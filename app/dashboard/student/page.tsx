@@ -1,88 +1,99 @@
 import Link from "next/link";
-import BubbleCard from "../../../components/ui/BubbleCard";
-import ProgressBar from "../../../components/ui/ProgressBar";
-import Section from "../../../components/ui/Section";
-import ClassCalendar from "../../../components/ui/ClassCalendar";
+import { ArrowRight } from "lucide-react";
 
-const courses = [
-  { id: "html-fun", title: "HTML Funhouse", progress: 65, badge: "🎨" },
-  { id: "js-quests", title: "JavaScript Quests", progress: 30, badge: "🧩" },
-  { id: "python-puzzles", title: "Python Puzzles", progress: 10, badge: "🐍" },
+const startCourses = [
+  { id: "html-fun", title: "HTML Basics for Kids", xp: 500, level: "beginner", age: "Ages 7-10", color: "from-orange-400 to-pink-500" },
+  { id: "css-magic", title: "CSS Magic: Style Your Pages", xp: 500, level: "beginner", age: "Ages 7-10", color: "from-sky-400 to-blue-500" },
+  { id: "js-quests", title: "JavaScript Adventures", xp: 750, level: "beginner", age: "Ages 11-14", color: "from-amber-400 to-orange-500" },
 ];
 
-const badges = ["⭐ Starter", "🐞 Bug Squasher", "🚀 Rocket Ready"];
-const upcoming = [
-  {
-    id: "evt-1",
-    day: "Today",
-    time: "4:00–4:30 PM",
-    title: "Roblox 101 · Obby Design",
-    instructor: "Coach Alex",
-    meetLink: "https://meet.google.com/rob-101-join",
-  },
-  {
-    id: "evt-2",
-    day: "Tomorrow",
-    time: "5:00–5:45 PM",
-    title: "JavaScript Quests · Loops Lab",
-    instructor: "Coach Jay",
-    meetLink: "https://meet.google.com/js-quests",
-  },
+const summary = [
+  { label: "Lessons Done", value: 0 },
+  { label: "Quizzes Passed", value: 0 },
+  { label: "Day Streak", value: 0 },
+  { label: "Badges Earned", value: 0 },
 ];
 
 export default function StudentDashboard() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-sky-50 text-slate-800">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <header className="flex flex-col gap-2">
-          <p className="text-sm text-sky-600 font-semibold uppercase tracking-[0.2em]">Student Dashboard</p>
-          <h1 className="text-3xl font-black">Welcome back, Kiddo!</h1>
-          <p className="text-slate-600">Keep your streak going. Small steps = big wins.</p>
-        </header>
+    <main className="min-h-screen bg-gradient-to-b from-[#40136f] via-[#4f1f9b] to-[#3a0f5f] text-white">
+      <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-white/80">Hey, Coder!</p>
+            <div className="inline-flex items-center gap-2 text-xs bg-white/10 px-3 py-1 rounded-full">
+              🔥 <span>0 day streak</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-white/80">Parent View</p>
+            <p className="text-xs text-white/60">0 XP</p>
+          </div>
+        </div>
 
-        <Section title="Your Courses" subtitle="Pick up where you left off" color="sky">
+        <div className="bg-white/10 rounded-2xl border border-white/10 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-white/80">Current Level</p>
+              <h2 className="text-2xl font-bold">Level 1</h2>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-white/80">Next Level In</p>
+              <p className="text-lg font-bold">500 XP</p>
+            </div>
+          </div>
+          <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+            <div className="h-full bg-white/60" style={{ width: "0%" }} />
+          </div>
+          <div className="flex justify-between text-xs text-white/70">
+            <span>0 XP</span>
+            <span>500 XP</span>
+          </div>
+        </div>
+
+        <div className="bg-white/10 rounded-2xl border border-white/10 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold">My Badges</h3>
+            <Link href="/dashboard/student" className="text-xs flex items-center gap-1 text-white/80">
+              View All <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="text-sm text-white/70 text-center py-6 border border-dashed border-white/20 rounded-xl">
+            No badges yet. Complete lessons and quizzes to earn badges!
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold flex items-center gap-2">⚡ Start Something New</h3>
           <div className="grid md:grid-cols-3 gap-4">
-            {courses.map((course) => (
-              <BubbleCard key={course.id} title={course.title} emoji={course.badge}>
-                <ProgressBar value={course.progress} />
-                <Link href={`/courses/${course.id}`} className="text-sky-700 font-semibold text-sm hover:underline">
-                  Open course →
-                </Link>
-              </BubbleCard>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Today’s Quick Wins" color="sun">
-          <div className="grid md:grid-cols-3 gap-3 text-sm">
-            <BubbleCard title="Finish Lesson 3" emoji="⏱️">
-              Knock out the HTML colors challenge in 10 minutes.
-            </BubbleCard>
-            <BubbleCard title="Earn XP" emoji="💎">
-              Score +50 XP by completing the quiz without hints.
-            </BubbleCard>
-            <BubbleCard title="Book a Session" emoji="📅">
-              Chat with Coach Alex for project feedback.
-            </BubbleCard>
-          </div>
-        </Section>
-
-        <Section title="Badges" color="mint">
-          <div className="flex flex-wrap gap-2 text-sm">
-            {badges.map((b) => (
-              <span
-                key={b}
-                className="px-3 py-2 rounded-full bg-white border border-emerald-200 text-emerald-700 shadow-sm"
+            {startCourses.map((course) => (
+              <Link
+                key={course.id}
+                href={`/courses/${course.id}`}
+                className="rounded-2xl overflow-hidden shadow-lg border border-white/10"
               >
-                {b}
-              </span>
+                <div className={`h-24 bg-gradient-to-r ${course.color}`} />
+                <div className="bg-white text-slate-900 p-3 space-y-2">
+                  <h4 className="font-semibold text-sm">{course.title}</h4>
+                  <div className="flex gap-2 text-[11px] text-slate-600">
+                    <span className="px-2 py-1 rounded-full bg-slate-100">{course.level}</span>
+                    <span className="px-2 py-1 rounded-full bg-slate-100">{course.age}</span>
+                  </div>
+                  <p className="text-xs text-amber-500 font-semibold">★ {course.xp} XP</p>
+                </div>
+              </Link>
             ))}
           </div>
-        </Section>
+        </div>
 
-        <Section title="Your Calendar" subtitle="Join classes on Google Meet" color="sun">
-          <ClassCalendar events={upcoming} />
-        </Section>
+        <div className="grid md:grid-cols-4 gap-3">
+          {summary.map((item) => (
+            <div key={item.label} className="bg-white/10 border border-white/10 rounded-2xl p-4 text-center">
+              <div className="text-2xl font-bold text-white">{item.value}</div>
+              <div className="text-xs text-white/80">{item.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </main>
   );
