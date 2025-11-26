@@ -25,19 +25,37 @@ export const authOptions: NextAuthOptions = {
         const password = credentials?.password;
         if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user?.hashedPassword) return null;
+        // Primary: look up user in DB
+        try {
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (user?.hashedPassword) {
+            const valid = await bcrypt.compare(password, user.hashedPassword);
+            if (!valid) return null;
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image ?? undefined,
+              role: user.role,
+            };
+          }
+        } catch (e) {
+          // Swallow DB errors and allow fallback to demo login
+        }
 
-        const valid = await bcrypt.compare(password, user.hashedPassword);
-        if (!valid) return null;
+        // Fallback: allow demo admin login via env (no DB needed)
+        const demoEmail = process.env.DEMO_ADMIN_EMAIL;
+        const demoPassword = process.env.DEMO_ADMIN_PASSWORD;
+        if (demoEmail && demoPassword && email === demoEmail && password === demoPassword) {
+          return {
+            id: "demo-admin",
+            name: "Demo Admin",
+            email: demoEmail,
+            role: "ADMIN",
+          };
+        }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image ?? undefined,
-          role: user.role,
-        };
+        return null;
       },
     }),
   ],

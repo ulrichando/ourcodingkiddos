@@ -17,14 +17,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <span className="text-lg font-semibold text-slate-800">Coding Kiddos</span>
               </Link>
               <nav className="flex items-center gap-5 text-sm font-semibold text-slate-700">
+                <Link href="/dashboard/parent" className="hover:text-slate-900">
+                  Dashboard
+                </Link>
                 <Link href="/courses/intro" className="hover:text-slate-900">
                   Courses
                 </Link>
                 <Link href="/schedule" className="hover:text-slate-900">
-                  Pricing
+                  Schedule
                 </Link>
-                <Link href="/about" className="hover:text-slate-900">
-                  About
+                <Link href="/dashboard/parent" className="hover:text-slate-900">
+                  Messages
                 </Link>
               </nav>
               <div className="flex items-center gap-3">
