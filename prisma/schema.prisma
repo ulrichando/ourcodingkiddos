@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role { STUDENT PARENT INSTRUCTOR ADMIN }
+enum CourseCategory { HTML CSS JAVASCRIPT PYTHON ROBLOX }
+enum CourseLevel { BEGINNER INTERMEDIATE ADVANCED }
+enum EnrollmentStatus { ACTIVE PAUSED COMPLETED CANCELLED }
+enum ProgressStatus { NOT_STARTED IN_PROGRESS COMPLETED }
+enum BookingType { ONE_ON_ONE GROUP }
+enum BookingStatus { SCHEDULED COMPLETED CANCELLED NO_SHOW }
+enum PaymentStatus { REQUIRES_PAYMENT PENDING SUCCEEDED FAILED CANCELED }
+enum SubscriptionStatus { ACTIVE TRIALING PAST_DUE CANCELED INCOMPLETE INCOMPLETE_EXPIRED UNPAID }
+
+model User {
+  id             String   @id @default(cuid())
+  name           String?
+  email          String   @unique
+  hashedPassword String?
+  image          String?
+  role           Role     @default(STUDENT)
+
+  studentProfile     StudentProfile?
+  parentProfile      ParentProfile?
+  enrollments        Enrollment[]
+  progress           Progress[]
+  bookingsAsStudent  Booking[]      @relation("BookingStudent")
+  bookingsAsInstructor Booking[]    @relation("BookingInstructor")
+  payments           Payment[]
+  subscriptions      Subscription[]
+  badges             UserBadge[]
+  achievements       Achievement[]
+  portfolio          PortfolioItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudentProfile {
+  id         String  @id @default(cuid())
+  userId     String  @unique
+  dob        DateTime?
+  guardianId String? // links to parent User
+
+  user     User @relation(fields: [userId], references: [id])
+  guardian User @relation("ParentGuardian", fields: [guardianId], references: [id])
+}
+
+model ParentProfile {
+  id      String  @id @default(cuid())
+  userId  String  @unique
+  phone   String?
+  address String?
+
+  user     User              @relation(fields: [userId], references: [id])
+  children StudentProfile[]  @relation("ParentGuardian")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    CourseCategory
+  level       CourseLevel
+  description String
+  thumbnail   String?
+  published   Boolean  @default(false)
+
+  lessons     Lesson[]
+  enrollments Enrollment[]
+  bookings    Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  slug        String
+  order       Int
+  content     Json
+  resources   Json?
+  durationMin Int?
+
+  course   Course   @relation(fields: [courseId], references: [id])
+  quiz     Quiz?
+  project  Project?
+  progress Progress[]
+
+  @@unique([courseId, slug])
+}
+
+model Quiz {
+  id       String   @id @default(cuid())
+  lessonId String   @unique
+
+  lesson    Lesson     @relation(fields: [lessonId], references: [id])
+  questions Question[]
+}
+
+model Question {
+  id       String   @id @default(cuid())
+  quizId   String
+  prompt   String
+  kind     String     // e.g., multiple_choice, true_false, short_answer
+  points   Int        @default(1)
+  order    Int
+
+  quiz    Quiz     @relation(fields: [quizId], references: [id])
+  answers Answer[]
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  questionId  String
+  text        String
+  isCorrect   Boolean  @default(false)
+  explanation String?
+
+  question Question @relation(fields: [questionId], references: [id])
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  status      EnrollmentStatus @default(ACTIVE)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  user        User        @relation(fields: [userId], references: [id])
+  course      Course      @relation(fields: [courseId], references: [id])
+  progress    Progress[]
+  certificates Certificate[]
+
+  @@unique([userId, courseId])
+}
+
+model Progress {
+  id           String   @id @default(cuid())
+  enrollmentId String
+  lessonId     String
+  status       ProgressStatus @default(NOT_STARTED)
+  score        Int?
+  completedAt  DateTime?
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+  lesson     Lesson     @relation(fields: [lessonId], references: [id])
+
+  @@unique([enrollmentId, lessonId])
+}
+
+model Booking {
+  id           String   @id @default(cuid())
+  studentId    String
+  instructorId String
+  courseId     String?
+  startsAt     DateTime
+  endsAt       DateTime
+  type         BookingType
+  status       BookingStatus @default(SCHEDULED)
+  notes        String?
+
+  student    User   @relation("BookingStudent", fields: [studentId], references: [id])
+  instructor User   @relation("BookingInstructor", fields: [instructorId], references: [id])
+  course     Course @relation(fields: [courseId], references: [id])
+  schedule   Schedule?
+
+  @@index([studentId])
+  @@index([instructorId])
+}
+
+model Schedule {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  timezone   String
+  recurrence Json?    // e.g., RRULE or custom pattern
+  reminders  Json?
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Payment {
+  id                     String   @id @default(cuid())
+  userId                 String
+  amount                 Int
+  currency               String   @default("usd")
+  status                 PaymentStatus
+  stripePaymentIntentId  String   @unique
+  stripeCustomerId       String?
+  subscriptionId         String?
+  createdAt              DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  status               SubscriptionStatus
+  priceId              String   // Stripe price ID
+  stripeCustomerId     String?
+  stripeSubscriptionId String @unique
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean @default(false)
+  canceledAt           DateTime?
+  trialEndsAt          DateTime?
+
+  user     User      @relation(fields: [userId], references: [id])
+  payments Payment[]
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String
+  icon        String?
+  criteria    Json?
+
+  users UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+}
+
+model Achievement {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  detail    String?
+  icon      String?
+  xpAwarded Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Project {
+  id       String   @id @default(cuid())
+  lessonId String   @unique
+  title    String
+  brief    String
+  rubric   Json?
+
+  lesson      Lesson        @relation(fields: [lessonId], references: [id])
+  submissions PortfolioItem[]
+}
+
+model PortfolioItem {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String
+  title       String
+  description String?
+  repoUrl     String?
+  demoUrl     String?
+  assets      Json?
+  score       Int?
+  feedback    String?
+  submittedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([userId, projectId])
+}
