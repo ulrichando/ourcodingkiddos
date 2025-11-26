@@ -3,13 +3,35 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import ChatWidget from "../components/chat/ChatWidget";
 
+// Pages that should render full-bleed without outer padding/background
+const FULL_PAGE = ["/", "/playground", "/dashboard/student"];
+
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+  const isFullPage = FULL_PAGE.includes(currentPath);
+
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-slate-900" suppressHydrationWarning>
+      <body className={isFullPage ? "" : "min-h-screen bg-slate-50"} suppressHydrationWarning>
+        <style>{`
+          :root {
+            --color-primary: #8B5CF6;
+            --color-primary-dark: #7C3AED;
+            --color-secondary: #EC4899;
+            --color-accent: #F59E0B;
+          }
+          body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+          ::-webkit-scrollbar { width: 8px; height: 8px; }
+          ::-webkit-scrollbar-track { background: #f1f5f9; }
+          ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+          ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+          @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+          .animate-gradient { background-size: 200% 200%; animation: gradient-shift 3s ease infinite; }
+        `}</style>
+
         <div className="min-h-screen flex flex-col">
           <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-100 shadow-sm">
-            <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
+            <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
               <Link href="/" className="flex items-center gap-3">
                 <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg">
                   CK
@@ -26,6 +48,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <Link href="/playground" className="hover:text-slate-900">
                   Playground
                 </Link>
+                <Link href="/dashboard/parent" className="hover:text-slate-900">
+                  Messages
+                </Link>
               </nav>
               <div className="flex items-center gap-3">
                 <Link
@@ -41,7 +66,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <main className="flex-1">{children}</main>
 
           <footer className="bg-slate-900 text-slate-200">
-            <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
+            <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2">
                   <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
@@ -61,11 +86,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </ul>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">Company</h4>
+                <h4 className="font-semibold mb-2">Resources</h4>
                 <ul className="text-sm space-y-1 text-slate-400">
-                  <li>About Us</li>
-                  <li>Careers</li>
-                  <li>Blog</li>
+                  <li>All Courses</li>
+                  <li>Code Playground</li>
+                  <li>Live Classes</li>
                   <li>Contact</li>
                 </ul>
               </div>
