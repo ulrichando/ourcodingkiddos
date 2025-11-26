@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </nav>
               <div className="flex items-center gap-3">
                 <Link
-                  href="/auth/login"
+                  href="/dashboard/parent"
                   className="hidden md:inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-4 py-2 shadow-md hover:brightness-105"
                 >
                   Go to Dashboard →
