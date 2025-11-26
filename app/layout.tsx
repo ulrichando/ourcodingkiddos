@@ -1,6 +1,9 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const ChatWidget = dynamic(() => import("../components/chat/ChatWidget"), { ssr: false });
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -81,6 +84,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               © {new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
             </div>
           </footer>
+          <ChatWidget />
         </div>
       </body>
     </html>
