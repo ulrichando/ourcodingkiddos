@@ -276,49 +276,6 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
-
-      <footer className="bg-slate-900 text-slate-200">
-        <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2">
-              <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                CK
-              </span>
-              <div className="text-lg font-semibold">Coding Kiddos</div>
-            </div>
-            <p className="text-sm text-slate-400">Empowering the next generation of coders, one lesson at a time.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-2">Courses</h4>
-            <ul className="text-sm space-y-1 text-slate-400">
-              <li>HTML & CSS</li>
-              <li>JavaScript</li>
-              <li>Python</li>
-              <li>Roblox Studio</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-2">Company</h4>
-            <ul className="text-sm space-y-1 text-slate-400">
-              <li>About Us</li>
-              <li>Careers</li>
-              <li>Blog</li>
-              <li>Contact</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-2">Legal</h4>
-            <ul className="text-sm space-y-1 text-slate-400">
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-              <li>Cookie Policy</li>
-            </ul>
-          </div>
-        </div>
-        <div className="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-          © 2025 Our Coding Kiddos. All rights reserved.
-        </div>
-      </footer>
     </main>
   );
 }
