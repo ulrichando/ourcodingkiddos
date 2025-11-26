@@ -3,14 +3,15 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
+import { CourseCategory, CourseLevel } from "@prisma/client";
 
 const updateSchema = z
   .object({
     title: z.string().min(3).optional(),
     slug: z.string().min(3).regex(/^[a-z0-9-]+$/i).optional(),
     description: z.string().min(10).optional(),
-    category: z.string().optional(),
-    level: z.string().optional(),
+    category: z.nativeEnum(CourseCategory).optional(),
+    level: z.nativeEnum(CourseLevel).optional(),
     published: z.boolean().optional(),
     thumbnail: z.string().url().optional(),
   })
