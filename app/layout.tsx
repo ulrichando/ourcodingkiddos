@@ -1,9 +1,7 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const ChatWidget = dynamic(() => import("../components/chat/ChatWidget"), { ssr: false });
+import ChatWidget from "../components/chat/ChatWidget";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

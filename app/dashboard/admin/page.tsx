@@ -3,7 +3,7 @@
 import AdminNav from "../../../components/admin/AdminNav";
 import AdminStatCard from "../../../components/admin/AdminStatCard";
 
-const metrics = [
+const metrics: { label: string; value: string; sublabel: string; accent: "purple" | "orange" | "green" | "blue" }[] = [
   { label: "Active Students", value: "1,248", sublabel: "+12% vs last month", accent: "purple" },
   { label: "Active Parents", value: "980", sublabel: "+8% vs last month", accent: "orange" },
   { label: "Monthly Revenue", value: "$42,300", sublabel: "ARR: $507k", accent: "green" },

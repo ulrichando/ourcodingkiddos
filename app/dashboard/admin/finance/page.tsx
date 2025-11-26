@@ -3,12 +3,13 @@
 import AdminNav from "../../../../components/admin/AdminNav";
 import AdminStatCard from "../../../../components/admin/AdminStatCard";
 
-const financeStats = [
-  { label: "MRR", value: "$42.3k", sublabel: "+6% vs last month", accent: "green" },
-  { label: "ARPU", value: "$38", sublabel: "Avg revenue per user", accent: "blue" },
-  { label: "Refunds", value: "$520", sublabel: "Last 30 days", accent: "orange" },
-  { label: "Churn", value: "3.2%", sublabel: "Rolling 30d", accent: "purple" },
-];
+const financeStats: { label: string; value: string; sublabel: string; accent: "purple" | "orange" | "green" | "blue" }[] =
+  [
+    { label: "MRR", value: "$42.3k", sublabel: "+6% vs last month", accent: "green" },
+    { label: "ARPU", value: "$38", sublabel: "Avg revenue per user", accent: "blue" },
+    { label: "Refunds", value: "$520", sublabel: "Last 30 days", accent: "orange" },
+    { label: "Churn", value: "3.2%", sublabel: "Rolling 30d", accent: "purple" },
+  ];
 
 const invoices = [
   { id: "INV-1001", user: "Alex Kim", amount: "$49", status: "Paid", date: "2025-02-10" },
