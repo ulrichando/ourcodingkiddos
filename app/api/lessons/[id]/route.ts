@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
@@ -16,8 +16,8 @@ const updateSchema = z
   .strict();
 
 // GET /api/lessons/:id - fetch single lesson (includes quiz/project when needed)
-export async function GET(_request: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
   try {
     const lesson = await prisma.lesson.findFirst({
       where: { OR: [{ id }, { slug: id }] },
@@ -35,7 +35,7 @@ export async function GET(_request: Request, context: { params: { id: string } }
 }
 
 // PATCH /api/lessons/:id - partial update
-export async function PATCH(request: Request, context: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
@@ -47,7 +47,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { id } = context.params;
+  const { id } = params;
   try {
     const lesson = await prisma.lesson.update({ where: { id }, data: parsed.data });
     return NextResponse.json({ status: "ok", data: lesson });
@@ -58,12 +58,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 }
 
 // DELETE /api/lessons/:id
-export async function DELETE(_request: Request, context: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
   }
-  const { id } = context.params;
+  const { id } = params;
   try {
     await prisma.lesson.delete({ where: { id } });
     return NextResponse.json({ status: "ok" });

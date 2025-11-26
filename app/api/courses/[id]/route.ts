@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
@@ -17,8 +17,8 @@ const updateSchema = z
   .strict();
 
 // GET /api/courses/:id - fetch a single course
-export async function GET(_request: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
   try {
     const course = await prisma.course.findFirst({
       where: { OR: [{ id }, { slug: id }] },
@@ -33,7 +33,7 @@ export async function GET(_request: Request, context: { params: { id: string } }
 }
 
 // PATCH /api/courses/:id - partial update
-export async function PATCH(request: Request, context: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
@@ -45,7 +45,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { id } = context.params;
+  const { id } = params;
   try {
     const course = await prisma.course.update({
       where: { id },
@@ -59,12 +59,12 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 }
 
 // DELETE /api/courses/:id
-export async function DELETE(_request: Request, context: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
   }
-  const { id } = context.params;
+  const { id } = params;
   try {
     await prisma.course.delete({ where: { id } });
     return NextResponse.json({ status: "ok" });

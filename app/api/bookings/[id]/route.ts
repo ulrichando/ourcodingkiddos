@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
@@ -14,7 +14,7 @@ const updateSchema = z
   .strict();
 
 // PATCH /api/bookings/:id - update status (e.g., cancel/reschedule)
-export async function PATCH(request: Request, context: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ status: "unauthorized" }, { status: 401 });
 
@@ -24,7 +24,7 @@ export async function PATCH(request: Request, context: { params: { id: string } 
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { id } = context.params;
+  const { id } = params;
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
 
@@ -56,13 +56,13 @@ export async function PATCH(request: Request, context: { params: { id: string } 
 }
 
 // DELETE /api/bookings/:id - hard cancel
-export async function DELETE(_request: Request, context: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ status: "unauthorized" }, { status: 401 });
 
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
-  const { id } = context.params;
+  const { id } = params;
   try {
     const existing = await prisma.booking.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ status: "not-found" }, { status: 404 });
