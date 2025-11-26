@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, CheckCircle } from "lucide-react";
 
 const stats = [
   { label: "Happy Students", value: "10,000+" },
@@ -93,17 +93,20 @@ export default function LandingPage() {
               >
                 Start Free Trial <ArrowRight className="w-4 h-4" />
               </Link>
-              <button className="inline-flex items-center gap-2 rounded-full bg-white/20 text-white font-semibold px-5 py-3 border border-white/30">
+              <Link
+                href="/playground"
+                className="inline-flex items-center gap-2 rounded-full bg-white/20 text-white font-semibold px-5 py-3 border border-white/30"
+              >
                 <Play className="w-4 h-4 fill-white" />
-                Watch Demo
-              </button>
+                Try Playground
+              </Link>
             </div>
             <div className="flex gap-4 text-sm text-white/90">
               <div className="inline-flex items-center gap-2">
-                <span>✅</span> No credit card required
+                <CheckCircle className="h-4 w-4" /> No credit card required
               </div>
               <div className="inline-flex items-center gap-2">
-                <span>✅</span> Cancel anytime
+                <CheckCircle className="h-4 w-4" /> Cancel anytime
               </div>
             </div>
           </div>
