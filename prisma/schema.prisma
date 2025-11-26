@@ -7,15 +7,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { STUDENT PARENT INSTRUCTOR ADMIN }
-enum CourseCategory { HTML CSS JAVASCRIPT PYTHON ROBLOX }
-enum CourseLevel { BEGINNER INTERMEDIATE ADVANCED }
-enum EnrollmentStatus { ACTIVE PAUSED COMPLETED CANCELLED }
-enum ProgressStatus { NOT_STARTED IN_PROGRESS COMPLETED }
-enum BookingType { ONE_ON_ONE GROUP }
-enum BookingStatus { SCHEDULED COMPLETED CANCELLED NO_SHOW }
-enum PaymentStatus { REQUIRES_PAYMENT PENDING SUCCEEDED FAILED CANCELED }
-enum SubscriptionStatus { ACTIVE TRIALING PAST_DUE CANCELED INCOMPLETE INCOMPLETE_EXPIRED UNPAID }
+enum Role {
+  STUDENT
+  PARENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum CourseCategory {
+  HTML
+  CSS
+  JAVASCRIPT
+  PYTHON
+  ROBLOX
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum BookingType {
+  ONE_ON_ONE
+  GROUP
+}
+
+enum BookingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  REQUIRES_PAYMENT
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  UNPAID
+}
 
 model User {
   id             String   @id @default(cuid())
@@ -28,7 +82,6 @@ model User {
   studentProfile     StudentProfile?
   parentProfile      ParentProfile?
   enrollments        Enrollment[]
-  progress           Progress[]
   bookingsAsStudent  Booking[]      @relation("BookingStudent")
   bookingsAsInstructor Booking[]    @relation("BookingInstructor")
   payments           Payment[]
@@ -45,10 +98,10 @@ model StudentProfile {
   id         String  @id @default(cuid())
   userId     String  @unique
   dob        DateTime?
-  guardianId String? // links to parent User
+  guardianId String? // links to parent profile
 
   user     User @relation(fields: [userId], references: [id])
-  guardian User @relation("ParentGuardian", fields: [guardianId], references: [id])
+  guardian ParentProfile? @relation("ParentGuardian", fields: [guardianId], references: [id])
 }
 
 model ParentProfile {
@@ -143,6 +196,15 @@ model Enrollment {
   @@unique([userId, courseId])
 }
 
+model Certificate {
+  id            String   @id @default(cuid())
+  enrollmentId  String
+  issuedAt      DateTime @default(now())
+  url           String
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+}
+
 model Progress {
   id           String   @id @default(cuid())
   enrollmentId String
@@ -170,7 +232,7 @@ model Booking {
 
   student    User   @relation("BookingStudent", fields: [studentId], references: [id])
   instructor User   @relation("BookingInstructor", fields: [instructorId], references: [id])
-  course     Course @relation(fields: [courseId], references: [id])
+  course     Course? @relation(fields: [courseId], references: [id])
   schedule   Schedule?
 
   @@index([studentId])
@@ -199,7 +261,7 @@ model Payment {
   createdAt              DateTime @default(now())
 
   user         User         @relation(fields: [userId], references: [id])
-  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
 }
 
 model Subscription {
