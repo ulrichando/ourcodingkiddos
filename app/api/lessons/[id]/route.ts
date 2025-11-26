@@ -16,8 +16,8 @@ const updateSchema = z
   .strict();
 
 // GET /api/lessons/:id - fetch single lesson (includes quiz/project when needed)
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     const lesson = await prisma.lesson.findFirst({
       where: { OR: [{ id }, { slug: id }] },
@@ -35,7 +35,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 // PATCH /api/lessons/:id - partial update
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
@@ -47,7 +47,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   try {
     const lesson = await prisma.lesson.update({ where: { id }, data: parsed.data });
     return NextResponse.json({ status: "ok", data: lesson });
@@ -58,12 +58,12 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 // DELETE /api/lessons/:id
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
   }
-  const { id } = params;
+  const { id } = await params;
   try {
     await prisma.lesson.delete({ where: { id } });
     return NextResponse.json({ status: "ok" });

@@ -16,7 +16,7 @@ const updateSchema = z
 // PATCH /api/bookings/:id - update status (e.g., cancel/reschedule)
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ status: "unauthorized" }, { status: 401 });
@@ -27,7 +27,7 @@ export async function PATCH(
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { id } = await (context.params as any);
+  const { id } = await params;
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
 
@@ -61,14 +61,14 @@ export async function PATCH(
 // DELETE /api/bookings/:id - hard cancel
 export async function DELETE(
   _request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ status: "unauthorized" }, { status: 401 });
 
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
-  const { id } = await (context.params as any);
+  const { id } = await params;
   try {
     const existing = await prisma.booking.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ status: "not-found" }, { status: 404 });
