@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-50 text-slate-900">
+      <body className="min-h-screen bg-slate-50 text-slate-900" suppressHydrationWarning>
         <div className="min-h-screen flex flex-col">
           <header className="glass-panel sticky top-0 z-20">
             <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
