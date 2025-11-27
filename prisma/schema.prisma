@@ -14,7 +14,13 @@ enum Role {
   ADMIN
 }
 
-enum CourseCategory {
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Language {
   HTML
   CSS
   JAVASCRIPT
@@ -22,10 +28,16 @@ enum CourseCategory {
   ROBLOX
 }
 
-enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
+enum AgeGroup {
+  AGES_7_10
+  AGES_11_14
+  AGES_15_18
+}
+
+enum ThemePreference {
+  LIGHT
+  DARK
+  COLORFUL
 }
 
 enum EnrollmentStatus {
@@ -51,6 +63,8 @@ enum BookingStatus {
   COMPLETED
   CANCELLED
   NO_SHOW
+  CONFIRMED
+  ATTENDED
 }
 
 enum PaymentStatus {
@@ -99,6 +113,18 @@ model StudentProfile {
   userId     String  @unique
   dob        DateTime?
   guardianId String? // links to parent profile
+  parentEmail String?
+  name       String?
+  avatar     String?
+  age        Int?
+  ageGroup   AgeGroup?
+  totalXp    Int      @default(0)
+  currentLevel Int    @default(1)
+  streakDays Int      @default(0)
+  lastActiveDate DateTime?
+  badges     Json?
+  themePreference ThemePreference?
+  accessibilitySettings Json?
 
   user     User @relation(fields: [userId], references: [id])
   guardian ParentProfile? @relation("ParentGuardian", fields: [guardianId], references: [id])
@@ -118,11 +144,15 @@ model Course {
   id          String   @id @default(cuid())
   title       String
   slug        String   @unique
-  category    CourseCategory
-  level       CourseLevel
   description String
-  thumbnail   String?
-  published   Boolean  @default(false)
+  language    Language
+  level       CourseLevel
+  ageGroup    AgeGroup
+  thumbnailUrl String?
+  totalXp     Int?
+  estimatedHours Int?
+  isPublished Boolean  @default(false)
+  orderIndex  Int?
 
   lessons     Lesson[]
   enrollments Enrollment[]
@@ -137,10 +167,16 @@ model Lesson {
   courseId    String
   title       String
   slug        String
-  order       Int
-  content     Json
-  resources   Json?
-  durationMin Int?
+  description String?
+  content     String? // markdown content
+  videoUrl    String?
+  exampleCode String?
+  exerciseInstructions String?
+  exerciseStarterCode String?
+  exerciseSolution String?
+  xpReward    Int?
+  orderIndex  Int?
+  isPublished Boolean @default(false)
 
   course   Course   @relation(fields: [courseId], references: [id])
   quiz     Quiz?
@@ -158,13 +194,78 @@ model Quiz {
   questions Question[]
 }
 
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  CODE_OUTPUT
+}
+
+enum SessionType {
+  ONE_ON_ONE
+  GROUP
+  WORKSHOP
+  CAMP
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum RecurrencePattern {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum PlanType {
+  FREE_TRIAL
+  MONTHLY
+  ANNUAL
+  FAMILY
+}
+
+enum MessageType {
+  GENERAL
+  PROGRESS_UPDATE
+  CLASS_REMINDER
+  FEEDBACK
+}
+
+enum BadgeCategory {
+  ACHIEVEMENT
+  STREAK
+  SKILL
+  SPECIAL
+}
+
+enum RequirementType {
+  XP_TOTAL
+  LESSONS_COMPLETED
+  STREAK_DAYS
+  COURSE_COMPLETED
+  QUIZ_SCORE
+}
+
+enum BadgeRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
 model Question {
   id       String   @id @default(cuid())
   quizId   String
-  prompt   String
-  kind     String     // e.g., multiple_choice, true_false, short_answer
-  points   Int        @default(1)
-  order    Int
+  question String
+  questionType QuestionType
+  options  Json?
+  correctAnswer String
+  explanation String?
+  xpReward Int?
+  orderIndex Int?
 
   quiz    Quiz     @relation(fields: [quizId], references: [id])
   answers Answer[]
@@ -201,6 +302,12 @@ model Certificate {
   enrollmentId  String
   issuedAt      DateTime @default(now())
   url           String
+  studentName   String?
+  courseTitle   String?
+  achievementType String?
+  verificationCode String?
+  studentId     String?
+  courseId      String?
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
 }
@@ -212,6 +319,10 @@ model Progress {
   status       ProgressStatus @default(NOT_STARTED)
   score        Int?
   completedAt  DateTime?
+  xpEarned     Int?
+  quizScore    Int?
+  timeSpentMinutes Int?
+  codeSubmission String?
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
   lesson     Lesson     @relation(fields: [lessonId], references: [id])
@@ -229,14 +340,22 @@ model Booking {
   type         BookingType
   status       BookingStatus @default(SCHEDULED)
   notes        String?
+  sessionId    String?
+  parentEmail  String?
+  attended     Boolean @default(false)
+  instructorNotes String?
+  cancelledAt  DateTime?
+  cancellationReason String?
 
   student    User   @relation("BookingStudent", fields: [studentId], references: [id])
   instructor User   @relation("BookingInstructor", fields: [instructorId], references: [id])
   course     Course? @relation(fields: [courseId], references: [id])
   schedule   Schedule?
+  session    ClassSession? @relation(fields: [sessionId], references: [id])
 
   @@index([studentId])
   @@index([instructorId])
+  @@index([sessionId])
 }
 
 model Schedule {
@@ -247,6 +366,49 @@ model Schedule {
   reminders  Json?
 
   booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model ClassSession {
+  id                String   @id @default(cuid())
+  instructorId      String?
+  instructorEmail   String
+  title             String
+  description       String?
+  sessionType       SessionType
+  language          Language
+  ageGroup          AgeGroup
+  startTime         DateTime
+  durationMinutes   Int
+  maxStudents       Int?
+  enrolledCount     Int?      @default(0)
+  priceCents        Int?      @default(0)
+  meetingUrl        String?
+  status            SessionStatus @default(SCHEDULED)
+  isRecurring       Boolean   @default(false)
+  recurrencePattern RecurrencePattern?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  instructor User? @relation(fields: [instructorId], references: [id])
+  bookings   Booking[]
+
+  @@index([instructorId])
+  @@index([startTime])
+}
+
+model InstructorAvailability {
+  id              String   @id @default(cuid())
+  instructorId    String?
+  instructorEmail String?
+  dayOfWeek       Int
+  startTime       String
+  endTime         String
+  isActive        Boolean  @default(true)
+
+  instructor User? @relation(fields: [instructorId], references: [id])
+
+  @@index([instructorId])
+  @@index([dayOfWeek])
 }
 
 model Payment {
@@ -276,6 +438,13 @@ model Subscription {
   cancelAtPeriodEnd    Boolean @default(false)
   canceledAt           DateTime?
   trialEndsAt          DateTime?
+  planType             PlanType?
+  maxStudents          Int?
+  priceCents           Int?
+  startDate            DateTime?
+  endDate              DateTime?
+  parentEmail          String?
+  features             Json?
 
   user     User      @relation(fields: [userId], references: [id])
   payments Payment[]
@@ -287,6 +456,10 @@ model Badge {
   name        String
   description String
   icon        String?
+  category    BadgeCategory?
+  requirementType RequirementType?
+  requirementValue Int?
+  rarity      BadgeRarity?
   criteria    Json?
 
   users UserBadge[]
@@ -304,6 +477,18 @@ model UserBadge {
   @@unique([userId, badgeId])
 }
 
+model Message {
+  id                 String      @id @default(cuid())
+  fromEmail          String
+  toEmail            String
+  subject            String?
+  content            String
+  regardingStudentId String?
+  isRead             Boolean     @default(false)
+  messageType        MessageType @default(GENERAL)
+  createdAt          DateTime    @default(now())
+}
+
 model Achievement {
   id        String   @id @default(cuid())
   userId    String
@@ -317,14 +502,24 @@ model Achievement {
 }
 
 model Project {
-  id       String   @id @default(cuid())
-  lessonId String   @unique
-  title    String
-  brief    String
-  rubric   Json?
+  id         String   @id @default(cuid())
+  lessonId   String   @unique
+  studentId  String?
+  title      String
+  brief      String
+  rubric     Json?
+  language   Language?
+  code       String?
+  thumbnailUrl String?
+  isPublic   Boolean  @default(false)
+  isFeatured Boolean  @default(false)
+  shareToken String?  @unique
 
   lesson      Lesson        @relation(fields: [lessonId], references: [id])
+  student     StudentProfile? @relation(fields: [studentId], references: [id])
   submissions PortfolioItem[]
+
+  @@index([studentId])
 }
 
 model PortfolioItem {

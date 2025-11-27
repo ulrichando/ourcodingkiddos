@@ -5,6 +5,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 
+const demoEmail = process.env.DEMO_ADMIN_EMAIL ?? "demo@ourcodingkiddos.com";
+const demoPassword = process.env.DEMO_ADMIN_PASSWORD ?? "demo1234";
+const demoParentEmail = process.env.DEMO_PARENT_EMAIL ?? "demo.parent@ourcodingkiddos.com";
+const demoInstructorEmail = process.env.DEMO_INSTRUCTOR_EMAIL ?? "demo.instructor@ourcodingkiddos.com";
+const demoUserPassword = process.env.DEMO_USER_PASSWORD ?? "demo1234";
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
@@ -43,15 +49,33 @@ export const authOptions: NextAuthOptions = {
           // Swallow DB errors and allow fallback to demo login
         }
 
-        // Fallback: allow demo admin login via env (no DB needed)
-        const demoEmail = process.env.DEMO_ADMIN_EMAIL;
-        const demoPassword = process.env.DEMO_ADMIN_PASSWORD;
-        if (demoEmail && demoPassword && email === demoEmail && password === demoPassword) {
+        // Fallback: allow demo admin login (env-configurable, with safe defaults)
+        if (email === demoEmail && password === demoPassword) {
           return {
             id: "demo-admin",
             name: "Demo Admin",
             email: demoEmail,
             role: "ADMIN",
+          };
+        }
+
+        // Demo parent
+        if (email === demoParentEmail && password === demoUserPassword) {
+          return {
+            id: "demo-parent",
+            name: "Demo Parent",
+            email: demoParentEmail,
+            role: "PARENT",
+          };
+        }
+
+        // Demo instructor
+        if (email === demoInstructorEmail && password === demoUserPassword) {
+          return {
+            id: "demo-instructor",
+            name: "Demo Instructor",
+            email: demoInstructorEmail,
+            role: "INSTRUCTOR",
           };
         }
 

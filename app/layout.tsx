@@ -1,18 +1,16 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import Link from "next/link";
-import ChatWidget from "../components/chat/ChatWidget";
+import AppHeader from "../components/navigation/AppHeader";
+import ChatBot from "../components/chat/ChatBot";
+import AuthProvider from "../components/providers/AuthProvider";
 
-// Pages that should render full-bleed without outer padding/background
-const FULL_PAGE = ["/", "/playground", "/dashboard/student"];
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
-  const isFullPage = FULL_PAGE.includes(currentPath);
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={isFullPage ? "" : "min-h-screen bg-slate-50"} suppressHydrationWarning>
+      <body className="min-h-screen bg-slate-50" suppressHydrationWarning>
         <style>{`
           :root {
             --color-primary: #8B5CF6;
@@ -29,86 +27,55 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           .animate-gradient { background-size: 200% 200%; animation: gradient-shift 3s ease infinite; }
         `}</style>
 
-        <div className="min-h-screen flex flex-col">
-          <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-100 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
-              <Link href="/" className="flex items-center gap-3">
-                <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg">
-                  CK
-                </span>
-                <span className="text-lg font-semibold text-slate-800">Coding Kiddos</span>
-              </Link>
-              <nav className="flex items-center gap-5 text-sm font-semibold text-slate-700">
-                <Link href="/courses" className="hover:text-slate-900">
-                  Courses
-                </Link>
-                <Link href="/pricing" className="hover:text-slate-900">
-                  Pricing
-                </Link>
-                <Link href="/playground" className="hover:text-slate-900">
-                  Playground
-                </Link>
-                <Link href="/dashboard/parent" className="hover:text-slate-900">
-                  Messages
-                </Link>
-              </nav>
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard/parent"
-                  className="hidden md:inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-4 py-2 shadow-md hover:brightness-105"
-                >
-                  Go to Dashboard →
-                </Link>
-              </div>
-            </div>
-          </header>
-
-          <main className="flex-1">{children}</main>
-
-          <footer className="bg-slate-900 text-slate-200">
-            <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
-              <div className="space-y-2">
-                <div className="inline-flex items-center gap-2">
-                  <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                    CK
-                  </span>
-                  <div className="text-lg font-semibold">Coding Kiddos</div>
+        <AuthProvider>
+          <div className="min-h-screen flex flex-col">
+            <AppHeader />
+            <main className="flex-1">{children}</main>
+            <footer className="bg-slate-900 text-slate-200">
+              <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2">
+                    <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                      CK
+                    </span>
+                    <div className="text-lg font-semibold">Coding Kiddos</div>
+                  </div>
+                  <p className="text-sm text-slate-400">Empowering the next generation of coders, one lesson at a time.</p>
                 </div>
-                <p className="text-sm text-slate-400">Empowering the next generation of coders, one lesson at a time.</p>
+                <div>
+                  <h4 className="font-semibold mb-2">Courses</h4>
+                  <ul className="text-sm space-y-1 text-slate-400">
+                    <li>HTML & CSS</li>
+                    <li>JavaScript</li>
+                    <li>Python</li>
+                    <li>Roblox Studio</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Resources</h4>
+                  <ul className="text-sm space-y-1 text-slate-400">
+                    <li>All Courses</li>
+                    <li>Code Playground</li>
+                    <li>Live Classes</li>
+                    <li>Contact</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Legal</h4>
+                  <ul className="text-sm space-y-1 text-slate-400">
+                    <li>Privacy Policy</li>
+                    <li>Terms of Service</li>
+                    <li>Cookie Policy</li>
+                  </ul>
+                </div>
               </div>
-              <div>
-                <h4 className="font-semibold mb-2">Courses</h4>
-                <ul className="text-sm space-y-1 text-slate-400">
-                  <li>HTML & CSS</li>
-                  <li>JavaScript</li>
-                  <li>Python</li>
-                  <li>Roblox Studio</li>
-                </ul>
+              <div className="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+                © {new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
               </div>
-              <div>
-                <h4 className="font-semibold mb-2">Resources</h4>
-                <ul className="text-sm space-y-1 text-slate-400">
-                  <li>All Courses</li>
-                  <li>Code Playground</li>
-                  <li>Live Classes</li>
-                  <li>Contact</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Legal</h4>
-                <ul className="text-sm space-y-1 text-slate-400">
-                  <li>Privacy Policy</li>
-                  <li>Terms of Service</li>
-                  <li>Cookie Policy</li>
-                </ul>
-              </div>
-            </div>
-            <div className="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-              © {new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
-            </div>
-          </footer>
-          <ChatWidget />
-        </div>
+            </footer>
+            <ChatBot />
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

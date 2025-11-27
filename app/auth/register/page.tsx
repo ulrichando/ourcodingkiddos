@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Section from "../../../components/ui/Section";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -10,6 +9,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<"parent" | "instructor">("parent");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,7 +24,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, role }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -40,7 +40,8 @@ export default function RegisterPage() {
       if (signInRes?.error) {
         throw new Error(signInRes.error);
       }
-      router.push("/dashboard/parent");
+      const destination = role === "instructor" ? "/dashboard/instructor" : "/dashboard/parent";
+      router.push(destination);
     } catch (err: any) {
       setError(err?.message || "Something went wrong");
     } finally {
@@ -49,9 +50,61 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-sky-50 text-slate-800 flex items-center">
-      <div className="max-w-md mx-auto px-4 py-10 w-full">
-        <Section title="Join Our Coding Kiddos" subtitle="Create a parent account to get started" color="mint">
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-8 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold flex items-center justify-center shadow-lg">
+              CK
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
+            <p className="text-sm text-slate-500">Select your role and sign up</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setRole("parent")}
+              className={`rounded-lg border px-3 py-2 font-semibold transition ${
+                role === "parent"
+                  ? "border-purple-300 bg-purple-50 text-purple-700"
+                  : "border-slate-200 bg-white text-slate-700"
+              }`}
+            >
+              Parent
+              <p className="text-xs font-normal text-slate-500">Add students & manage billing</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole("instructor")}
+              className={`rounded-lg border px-3 py-2 font-semibold transition ${
+                role === "instructor"
+                  ? "border-purple-300 bg-purple-50 text-purple-700"
+                  : "border-slate-200 bg-white text-slate-700"
+              }`}
+            >
+              Instructor
+              <p className="text-xs font-normal text-slate-500">Teach classes & content</p>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: role === "instructor" ? "/dashboard/instructor" : "/dashboard/parent" })}
+            className="w-full inline-flex items-center justify-center gap-3 border border-slate-200 rounded-lg py-2.5 text-slate-700 font-semibold hover:bg-slate-50"
+          >
+            <span className="h-5 w-5 rounded-full bg-white shadow ring-1 ring-slate-200 flex items-center justify-center text-lg font-bold text-red-500">
+              G
+            </span>
+            Continue with Google
+          </button>
+
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <span className="h-px flex-1 bg-slate-200" />
+            OR
+            <span className="h-px flex-1 bg-slate-200" />
+          </div>
+
           <form className="space-y-3" onSubmit={handleSubmit}>
             <label className="block text-sm font-semibold text-slate-700">
               Name
@@ -60,7 +113,7 @@ export default function RegisterPage() {
                 required
                 type="text"
                 placeholder="Your name"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
             </label>
             <label className="block text-sm font-semibold text-slate-700">
@@ -70,7 +123,7 @@ export default function RegisterPage() {
                 required
                 type="email"
                 placeholder="you@example.com"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
             </label>
             <label className="block text-sm font-semibold text-slate-700">
@@ -81,25 +134,25 @@ export default function RegisterPage() {
                 minLength={6}
                 type="password"
                 placeholder="Create a password"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
             </label>
             {error && <p className="text-sm text-red-600">{error}</p>}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-emerald-500 text-white font-semibold rounded-xl py-2 shadow hover:bg-emerald-600 disabled:opacity-60"
+              className="w-full bg-slate-900 text-white font-semibold rounded-lg py-2.5 shadow-sm hover:bg-slate-800 disabled:opacity-60"
             >
-              {loading ? "Creating..." : "Create parent account"}
+              {loading ? "Creating..." : role === "instructor" ? "Create instructor account" : "Create parent account"}
             </button>
             <p className="text-sm text-slate-600 text-center">
               Already have an account?{" "}
-              <Link href="/auth/login" className="font-semibold text-emerald-700">
+              <Link href="/auth/login" className="font-semibold text-purple-700">
                 Log in
               </Link>
             </p>
           </form>
-        </Section>
+        </div>
       </div>
     </main>
   );

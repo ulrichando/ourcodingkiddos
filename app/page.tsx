@@ -61,7 +61,7 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-4 mb-6">
                 <Link
-                  href="/auth/register"
+                  href="/auth/login"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 shadow-lg"
                 >
                   Start Free Trial <Play className="w-5 h-5" />
@@ -333,7 +333,7 @@ export default function LandingPage() {
             <h2 className="text-3xl lg:text-4xl font-bold">Ready to Start Your Child's Coding Journey?</h2>
             <p className="text-white/90 text-lg">Join thousands of happy families. No credit card required.</p>
             <Link
-              href="/auth/register"
+              href="/auth/login"
               className="inline-flex items-center gap-2 bg-white text-purple-600 hover:bg-slate-100 font-semibold px-6 py-3 rounded-full"
             >
               Start Free Trial <ArrowRight className="w-4 h-4" />
