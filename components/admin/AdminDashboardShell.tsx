@@ -54,7 +54,44 @@ export default function AdminDashboardShell({
     return users.filter((u) => u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
   }, [users, search]);
 
-  const filteredInstructors = useMemo(() => users.filter((u) => u.type === "instructor"), [users]);
+  const filteredInstructors = useMemo(() => {
+    const term = search.toLowerCase();
+    return users.filter(
+      (u) =>
+        u.type === "instructor" &&
+        (u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term))
+    );
+  }, [users, search]);
+
+  // Fallback demo data if student/parent lists are empty (but users table has roles)
+  const displayStudents: StudentRow[] =
+    students.length > 0
+      ? students
+      : users
+          .filter((u) => u.type === "student")
+          .map((u) => ({
+            id: u.id,
+            name: u.name,
+            username: u.email.split("@")[0],
+            age: "N/A",
+            parentEmail: "N/A",
+            xp: 0,
+            level: 1,
+          }));
+
+  const displayParents: ParentRow[] =
+    parents.length > 0
+      ? parents
+      : users
+          .filter((u) => u.type === "parent")
+          .map((u) => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            phone: "N/A",
+            address: "N/A",
+            childrenCount: 0,
+          }));
 
   const bgBase = "#0c1426";
   const bgCard = "#111c2d";
@@ -215,7 +252,7 @@ export default function AdminDashboardShell({
                     </tr>
                   </thead>
                   <tbody>
-                    {parents.map((p) => (
+                    {displayParents.map((p) => (
                       <tr key={p.id} className="border-b border-white/5">
                         <td className="py-3 font-semibold">{p.name}</td>
                         <td className="py-3 text-slate-300">{p.email}</td>
@@ -224,7 +261,7 @@ export default function AdminDashboardShell({
                         <td className="py-3 text-purple-300 font-semibold">{p.childrenCount}</td>
                       </tr>
                     ))}
-                    {parents.length === 0 && (
+                    {displayParents.length === 0 && (
                       <tr>
                         <td className="py-4 text-slate-400" colSpan={5}>
                           No parents found.
@@ -255,7 +292,7 @@ export default function AdminDashboardShell({
                     </tr>
                   </thead>
                   <tbody>
-                    {students.map((s) => (
+                    {displayStudents.map((s) => (
                       <tr key={s.id} className="border-b border-white/5">
                         <td className="py-3 font-semibold">{s.name}</td>
                         <td className="py-3 text-slate-300">{s.username}</td>
@@ -265,10 +302,64 @@ export default function AdminDashboardShell({
                         <td className="py-3 text-purple-300 font-semibold">Lvl {s.level}</td>
                       </tr>
                     ))}
-                    {students.length === 0 && (
+                    {displayStudents.length === 0 && (
                       <tr>
                         <td className="py-4 text-slate-400" colSpan={6}>
                           No students found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "instructors" && (
+          <Card className="border-white/5" style={{ backgroundColor: bgCard }}>
+            <CardContent className="p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 className="text-lg font-semibold">Instructors</h2>
+                <div className="relative w-full sm:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    value={search}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+                    placeholder="Search instructors..."
+                    className="pl-10 bg-[#0f192f] border-white/10 text-white placeholder:text-slate-500"
+                  />
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-slate-300 text-left border-b border-white/5">
+                      <th className="py-3 font-medium">Name</th>
+                      <th className="py-3 font-medium">Email</th>
+                      <th className="py-3 font-medium">Type</th>
+                      <th className="py-3 font-medium">Joined</th>
+                      <th className="py-3 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredInstructors.map((u) => (
+                      <tr key={u.id} className="border-b border-white/5">
+                        <td className="py-3 font-semibold">{u.name}</td>
+                        <td className="py-3 text-slate-300">{u.email}</td>
+                        <td className="py-3">
+                          <Badge className="bg-emerald-500/20 text-emerald-200">instructor</Badge>
+                        </td>
+                        <td className="py-3 text-slate-300">{u.joined}</td>
+                        <td className="py-3 text-right">
+                          <button className="text-slate-300 hover:text-white text-sm inline-flex items-center gap-1">Edit</button>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredInstructors.length === 0 && (
+                      <tr>
+                        <td className="py-4 text-slate-400" colSpan={5}>
+                          No instructors found.
                         </td>
                       </tr>
                     )}
