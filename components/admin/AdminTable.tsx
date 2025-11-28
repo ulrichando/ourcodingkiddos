@@ -1,3 +1,5 @@
+import React from "react";
+
 type Column<T> = {
   key: keyof T;
   label: string;

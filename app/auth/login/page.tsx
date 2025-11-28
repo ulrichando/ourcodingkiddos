@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<"parent" | "instructor">("parent");
+  const [role, setRole] = useState<"parent" | "instructor" | "student">("student");
 
   const destination = useMemo(
-    () => (role === "instructor" ? "/dashboard/instructor" : "/dashboard/parent"),
+    () => {
+      if (role === "instructor") return "/dashboard/instructor";
+      if (role === "student") return "/dashboard/student";
+      return "/dashboard/parent";
+    },
     [role]
   );
 
@@ -30,7 +34,17 @@ export default function LoginPage() {
         password,
       });
       if (res?.error) throw new Error(res.error);
-      router.push(destination);
+      const session = await getSession();
+      const sessionRole = typeof (session?.user as any)?.role === "string" ? ((session?.user as any)?.role as string).toUpperCase() : null;
+      const target =
+        sessionRole === "ADMIN"
+          ? "/dashboard/admin"
+          : sessionRole === "INSTRUCTOR"
+            ? "/dashboard/instructor"
+            : sessionRole === "STUDENT"
+              ? "/dashboard/student"
+              : "/dashboard/parent";
+      router.push(target);
     } catch (err: any) {
       setError(err?.message || "Sign in failed");
     } finally {
@@ -50,7 +64,19 @@ export default function LoginPage() {
             <p className="text-sm text-slate-500">Choose your role and sign in</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <button
+              type="button"
+              onClick={() => setRole("student")}
+              className={`rounded-lg border px-3 py-2 font-semibold transition ${
+                role === "student"
+                  ? "border-purple-300 bg-purple-50 text-purple-700"
+                  : "border-slate-200 bg-white text-slate-700"
+              }`}
+            >
+              Student
+              <p className="text-xs font-normal text-slate-500">Learn & earn XP</p>
+            </button>
             <button
               type="button"
               onClick={() => setRole("parent")}

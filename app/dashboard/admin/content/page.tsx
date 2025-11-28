@@ -1,18 +1,18 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import ContentManagerView from "../../../../components/admin/ContentManagerView";
-import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
+import prisma from "../../../../lib/prisma";
+import ContentManagerView from "../../../../components/admin/ContentManagerView";
 import fs from "fs/promises";
 import path from "path";
 import { courses as fallbackCourses } from "../../../../data/courses";
 
 export const dynamic = "force-dynamic";
 
-export default async function InstructorContentPage() {
+export default async function AdminContentPage() {
   const session = await getServerSession(authOptions);
   const role = typeof (session?.user as any)?.role === "string" ? ((session?.user as any).role as string).toUpperCase() : null;
-  if (!session?.user || (role !== "INSTRUCTOR" && role !== "ADMIN")) {
+  if (!session?.user || (role !== "ADMIN" && role !== "INSTRUCTOR")) {
     return redirect("/auth/login");
   }
 
@@ -37,5 +37,7 @@ export default async function InstructorContentPage() {
     courses = [];
   }
 
-  return <ContentManagerView courses={courses} homePath="/dashboard/instructor" dbError={dbError} />;
+  const homePath = role === "ADMIN" ? "/dashboard/admin" : "/dashboard/instructor";
+
+  return <ContentManagerView courses={courses} homePath={homePath} dbError={dbError} />;
 }

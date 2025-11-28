@@ -27,8 +27,8 @@ const contacts = [
   { id: "instructor-1", name: "Coach Alex", role: "instructor" },
   { id: "instructor-2", name: "Coach Jay", role: "instructor" },
   { id: "support-1", name: "Support", role: "support" },
-  { id: "student-1", name: "Student (Your Kid)", role: "student" },
-  { id: "parent-1", name: "Parent", role: "parent" },
+  { id: "student-1", name: "Demo Student", role: "student" },
+  { id: "parent-1", name: "Demo Parent", role: "parent" },
 ];
 
 let conversations: Conversation[] = [
@@ -48,11 +48,11 @@ let conversations: Conversation[] = [
   },
   {
     id: "c3",
-    label: "Student (Your Kid)",
+    label: "Demo Student",
     roles: { from: "parent", to: "student" },
     time: "Yesterday",
     preview: "Family chat",
-    participants: ["Parent", "Student"],
+    participants: ["Demo Parent", "Demo Student"],
   },
 ];
 
@@ -93,6 +93,26 @@ let messages: ChatMessage[] = [
     text: "Your free trial has 7 days left.",
     createdAt: new Date().toISOString(),
   },
+  {
+    id: "m5",
+    conversationId: "c3",
+    fromRole: "parent",
+    toRole: "student",
+    fromName: "Demo Parent",
+    toName: "Demo Student",
+    text: "Let's review your HTML lesson tonight.",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "m6",
+    conversationId: "c3",
+    fromRole: "student",
+    toRole: "parent",
+    fromName: "Demo Student",
+    toName: "Demo Parent",
+    text: "Sure! I finished the quiz and can show you.",
+    createdAt: new Date().toISOString(),
+  },
 ];
 
 export async function GET(req: Request) {
@@ -107,13 +127,16 @@ export async function GET(req: Request) {
   const filteredMessages = role
     ? messages.filter((m) => m.fromRole === role || m.toRole === role)
     : messages;
+  const convosForRole = role
+    ? conversations.filter((c) => !c.roles || c.roles.from === role || c.roles.to === role)
+    : conversations;
   const filteredConvos = q
-    ? conversations.filter((c) => {
+    ? convosForRole.filter((c) => {
         const label = c.label.toLowerCase();
         const participants = (c.participants || []).join(" ").toLowerCase();
         return label.includes(q) || participants.includes(q);
       })
-    : conversations;
+    : convosForRole;
 
   return NextResponse.json({ conversations: filteredConvos, messages: filteredMessages, contacts });
 }

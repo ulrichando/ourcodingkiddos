@@ -1,69 +1,248 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "../../../lib/auth";
+import prisma from "../../../lib/prisma";
+import AdminDashboardShell from "../../../components/admin/AdminDashboardShell";
 
-import AdminNav from "../../../components/admin/AdminNav";
-import AdminStatCard from "../../../components/admin/AdminStatCard";
+export const dynamic = "force-dynamic";
 
-const metrics: { label: string; value: string; sublabel: string; accent: "purple" | "orange" | "green" | "blue" }[] = [
-  { label: "Active Students", value: "1,248", sublabel: "+12% vs last month", accent: "purple" },
-  { label: "Active Parents", value: "980", sublabel: "+8% vs last month", accent: "orange" },
-  { label: "Monthly Revenue", value: "$42,300", sublabel: "ARR: $507k", accent: "green" },
-  { label: "Completion Rate", value: "78%", sublabel: "Course completion", accent: "blue" },
-];
+const ageGroupLabel: Record<string, string> = {
+  AGES_7_10: "7-10",
+  AGES_11_14: "11-14",
+  AGES_15_18: "15-18",
+};
 
-const recent = [
-  { name: "Emma Johnson", role: "Student", activity: "Completed JS Quests", time: "2h ago" },
-  { name: "Alex Kim", role: "Parent", activity: "Upgraded to Family Plan", time: "5h ago" },
-  { name: "Coach Sam", role: "Instructor", activity: "Finished 3 sessions", time: "7h ago" },
-  { name: "Priya S.", role: "Student", activity: "Earned Bug Squasher badge", time: "9h ago" },
-];
+function formatDate(date: Date | null): string {
+  if (!date) return "N/A";
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "2-digit", day: "2-digit" });
+}
 
-export default function AdminOverviewPage() {
+function toTitle(value: string | null | undefined): string {
+  if (!value) return "N/A";
+  const lower = value.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+function ageFromDob(dob: Date | null): number | null {
+  if (!dob) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const m = now.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+export default async function AdminDashboardPage() {
+  const session = await getServerSession(authOptions);
+  const role = typeof (session?.user as any)?.role === "string" ? ((session?.user as any).role as string).toUpperCase() : null;
+  if (!session?.user || role !== "ADMIN") {
+    return redirect("/auth/login");
+  }
+
+  const hasDbUrl = Boolean(process.env.DATABASE_URL);
+  let warning: string | null = null;
+
+  const demoUsersRaw = [
+    { id: "u1", name: "Ghislain Ulrich", email: "ghislainulrich007@gmail.com", role: "PARENT", createdAt: new Date("2025-11-26") },
+    { id: "u2", name: "Ando Ulrich", email: "ulrichando007@gmail.com", role: "ADMIN", createdAt: new Date("2025-11-26") },
+  ];
+  const demoStudentsRaw = [
+    {
+      id: "s1",
+      name: "Emma",
+      age: 10,
+      dob: null,
+      totalXp: 1250,
+      currentLevel: 3,
+      parentEmail: "test@parent.com",
+      user: { email: "emma2024@example.com", name: "Emma", createdAt: new Date("2025-11-26") },
+      guardian: { user: { email: "test@parent.com" } },
+    },
+    {
+      id: "s2",
+      name: "Jake",
+      age: 13,
+      dob: null,
+      totalXp: 800,
+      currentLevel: 2,
+      parentEmail: "test@parent.com",
+      user: { email: "jake2024@example.com", name: "Jake", createdAt: new Date("2025-11-26") },
+      guardian: { user: { email: "test@parent.com" } },
+    },
+    {
+      id: "s3",
+      name: "yanick",
+      age: 11,
+      dob: null,
+      totalXp: 0,
+      currentLevel: 1,
+      parentEmail: "ulrichando007@gmail.com",
+      user: { email: "yanci@example.com", name: "yanick", createdAt: new Date("2025-11-26") },
+      guardian: { user: { email: "ulrichando007@gmail.com" } },
+    },
+  ];
+  const demoCoursesRaw = [
+    { id: "c1", title: "HTML Basics for Kids", language: "HTML", level: "BEGINNER", ageGroup: "AGES_7_10", isPublished: true },
+    { id: "c2", title: "CSS Magic: Style Your Pages", language: "CSS", level: "BEGINNER", ageGroup: "AGES_7_10", isPublished: true },
+    { id: "c3", title: "JavaScript Adventures", language: "JAVASCRIPT", level: "BEGINNER", ageGroup: "AGES_11_14", isPublished: true },
+    { id: "c4", title: "Python for Young Coders", language: "PYTHON", level: "BEGINNER", ageGroup: "AGES_11_14", isPublished: true },
+    { id: "c5", title: "Roblox Game Creator", language: "ROBLOX", level: "BEGINNER", ageGroup: "AGES_11_14", isPublished: true },
+    { id: "c6", title: "Advanced Web Development", language: "JAVASCRIPT", level: "INTERMEDIATE", ageGroup: "AGES_15_18", isPublished: true },
+  ];
+  const demoParentsRaw = [
+    { id: "p1", phone: "555-1234", address: "123 Demo St", user: { name: "Ghislain Ulrich", email: "ghislainulrich007@gmail.com" }, _count: { children: 1 } },
+    { id: "p2", phone: "555-4321", address: "456 Sample Ave", user: { name: "Ando Ulrich", email: "ulrichando007@gmail.com" }, _count: { children: 1 } },
+  ];
+  const demoSubscriptionsRaw = [
+    {
+      id: "sub1",
+      parentEmail: "ulrichando007@gmail.com",
+      planType: "FAMILY",
+      status: "ACTIVE",
+      priceCents: 0,
+      endDate: null,
+      currentPeriodEnd: new Date("2025-12-31"),
+      user: { email: "ulrichando007@gmail.com" },
+    },
+    {
+      id: "sub2",
+      parentEmail: "test@parent.com",
+      planType: "MONTHLY",
+      status: "ACTIVE",
+      priceCents: 2900,
+      endDate: new Date("2025-12-01"),
+      currentPeriodEnd: new Date("2025-12-01"),
+      user: { email: "test@parent.com" },
+    },
+  ];
+
+  let usersRaw = demoUsersRaw;
+  let studentsRaw = demoStudentsRaw;
+  let coursesRaw = demoCoursesRaw;
+  let subscriptionsRaw = demoSubscriptionsRaw;
+  let parentsRaw = demoParentsRaw;
+
+  if (hasDbUrl) {
+    try {
+      [usersRaw, studentsRaw, coursesRaw, subscriptionsRaw, parentsRaw] = await Promise.all([
+        prisma.user.findMany({
+          orderBy: { createdAt: "desc" },
+          select: { id: true, name: true, email: true, role: true, createdAt: true },
+        }),
+        prisma.studentProfile.findMany({
+          orderBy: { user: { createdAt: "desc" } },
+          select: {
+            id: true,
+            name: true,
+            age: true,
+            dob: true,
+            totalXp: true,
+            currentLevel: true,
+            parentEmail: true,
+            user: { select: { email: true, name: true, createdAt: true } },
+            guardian: { select: { user: { select: { email: true } } } },
+          },
+        }),
+        prisma.course.findMany({
+          orderBy: { title: "asc" },
+          select: { id: true, title: true, language: true, level: true, ageGroup: true, isPublished: true },
+        }),
+        prisma.subscription.findMany({
+          orderBy: { currentPeriodStart: "desc" },
+          include: { user: { select: { email: true } } },
+        }),
+        prisma.parentProfile.findMany({
+          orderBy: { user: { createdAt: "desc" } },
+          select: {
+            id: true,
+            phone: true,
+            address: true,
+            user: { select: { name: true, email: true } },
+            _count: { select: { children: true } },
+          },
+        }),
+      ]);
+    } catch (error) {
+      console.error("Admin dashboard data load failed; falling back to demo data", error);
+      warning =
+        "Database unavailable or misconfigured (check DATABASE_URL). Showing demo admin data instead.";
+      usersRaw = demoUsersRaw;
+      studentsRaw = demoStudentsRaw;
+      coursesRaw = demoCoursesRaw;
+      subscriptionsRaw = demoSubscriptionsRaw;
+      parentsRaw = demoParentsRaw;
+    }
+  } else {
+    warning = "DATABASE_URL is not set. Showing demo admin data instead.";
+  }
+
+  const users = usersRaw.map((u) => ({
+    id: u.id,
+    name: u.name || "Unnamed",
+    email: u.email,
+    type: u.role.toLowerCase(),
+    joined: formatDate(u.createdAt),
+  }));
+
+  const students = studentsRaw.map((s) => {
+    const age = s.age ?? ageFromDob(s.dob);
+    const username = s.user.email?.split("@")[0] || "unknown";
+    const parentEmail = s.parentEmail || s.guardian?.user?.email || "N/A";
+    return {
+      id: s.id,
+      name: s.name || s.user.name || "Student",
+      username,
+      age: age ? String(age) : "N/A",
+      parentEmail,
+      xp: s.totalXp ?? 0,
+    level: s.currentLevel ?? 1,
+  };
+  });
+
+  const courses = coursesRaw.map((c) => ({
+    id: c.id,
+    title: c.title,
+    language: toTitle(c.language),
+    level: toTitle(c.level),
+    ageGroup: ageGroupLabel[c.ageGroup] ?? c.ageGroup ?? "N/A",
+    status: c.isPublished ? "Published" : "Draft",
+  }));
+
+  const subscriptions = subscriptionsRaw.map((s) => ({
+    id: s.id,
+    parentEmail: s.parentEmail || s.user.email || "N/A",
+    plan: s.planType ? toTitle(s.planType) : "N/A",
+    status: s.status.toLowerCase(),
+    price: typeof s.priceCents === "number" ? `$${(s.priceCents / 100).toFixed(0)}/mo` : "$0/mo",
+    endDate: formatDate(s.endDate ?? s.currentPeriodEnd ?? null),
+  }));
+
+  const parents = parentsRaw.map((p) => ({
+    id: p.id,
+    name: p.user?.name || "Parent",
+    email: p.user?.email || "N/A",
+    phone: p.phone || "N/A",
+    address: p.address || "N/A",
+    childrenCount: p._count?.children ?? 0,
+  }));
+
+  const stats = {
+    totalParents: usersRaw.filter((u) => u.role === "PARENT").length,
+    totalStudents: studentsRaw.length,
+    instructors: usersRaw.filter((u) => u.role === "INSTRUCTOR").length,
+    activeSubs: subscriptionsRaw.filter((s) => s.status === "ACTIVE").length,
+  };
+
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm text-slate-500">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900">Overview</h1>
-        </div>
-        <AdminNav />
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((m) => (
-          <AdminStatCard key={m.label} {...m} />
-        ))}
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">
-          <h2 className="text-lg font-semibold text-slate-900 mb-3">System Health</h2>
-          <ul className="space-y-3 text-sm text-slate-700">
-            <li className="flex items-center gap-2">
-              <span className="text-emerald-500">●</span> API latency: 120ms (avg)
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-emerald-500">●</span> Error rate: 0.2% (7d)
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-emerald-500">●</span> Uptime: 99.97%
-            </li>
-          </ul>
-        </div>
-        <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">
-          <h2 className="text-lg font-semibold text-slate-900 mb-3">Recent Activity</h2>
-          <div className="space-y-3">
-            {recent.map((r) => (
-              <div key={r.name + r.time} className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-slate-900">{r.name} • {r.role}</p>
-                  <p className="text-sm text-slate-600">{r.activity}</p>
-                </div>
-                <span className="text-xs text-slate-500">{r.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </main>
+    <AdminDashboardShell
+      userEmail={session.user.email}
+      stats={stats}
+      users={users}
+      parents={parents}
+      students={students}
+      courses={courses}
+      subscriptions={subscriptions}
+      warning={warning}
+    />
   );
 }

@@ -107,7 +107,9 @@ function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
       </div>
       <button
         onClick={() => onChange(!checked)}
-        className={`w-11 h-6 rounded-full border transition ${checked ? "bg-slate-900 border-slate-900" : "bg-slate-200 border-slate-300"}`}
+        className={`w-11 h-6 rounded-full border transition ${
+          checked ? "bg-slate-900 border-slate-900" : "bg-slate-200 border-slate-300"
+        }`}
       >
         <span
           className={`block w-5 h-5 bg-white rounded-full shadow transform transition ${

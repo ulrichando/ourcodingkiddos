@@ -12,6 +12,8 @@ export default function AppHeader() {
   const pathname = usePathname();
   const userName = session?.user?.name || "Guest";
   const userInitial = userName.charAt(0).toUpperCase();
+  const userRole =
+    typeof (session?.user as any)?.role === "string" ? ((session?.user as any)?.role as string).toUpperCase() : "PARENT";
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,6 +34,15 @@ export default function AppHeader() {
       pathname?.startsWith(href) ? "text-slate-900" : "text-slate-700"
     } hover:text-slate-900`;
 
+  const dashboardHref =
+    userRole === "STUDENT"
+      ? "/dashboard/student"
+      : userRole === "INSTRUCTOR"
+        ? "/dashboard/instructor"
+        : userRole === "ADMIN"
+          ? "/dashboard/admin"
+          : "/dashboard/parent";
+
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-6">
@@ -45,7 +56,7 @@ export default function AppHeader() {
         {isLoggedIn ? (
           <>
             <nav className="flex-1 flex items-center justify-center gap-7">
-                <Link href="/dashboard/parent" className={linkClass("/dashboard")}>
+                <Link href={dashboardHref} className={linkClass(dashboardHref)}>
                   <Home className="h-4 w-4 text-slate-500" />
                   Dashboard
                 </Link>

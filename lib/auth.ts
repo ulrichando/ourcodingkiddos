@@ -9,6 +9,7 @@ const demoEmail = process.env.DEMO_ADMIN_EMAIL ?? "demo@ourcodingkiddos.com";
 const demoPassword = process.env.DEMO_ADMIN_PASSWORD ?? "demo1234";
 const demoParentEmail = process.env.DEMO_PARENT_EMAIL ?? "demo.parent@ourcodingkiddos.com";
 const demoInstructorEmail = process.env.DEMO_INSTRUCTOR_EMAIL ?? "demo.instructor@ourcodingkiddos.com";
+const demoStudentEmail = process.env.DEMO_STUDENT_EMAIL ?? "demo.student@ourcodingkiddos.com";
 const demoUserPassword = process.env.DEMO_USER_PASSWORD ?? "demo1234";
 
 export const authOptions: NextAuthOptions = {
@@ -76,6 +77,16 @@ export const authOptions: NextAuthOptions = {
             name: "Demo Instructor",
             email: demoInstructorEmail,
             role: "INSTRUCTOR",
+          };
+        }
+
+        // Demo student
+        if (email === demoStudentEmail && password === demoUserPassword) {
+          return {
+            id: "demo-student",
+            name: "Demo Student",
+            email: demoStudentEmail,
+            role: "STUDENT",
           };
         }
 

@@ -5,6 +5,14 @@ import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
 import { CourseCategory, CourseLevel } from "@prisma/client";
 
+function normalizeSlug(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 const updateSchema = z
   .object({
     title: z.string().min(3).optional(),
@@ -17,13 +25,27 @@ const updateSchema = z
   })
   .strict();
 
-// GET /api/courses/:id - fetch a single course
-export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+// GET /api/courses/:id - fetch a single course (by id or slug)
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
+  const normalized = normalizeSlug(id);
   try {
     const course = await prisma.course.findFirst({
-      where: { OR: [{ id }, { slug: id }] },
-      include: { lessons: { orderBy: { order: "asc" } } },
+      where: {
+        OR: [
+          { id },
+          { slug: id },
+          { slug: id.toLowerCase() },
+          { slug: normalized },
+          { slug: { equals: id, mode: "insensitive" } },
+          { slug: { contains: normalized, mode: "insensitive" } },
+        ],
+      },
+      include: {
+        lessons: {
+          orderBy: [{ orderIndex: "asc" }, { id: "asc" }],
+        },
+      },
     });
     if (!course) return NextResponse.json({ status: "not-found" }, { status: 404 });
     return NextResponse.json({ status: "ok", data: course });
@@ -34,7 +56,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 }
 
 // PATCH /api/courses/:id - partial update
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
@@ -46,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { id } = await params;
+  const { id } = params;
   try {
     const course = await prisma.course.update({
       where: { id },
@@ -60,12 +82,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 // DELETE /api/courses/:id
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user || !["ADMIN", "INSTRUCTOR"].includes((session.user as any).role)) {
     return NextResponse.json({ status: "forbidden" }, { status: 403 });
   }
-  const { id } = await params;
+  const { id } = params;
   try {
     await prisma.course.delete({ where: { id } });
     return NextResponse.json({ status: "ok" });

@@ -42,24 +42,24 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white text-slate-800">
       {/* Hero */}
-      <section className="pt-24 pb-16 px-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+      <section className="pt-20 md:pt-24 pb-14 px-4 overflow-hidden">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+            <div className="text-center lg:text-left">
               <span className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold mb-5">
                 <Sparkles className="w-3 h-3" /> #1 Online Coding School for Kids
               </span>
-              <h1 className="text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-5">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-5">
                 Turn Your Child Into a{" "}
                 <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
                   Future Coder
                 </span>
               </h1>
-              <p className="text-lg lg:text-xl text-slate-600 mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl text-slate-600 mb-8 leading-relaxed">
                 Fun, interactive coding courses for ages 7-18. From building games in Roblox to creating real websites
                 with HTML, CSS & JavaScript.
               </p>
-              <div className="flex flex-wrap gap-4 mb-6">
+              <div className="flex flex-wrap gap-4 mb-6 justify-center lg:justify-start">
                 <Link
                   href="/auth/login"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 shadow-lg"
@@ -73,7 +73,7 @@ export default function LandingPage() {
                   Try Playground
                 </Link>
               </div>
-              <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-sm text-slate-600 justify-center lg:justify-start">
                 <span className="inline-flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" /> No credit card required
                 </span>
@@ -82,15 +82,15 @@ export default function LandingPage() {
                 </span>
               </div>
             </div>
-            <div className="relative">
-              <div className="absolute -z-10 w-96 h-96 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              <div className="relative bg-slate-900 rounded-2xl p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
+            <div className="relative max-w-md w-full mx-auto lg:mx-0">
+              <div className="absolute -z-10 w-72 sm:w-96 h-72 sm:h-96 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              <div className="relative bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="h-3 w-3 rounded-full bg-red-400" />
                   <span className="h-3 w-3 rounded-full bg-yellow-400" />
                   <span className="h-3 w-3 rounded-full bg-green-400" />
                 </div>
-                <pre className="text-sm font-mono leading-7 text-white">
+                <pre className="text-xs sm:text-sm font-mono leading-7 text-white">
 {`function sayHello() {
   console.log("Hello, Coder! 🚀");
 }`}
@@ -103,7 +103,7 @@ export default function LandingPage() {
 
       {/* Stats */}
       <section className="py-10 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
           {stats.map((stat) => (
             <div key={stat.label}>
               <div className="text-3xl font-bold">{stat.value}</div>
@@ -115,15 +115,15 @@ export default function LandingPage() {
 
       {/* Languages */}
       <section id="courses" className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
+          <div className="text-center mb-12 px-2">
             <span className="inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
               What We Teach
             </span>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Learn Real Programming Languages</h2>
             <p className="text-lg text-slate-600">Age-appropriate courses designed to make coding fun and engaging</p>
           </div>
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {languages.map((lang) => (
               <Link key={lang.name} href="/courses">
                 <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border-0">
@@ -145,14 +145,14 @@ export default function LandingPage() {
 
       {/* Age Groups */}
       <section className="py-16 px-4 bg-slate-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
+          <div className="text-center mb-12 px-2">
             <span className="inline-block bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
               For Every Age
             </span>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Courses Designed for Your Child</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {[
               { age: "7-10", title: "Young Explorers", desc: "Fun visual coding with games and animations. Big buttons, colorful interface, lots of encouragement!", emoji: "🎨" },
               { age: "11-14", title: "Junior Developers", desc: "Build real websites and games. Learn HTML, CSS, JavaScript with hands-on projects.", emoji: "🚀" },
@@ -176,8 +176,8 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <div>
+        <div className="max-w-6xl lg:max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+          <div className="text-center lg:text-left">
             <span className="inline-block bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
               Why Choose Us
             </span>
@@ -206,7 +206,7 @@ export default function LandingPage() {
             <img
               src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800"
               alt="Kids coding"
-              className="rounded-2xl shadow-2xl"
+              className="rounded-2xl shadow-2xl w-full object-cover"
             />
             <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl border border-slate-100 p-4 flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -223,15 +223,15 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section id="pricing" className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
+          <div className="text-center mb-12 px-2">
             <span className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
               Simple Pricing
             </span>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Invest in Your Child's Future</h2>
             <p className="text-lg text-slate-600">Start with a free trial, upgrade when you're ready</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
               {
                 name: "Free Trial",

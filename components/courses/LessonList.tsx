@@ -5,7 +5,9 @@ type Lesson = {
   id: string;
   title: string;
   xp_reward?: number;
+  xpReward?: number;
   video_url?: string | null;
+  videoUrl?: string | null;
 };
 
 type Props = {
@@ -19,6 +21,8 @@ export default function LessonList({ lessons, currentLessonId, completedLessons 
   return (
     <div className="space-y-2">
       {lessons.map((lesson, index) => {
+        const xp = lesson.xp_reward ?? lesson.xpReward ?? 50;
+        const videoUrl = lesson.video_url ?? lesson.videoUrl;
         const isCompleted = completedLessons.includes(lesson.id);
         const isCurrent = lesson.id === currentLessonId;
         const prevCompleted = index === 0 || completedLessons.includes(lessons[index - 1]?.id);
@@ -60,7 +64,7 @@ export default function LessonList({ lessons, currentLessonId, completedLessons 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-slate-400">Lesson {index + 1}</span>
-                {lesson.video_url && (
+                {videoUrl && (
                   <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Video</span>
                 )}
               </div>
@@ -75,7 +79,7 @@ export default function LessonList({ lessons, currentLessonId, completedLessons 
             </div>
 
             <div className="flex-shrink-0 text-right">
-              <span className="text-sm font-medium text-amber-500">+{lesson.xp_reward || 50} XP</span>
+              <span className="text-sm font-medium text-amber-500">+{xp} XP</span>
             </div>
           </button>
         );

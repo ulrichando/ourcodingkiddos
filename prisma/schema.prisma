@@ -98,6 +98,8 @@ model User {
   enrollments        Enrollment[]
   bookingsAsStudent  Booking[]      @relation("BookingStudent")
   bookingsAsInstructor Booking[]    @relation("BookingInstructor")
+  classSessions      ClassSession[] @relation("ClassSessionInstructor")
+  instructorAvailability InstructorAvailability[] @relation("InstructorAvailabilityInstructor")
   payments           Payment[]
   subscriptions      Subscription[]
   badges             UserBadge[]
@@ -128,6 +130,7 @@ model StudentProfile {
 
   user     User @relation(fields: [userId], references: [id])
   guardian ParentProfile? @relation("ParentGuardian", fields: [guardianId], references: [id])
+  projects Project[] @relation("StudentProjects")
 }
 
 model ParentProfile {
@@ -389,7 +392,7 @@ model ClassSession {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  instructor User? @relation(fields: [instructorId], references: [id])
+  instructor User? @relation("ClassSessionInstructor", fields: [instructorId], references: [id])
   bookings   Booking[]
 
   @@index([instructorId])
@@ -405,7 +408,7 @@ model InstructorAvailability {
   endTime         String
   isActive        Boolean  @default(true)
 
-  instructor User? @relation(fields: [instructorId], references: [id])
+  instructor User? @relation("InstructorAvailabilityInstructor", fields: [instructorId], references: [id])
 
   @@index([instructorId])
   @@index([dayOfWeek])
@@ -516,7 +519,7 @@ model Project {
   shareToken String?  @unique
 
   lesson      Lesson        @relation(fields: [lessonId], references: [id])
-  student     StudentProfile? @relation(fields: [studentId], references: [id])
+  student     StudentProfile? @relation("StudentProjects", fields: [studentId], references: [id])
   submissions PortfolioItem[]
 
   @@index([studentId])

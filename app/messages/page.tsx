@@ -42,6 +42,14 @@ export default function MessagesPage() {
   const [newGroupName, setNewGroupName] = useState("");
   const [attachment, setAttachment] = useState<string | null>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const findTargetRole = (convoId: string | null) => {
+    const convo = conversations.find((c) => c.id === convoId);
+    if (!convo?.roles) return "support";
+    const { from, to } = convo.roles;
+    if (from === userRole && to) return to;
+    if (to === userRole && from) return from;
+    return to || from || "support";
+  };
   const emojiList = [
     "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚",
     "😋","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥",
@@ -86,12 +94,14 @@ export default function MessagesPage() {
   const handleSend = async () => {
     if (!input.trim() || !activeId) return;
     const text = input.trim();
+    const targetRole = findTargetRole(activeId);
+    const targetName = conversations.find((c) => c.id === activeId)?.name;
     setInput("");
     const optimistic: ChatMessage = {
       id: `tmp-${Date.now()}`,
       conversationId: activeId,
       fromRole: userRole,
-      toRole: "instructor",
+      toRole: targetRole,
       text,
       attachmentName: attachment || undefined,
     };
@@ -104,9 +114,10 @@ export default function MessagesPage() {
         body: JSON.stringify({
           conversationId: activeId,
           fromRole: userRole,
-          toRole: "instructor",
+          toRole: targetRole,
           text,
           fromName: userName,
+          toName: targetName,
           attachmentName: optimistic.attachmentName,
         }),
       });
@@ -127,25 +138,31 @@ export default function MessagesPage() {
   const handleCreateConversation = async () => {
     const recipients = newGroup.length ? newGroup : newTo ? [newTo.trim()] : [];
     if (!recipients.length || !newBody.trim()) return;
+    const primaryName = recipients[0];
+    const contact =
+      primaryName && contacts.length
+        ? contacts.find((c) => c.name.toLowerCase() === primaryName.toLowerCase())
+        : undefined;
+    const targetRole = contact?.role || "support";
     const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "createConversation",
-          fromRole: userRole,
-          toRole: "instructor",
-          toName: recipients[0],
-          participantNames: recipients,
-          label: newGroupName.trim()
-            ? newGroupName.trim()
-            : recipients.length > 1
-              ? `Group: ${recipients.join(", ")}`
-              : undefined,
-          text: newBody.trim(),
-          fromName: userName,
-        }),
-      });
-      const json = await res.json();
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "createConversation",
+        fromRole: userRole,
+        toRole: targetRole,
+        toName: contact?.name || primaryName,
+        participantNames: recipients,
+        label: newGroupName.trim()
+          ? newGroupName.trim()
+          : recipients.length > 1
+            ? `Group: ${recipients.join(", ")}`
+            : undefined,
+        text: newBody.trim(),
+        fromName: userName,
+      }),
+    });
+    const json = await res.json();
     if (json.conversation) {
       setConversations((prev) => [json.conversation, ...prev]);
       setActiveId(json.conversation.id);

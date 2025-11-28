@@ -38,7 +38,7 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
     { name: "Dashboard", href: "/dashboard/parent", icon: Home },
     { name: "Courses", href: "/courses", icon: BookOpen },
     { name: "Schedule", href: "/schedule", icon: Calendar },
-    { name: "Messages", href: "/dashboard/parent", icon: MessageSquare },
+    { name: "Messages", href: "/messages", icon: MessageSquare },
   ];
 
   const studentLinks: NavLink[] = [

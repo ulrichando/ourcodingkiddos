@@ -4,7 +4,7 @@ import AdminNav from "../../../../components/admin/AdminNav";
 import AdminUsersClient from "../../../../components/admin/AdminUsersClient";
 import { useEffect, useState } from "react";
 
-export default function AdminUsersPage() {
+export default function AdminInstructorsPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,14 +34,14 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm text-slate-500">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900">Users</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Instructors</h1>
         </div>
         <AdminNav />
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading users…</p>}
-      {error && <p className="text-sm text-rose-600">Failed to load users</p>}
-      {!loading && !error && <AdminUsersClient initialUsers={users} />}
+      {loading && <p className="text-sm text-slate-500">Loading instructors…</p>}
+      {error && <p className="text-sm text-rose-600">Failed to load instructors</p>}
+      {!loading && !error && <AdminUsersClient initialUsers={users} defaultRole="INSTRUCTOR" />}
     </main>
   );
 }

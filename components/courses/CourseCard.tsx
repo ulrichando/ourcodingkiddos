@@ -4,30 +4,24 @@ import { Progress } from "../ui/progress";
 import { Clock, Star } from "lucide-react";
 import LanguageIcon from "../ui/LanguageIcon";
 
-type Course = {
-  id: string;
-  title: string;
-  description?: string;
-  language: string;
-  level: "beginner" | "intermediate" | "advanced";
-  age_group?: string;
-  thumbnail_url?: string;
-  total_xp?: number;
-  estimated_hours?: number;
-};
-
 type Props = {
-  course: Course;
+  course: any;
   progress?: number;
   onClick?: () => void;
 };
 
 export default function CourseCard({ course, progress = 0, onClick }: Props) {
-  const levelColors: Record<Course["level"], string> = {
+  const levelColors: Record<string, string> = {
     beginner: "bg-green-100 text-green-700",
     intermediate: "bg-yellow-100 text-yellow-700",
     advanced: "bg-red-100 text-red-700",
   };
+
+  const level = (course.level || "beginner").toString().toLowerCase();
+  const language = (course.language || "html").toString().toLowerCase();
+  const ageGroup = course.age_group || course.ageGroup || (course.age ? course.age.replace("Ages ", "") : "7-10");
+  const estimatedHours = course.estimated_hours ?? course.estimatedHours ?? 5;
+  const totalXp = course.total_xp ?? course.totalXp ?? 500;
 
   return (
     <Card
@@ -37,10 +31,10 @@ export default function CourseCard({ course, progress = 0, onClick }: Props) {
       <div className="relative h-40 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 overflow-hidden">
         <div className="absolute inset-0 bg-black/10" />
         <div className="absolute top-4 left-4">
-          <LanguageIcon language={course.language} size="lg" />
+          <LanguageIcon language={language} size="lg" />
         </div>
         <div className="absolute bottom-4 right-4">
-          <Badge className={`${levelColors[course.level]} border-0 font-medium`}>{course.level}</Badge>
+          <Badge className={`${levelColors[level] || levelColors.beginner} border-0 font-medium`}>{level}</Badge>
         </div>
         {course.thumbnail_url && (
           <img
@@ -53,7 +47,7 @@ export default function CourseCard({ course, progress = 0, onClick }: Props) {
 
       <CardContent className="p-5">
         <Badge variant="outline" className="mb-2 text-xs">
-          Ages {course.age_group || "7-10"}
+          Ages {ageGroup}
         </Badge>
         <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
           {course.title}
@@ -63,11 +57,11 @@ export default function CourseCard({ course, progress = 0, onClick }: Props) {
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            <span>{course.estimated_hours || 5}h</span>
+            <span>{estimatedHours}h</span>
           </div>
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span>{course.total_xp || 500} XP</span>
+            <span>{totalXp} XP</span>
           </div>
         </div>
       </CardContent>
