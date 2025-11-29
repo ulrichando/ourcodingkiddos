@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Home, BookOpen, Calendar, MessageSquare, ChevronDown, Settings, Award, LogOut } from "lucide-react";
+import { Home, BookOpen, Calendar, MessageSquare, ChevronDown, Settings, Award, LogOut, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
+import NotificationBell from "../notifications/NotificationBell";
 
 export default function AppHeader() {
   const { data: session } = useSession();
@@ -16,6 +17,8 @@ export default function AppHeader() {
     typeof (session?.user as any)?.role === "string" ? ((session?.user as any)?.role as string).toUpperCase() : "PARENT";
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const showBell = userRole === "PARENT" || userRole === "STUDENT";
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -26,6 +29,36 @@ export default function AppHeader() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("ok-theme");
+      const initial = stored === "dark" ? "dark" : "light";
+      setTheme(initial as "light" | "dark");
+      if (initial === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    try {
+      localStorage.setItem("ok-theme", next);
+    } catch {
+      // ignore
+    }
+    if (next === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   const isLoggedIn = Boolean(session);
 
@@ -73,7 +106,15 @@ export default function AppHeader() {
                   Messages
                 </Link>
             </nav>
-            <div className="flex items-center ml-auto relative" ref={menuRef}>
+            <div className="flex items-center ml-auto gap-2 relative" ref={menuRef}>
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+              {showBell && <NotificationBell userEmail={session?.user?.email || ""} />}
               <button
                 onClick={() => setMenuOpen((o) => !o)}
                 className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-100 transition"

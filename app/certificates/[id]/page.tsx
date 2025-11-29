@@ -1,0 +1,117 @@
+"use client";
+
+import Link from "next/link";
+import { use } from "react";
+import { ArrowLeft, Calendar, Download } from "lucide-react";
+import Button from "../../../components/ui/button";
+
+const demoCerts = [
+  {
+    id: "cert-demo",
+    student: "Demo Student",
+    course: "HTML Basics for Kids",
+    issued: "Nov 28, 2025",
+    type: "Certificate of Completion",
+    code: "CK-DEMO-001",
+  },
+];
+
+export default function CertificateDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const cert = demoCerts.find((c) => c.id === id) || demoCerts[0];
+
+  const handleDownload = () => {
+    const html = `
+      <html>
+        <head>
+          <title>Certificate</title>
+          <style>
+            @page { size: A4; margin: 20mm; }
+            body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #fff7e6; }
+            .wrapper { padding: 24px; }
+            .card { border: 8px double #d97706; border-radius: 12px; padding: 32px; background: #fff; max-width: 700px; margin: 0 auto; text-align: center; }
+            .title { font-size: 28px; font-weight: 700; color: #92400e; margin-bottom: 8px; }
+            .subtitle { font-size: 14px; color: #4b5563; margin-bottom: 16px; }
+            .student { font-size: 24px; font-weight: 700; color: #111827; margin: 4px 0; }
+            .course { font-size: 18px; font-weight: 600; color: #7c3aed; margin: 6px 0 18px; }
+            .date { font-size: 14px; color: #4b5563; margin-top: 8px; }
+            .code { font-size: 12px; color: #6b7280; margin-top: 4px; }
+            .logo { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg,#f59e0b,#d97706); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; color: #fff; }
+            .footer { margin-top: 24px; font-size: 14px; color: #1f2937; font-weight: 600; }
+          </style>
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="card">
+              <div class="logo">🎖️</div>
+              <div class="title">Certificate of Completion</div>
+              <div class="subtitle">This is to certify that</div>
+              <div class="student">${cert.student}</div>
+              <div class="subtitle">has successfully completed</div>
+              <div class="course">${cert.course}</div>
+              <div class="date">Issued: ${cert.issued}</div>
+              <div class="code">Verification Code: ${cert.code}</div>
+              <div class="footer">Coding Kiddos</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank", "height=900,width=700");
+    if (win) {
+      win.onload = () => {
+        win.focus();
+        win.print();
+      };
+    } else {
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
+        <Link href="/certificates" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Certificates
+        </Link>
+
+        <div className="bg-white shadow-lg rounded-2xl border border-amber-200 overflow-hidden">
+          <div className="bg-gradient-to-b from-amber-50 to-white p-8">
+            <div className="max-w-3xl mx-auto border-[3px] border-amber-400 rounded-xl p-8 space-y-6 text-center">
+              <div className="w-14 h-14 rounded-full bg-amber-500 text-white flex items-center justify-center mx-auto text-2xl font-bold">
+                🎖️
+              </div>
+              <div className="space-y-2">
+                <p className="text-xl font-semibold text-amber-800">{cert.type}</p>
+                <p className="text-sm text-slate-600">This is to certify that</p>
+                <p className="text-2xl font-bold text-slate-900">{cert.student}</p>
+                <p className="text-sm text-slate-600">has successfully completed</p>
+                <p className="text-lg font-semibold text-purple-700">{cert.course}</p>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
+                <Calendar className="h-4 w-4" />
+                {cert.issued}
+              </div>
+              <div className="pt-4 border-t border-amber-200">
+                <p className="text-sm text-slate-500">Coding Kiddos</p>
+                <p className="text-xs text-slate-400">Verification Code: {cert.code}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border-t border-amber-200 px-6 py-4 flex items-center justify-between">
+            <Link href="/certificates">
+              <Button variant="outline">Back</Button>
+            </Link>
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white inline-flex items-center gap-2" onClick={handleDownload}>
+              <Download className="h-4 w-4" />
+              Download
+            </Button>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

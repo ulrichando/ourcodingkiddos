@@ -42,6 +42,13 @@ export default function MessagesPage() {
   const [newGroupName, setNewGroupName] = useState("");
   const [attachment, setAttachment] = useState<string | null>(null);
   const [showEmojis, setShowEmojis] = useState(false);
+  const inferRole = (recipient: string) => {
+    const lower = recipient.toLowerCase();
+    if (lower.includes("@students.")) return "student";
+    if (lower.includes("instructor") || lower.includes("coach")) return "instructor";
+    if (lower.includes("parent")) return "parent";
+    return "support";
+  };
   const findTargetRole = (convoId: string | null) => {
     const convo = conversations.find((c) => c.id === convoId);
     if (!convo?.roles) return "support";
@@ -76,6 +83,20 @@ export default function MessagesPage() {
       })
       .catch(() => {});
   }, [userRole]);
+
+  // Prefill "new message" when arriving with ?to=&subject=
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const to = params.get("to");
+    const subject = params.get("subject");
+    if (to || subject) {
+      setShowNew(true);
+      if (to) setNewTo(to);
+      if (subject) setNewGroupName(subject);
+      // focus the composer; we rely on user to type a message before send
+    }
+  }, []);
 
   const activeMessages = useMemo(() => {
     return messages.filter((m) => {
@@ -143,7 +164,7 @@ export default function MessagesPage() {
       primaryName && contacts.length
         ? contacts.find((c) => c.name.toLowerCase() === primaryName.toLowerCase())
         : undefined;
-    const targetRole = contact?.role || "support";
+    const targetRole = contact?.role || inferRole(primaryName);
     const res = await fetch("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -152,6 +173,7 @@ export default function MessagesPage() {
         fromRole: userRole,
         toRole: targetRole,
         toName: contact?.name || primaryName,
+        toEmail: primaryName,
         participantNames: recipients,
         label: newGroupName.trim()
           ? newGroupName.trim()
@@ -222,12 +244,14 @@ export default function MessagesPage() {
                       active ? "border-purple-200 bg-purple-50" : "border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <div className="flex justify-between text-sm font-semibold text-slate-800">
-                      <span>{label}</span>
-                      <span className="text-xs text-slate-500">{c.time}</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 truncate">{label}</p>
+                        {people && <p className="text-[11px] text-slate-500 truncate">With: {people}</p>}
+                        <p className="text-xs text-slate-500 truncate">{c.preview}</p>
+                      </div>
+                      {c.time && <span className="text-[11px] text-slate-400 shrink-0">{c.time}</span>}
                     </div>
-                    {people && <p className="text-[11px] text-slate-500 line-clamp-1">With: {people}</p>}
-                    <p className="text-xs text-slate-500 line-clamp-1">{c.preview}</p>
                   </button>
                 );
               })}
@@ -257,13 +281,13 @@ export default function MessagesPage() {
                 {activeMessages.map((m) => (
                   <div key={m.id} className={`flex ${m.fromRole === userRole ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
+                      className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm break-words ${
                         m.fromRole === userRole
                           ? "bg-purple-500 text-white rounded-br-sm"
                           : "bg-slate-100 text-slate-800 rounded-bl-sm"
                       }`}
                     >
-                      <p className="whitespace-pre-line">{m.text}</p>
+                      <p className="whitespace-pre-wrap break-words">{m.text}</p>
                       {m.attachmentName && (
                         <p className="mt-1 text-xs opacity-80">📎 {m.attachmentName}</p>
                       )}

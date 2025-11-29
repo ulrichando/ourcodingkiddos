@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Button from "../../components/ui/button";
 
 export default function SettingsPage() {
-  const [fullName, setFullName] = useState("Ando Ulrich");
+  const { data: session, status } = useSession();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [emailUpdates, setEmailUpdates] = useState(false);
   const [classReminders, setClassReminders] = useState(true);
   const [progressReports, setProgressReports] = useState(true);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    if (session?.user) {
+      setFullName(session.user.name ?? "");
+      setEmail(session.user.email ?? "");
+      const storedTheme = localStorage.getItem("ok-theme");
+      if (storedTheme === "dark" || storedTheme === "light") setTheme(storedTheme);
+      document.documentElement.classList.toggle("dark", storedTheme === "dark");
+    }
+  }, [session]);
+
+  if (status === "loading") {
+    return <div className="min-h-screen flex items-center justify-center text-slate-600">Loading...</div>;
+  }
+
+  if (!session?.user) {
+    return <div className="min-h-screen flex items-center justify-center text-slate-600">Please log in to view settings.</div>;
+  }
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -34,13 +56,53 @@ export default function SettingsPage() {
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Email Address</label>
               <input
-                value="ulrichando007@gmail.com"
-                readOnly
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 bg-slate-50 text-slate-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
               />
-              <p className="text-xs text-slate-500">Email cannot be changed</p>
             </div>
-            <Button className="bg-slate-900 text-white w-fit px-4">Save Changes</Button>
+            <Button
+              className="bg-slate-900 text-white w-fit px-4"
+              onClick={async () => {
+                await fetch("/api/profile", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ name: fullName, email }),
+                });
+              }}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 font-semibold">
+            <span className="text-lg">🌓</span>
+            Appearance
+          </div>
+          <p className="text-slate-600 text-sm">Switch between light and dark themes.</p>
+          <div className="flex items-center gap-4">
+            <Button
+              variant={theme === "light" ? "default" : "outline"}
+              onClick={() => {
+                setTheme("light");
+                localStorage.setItem("ok-theme", "light");
+                document.documentElement.classList.remove("dark");
+              }}
+            >
+              Light Mode
+            </Button>
+            <Button
+              variant={theme === "dark" ? "default" : "outline"}
+              onClick={() => {
+                setTheme("dark");
+                localStorage.setItem("ok-theme", "dark");
+                document.documentElement.classList.add("dark");
+              }}
+            >
+              Dark Mode
+            </Button>
           </div>
         </section>
 
@@ -82,7 +144,11 @@ export default function SettingsPage() {
             <span className="text-lg">🛡️</span>
             Account
           </div>
-          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 w-fit">
+          <Button
+            variant="outline"
+            className="text-red-600 border-red-200 hover:bg-red-50 w-fit"
+            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+          >
             Log Out
           </Button>
         </section>

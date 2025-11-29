@@ -121,22 +121,32 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   let parentEmail: string | null = null;
+  let role: string | null = null;
+  const { searchParams } = new URL(request.url);
+  const studentId = searchParams.get("id") || undefined;
   try {
     const session = await getServerSession(authOptions);
     if (session?.user?.email) parentEmail = session.user.email.toLowerCase();
+    if ((session as any)?.user?.role) role = (session as any).user.role;
   } catch {
     parentEmail = null;
   }
   if (!parentEmail) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (token?.email) parentEmail = token.email.toLowerCase();
+    if (token?.role) role = String(token.role);
   }
 
-  if (!parentEmail) {
+  if (!parentEmail && !role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const isElevated = role === "INSTRUCTOR" || role === "ADMIN";
+  const whereClause = isElevated
+    ? { ...(studentId ? { id: studentId } : {}) }
+    : { parentEmail: parentEmail ?? undefined, ...(studentId ? { id: studentId } : {}) };
+
   const students = (await prisma.studentProfile.findMany({
-    where: { parentEmail: parentEmail } as any,
+    where: whereClause as any,
     select: {
       id: true,
       name: true,
@@ -145,8 +155,28 @@ export async function GET(request: NextRequest) {
       totalXp: true,
       currentLevel: true,
       streakDays: true,
+      parentEmail: true,
+      lastActiveDate: true,
     } as any,
   })) as any[];
+
+  if (students.length === 0 && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false") {
+    return NextResponse.json({
+      students: [
+        {
+          id: "demo-student-1",
+          name: "Demo Student",
+          age: 12,
+          avatar: "🦊",
+          totalXp: 1200,
+          currentLevel: 3,
+          streakDays: 2,
+          parentEmail: "demo.parent@ourcodingkiddos.com",
+          lastActiveDate: new Date().toISOString(),
+        },
+      ],
+    });
+  }
 
   return NextResponse.json({ students });
 }

@@ -5,16 +5,22 @@ import { courses as mockCourses } from "../../data/courses";
 export const dynamic = "force-dynamic";
 
 export default async function CoursesPage() {
+  const useDemo =
+    process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false" &&
+    (!process.env.NODE_ENV || process.env.NODE_ENV === "development");
+
   let coursesDb: any[] = [];
-  try {
-    coursesDb = await prisma.course.findMany({
-      orderBy: { title: "asc" },
-      include: {
-        lessons: { select: { id: true } },
-      },
-    });
-  } catch (e) {
-    coursesDb = [];
+  if (!useDemo) {
+    try {
+      coursesDb = await prisma.course.findMany({
+        orderBy: { title: "asc" },
+        include: {
+          lessons: { select: { id: true } },
+        },
+      });
+    } catch (e) {
+      coursesDb = [];
+    }
   }
 
   const sourceCourses = coursesDb.map((c) => ({

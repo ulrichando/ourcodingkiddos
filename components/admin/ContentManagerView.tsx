@@ -3,7 +3,20 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Plus, CircleCheck, X, ChevronRight, FileText, Edit, Trash2 } from "lucide-react";
+import {
+  BookOpen,
+  Plus,
+  CircleCheck,
+  X,
+  ChevronRight,
+  FileText,
+  Edit,
+  Trash2,
+  Award as AwardIcon,
+  Ticket,
+  Copy,
+  Check,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import Badge from "../ui/badge";
 import Button from "../ui/button";
@@ -29,6 +42,27 @@ type LessonItem = {
   orderIndex?: number | null;
 };
 
+type QuizQuestionForm = {
+  question: string;
+  questionType: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "CODE_OUTPUT";
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+  xpReward: number;
+};
+
+type Coupon = {
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  description?: string;
+  maxUses?: number | null;
+  currentUses?: number;
+  validFrom?: string;
+  validUntil?: string;
+  isActive: boolean;
+};
+
 type Props = {
   courses: ContentCourse[];
   homePath: string;
@@ -47,8 +81,21 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
 
   const [courseModalOpen, setCourseModalOpen] = useState(false);
   const [lessonModalOpen, setLessonModalOpen] = useState(false);
+  const [quizModalOpen, setQuizModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestionForm[]>([]);
+  const [activeTab, setActiveTab] = useState<"courses" | "classes" | "certificates" | "coupons">("courses");
+  const demoStudents = useMemo(
+    () => [
+      { id: "stu1", name: "Demo Student", xp: 0 },
+      { id: "stu2", name: "Artan", xp: 0 },
+    ],
+    []
+  );
+  const [certificateModal, setCertificateModal] = useState(false);
+  const [certForm, setCertForm] = useState({ student: "", course: "", achievement: "course_completion" });
 
   const [courseForm, setCourseForm] = useState({
     title: "",
@@ -69,6 +116,28 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
     exerciseInstructions: "",
     xpReward: 50,
   });
+  const [quizForm, setQuizForm] = useState<QuizQuestionForm>({
+    question: "",
+    questionType: "MULTIPLE_CHOICE",
+    options: ["", "", "", ""],
+    correctAnswer: "",
+    explanation: "",
+    xpReward: 10,
+  });
+  const [couponModalOpen, setCouponModalOpen] = useState(false);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponForm, setCouponForm] = useState<Coupon>({
+    code: "",
+    discountType: "percentage",
+    discountValue: 10,
+    description: "",
+    maxUses: 100,
+    currentUses: 0,
+    validFrom: "",
+    validUntil: "",
+    isActive: true,
+  });
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const selected = useMemo(() => courseList.find((c) => c.id === selectedId) || null, [courseList, selectedId]);
 
@@ -98,6 +167,73 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
     setLessonError(null);
   }, [selectedId]);
 
+  // Coupons local storage helpers
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("ck_coupons");
+      if (saved) {
+        const parsed = JSON.parse(saved) as Coupon[];
+        setCoupons(parsed);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const persistCoupons = (list: Coupon[]) => {
+    setCoupons(list);
+    try {
+      localStorage.setItem("ck_coupons", JSON.stringify(list));
+    } catch {
+      // ignore
+    }
+  };
+
+  const generateCouponCode = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    let code = "CK-";
+    for (let i = 0; i < 6; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    setCouponForm((prev) => ({ ...prev, code }));
+  };
+
+  const saveCoupon = () => {
+    if (!couponForm.code.trim() || !couponForm.discountValue) return;
+    const existingIdx = coupons.findIndex((c) => c.code.toUpperCase() === couponForm.code.toUpperCase());
+    const updated: Coupon = {
+      ...couponForm,
+      code: couponForm.code.toUpperCase(),
+      currentUses: couponForm.currentUses ?? 0,
+    };
+    const list = [...coupons];
+    if (existingIdx >= 0) {
+      list[existingIdx] = updated;
+    } else {
+      list.unshift(updated);
+    }
+    persistCoupons(list);
+    setCouponModalOpen(false);
+  };
+
+  const deleteCoupon = (code: string) => {
+    if (!confirm("Delete this coupon?")) return;
+    persistCoupons(coupons.filter((c) => c.code !== code));
+  };
+
+  const copyCoupon = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 1500);
+  };
+
+  const openQuizModal = async (lessonId: string) => {
+    setQuizLessonId(lessonId);
+    await loadQuiz(lessonId);
+    resetQuizForm();
+    setQuizModalOpen(true);
+  };
+
   const resetCourseForm = () => {
     setCourseForm({
       title: "",
@@ -125,6 +261,17 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
     setEditingLessonId(null);
   };
 
+  const resetQuizForm = () => {
+    setQuizForm({
+      question: "",
+      questionType: "MULTIPLE_CHOICE",
+      options: ["", "", "", ""],
+      correctAnswer: "",
+      explanation: "",
+      xpReward: 10,
+    });
+  };
+
   const loadLessons = useCallback(async () => {
     if (!selectedId) {
       setLessons([]);
@@ -148,6 +295,29 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
   useEffect(() => {
     loadLessons();
   }, [loadLessons]);
+
+  const loadQuiz = useCallback(async (lessonId: string) => {
+    try {
+      const res = await fetch(`/api/admin/quizzes?lessonId=${lessonId}`);
+      const data = await safeJson(res);
+      if (res.ok && data?.quiz?.questions) {
+        setQuizQuestions(
+          (data.quiz.questions as any[]).map((q: any) => ({
+            question: q.question || "",
+            questionType: (q.questionType as any) || "MULTIPLE_CHOICE",
+            options: Array.isArray(q.options) ? q.options : q.options ? Object.values(q.options) : ["", "", "", ""],
+            correctAnswer: q.correctAnswer || "",
+            explanation: q.explanation || "",
+            xpReward: q.xpReward || 10,
+          }))
+        );
+      } else {
+        setQuizQuestions([]);
+      }
+    } catch {
+      setQuizQuestions([]);
+    }
+  }, []);
 
   const handleSaveCourse = async () => {
     if (!courseForm.title.trim()) {
@@ -280,23 +450,68 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Content Manager</h1>
-            <p className="text-slate-600 text-sm">Create and manage courses and lessons</p>
+            <p className="text-slate-600 text-sm">Create and manage courses, lessons, live classes, and certificates</p>
           </div>
-          <Button
-            type="button"
-            className="bg-gradient-to-r from-purple-500 to-pink-500"
-            onClick={() => {
-              resetCourseForm();
-              setCourseModalOpen(true);
-            }}
-            disabled={dbError}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New Course
-          </Button>
+          {activeTab === "courses" && (
+            <Button
+              type="button"
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+              onClick={() => {
+                resetCourseForm();
+                setCourseModalOpen(true);
+              }}
+              disabled={dbError}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Course
+            </Button>
+          )}
+          {activeTab === "classes" && (
+            <Button
+              type="button"
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+              onClick={() => alert("Class scheduling is demo-only in this build.")}
+              disabled={dbError}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Schedule Class
+            </Button>
+          )}
+          {activeTab === "certificates" && (
+            <Button
+              type="button"
+              className="bg-gradient-to-r from-amber-500 to-orange-500"
+              onClick={() => setCertificateModal(true)}
+              disabled={demoStudents.length === 0}
+            >
+              <AwardIcon className="w-4 h-4 mr-2" />
+              Issue Certificate
+            </Button>
+          )}
         </div>
 
-        <div className="grid lg:grid-cols-[380px,1fr] gap-6">
+        {/* Tabs */}
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { id: "courses", label: "Courses & Lessons" },
+            { id: "classes", label: "Live Classes" },
+            { id: "certificates", label: "Certificates" },
+            { id: "coupons", label: "Coupons" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                activeTab === tab.id ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-slate-200"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "courses" && (
+          <div className="grid lg:grid-cols-[380px,1fr] gap-6">
           {/* Courses list */}
           <Card className="border border-slate-100 shadow-sm bg-white">
             <CardHeader className="pb-2">
@@ -455,6 +670,12 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                                 {lesson.videoUrl || (lesson as any).video_url ? "Video" : "Text"}
                               </Badge>
                               <button
+                                className="text-xs text-amber-600 hover:text-amber-800"
+                                onClick={() => openQuizModal(lesson.id)}
+                              >
+                                Quiz
+                              </button>
+                              <button
                                 className="text-xs text-purple-600 hover:text-purple-800"
                                 onClick={() => {
                                   setLessonForm({
@@ -509,8 +730,276 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </CardContent>
             )}
           </Card>
-        </div>
+          </div>
+        )}
+
+        {activeTab === "classes" && (
+          <Card className="border border-slate-100 shadow-sm bg-white">
+            <CardContent className="p-8 text-center space-y-2">
+              <h3 className="text-lg font-semibold text-slate-900">Live Classes</h3>
+              <p className="text-slate-600 text-sm">
+                Scheduling is demo-only in this local build. Use the instructor dashboard to create classes.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "certificates" && (
+          <Card className="border border-slate-100 shadow-sm bg-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AwardIcon className="w-5 h-5 text-amber-500" />
+                Issue Certificates to Students
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-600 mb-6">
+                Award certificates to students who have completed courses or achieved milestones.
+              </p>
+              {demoStudents.length === 0 ? (
+                <div className="text-center text-slate-500 py-8 border border-dashed border-slate-200 rounded-xl">
+                  No students available yet. Add students to issue certificates.
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {demoStudents.map((stu) => (
+                    <Card key={stu.id} className="bg-slate-50">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold flex items-center justify-center">
+                            {stu.name[0]}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900">{stu.name}</div>
+                            <div className="text-xs text-slate-500">{stu.xp} XP</div>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            setCertForm((prev) => ({ ...prev, student: stu.id }));
+                            setCertificateModal(true);
+                          }}
+                        >
+                          <AwardIcon className="w-4 h-4 mr-2" />
+                          Issue Certificate
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "coupons" && (
+          <Card className="border border-slate-100 shadow-sm bg-white">
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Ticket className="w-5 h-5 text-green-600" />
+                Coupons
+              </CardTitle>
+              <Button
+                type="button"
+                className="bg-gradient-to-r from-green-500 to-emerald-500"
+                onClick={() => {
+                  setCouponForm({
+                    code: "",
+                    discountType: "percentage",
+                    discountValue: 10,
+                    description: "",
+                    maxUses: 100,
+                    currentUses: 0,
+                    validFrom: "",
+                    validUntil: "",
+                    isActive: true,
+                  });
+                  setCouponModalOpen(true);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Coupon
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {coupons.length === 0 ? (
+                <div className="text-center py-10">
+                  <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-200 mx-auto mb-3 flex items-center justify-center">
+                    <Ticket className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="font-semibold text-slate-800">No coupons yet</p>
+                  <p className="text-sm text-slate-500">Create discount coupons to attract more students.</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {coupons.map((cpn) => (
+                    <Card key={cpn.code} className="border border-slate-100 shadow-sm">
+                      <CardContent className="p-4 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <Badge className={cpn.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}>
+                            {cpn.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                          <button
+                            className="text-xs text-red-500"
+                            onClick={() => deleteCoupon(cpn.code)}
+                            type="button"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <code className="px-3 py-1 rounded bg-slate-100 font-mono text-sm">{cpn.code}</code>
+                          <button type="button" onClick={() => copyCoupon(cpn.code)} className="text-slate-500 hover:text-slate-800">
+                            {copiedCode === cpn.code ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        <div className="text-lg font-bold text-green-600">
+                          {cpn.discountType === "percentage" ? `${cpn.discountValue}% OFF` : `$${(cpn.discountValue / 100).toFixed(2)} OFF`}
+                        </div>
+                        {cpn.description && <p className="text-sm text-slate-500">{cpn.description}</p>}
+                        <div className="text-xs text-slate-500">
+                          Uses: {cpn.currentUses ?? 0}/{cpn.maxUses ?? "∞"}
+                        </div>
+                        {(cpn.validFrom || cpn.validUntil) && (
+                          <div className="text-xs text-slate-500 space-y-1">
+                            {cpn.validFrom && <div>From: {cpn.validFrom}</div>}
+                            {cpn.validUntil && <div>Until: {cpn.validUntil}</div>}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
+
+      {couponModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative">
+            <button
+              className="absolute top-3 right-3 text-slate-500 hover:text-slate-700"
+              onClick={() => setCouponModalOpen(false)}
+              type="button"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <form
+              className="px-6 py-5 space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveCoupon();
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+                  <Ticket className="w-5 h-5 text-green-600" />
+                  Create Coupon
+                </h2>
+                <Button type="button" variant="outline" onClick={generateCouponCode}>
+                  Generate
+                </Button>
+              </div>
+              <div className="grid grid-cols-[1fr,120px] gap-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Code</label>
+                  <Input
+                    value={couponForm.code}
+                    onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
+                    placeholder="CK-SAVE20"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Uses</label>
+                  <Input
+                    type="number"
+                    value={couponForm.maxUses ?? 0}
+                    onChange={(e) => setCouponForm({ ...couponForm, maxUses: parseInt(e.target.value || "0", 10) })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Discount Type</label>
+                  <select
+                    value={couponForm.discountType}
+                    onChange={(e) => setCouponForm({ ...couponForm, discountType: e.target.value as "percentage" | "fixed" })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
+                  >
+                    <option value="percentage">Percentage</option>
+                    <option value="fixed">Fixed (cents)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    {couponForm.discountType === "percentage" ? "Discount %" : "Amount (cents)"}
+                  </label>
+                  <Input
+                    type="number"
+                    value={couponForm.discountValue}
+                    onChange={(e) => setCouponForm({ ...couponForm, discountValue: parseInt(e.target.value || "0", 10) })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Description</label>
+                <Input
+                  value={couponForm.description}
+                  onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
+                  placeholder="Short description (optional)"
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Valid From</label>
+                  <Input
+                    type="date"
+                    value={couponForm.validFrom}
+                    onChange={(e) => setCouponForm({ ...couponForm, validFrom: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Valid Until</label>
+                  <Input
+                    type="date"
+                    value={couponForm.validUntil}
+                    onChange={(e) => setCouponForm({ ...couponForm, validUntil: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="coupon-active"
+                  type="checkbox"
+                  checked={couponForm.isActive}
+                  onChange={(e) => setCouponForm({ ...couponForm, isActive: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-400"
+                />
+                <label htmlFor="coupon-active" className="text-sm text-slate-700">
+                  Active
+                </label>
+              </div>
+              <div className="flex items-center justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setCouponModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Save Coupon</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {courseModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative">
@@ -710,6 +1199,260 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 <Button type="submit" disabled={saving}>
                   {saving ? "Saving..." : editingLessonId ? "Update Lesson" : "Create Lesson"}
                 </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {certificateModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative">
+            <button className="absolute top-3 right-3 text-slate-500 hover:text-slate-700" onClick={() => setCertificateModal(false)} type="button">
+              <X className="w-5 h-5" />
+            </button>
+            <form
+              className="px-6 py-5 space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                alert("Certificate issued (demo).");
+                setCertForm({ student: "", course: "", achievement: "course_completion" });
+                setCertificateModal(false);
+              }}
+            >
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+                  <AwardIcon className="w-5 h-5 text-amber-500" />
+                  Issue Certificate
+                </h2>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Student</label>
+                  <select
+                    value={certForm.student}
+                    onChange={(e) => setCertForm({ ...certForm, student: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    required
+                    disabled={demoStudents.length === 0}
+                  >
+                    <option value="">Select student</option>
+                    {demoStudents.map((stu) => (
+                      <option key={stu.id} value={stu.id}>
+                        {stu.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Course</label>
+                  <select
+                    value={certForm.course}
+                    onChange={(e) => setCertForm({ ...certForm, course: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    required
+                  >
+                    <option value="">Select course</option>
+                    {courseList.map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Achievement Type</label>
+                  <select
+                    value={certForm.achievement}
+                    onChange={(e) => setCertForm({ ...certForm, achievement: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                  >
+                    <option value="course_completion">Course Completion</option>
+                    <option value="track_completion">Track Completion</option>
+                    <option value="special_achievement">Special Achievement</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setCertificateModal(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500">
+                  Issue Certificate
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {quizModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative">
+            <button className="absolute top-3 right-3 text-slate-500 hover:text-slate-700" onClick={() => setQuizModalOpen(false)} type="button">
+              <X className="w-5 h-5" />
+            </button>
+            <form
+              className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Add Quiz Question</h2>
+                {quizQuestions.length > 0 && (
+                  <p className="text-xs text-slate-500 mt-1">{quizQuestions.length} question(s) saved for this lesson.</p>
+                )}
+              </div>
+              {quizQuestions.length > 0 && (
+                <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-sm font-semibold text-slate-700">Existing Questions</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {quizQuestions.map((q, idx) => (
+                      <div key={idx} className="rounded-lg border border-slate-200 bg-white px-3 py-2 flex items-start justify-between gap-2 text-sm">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-800">{q.question || `Question ${idx + 1}`}</p>
+                          <p className="text-xs text-slate-500">
+                            {q.questionType} • XP {q.xpReward ?? 10}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="text-xs text-red-500 hover:text-red-700"
+                          onClick={() => {
+                            setQuizQuestions((prev) => prev.filter((_, i) => i !== idx));
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Question</label>
+                  <textarea
+                    value={quizForm.question}
+                    onChange={(e) => setQuizForm({ ...quizForm, question: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    rows={2}
+                    placeholder="What does HTML stand for?"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Question Type</label>
+                  <select
+                    value={quizForm.questionType}
+                    onChange={(e) =>
+                      setQuizForm({
+                        ...quizForm,
+                        questionType: e.target.value as QuizQuestionForm["questionType"],
+                      })
+                    }
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                  >
+                    <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+                    <option value="TRUE_FALSE">True / False</option>
+                    <option value="CODE_OUTPUT">Code Output</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Answer Options</label>
+                  <div className="space-y-2">
+                    {quizForm.options.map((opt, idx) => (
+                      <Input
+                        key={idx}
+                        value={opt}
+                        onChange={(e) => {
+                          const next = [...quizForm.options];
+                          next[idx] = e.target.value;
+                          setQuizForm({ ...quizForm, options: next });
+                        }}
+                        placeholder={`Option ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Correct Answer</label>
+                  <Input
+                    value={quizForm.correctAnswer}
+                    onChange={(e) => setQuizForm({ ...quizForm, correctAnswer: e.target.value })}
+                    placeholder="Enter the correct answer exactly as shown in options"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Explanation (shown after answer)</label>
+                  <textarea
+                    value={quizForm.explanation}
+                    onChange={(e) => setQuizForm({ ...quizForm, explanation: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    rows={2}
+                    placeholder="Why this answer is correct..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">XP Reward</label>
+                  <Input
+                    type="number"
+                    value={quizForm.xpReward}
+                    onChange={(e) => setQuizForm({ ...quizForm, xpReward: parseInt(e.target.value || "0", 10) })}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (!quizForm.question.trim()) return;
+                      setQuizQuestions((prev) => [...prev, quizForm]);
+                      resetQuizForm();
+                    }}
+                    disabled={!quizForm.question.trim()}
+                  >
+                    Add to list
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setQuizModalOpen(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      if (!quizLessonId) return;
+                      const questions = quizForm.question.trim()
+                        ? [...quizQuestions, quizForm]
+                        : [...quizQuestions];
+                      try {
+                        setSaving(true);
+                        const res = await fetch("/api/admin/quizzes", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ lessonId: quizLessonId, questions }),
+                        });
+                        const data = await safeJson(res);
+                        if (!res.ok) throw new Error(data?.error || "Failed to save quiz");
+                        await loadQuiz(quizLessonId);
+                        resetQuizForm();
+                        alert("Quiz saved");
+                      } catch (err: any) {
+                        alert(err.message || "Failed to save quiz");
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    disabled={saving || !quizLessonId || (quizQuestions.length === 0 && !quizForm.question.trim())}
+                  >
+                    {saving ? "Saving..." : "Save Quiz"}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>

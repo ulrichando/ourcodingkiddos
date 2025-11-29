@@ -7,13 +7,26 @@ import StudentCard from "../../../components/dashboard/StudentCard";
 import Button from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { useSession } from "next-auth/react";
+import { Video } from "lucide-react";
 
-const demoUpcoming = [] as Array<{ title: string; start: string }>;
+async function fetchClasses() {
+  const res = await fetch("/api/classes", { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.sessions ?? [];
+}
 
 export default function ParentDashboardPage() {
   const { data: session } = useSession();
   const [students, setStudents] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [upcoming, setUpcoming] = useState<any[]>([]);
+  const [subscription, setSubscription] = useState<{
+    plan_type: string;
+    status: string;
+    startDate?: Date;
+    endDate?: Date;
+  } | null>(null);
 
   useEffect(() => {
     if (!session?.user?.email) return;
@@ -23,33 +36,91 @@ export default function ParentDashboardPage() {
       .then((data) => setStudents(data.students || []))
       .catch(() => setStudents([]))
       .finally(() => setLoadingStudents(false));
+    fetchClasses().then((data) => {
+      const normalized = data
+        .map((c: any) => ({
+          ...c,
+          start: new Date(c.startTime || c.start),
+        }))
+        .sort((a: any, b: any) => a.start.getTime() - b.start.getTime());
+      const buffer = new Date(Date.now() - 60 * 60 * 1000);
+      const futureOnly = normalized.filter((cls) => cls.start >= buffer);
+      setUpcoming(futureOnly);
+    });
+
+    // Subscription lookup (fallback to demo free trial)
+    fetch("/api/subscriptions", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        const sub = data?.subscription || data?.subscriptions?.[0];
+        if (sub) {
+          setSubscription({
+            plan_type: sub.plan_type || sub.planType || "free_trial",
+            status: sub.status || "active",
+            startDate: sub.startDate ? new Date(sub.startDate) : undefined,
+            endDate: sub.endDate ? new Date(sub.endDate) : undefined,
+          });
+        } else {
+          // Demo free trial fallback
+          const start = new Date();
+          const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+          setSubscription({ plan_type: "free_trial", status: "active", startDate: start, endDate: end });
+        }
+      })
+      .catch(() => {
+        const start = new Date();
+        const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+        setSubscription({ plan_type: "free_trial", status: "active", startDate: start, endDate: end });
+      });
   }, [session?.user?.email]);
 
   const totalXP = useMemo(() => students.reduce((sum, s) => sum + (s.totalXp || s.total_xp || 0), 0), [students]);
   const totalBadges = 0;
+  const trialExpired =
+    subscription?.plan_type === "free_trial" &&
+    subscription?.endDate &&
+    subscription.endDate.getTime() < Date.now();
+  const planLabel =
+    subscription?.plan_type && subscription.plan_type !== "free_trial"
+      ? subscription.plan_type === "family"
+        ? "Premium Family"
+        : "Premium"
+      : "Free Trial";
 
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome back, Ando! 👋</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}! 👋
+          </h1>
           <p className="text-slate-600">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          {[
-            { label: "Students", value: students.length, icon: Users, color: "text-purple-600 bg-purple-100" },
-            { label: "Total XP", value: totalXP.toLocaleString(), icon: Star, color: "text-amber-600 bg-amber-100" },
-            { label: "Badges Earned", value: totalBadges, icon: Award, color: "text-green-600 bg-green-100" },
-            { label: "Upcoming Classes", value: demoUpcoming.length, icon: Calendar, color: "text-blue-600 bg-blue-100" },
-            { label: "Free Trial", value: "7 days left", icon: TrendingUp, color: "text-pink-600 bg-pink-100" },
-          ].map((stat, i) => (
-            <Card key={i} className="border-0 shadow-sm">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center`}>
-                  <stat.icon className="w-6 h-6" />
+            {[
+              { label: "Students", value: students.length, icon: Users, color: "text-purple-600 bg-purple-100" },
+              { label: "Total XP", value: totalXP.toLocaleString(), icon: Star, color: "text-amber-600 bg-amber-100" },
+              { label: "Badges Earned", value: totalBadges, icon: Award, color: "text-green-600 bg-green-100" },
+              { label: "Upcoming Classes", value: upcoming.length, icon: Calendar, color: "text-blue-600 bg-blue-100" },
+              {
+                label: planLabel,
+                value:
+                  subscription?.plan_type === "free_trial" && subscription?.endDate
+                    ? `${Math.max(0, Math.ceil((subscription.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left`
+                    : subscription?.status === "active"
+                      ? "Active"
+                      : "Inactive",
+                icon: TrendingUp,
+                color: "text-pink-600 bg-pink-100",
+              },
+            ].map((stat, i) => (
+              <Card key={i} className="border-0 shadow-sm">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="text-xl font-bold text-slate-900">{stat.value}</div>
@@ -63,6 +134,20 @@ export default function ParentDashboardPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Students Section */}
           <div className="lg:col-span-2 space-y-6">
+            {trialExpired && (
+              <Card className="border border-amber-200 bg-amber-50">
+                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-amber-800">Free trial ended</p>
+                    <p className="text-sm text-amber-700">Upgrade to continue accessing classes and progress.</p>
+                  </div>
+                  <Link href="/checkout?plan=monthly">
+                    <Button className="bg-purple-600 text-white hover:bg-purple-700">Upgrade</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900">Your Students</h2>
               <Link href="/dashboard/parent/add-student">
@@ -123,7 +208,8 @@ export default function ParentDashboardPage() {
                   { name: "HTML Basics", level: "Beginner", color: "bg-orange-100 text-orange-600" },
                   { name: "Python for Kids", level: "Beginner", color: "bg-green-100 text-green-600" },
                 ].map((course) => (
-                  <Card key={course.name} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                  <Link key={course.name} href="/courses" className="block">
+                    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                     <CardContent className="p-4 flex items-center gap-3">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${course.color}`}>
                         <BookOpen className="w-6 h-6" />
@@ -135,6 +221,7 @@ export default function ParentDashboardPage() {
                       <ChevronRight className="w-5 h-5 text-slate-400" />
                     </CardContent>
                   </Card>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -150,26 +237,35 @@ export default function ParentDashboardPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {demoUpcoming.length === 0 ? (
+                {upcoming.length === 0 || trialExpired ? (
                   <div className="text-center py-6 space-y-2">
-                    <p className="text-slate-500">No upcoming classes</p>
+                    <p className="text-slate-500">
+                      {trialExpired ? "Trial ended. Upgrade to keep booking classes." : "No upcoming classes"}
+                    </p>
                     <Link href="/schedule">
                       <Button variant="outline" size="sm">
-                        Book a Class
+                        {trialExpired ? "View plans" : "Book a Class"}
                       </Button>
                     </Link>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {demoUpcoming.map((cls) => (
-                      <div key={cls.title} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
+                    {upcoming.map((cls) => (
+                      <div key={cls.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
                         <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
                           <Clock className="w-5 h-5 text-purple-600" />
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-sm">{cls.title}</p>
-                          <p className="text-xs text-slate-500">{cls.start}</p>
+                          <p className="text-xs text-slate-500">
+                            {cls.start.toLocaleDateString()} {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                          </p>
                         </div>
+                        {cls.meetingUrl && (
+                          <span className="inline-flex items-center gap-1 text-sm text-slate-400">
+                            <Video className="w-4 h-4" /> Join (student only)
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -181,17 +277,25 @@ export default function ParentDashboardPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
                 {[
                   { label: "Book a Class", icon: Calendar, href: "/schedule" },
                   { label: "Browse Courses", icon: BookOpen, href: "/courses" },
+                  { label: "View Certificates", icon: Award, href: "/certificates" },
                   { label: "View Progress Reports", icon: TrendingUp, href: "/dashboard/parent" },
-                  { label: "Contact Instructor", icon: MessageSquare, href: "/dashboard/parent" },
+                  {
+                    label: "Contact Instructor",
+                    icon: MessageSquare,
+                    href: "/messages?to=demo.instructor@ourcodingkiddos.com&subject=Question%20about%20my%20student",
+                  },
                 ].map((action) => (
                   <Link key={action.label} href={action.href}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <action.icon className="w-4 h-4 mr-3" />
-                      {action.label}
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start font-semibold text-slate-800 hover:text-slate-900 flex items-center gap-3 px-0"
+                    >
+                      <action.icon className="w-4 h-4 text-slate-700 flex-shrink-0" />
+                      <span className="text-sm">{action.label}</span>
                     </Button>
                   </Link>
                 ))}

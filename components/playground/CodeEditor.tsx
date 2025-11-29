@@ -96,7 +96,7 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-lg bg-slate-900">
+    <div className="rounded-2xl overflow-hidden border border-slate-900 shadow-xl bg-[#0a1326]">
       <div className={`flex items-center justify-between px-4 py-3 bg-gradient-to-r ${languageColors[language]}`}>
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">

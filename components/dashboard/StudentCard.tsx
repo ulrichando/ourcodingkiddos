@@ -71,7 +71,15 @@ export default function StudentCard({ student, onSelect }: Props) {
             <BookOpen className="w-4 h-4" />
             <span>Continue Learning</span>
           </div>
-          <Link href="/dashboard/student">
+          <Link
+            href={`/dashboard/student?name=${encodeURIComponent(student.name || "Coder")}&id=${encodeURIComponent(
+              student.id || ""
+            )}&xp=${encodeURIComponent(String(student.total_xp || 0))}&level=${encodeURIComponent(
+              String(student.current_level || 1)
+            )}&streak=${encodeURIComponent(String(student.streak_days || 0))}&avatar=${encodeURIComponent(
+              typeof student.avatar === "string" ? student.avatar : ""
+            )}`}
+          >
             <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
               View Progress
             </Button>

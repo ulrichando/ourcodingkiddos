@@ -17,8 +17,10 @@ import {
   Menu,
   X,
   ChevronDown,
+  Bell,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import NotificationBell from "../notifications/NotificationBell";
 
 type UserType = "parent" | "student" | "instructor";
 
@@ -58,6 +60,7 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
   const links = userType === "instructor" ? instructorLinks : userType === "student" ? studentLinks : parentLinks;
 
   const userInitial = (user?.full_name || "U").charAt(0).toUpperCase();
+  const displayEmail = user?.email || "demo.instructor@ourcodingkiddos.com";
 
   return (
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
@@ -84,6 +87,7 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
           </div>
 
           <div className="flex items-center gap-2 relative">
+            <NotificationBell userEmail={user?.email} />
             <Button variant="ghost" className="flex items-center gap-2" onClick={() => setMenuOpen((o) => !o)}>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
                 {userInitial}
@@ -95,7 +99,7 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
               <div className="absolute right-0 top-12 w-56 rounded-xl border border-slate-200 bg-white shadow-lg z-50 overflow-hidden">
                 <div className="px-3 py-2">
                   <p className="font-medium text-slate-900">{user?.full_name || "User"}</p>
-                  <p className="text-sm text-slate-500">{user?.email}</p>
+                  <p className="text-sm text-slate-500 truncate">{displayEmail}</p>
                 </div>
                 <div className="border-t border-slate-100" />
                 <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">

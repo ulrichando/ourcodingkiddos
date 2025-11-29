@@ -29,6 +29,9 @@ const plans = [
     badge: "",
   },
 ];
+const planParam = (name: string) => {
+  return name.toLowerCase().replace(/\s+/g, "-");
+};
 
 const inclusions = [
   "Code playground access on every plan",
@@ -86,7 +89,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
                 <Link
-                  href="/auth/login"
+                  href={`/checkout?plan=${planParam(plan.name)}`}
                   className={`w-full inline-flex justify-center items-center rounded-md px-3 py-2 text-sm font-semibold ${
                     plan.popular
                       ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"

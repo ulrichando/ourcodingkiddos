@@ -39,6 +39,7 @@ export default async function AdminDashboardPage() {
     return redirect("/auth/login");
   }
 
+  const useDemo = process.env.NEXT_PUBLIC_USE_DEMO_DATA === "true";
   const hasDbUrl = Boolean(process.env.DATABASE_URL);
   let warning: string | null = null;
 
@@ -68,17 +69,6 @@ export default async function AdminDashboardPage() {
       parentEmail: "test@parent.com",
       user: { email: "jake2024@example.com", name: "Jake", createdAt: new Date("2025-11-26") },
       guardian: { user: { email: "test@parent.com" } },
-    },
-    {
-      id: "s3",
-      name: "yanick",
-      age: 11,
-      dob: null,
-      totalXp: 0,
-      currentLevel: 1,
-      parentEmail: "ulrichando007@gmail.com",
-      user: { email: "yanci@example.com", name: "yanick", createdAt: new Date("2025-11-26") },
-      guardian: { user: { email: "ulrichando007@gmail.com" } },
     },
   ];
   const demoCoursesRaw = [
@@ -122,7 +112,7 @@ export default async function AdminDashboardPage() {
   let subscriptionsRaw = demoSubscriptionsRaw;
   let parentsRaw = demoParentsRaw;
 
-  if (hasDbUrl) {
+  if (hasDbUrl && !useDemo) {
     try {
       [usersRaw, studentsRaw, coursesRaw, subscriptionsRaw, parentsRaw] = await Promise.all([
         prisma.user.findMany({
@@ -172,7 +162,7 @@ export default async function AdminDashboardPage() {
       subscriptionsRaw = demoSubscriptionsRaw;
       parentsRaw = demoParentsRaw;
     }
-  } else {
+  } else if (!hasDbUrl) {
     warning = "DATABASE_URL is not set. Showing demo admin data instead.";
   }
 
@@ -195,8 +185,8 @@ export default async function AdminDashboardPage() {
       age: age ? String(age) : "N/A",
       parentEmail,
       xp: s.totalXp ?? 0,
-    level: s.currentLevel ?? 1,
-  };
+      level: s.currentLevel ?? 1,
+    };
   });
 
   const courses = coursesRaw.map((c) => ({
@@ -217,6 +207,21 @@ export default async function AdminDashboardPage() {
     endDate: formatDate(s.endDate ?? s.currentPeriodEnd ?? null),
   }));
 
+  // If no subscriptions, create a demo one so demo data reflects active plan
+  const subscriptionsWithFallback =
+    subscriptions.length > 0
+      ? subscriptions
+      : [
+          {
+            id: "demo-sub",
+            parentEmail: "demo.parent@ourcodingkiddos.com",
+            plan: "Monthly",
+            status: "active",
+            price: "$29/mo",
+            endDate: "—",
+          },
+        ];
+
   const parents = parentsRaw.map((p) => ({
     id: p.id,
     name: p.user?.name || "Parent",
@@ -226,11 +231,14 @@ export default async function AdminDashboardPage() {
     childrenCount: p._count?.children ?? 0,
   }));
 
+  const studentCount = students.length > 0 ? students.length : users.filter((u) => u.type === "student").length;
+  const activeSubsCount = subscriptionsWithFallback.filter((s) => s.status === "active").length;
+
   const stats = {
-    totalParents: usersRaw.filter((u) => u.role === "PARENT").length,
-    totalStudents: studentsRaw.length,
-    instructors: usersRaw.filter((u) => u.role === "INSTRUCTOR").length,
-    activeSubs: subscriptionsRaw.filter((s) => s.status === "ACTIVE").length,
+    totalParents: users.filter((u) => u.type === "parent").length,
+    totalStudents: studentCount,
+    instructors: users.filter((u) => u.type === "instructor").length,
+    activeSubs: activeSubsCount,
   };
 
   return (
@@ -241,7 +249,7 @@ export default async function AdminDashboardPage() {
       parents={parents}
       students={students}
       courses={courses}
-      subscriptions={subscriptions}
+      subscriptions={subscriptionsWithFallback}
       warning={warning}
     />
   );

@@ -3,14 +3,31 @@ import type { ReactNode } from "react";
 import AppHeader from "../components/navigation/AppHeader";
 import ChatBot from "../components/chat/ChatBot";
 import AuthProvider from "../components/providers/AuthProvider";
+import ThemeHydrator from "../components/providers/ThemeHydrator";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-slate-50" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-slate-50 dark:bg-[#050812]" suppressHydrationWarning>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem("ok-theme");
+                  if (theme === "dark") {
+                    document.documentElement.classList.add("dark");
+                  } else {
+                    document.documentElement.classList.remove("dark");
+                  }
+                } catch (_) {}
+              })();
+            `,
+          }}
+        />
         <style>{`
           :root {
             --color-primary: #8B5CF6;
@@ -28,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         `}</style>
 
         <AuthProvider>
+          <ThemeHydrator />
           <div className="min-h-screen flex flex-col">
             <AppHeader />
             <main className="flex-1">{children}</main>
@@ -45,27 +63,49 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div>
                   <h4 className="font-semibold mb-2">Courses</h4>
                   <ul className="text-sm space-y-1 text-slate-400">
-                    <li>HTML & CSS</li>
-                    <li>JavaScript</li>
-                    <li>Python</li>
-                    <li>Roblox Studio</li>
+                    <li>
+                      <a href="/courses?language=html" className="hover:text-white">HTML & CSS</a>
+                    </li>
+                    <li>
+                      <a href="/courses?language=javascript" className="hover:text-white">JavaScript</a>
+                    </li>
+                    <li>
+                      <a href="/courses?language=python" className="hover:text-white">Python</a>
+                    </li>
+                    <li>
+                      <a href="/courses?language=roblox" className="hover:text-white">Roblox Studio</a>
+                    </li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Resources</h4>
                   <ul className="text-sm space-y-1 text-slate-400">
-                    <li>All Courses</li>
-                    <li>Code Playground</li>
-                    <li>Live Classes</li>
-                    <li>Contact</li>
+                    <li>
+                      <a href="/courses" className="hover:text-white">All Courses</a>
+                    </li>
+                    <li>
+                      <a href="/playground" className="hover:text-white">Code Playground</a>
+                    </li>
+                    <li>
+                      <a href="/schedule" className="hover:text-white">Live Classes</a>
+                    </li>
+                    <li>
+                      <a href="/contact" className="hover:text-white">Contact</a>
+                    </li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Legal</h4>
                   <ul className="text-sm space-y-1 text-slate-400">
-                    <li>Privacy Policy</li>
-                    <li>Terms of Service</li>
-                    <li>Cookie Policy</li>
+                    <li>
+                      <a href="/privacy" className="hover:text-white">Privacy Policy</a>
+                    </li>
+                    <li>
+                      <a href="/terms" className="hover:text-white">Terms of Service</a>
+                    </li>
+                    <li>
+                      <a href="/cookies" className="hover:text-white">Cookie Policy</a>
+                    </li>
                   </ul>
                 </div>
               </div>

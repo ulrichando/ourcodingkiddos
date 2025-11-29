@@ -110,9 +110,9 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0c1222] text-white">
+    <main className="min-h-screen bg-gradient-to-b from-[#080d18] via-[#0a1020] to-[#050812] text-white">
       {/* Header */}
-      <header className="bg-[#0c1222] border-b border-slate-800">
+      <header className="bg-[#080d18] border-b border-slate-900/60">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">

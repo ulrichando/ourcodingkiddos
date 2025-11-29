@@ -4,12 +4,6 @@ import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  const role = typeof (session?.user as any)?.role === "string" ? ((session?.user as any).role as string).toUpperCase() : null;
-  if (!session?.user || (role !== "ADMIN" && role !== "INSTRUCTOR")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const { searchParams } = new URL(req.url);
   const lessonId = searchParams.get("lessonId");
   if (!lessonId) return NextResponse.json({ quiz: null });

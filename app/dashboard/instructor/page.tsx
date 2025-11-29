@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Calendar,
   Users,
@@ -11,49 +13,49 @@ import {
   Video,
 } from "lucide-react";
 
-const sessions = [
-  {
-    id: "s1",
-    title: "Roblox 101",
-    start: new Date(Date.now() + 24 * 60 * 60 * 1000 * 1), // tomorrow
-    type: "Group",
-    maxStudents: 10,
-    bookings: 6,
-    meetingUrl: "#",
-  },
-  {
-    id: "s2",
-    title: "JavaScript Quests",
-    start: new Date(Date.now() + 24 * 60 * 60 * 1000 * 2),
-    type: "1:1",
-    maxStudents: 1,
-    bookings: 1,
-    meetingUrl: "#",
-  },
-];
-
-const bookings = [
-  { id: "b1", student: "Maya", sessionTitle: "Roblox 101" },
-  { id: "b2", student: "Alex", sessionTitle: "JavaScript Quests" },
-];
-
-const students = [
-  { id: "st1", name: "Maya" },
-  { id: "st2", name: "Alex" },
-  { id: "st3", name: "Priya" },
-];
+async function fetchSessions() {
+  const res = await fetch("/api/instructor/classes", { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.sessions ?? [];
+}
 
 export default function InstructorDashboard() {
-  const upcoming = useMemo(
-    () => sessions.filter((s) => s.start.getTime() > Date.now()).slice(0, 5),
-    []
-  );
+  const userName = "Instructor";
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchSessions().then((data) => {
+      if (!mounted) return;
+      // Normalize dates
+      const normalized = data.map((s: any) => ({
+        ...s,
+        start: new Date(s.startTime || s.start),
+        bookings: s.enrolledCount ?? 0,
+      }));
+      setSessions(normalized);
+    });
+    // simple demo bookings/students fallback (could be replaced with real fetch)
+    setBookings([]);
+    setStudents([]);
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const upcoming = useMemo(() => {
+    const future = sessions.filter((s) => s.start && s.start.getTime() > Date.now()).slice(0, 5);
+    return future.length > 0 ? future : sessions.slice(0, 5); // fallback to show recent created
+  }, [sessions]);
   const todays = useMemo(
     () =>
       sessions.filter(
         (s) => s.start.toDateString() === new Date().toDateString()
       ),
-    []
+    [sessions]
   );
   const uniqueStudentCount = students.length;
 
@@ -63,10 +65,10 @@ export default function InstructorDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Instructor Dashboard</h1>
-            <p className="text-slate-600">Welcome back, Coach!</p>
+            <p className="text-slate-600">Welcome back, {userName}!</p>
           </div>
           <Link
-            href="/dashboard/instructor"
+            href="/dashboard/instructor/create-class"
             className="inline-flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold shadow"
           >
             <Plus className="h-4 w-4" /> Create Class
@@ -105,15 +107,7 @@ export default function InstructorDashboard() {
             </div>
             {upcoming.length === 0 ? (
               <div className="border border-dashed border-slate-200 rounded-xl p-6 text-center text-slate-500 text-sm">
-                No upcoming classes scheduled
-                <div className="mt-4">
-                  <Link
-                    href="/dashboard/instructor"
-                    className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md text-sm font-semibold"
-                  >
-                    <Plus className="h-4 w-4" /> Create Your First Class
-                  </Link>
-                </div>
+                No classes yet. Create one to get started.
               </div>
             ) : (
               <div className="space-y-3">
@@ -124,28 +118,30 @@ export default function InstructorDashboard() {
                   >
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex flex-col items-center justify-center">
                       <span className="text-xs font-medium">
-                        {session.start.toLocaleDateString(undefined, { weekday: "short" })}
+                        {session.start ? session.start.toLocaleDateString(undefined, { weekday: "short" }) : ""}
                       </span>
-                      <span className="text-lg font-bold">{session.start.getDate()}</span>
+                      <span className="text-lg font-bold">{session.start ? session.start.getDate() : ""}</span>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-slate-800">{session.title}</h3>
-                        {new Date().toDateString() === session.start.toDateString() && (
+                        {session.start && new Date().toDateString() === session.start.toDateString() && (
                           <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Today</span>
                         )}
                       </div>
                       <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {session.start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                          {session.start
+                            ? session.start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+                            : "--"}
                         </span>
                         <span className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          {session.bookings}/{session.maxStudents}
+                          {session.bookings}/{session.maxStudents ?? "∞"}
                         </span>
                         <span className="text-xs px-2 py-1 rounded-full border border-slate-200 capitalize">
-                          {session.type}
+                          {(session.sessionType || session.type || "").toLowerCase()}
                         </span>
                       </div>
                     </div>
@@ -153,6 +149,8 @@ export default function InstructorDashboard() {
                       <Link
                         href={session.meetingUrl}
                         className="inline-flex items-center gap-1 bg-blue-500 text-white px-3 py-2 rounded-md text-sm"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         <Video className="h-4 w-4" /> Join
                       </Link>
@@ -167,10 +165,9 @@ export default function InstructorDashboard() {
             <div className="bg-white rounded-2xl border border-slate-100 p-5 space-y-2">
               <h3 className="font-semibold text-slate-900">Quick Actions</h3>
               {[
-                { label: "Create Class", href: "/dashboard/instructor", icon: Plus },
                 { label: "View Students", href: "/dashboard/instructor/students", icon: Users },
                 { label: "Manage Content", href: "/dashboard/instructor/content", icon: BookOpen },
-                { label: "Messages", href: "/dashboard/instructor/messages", icon: MessageSquare },
+                { label: "Messages", href: "/messages", icon: MessageSquare },
                 { label: "Availability", href: "/dashboard/instructor/availability", icon: Calendar },
               ].map((action) => (
                 <Link key={action.label} href={action.href} className="flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900">
