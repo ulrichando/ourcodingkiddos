@@ -8,7 +8,7 @@ const updateSchema = z
   .object({
     title: z.string().min(3).optional(),
     slug: z.string().min(3).optional(),
-    order: z.number().int().min(0).optional(),
+    orderIndex: z.number().int().min(0).optional(),
     content: z.any().optional(),
     resources: z.any().optional(),
     durationMin: z.number().int().positive().optional(),
@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const lesson = await prisma.lesson.findFirst({
       where: { OR: [{ id }, { slug: id }] },
       include: {
-        quiz: { include: { questions: { include: { answers: true }, orderBy: { order: "asc" } } } },
+        quiz: { include: { questions: { include: { answers: true }, orderBy: { orderIndex: "asc" } } } },
         project: true,
       },
     });

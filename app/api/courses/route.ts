@@ -3,34 +3,39 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
-import { CourseCategory, CourseLevel } from "@prisma/client";
+import { CourseLevel, Language, AgeGroup } from "@prisma/client";
 
 const createCourseSchema = z.object({
   title: z.string().min(3),
   slug: z.string().min(3).regex(/^[a-z0-9-]+$/i),
   description: z.string().min(10),
-  category: z.nativeEnum(CourseCategory),
+  language: z.nativeEnum(Language),
+  ageGroup: z.nativeEnum(AgeGroup),
   level: z.nativeEnum(CourseLevel),
-  published: z.boolean().optional().default(false),
-  thumbnail: z.string().url().optional(),
+  isPublished: z.boolean().optional().default(false),
+  thumbnailUrl: z.string().url().optional(),
+  totalXp: z.number().optional(),
+  estimatedHours: z.number().optional(),
 });
 
 // GET /api/courses - list courses with optional filters
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const category = searchParams.get("category") ?? undefined;
   const level = searchParams.get("level") ?? undefined;
+  const language = searchParams.get("language") ?? undefined;
+  const ageGroup = searchParams.get("ageGroup") ?? undefined;
   const published = searchParams.get("published");
 
   try {
     const courses = await prisma.course.findMany({
       where: {
-        category: category ? (category as any) : undefined,
         level: level ? (level as any) : undefined,
-        published: published === null ? undefined : published === "true",
+        language: language ? (language as any) : undefined,
+        ageGroup: ageGroup ? (ageGroup as any) : undefined,
+        isPublished: published === null ? undefined : published === "true",
       },
       orderBy: { createdAt: "desc" },
-      include: { lessons: { select: { id: true, title: true, slug: true, order: true } } },
+      include: { lessons: { select: { id: true, title: true, slug: true, orderIndex: true } } },
     });
     return NextResponse.json({ status: "ok", data: courses });
   } catch (error) {
@@ -53,7 +58,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const course = await prisma.course.create({ data: parse.data });
+    const course = await prisma.course.create({
+      data: {
+        ...parse.data,
+        slug: parse.data.slug.toLowerCase(),
+      },
+    });
     return NextResponse.json({ status: "ok", data: course }, { status: 201 });
   } catch (error) {
     console.error("POST /api/courses error", error);

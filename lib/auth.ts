@@ -1,7 +1,7 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 
@@ -12,88 +12,97 @@ const demoInstructorEmail = process.env.DEMO_INSTRUCTOR_EMAIL ?? "demo.instructo
 const demoStudentEmail = process.env.DEMO_STUDENT_EMAIL ?? "demo.student@ourcodingkiddos.com";
 const demoUserPassword = process.env.DEMO_USER_PASSWORD ?? "demo1234";
 
+// Email provider is enabled only if SMTP settings are present
+const emailProvider =
+  process.env.EMAIL_SERVER && process.env.EMAIL_FROM
+    ? EmailProvider({
+        server: process.env.EMAIL_SERVER,
+        from: process.env.EMAIL_FROM,
+        maxAge: 24 * 60 * 60, // 24h
+      })
+    : null;
+
+const providers: NextAuthOptions["providers"] = [
+  emailProvider,
+  CredentialsProvider({
+    name: "Email and Password",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      const email = credentials?.email?.toLowerCase().trim();
+      const password = credentials?.password;
+      if (!email || !password) return null;
+
+      // Primary: look up user in DB
+      try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user?.hashedPassword) {
+          const valid = await bcrypt.compare(password, user.hashedPassword);
+          if (!valid) return null;
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image ?? undefined,
+            role: user.role,
+          };
+        }
+      } catch (e) {
+        // Swallow DB errors and allow fallback to demo login
+      }
+
+      // Fallback: allow demo admin login (env-configurable, with safe defaults)
+      if (email === demoEmail && password === demoPassword) {
+        return {
+          id: "demo-admin",
+          name: "Demo Admin",
+          email: demoEmail,
+          role: "ADMIN",
+        };
+      }
+
+      // Demo parent
+      if (email === demoParentEmail && password === demoUserPassword) {
+        return {
+          id: "demo-parent",
+          name: "Demo Parent",
+          email: demoParentEmail,
+          role: "PARENT",
+        };
+      }
+
+      // Demo instructor
+      if (email === demoInstructorEmail && password === demoUserPassword) {
+        return {
+          id: "demo-instructor",
+          name: "Demo Instructor",
+          email: demoInstructorEmail,
+          role: "INSTRUCTOR",
+        };
+      }
+
+      // Demo student
+      if (email === demoStudentEmail && password === demoUserPassword) {
+        return {
+          id: "demo-student",
+          name: "Demo Student",
+          email: demoStudentEmail,
+          role: "STUDENT",
+        };
+      }
+
+      return null;
+    },
+  }),
+].filter(Boolean) as NextAuthOptions["providers"];
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-    }),
-    CredentialsProvider({
-      name: "Email and Password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const email = credentials?.email?.toLowerCase().trim();
-        const password = credentials?.password;
-        if (!email || !password) return null;
-
-        // Primary: look up user in DB
-        try {
-          const user = await prisma.user.findUnique({ where: { email } });
-          if (user?.hashedPassword) {
-            const valid = await bcrypt.compare(password, user.hashedPassword);
-            if (!valid) return null;
-            return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              image: user.image ?? undefined,
-              role: user.role,
-            };
-          }
-        } catch (e) {
-          // Swallow DB errors and allow fallback to demo login
-        }
-
-        // Fallback: allow demo admin login (env-configurable, with safe defaults)
-        if (email === demoEmail && password === demoPassword) {
-          return {
-            id: "demo-admin",
-            name: "Demo Admin",
-            email: demoEmail,
-            role: "ADMIN",
-          };
-        }
-
-        // Demo parent
-        if (email === demoParentEmail && password === demoUserPassword) {
-          return {
-            id: "demo-parent",
-            name: "Demo Parent",
-            email: demoParentEmail,
-            role: "PARENT",
-          };
-        }
-
-        // Demo instructor
-        if (email === demoInstructorEmail && password === demoUserPassword) {
-          return {
-            id: "demo-instructor",
-            name: "Demo Instructor",
-            email: demoInstructorEmail,
-            role: "INSTRUCTOR",
-          };
-        }
-
-        // Demo student
-        if (email === demoStudentEmail && password === demoUserPassword) {
-          return {
-            id: "demo-student",
-            name: "Demo Student",
-            email: demoStudentEmail,
-            role: "STUDENT",
-          };
-        }
-
-        return null;
-      },
-    }),
-  ],
+  providers,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

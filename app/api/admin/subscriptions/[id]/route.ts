@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "lib/auth";
 import prisma from "lib/prisma";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user || (session as any).user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   try {
     const sub = await prisma.subscription.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(planType ? { planType } : {}),
         ...(status ? { status } : {}),
@@ -36,7 +37,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session?.user || (session as any).user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -44,8 +46,8 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
 
   try {
     const sub = await prisma.subscription.update({
-      where: { id: params.id },
-      data: { status: "CANCELLED" },
+      where: { id },
+      data: { status: "CANCELED" },
       select: { id: true, status: true },
     });
     return NextResponse.json({ subscription: sub });

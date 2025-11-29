@@ -88,23 +88,6 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => signIn("google", { callbackUrl: role === "instructor" ? "/dashboard/instructor" : "/dashboard/parent" })}
-            className="w-full inline-flex items-center justify-center gap-3 border border-slate-200 rounded-lg py-2.5 text-slate-700 font-semibold hover:bg-slate-50"
-          >
-            <span className="h-5 w-5 rounded-full bg-white shadow ring-1 ring-slate-200 flex items-center justify-center text-lg font-bold text-red-500">
-              G
-            </span>
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <span className="h-px flex-1 bg-slate-200" />
-            OR
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-
           <form className="space-y-3" onSubmit={handleSubmit}>
             <label className="block text-sm font-semibold text-slate-700">
               Name

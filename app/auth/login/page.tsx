@@ -10,6 +10,10 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<"parent" | "instructor" | "student">("student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [magicSending, setMagicSending] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
 
   const destination = useMemo(
     () => {
@@ -22,16 +26,15 @@ export default function LoginPage() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = String(formData.get("email") || "").trim().toLowerCase();
-    const password = String(formData.get("password") || "");
+    const emailValue = email.trim().toLowerCase();
+    const passwordValue = password;
     setError(null);
     setLoading(true);
     try {
       const res = await signIn("credentials", {
         redirect: false,
-        email,
-        password,
+        email: emailValue,
+        password: passwordValue,
       });
       if (res?.error) throw new Error(res.error);
       const session = await getSession();
@@ -49,6 +52,30 @@ export default function LoginPage() {
       setError(err?.message || "Sign in failed");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleMagicLink() {
+    const emailValue = email.trim().toLowerCase();
+    if (!emailValue) {
+      setError("Please enter your email first.");
+      return;
+    }
+    setError(null);
+    setMagicSending(true);
+    setMagicSent(false);
+    try {
+      const res = await signIn("email", {
+        email: emailValue,
+        redirect: false,
+        callbackUrl: destination,
+      });
+      if (res?.error) throw new Error(res.error);
+      setMagicSent(true);
+    } catch (err: any) {
+      setError(err?.message || "Could not send magic link. Please try again.");
+    } finally {
+      setMagicSending(false);
     }
   }
 
@@ -103,23 +130,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => signIn("google", { callbackUrl: destination })}
-            className="w-full inline-flex items-center justify-center gap-3 border border-slate-200 rounded-lg py-2.5 text-slate-700 font-semibold hover:bg-slate-50"
-          >
-            <span className="h-5 w-5 rounded-full bg-white shadow ring-1 ring-slate-200 flex items-center justify-center text-lg font-bold text-red-500">
-              G
-            </span>
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <span className="h-px flex-1 bg-slate-200" />
-            OR
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-semibold text-slate-700">Email</label>
@@ -127,6 +137,8 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
@@ -137,6 +149,8 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
@@ -150,6 +164,25 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs uppercase tracking-wide text-slate-400">or</span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+            <button
+              type="button"
+              onClick={handleMagicLink}
+              disabled={magicSending}
+              className="w-full border border-slate-200 bg-white text-slate-800 font-semibold rounded-lg py-2.5 shadow-sm hover:bg-slate-50 disabled:opacity-60"
+            >
+              {magicSending ? "Sending link..." : magicSent ? "Link sent! Check your email" : "Email me a sign-in link"}
+            </button>
+            <p className="text-xs text-slate-500 text-center">
+              We’ll send a magic link to your inbox. The link expires in 24 hours.
+            </p>
+          </div>
 
           <div className="flex justify-between text-xs text-slate-500">
             <Link href="#" className="hover:text-slate-700">
