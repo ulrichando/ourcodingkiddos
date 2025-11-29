@@ -53,11 +53,8 @@ export default function AppHeader() {
     } catch {
       // ignore
     }
-    if (next === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", next === "dark");
+    document.documentElement.setAttribute("data-theme", next);
   };
 
   const isLoggedIn = Boolean(session);

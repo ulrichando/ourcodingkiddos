@@ -11,15 +11,12 @@ export default function SettingsPage() {
   const [emailUpdates, setEmailUpdates] = useState(false);
   const [classReminders, setClassReminders] = useState(true);
   const [progressReports, setProgressReports] = useState(true);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     if (session?.user) {
       setFullName(session.user.name ?? "");
       setEmail(session.user.email ?? "");
-      const storedTheme = localStorage.getItem("ok-theme");
-      if (storedTheme === "dark" || storedTheme === "light") setTheme(storedTheme);
-      document.documentElement.classList.toggle("dark", storedTheme === "dark");
+      // appearance now handled by header toggle
     }
   }, [session]);
 
@@ -76,35 +73,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 font-semibold">
-            <span className="text-lg">🌓</span>
-            Appearance
-          </div>
-          <p className="text-slate-600 text-sm">Switch between light and dark themes.</p>
-          <div className="flex items-center gap-4">
-            <Button
-              variant={theme === "light" ? "default" : "outline"}
-              onClick={() => {
-                setTheme("light");
-                localStorage.setItem("ok-theme", "light");
-                document.documentElement.classList.remove("dark");
-              }}
-            >
-              Light Mode
-            </Button>
-            <Button
-              variant={theme === "dark" ? "default" : "outline"}
-              onClick={() => {
-                setTheme("dark");
-                localStorage.setItem("ok-theme", "dark");
-                document.documentElement.classList.add("dark");
-              }}
-            >
-              Dark Mode
-            </Button>
-          </div>
-        </section>
+        {/* Appearance settings removed; use the header toggle next to the bell */}
 
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2 text-slate-800 font-semibold">

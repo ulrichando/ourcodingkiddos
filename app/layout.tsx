@@ -17,12 +17,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem("ok-theme");
-                  if (theme === "dark") {
-                    document.documentElement.classList.add("dark");
-                  } else {
-                    document.documentElement.classList.remove("dark");
-                  }
+                  const stored = localStorage.getItem("ok-theme");
+                  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                  const theme = stored || (prefersDark ? "dark" : "light");
+                  document.documentElement.classList.toggle("dark", theme === "dark");
+                  document.documentElement.setAttribute("data-theme", theme);
+                  if (!stored) localStorage.setItem("ok-theme", theme);
                 } catch (_) {}
               })();
             `,

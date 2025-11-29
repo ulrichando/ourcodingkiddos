@@ -6,6 +6,10 @@
   color-scheme: light;
   background-color: #f8fafc;
 }
+.dark:root {
+  color-scheme: dark;
+  background-color: #050812;
+}
 
 * {
   box-sizing: border-box;
@@ -16,6 +20,86 @@ body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   color: #0f172a;
   background: linear-gradient(135deg, #f0f9ff 0%, #ecfeff 45%, #fdf2f8 100%);
+}
+.dark body {
+  color: #e2e8f0;
+  background: #050812;
+  background: radial-gradient(circle at 20% 20%, rgba(88, 28, 135, 0.25), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.18), transparent 25%),
+    #050812;
+}
+
+/* Global dark-mode adjustments so existing light classes look correct */
+.dark .bg-white {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+.dark [class*="bg-white/"] {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+.dark .bg-slate-50 {
+  background-color: #0a1224 !important;
+  color: #e2e8f0 !important;
+}
+.dark .bg-slate-100 {
+  background-color: #0d162b !important;
+  color: #e2e8f0 !important;
+}
+.dark .bg-slate-200 {
+  background-color: #131f36 !important;
+  color: #e2e8f0 !important;
+}
+.dark .text-slate-900 {
+  color: #e2e8f0 !important;
+}
+.dark .text-slate-800 {
+  color: #cbd5f5 !important;
+}
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+.dark .text-slate-400,
+.dark .text-slate-300,
+.dark .text-slate-200 {
+  color: #cbd5e1 !important;
+}
+.dark .text-slate-100 {
+  color: #e2e8f0 !important;
+}
+.dark .border-slate-200 {
+  border-color: #1e293b !important;
+}
+.dark .border-slate-100 {
+  border-color: #162137 !important;
+}
+.dark .border-slate-300 {
+  border-color: #25324a !important;
+}
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* Messages list (left column) in dark mode */
+.dark .message-list,
+.dark .message-item {
+  background-color: #0d162b !important;
+  color: #e2e8f0 !important;
+  border-color: #1e293b !important;
+}
+.dark .message-item:hover,
+.dark .message-item:focus-visible {
+  background-color: #16243d !important;
+}
+.dark .message-item .text-muted {
+  color: #cbd5e1 !important;
+}
+.dark .message-item .text-dim {
+  color: #94a3b8 !important;
 }
 
 a {
