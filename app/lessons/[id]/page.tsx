@@ -290,18 +290,18 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
             {active && (
               <>
                 <div className="space-y-2">
-                  <Badge className="bg-purple-500/20 text-purple-200 border-0">Lesson {current + 1}</Badge>
-                  <h2 className="text-3xl font-bold text-white">{active.title}</h2>
-                  <p className="text-slate-300">{active.description}</p>
-                </div>
+              <Badge className="bg-purple-500/20 text-purple-200 border-0">Lesson {current + 1}</Badge>
+              <h2 className="text-3xl font-bold text-white">{active.title}</h2>
+              <p className="text-slate-200">{active.description}</p>
+            </div>
 
-                <Card className="bg-[#0c1326] border-[#243155] shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+                <Card className="bg-white text-slate-900 dark:bg-[#0c1326] dark:text-slate-100 border-[#243155] shadow-[0_10px_40px_rgba(0,0,0,0.35)] lesson-shell">
                   <CardContent className="p-6 space-y-3">
-                    <h3 className="text-sm font-semibold text-purple-50 mb-1">Overview</h3>
-                    <p className="text-slate-50">
+                    <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-100 mb-1">Overview</h3>
+                    <p className="text-slate-700 dark:text-slate-100">
                       Learn why this lesson matters and practice with the example and “Your Turn” editor below. Complete the lesson to earn XP.
                     </p>
-                    <ul className="text-slate-100 text-sm space-y-1 list-disc list-inside">
+                    <ul className="text-slate-800 dark:text-slate-100 text-sm space-y-1 list-disc list-inside">
                       <li>Welcome to the topic with a quick primer.</li>
                       <li>Follow the example code, then try it yourself.</li>
                       <li>Mark complete to fill the progress bar.</li>

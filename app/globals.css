@@ -29,6 +29,15 @@ body {
     #050812;
 }
 
+/* Hero code sample in dark mode: keep text bright */
+.dark pre,
+.dark code {
+  color: #e5e7eb !important;
+}
+.dark .code-card {
+  color: #e5e7eb !important;
+}
+
 /* Global dark-mode adjustments so existing light classes look correct */
 .dark .bg-white {
   background-color: #0f172a !important;
@@ -48,6 +57,14 @@ body {
 }
 .dark .bg-slate-200 {
   background-color: #131f36 !important;
+  color: #e2e8f0 !important;
+}
+.dark .bg-gradient-to-b.from-slate-50 {
+  background-image: linear-gradient(to bottom, #0a1224, #0a1224) !important;
+  color: #e2e8f0 !important;
+}
+.dark .bg-gradient-to-r.from-purple-600 {
+  /* keep gradients vivid on dark background */
   color: #e2e8f0 !important;
 }
 .dark .text-slate-900 {
@@ -99,6 +116,50 @@ body {
   color: #cbd5e1 !important;
 }
 .dark .message-item .text-dim {
+  color: #94a3b8 !important;
+}
+
+/* Course pages & learning sections */
+.dark .course-card,
+.dark .course-detail,
+.dark .course-section,
+.dark .lesson-shell {
+  color: #e2e8f0 !important;
+  background-color: transparent;
+}
+.dark .lesson-card,
+.dark .lesson-list,
+.dark .lesson-item,
+.dark .lesson-content {
+  color: #e2e8f0 !important;
+}
+.dark .lesson-card p,
+.dark .lesson-list p,
+.dark .lesson-item p,
+.dark .lesson-content p {
+  color: #cbd5e1 !important;
+}
+.dark .course-card h1,
+.dark .course-card h2,
+.dark .course-card h3,
+.dark .course-card h4,
+.dark .course-detail h1,
+.dark .course-detail h2,
+.dark .course-detail h3,
+.dark .course-detail h4,
+.dark .lesson-shell h1,
+.dark .lesson-shell h2,
+.dark .lesson-shell h3,
+.dark .lesson-shell h4 {
+  color: #e2e8f0 !important;
+}
+.dark .course-card p,
+.dark .course-detail p,
+.dark .lesson-shell p {
+  color: #cbd5e1 !important;
+}
+.dark .course-meta,
+.dark .course-muted {
   color: #94a3b8 !important;
 }
 

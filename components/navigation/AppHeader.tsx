@@ -172,7 +172,7 @@ export default function AppHeader() {
                 href="/auth/login"
                 className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-4 py-2 shadow-md hover:brightness-105"
               >
-                Go to Dashboard
+                Sign In
               </Link>
             </div>
           </>
