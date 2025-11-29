@@ -28,6 +28,7 @@ const typeIcons = {
 const demoNotifications: Notification[] = [
   {
     id: "n1",
+    user_email: "demo@ourcodingkiddos.com",
     title: "Welcome to Coding Kiddos!",
     message: "Start exploring courses and add your first student.",
     type: "system",
@@ -37,6 +38,7 @@ const demoNotifications: Notification[] = [
   },
   {
     id: "n2",
+    user_email: "demo@ourcodingkiddos.com",
     title: "New Course Available!",
     message: "HTML Basics for Kids is now live. Earn 500 XP.",
     type: "progress",
@@ -46,6 +48,7 @@ const demoNotifications: Notification[] = [
   },
   {
     id: "n3",
+    user_email: "demo@ourcodingkiddos.com",
     title: "Certificate earned!",
     message: "Demo Student just earned HTML Basics for Kids. View the certificate.",
     type: "achievement",
@@ -104,8 +107,8 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
     <div className="relative inline-flex items-center">
       <Button
         variant="ghost"
-        size="icon"
-        className="relative rounded-full hover:bg-slate-100"
+        size="sm"
+        className="relative rounded-full hover:bg-slate-100 w-10 h-10"
         onClick={() => setOpen((o) => !o)}
       >
         <Bell className="w-5 h-5" />

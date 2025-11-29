@@ -11,7 +11,7 @@ import { courses as mockCourses } from "@/data/courses";
 import QuizCard from "@/components/quiz/QuizCard";
 import { useSearchParams } from "next/navigation";
 
-type CourseType = (typeof mockCourses)[number];
+type CourseType = ((typeof mockCourses)[number]) & { slug?: string };
 type LessonType = CourseType["lessons"][number];
 
 function normalizeSlug(text: string) {

@@ -667,7 +667,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs">
-                                {lesson.videoUrl || (lesson as any).video_url ? "Video" : "Text"}
+                                {(lesson as any).videoUrl || (lesson as any).video_url ? "Video" : "Text"}
                               </Badge>
                               <button
                                 className="text-xs text-amber-600 hover:text-amber-800"

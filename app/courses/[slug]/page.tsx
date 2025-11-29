@@ -128,13 +128,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
 
   // Fallback to mock courses (static data) even if demo flag is false, so preview links never 404 in development
   if (!course && mockCourses.length) {
-    const mock = mockCourses.find(
-      (c) =>
-        c.id === slugParam ||
-        c.slug === slugParam ||
-        normalizeSlug(c.title) === normalizedSlug ||
-        c.id === normalizedSlug
-    );
+    const mock = mockCourses.find((c: any) => {
+      const mockSlug = (c as any).slug ?? normalizeSlug(c.title);
+      return c.id === slugParam || mockSlug === slugParam || normalizeSlug(c.title) === normalizedSlug || c.id === normalizedSlug;
+    });
     if (mock) {
       course = {
         ...mock,

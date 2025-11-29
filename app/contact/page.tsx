@@ -94,9 +94,12 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-slate-600">
                 <p>Click the chat bubble in the bottom-right corner to open Cody (our chatbot) and get instant answers.</p>
-                <Button asChild variant="outline" className="w-full">
-                  <a href="#chatbot">Open Chat</a>
-                </Button>
+                <a
+                  href="#chatbot"
+                  className="w-full inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition"
+                >
+                  Open Chat
+                </a>
               </CardContent>
             </Card>
           </div>

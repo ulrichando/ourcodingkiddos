@@ -8,10 +8,11 @@ const createLessonSchema = z.object({
   courseId: z.string(),
   title: z.string().min(3),
   slug: z.string().min(3),
-  order: z.number().int().min(0),
-  content: z.any(),
-  resources: z.any().optional(),
-  durationMin: z.number().int().positive().optional(),
+  description: z.string().optional(),
+  orderIndex: z.number().int().min(0).optional(),
+  content: z.any().optional(),
+  videoUrl: z.string().url().optional(),
+  xpReward: z.number().int().optional(),
 });
 
 // GET /api/lessons - list lessons (optionally by courseId)
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
   try {
     const lessons = await prisma.lesson.findMany({
       where: { courseId },
-      orderBy: { order: "asc" },
+      orderBy: { orderIndex: "asc" },
     });
     return NextResponse.json({ status: "ok", data: lessons });
   } catch (error) {
@@ -45,7 +46,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const lesson = await prisma.lesson.create({ data: parsed.data });
+    const lesson = await prisma.lesson.create({
+      data: {
+        courseId: parsed.data.courseId,
+        title: parsed.data.title,
+        slug: parsed.data.slug.toLowerCase(),
+        description: parsed.data.description ?? "",
+        content: parsed.data.content ?? null,
+        videoUrl: parsed.data.videoUrl,
+        xpReward: parsed.data.xpReward,
+        orderIndex: parsed.data.orderIndex ?? 0,
+        isPublished: true,
+      },
+    });
     return NextResponse.json({ status: "ok", data: lesson }, { status: 201 });
   } catch (error) {
     console.error("POST /api/lessons error", error);
