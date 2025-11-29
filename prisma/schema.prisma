@@ -105,6 +105,8 @@ model User {
   badges             UserBadge[]
   achievements       Achievement[]
   portfolio          PortfolioItem[]
+  accounts           Account[]
+  sessions           Session[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
