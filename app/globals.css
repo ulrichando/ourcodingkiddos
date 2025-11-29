@@ -163,8 +163,81 @@ body {
   color: #94a3b8 !important;
 }
 
+/* Lesson pages */
+.lesson-page {
+  background: #0b1224;
+}
+.lesson-overview {
+  background: #ffffff;
+  color: #0f172a;
+}
+.dark .lesson-overview {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+.dark .lesson-overview h3 {
+  color: #e5e7eb !important;
+}
+.dark .lesson-overview p,
+.dark .lesson-overview li {
+  color: #cbd5e1 !important;
+}
+
+/* Pricing & hero cards in dark */
+.dark .pricing-card,
+.dark .pricing-summary,
+.dark .pricing-section {
+  color: #e5e7eb !important;
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+.dark .pricing-card h2,
+.dark .pricing-card h3,
+.dark .pricing-card h4,
+.dark .pricing-card span,
+.dark .pricing-card p {
+  color: #e5e7eb !important;
+}
+
+/* Code samples on dark */
+.dark .bg-slate-900 code,
+.dark .bg-slate-800 code,
+.dark .bg-\[\#0f1528\] code,
+.dark .bg-slate-900 pre,
+.dark .bg-slate-800 pre,
+.dark .bg-\[\#0f1528\] pre {
+  color: #e5e7eb !important;
+}
+
 a {
   text-decoration: none;
+}
+
+/* Media defaults */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .header-nav {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: flex-start;
+  }
+  .header-nav a {
+    padding: 0.35rem 0.5rem;
+  }
+  .header-nav + * {
+    margin-left: auto;
+  }
 }
 
 .glass-panel {
@@ -178,4 +251,21 @@ a {
   font-family: "Baloo 2", "Quicksand", system-ui, sans-serif;
   font-weight: 800;
   letter-spacing: 0.01em;
+}
+
+/* Footer mobile visibility */
+.site-footer {
+  margin-top: auto;
+}
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 1.5rem 1rem;
+  }
+  .site-footer .grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+  .site-footer ul {
+    padding-left: 0;
+  }
 }

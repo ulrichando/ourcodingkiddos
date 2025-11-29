@@ -16,6 +16,7 @@ export default function AppHeader() {
   const userRole =
     typeof (session?.user as any)?.role === "string" ? ((session?.user as any)?.role as string).toUpperCase() : "PARENT";
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const showBell = userRole === "PARENT" || userRole === "STUDENT";
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -75,17 +76,19 @@ export default function AppHeader() {
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg">
-            CK
-          </span>
-          <span className="text-lg font-semibold text-slate-900">Coding Kiddos</span>
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-4 sm:gap-6 w-full">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-3">
+            <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg">
+              CK
+            </span>
+            <span className="text-lg font-semibold text-slate-900">Coding Kiddos</span>
+          </Link>
+        </div>
 
         {isLoggedIn ? (
           <>
-            <nav className="flex-1 flex items-center justify-center gap-7">
+            <nav className="header-nav hidden sm:flex flex-1 items-center justify-center gap-7">
                 <Link href={dashboardHref} className={linkClass(dashboardHref)}>
                   <Home className="h-4 w-4 text-slate-500" />
                   Dashboard
@@ -104,6 +107,21 @@ export default function AppHeader() {
                 </Link>
             </nav>
             <div className="flex items-center ml-auto gap-2 relative" ref={menuRef}>
+              <button
+                className="sm:hidden inline-flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 text-slate-700"
+                onClick={() => setMobileOpen((o) => !o)}
+                aria-label="Toggle navigation"
+              >
+                {mobileOpen ? (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
               <button
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
@@ -156,7 +174,7 @@ export default function AppHeader() {
           </>
         ) : (
           <>
-            <nav className="flex-1 flex items-center justify-center gap-7 text-sm font-semibold text-slate-700">
+            <nav className="header-nav hidden sm:flex flex-1 items-center justify-center gap-7 text-sm font-semibold text-slate-700">
               <Link href="/courses" className="hover:text-slate-900">
                 Courses
               </Link>
@@ -167,10 +185,25 @@ export default function AppHeader() {
                 Playground
               </Link>
             </nav>
-            <div className="flex items-center ml-auto">
+            <div className="flex items-center ml-auto gap-2">
+              <button
+                className="sm:hidden inline-flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 text-slate-700"
+                onClick={() => setMobileOpen((o) => !o)}
+                aria-label="Toggle navigation"
+              >
+                {mobileOpen ? (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
               <Link
                 href="/auth/login"
-                className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-4 py-2 shadow-md hover:brightness-105"
+                className="hidden sm:inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-4 py-2 shadow-md hover:brightness-105"
               >
                 Sign In
               </Link>
@@ -178,6 +211,56 @@ export default function AppHeader() {
           </>
         )}
       </div>
+      {mobileOpen && (
+        <div className="sm:hidden border-t border-slate-200 bg-white shadow-lg">
+          <div className="px-4 py-3 flex flex-col gap-3 text-sm font-semibold text-slate-700">
+            {isLoggedIn ? (
+              <>
+                <Link href={dashboardHref} onClick={() => setMobileOpen(false)} className={linkClass(dashboardHref)}>
+                  Dashboard
+                </Link>
+                <Link href="/courses" onClick={() => setMobileOpen(false)} className={linkClass("/courses")}>
+                  Courses
+                </Link>
+                <Link href="/schedule" onClick={() => setMobileOpen(false)} className={linkClass("/schedule")}>
+                  Schedule
+                </Link>
+                <Link href="/messages" onClick={() => setMobileOpen(false)} className={linkClass("/messages")}>
+                  Messages
+                </Link>
+                <button
+                  onClick={async () => {
+                    setMobileOpen(false);
+                    await signOut({ callbackUrl: "/auth/login" });
+                  }}
+                  className="text-left text-red-600"
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/courses" onClick={() => setMobileOpen(false)}>
+                  Courses
+                </Link>
+                <Link href="/pricing" onClick={() => setMobileOpen(false)}>
+                  Pricing
+                </Link>
+                <Link href="/playground" onClick={() => setMobileOpen(false)}>
+                  Playground
+                </Link>
+                <Link
+                  href="/auth/login"
+                  className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-4 py-2 shadow-md hover:brightness-105 w-fit"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

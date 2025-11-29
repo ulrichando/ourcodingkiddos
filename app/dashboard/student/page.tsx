@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar, ArrowRight, Target } from "lucide-react";
+import { Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar, ArrowRight, Target as Aim } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import LanguageIcon from "@/components/ui/LanguageIcon";
@@ -323,7 +323,7 @@ export default function StudentDashboard() {
         <section className="grid md:grid-cols-4 gap-3">
           {[
             { label: "Lessons Done", value: 1, icon: BookOpen, color: "from-green-400 to-emerald-500" },
-            { label: "Quizzes Passed", value: 0, icon: Target, color: "from-blue-400 to-cyan-500" },
+            { label: "Quizzes Passed", value: 0, icon: Aim, color: "from-blue-400 to-cyan-500" },
             { label: "Day Streak", value: streakDays, icon: Flame, color: "from-orange-400 to-red-500" },
             { label: "Badges Earned", value: 0, icon: Trophy, color: "from-yellow-400 to-amber-500" },
           ].map((stat) => (

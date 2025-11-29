@@ -208,6 +208,37 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
     );
   }, [active]);
 
+  const handleMarkComplete = async () => {
+    if (!active || completed.has(current)) return;
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.add(current);
+      return next;
+    });
+
+    if (!studentId) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch("/api/lessons/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonId: (active as any).id,
+          courseId: course?.id,
+          studentId,
+          xp: (active as any).xp || (active as any).xpReward || 50,
+        }),
+      });
+      if (res.ok) {
+        toastSuccess("Progress saved! XP awarded.");
+      }
+    } catch (e) {
+      console.error("failed to save progress", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!course) {
     return (
       <main className="min-h-screen bg-[#0b1224] text-white flex items-center justify-center">
@@ -222,7 +253,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <main className="min-h-screen bg-[#0b1224] text-white">
+    <main className="lesson-page min-h-screen bg-[#0b1224] text-white">
       <header className="bg-[#0b1224] border-b border-slate-800 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -295,7 +326,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
               <p className="text-slate-200">{active.description}</p>
             </div>
 
-                <Card className="bg-white text-slate-900 dark:bg-[#0c1326] dark:text-slate-100 border-[#243155] shadow-[0_10px_40px_rgba(0,0,0,0.35)] lesson-shell">
+                <Card className="lesson-overview bg-white text-slate-900 dark:bg-[#0c1326] dark:text-slate-100 border-[#243155] shadow-[0_10px_40px_rgba(0,0,0,0.35)] lesson-shell">
                   <CardContent className="p-6 space-y-3">
                     <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-100 mb-1">Overview</h3>
                     <p className="text-slate-700 dark:text-slate-100">
@@ -415,33 +446,3 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
     </main>
   );
 }
-  const handleMarkComplete = async () => {
-    if (!active || completed.has(current)) return;
-    setCompleted((prev) => {
-      const next = new Set(prev);
-      next.add(current);
-      return next;
-    });
-
-    if (!studentId) return;
-    setIsSaving(true);
-    try {
-      const res = await fetch("/api/lessons/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lessonId: (active as any).id,
-          courseId: course?.id,
-          studentId,
-          xp: (active as any).xp || (active as any).xpReward || 50,
-        }),
-      });
-      if (res.ok) {
-        toastSuccess("Progress saved! XP awarded.");
-      }
-    } catch (e) {
-      console.error("failed to save progress", e);
-    } finally {
-      setIsSaving(false);
-    }
-  };
