@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import Button from "../ui/button";
 import { Bell, Trophy, Flame, Calendar, TrendingUp, Info, CheckCheck } from "lucide-react";
@@ -66,6 +66,7 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
 
   const [items, setItems] = useState<Notification[]>(baseNotifications);
   const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const readStore = () => {
     try {
@@ -89,6 +90,23 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
     setItems(baseNotifications.map((n) => ({ ...n, is_read: readIds.includes(n.id) })));
   }, [baseNotifications]);
 
+  // Click-outside handler to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   const unreadCount = items.filter((n) => !n.is_read).length;
 
   const markAll = () => {
@@ -104,14 +122,14 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
   };
 
   return (
-    <div className="relative inline-flex items-center">
+    <div className="relative inline-flex items-center" ref={dropdownRef}>
       <Button
         variant="ghost"
         size="sm"
-        className="relative rounded-full hover:bg-slate-100 w-10 h-10"
+        className="relative rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 w-10 h-10"
         onClick={() => setOpen((o) => !o)}
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-5 h-5 text-slate-700 dark:text-slate-300" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -119,14 +137,14 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
         )}
       </Button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-1rem)] p-0 z-50 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
-          <div className="flex items-center justify-between p-3 border-b">
-            <h3 className="font-semibold">Notifications</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-1rem)] p-0 z-50 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg overflow-hidden">
+          <div className="flex items-center justify-between p-3 border-b dark:border-slate-700">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">Notifications</h3>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-purple-600"
+                className="text-xs text-purple-600 dark:text-purple-400"
                 onClick={markAll}
               >
                 <CheckCheck className="w-3 h-3 mr-1" />
@@ -136,7 +154,7 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
           </div>
           <div className="max-h-96 overflow-y-auto">
             {items.length === 0 ? (
-              <div className="p-6 text-center text-slate-500">
+              <div className="p-6 text-center text-slate-500 dark:text-slate-400">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No notifications yet</p>
               </div>
@@ -147,23 +165,25 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
                 const inner = (
                   <div
                     key={notification.id}
-                    className={`p-3 border-b last:border-0 cursor-pointer transition-colors ${
-                      notification.is_read ? "bg-white" : "bg-purple-50"
-                    } hover:bg-slate-50`}
+                    className={`p-3 border-b dark:border-slate-700 last:border-0 cursor-pointer transition-colors ${
+                      notification.is_read
+                        ? "bg-white dark:bg-slate-800"
+                        : "bg-purple-50 dark:bg-purple-900/20"
+                    } hover:bg-slate-50 dark:hover:bg-slate-700`}
                     onClick={() => markOne(notification.id)}
                   >
                     <div className="flex gap-3">
-                      <div className={`w-9 h-9 rounded-full ${typeConfig.bg} flex items-center justify-center flex-shrink-0`}>
+                      <div className={`w-9 h-9 rounded-full ${typeConfig.bg} dark:bg-opacity-20 flex items-center justify-center flex-shrink-0`}>
                         <Icon className={`w-4 h-4 ${typeConfig.color}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className={`text-sm ${notification.is_read ? "text-slate-700" : "font-medium text-slate-900"}`}>
+                          <p className={`text-sm ${notification.is_read ? "text-slate-700 dark:text-slate-300" : "font-medium text-slate-900 dark:text-slate-100"}`}>
                             {notification.title}
                           </p>
-                          {!notification.is_read && <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0 mt-1.5" />}
+                          {!notification.is_read && <div className="w-2 h-2 bg-purple-500 dark:bg-purple-400 rounded-full flex-shrink-0 mt-1.5" />}
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{notification.message}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{notification.message}</p>
                       </div>
                     </div>
                   </div>
@@ -179,9 +199,9 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
               })
             )}
           </div>
-          <div className="p-2 border-t">
+          <div className="p-2 border-t dark:border-slate-700">
             <Link href="/notifications" onClick={() => setOpen(false)}>
-              <Button variant="ghost" className="w-full text-sm">
+              <Button variant="ghost" className="w-full text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
                 View all notifications
               </Button>
             </Link>

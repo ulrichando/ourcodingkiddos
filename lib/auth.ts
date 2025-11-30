@@ -4,6 +4,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
 import prisma from "./prisma";
+import type { UserRole } from "../types/next-auth";
+import { checkRateLimit, resetRateLimit } from "./validation";
 
 // Email provider is enabled only if SMTP settings are present
 const emailProvider =
@@ -28,18 +30,27 @@ const providers: NextAuthOptions["providers"] = [
       const password = credentials?.password;
       if (!email || !password) return null;
 
+      // Rate limiting: prevent brute force attacks
+      if (!checkRateLimit(email, 5, 15 * 60 * 1000)) {
+        throw new Error("Too many login attempts. Please try again later.");
+      }
+
       // Look up user in DB only (no demo fallbacks)
       try {
         const user = await prisma.user.findUnique({ where: { email } });
         if (user?.hashedPassword) {
           const valid = await bcrypt.compare(password, user.hashedPassword);
           if (!valid) return null;
+
+          // Reset rate limit on successful login
+          resetRateLimit(email);
+
           return {
             id: user.id,
             name: user.name,
             email: user.email,
             image: user.image ?? undefined,
-            role: user.role,
+            role: user.role as UserRole,
           };
         }
       } catch (e) {
@@ -59,18 +70,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role ?? "STUDENT";
+        token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        (session as any).user = {
-          ...session.user,
-          id: token.id as string,
-          role: (token as any).role,
-        };
+      if (token && session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
       }
       return session;
     },

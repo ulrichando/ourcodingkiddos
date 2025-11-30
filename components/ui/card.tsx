@@ -2,7 +2,7 @@ import { cn } from "../../lib/utils";
 import type { HTMLAttributes } from "react";
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-xl border border-slate-200 bg-white shadow-sm", className)} {...props} />;
+  return <div className={cn("rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {

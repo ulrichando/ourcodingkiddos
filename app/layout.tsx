@@ -1,9 +1,9 @@
 import "./globals.css";
-import type { ReactNode } from "react";
 import AppHeader from "../components/navigation/AppHeader";
 import ChatBot from "../components/chat/ChatBot";
 import AuthProvider from "../components/providers/AuthProvider";
 import ThemeHydrator from "../components/providers/ThemeHydrator";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -45,9 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <AuthProvider>
           <ThemeHydrator />
-          <div className="min-h-screen flex flex-col">
-            <AppHeader />
-            <main className="flex-1">{children}</main>
+          <ErrorBoundary>
+            <div className="min-h-screen flex flex-col">
+              <AppHeader />
+              <main className="flex-1">{children}</main>
             <footer className="site-footer bg-slate-900 text-slate-200">
               <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
                 <div className="space-y-2">
@@ -113,7 +114,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </footer>
             <ChatBot />
-          </div>
+            </div>
+          </ErrorBoundary>
         </AuthProvider>
       </body>
     </html>

@@ -20,6 +20,12 @@ module.exports = {
           grape: "#a855f7",
           ink: "#0f172a",
         },
+        admin: {
+          base: "#0c1426",
+          card: "#111c2d",
+          header: "#121d36",
+          input: "#0f192f",
+        },
       },
     },
   },

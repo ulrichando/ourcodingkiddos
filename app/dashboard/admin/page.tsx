@@ -3,6 +3,13 @@ import { redirect } from "next/navigation";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
 import AdminDashboardShell from "../../../components/admin/AdminDashboardShell";
+import {
+  demoUsersRaw,
+  demoStudentsRaw,
+  demoCoursesRaw,
+  demoSubscriptionsRaw,
+  demoParentsRaw,
+} from "../../../lib/demo-data";
 
 export const dynamic = "force-dynamic";
 
@@ -34,85 +41,21 @@ function ageFromDob(dob: Date | null): number | null {
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
-  const role = typeof (session?.user as any)?.role === "string" ? ((session?.user as any).role as string).toUpperCase() : null;
-  if (!session?.user || role !== "ADMIN") {
+
+  if (!session?.user || session.user.role !== "ADMIN") {
     return redirect("/auth/login");
   }
 
-  const useDemo = process.env.NEXT_PUBLIC_USE_DEMO_DATA === "true";
   const hasDbUrl = Boolean(process.env.DATABASE_URL);
   let warning: string | null = null;
 
-  const demoUsersRaw = [
-    { id: "u1", name: "Ghislain Ulrich", email: "ghislainulrich007@gmail.com", role: "PARENT", createdAt: new Date("2025-11-26") },
-    { id: "u2", name: "Ando Ulrich", email: "ulrichando007@gmail.com", role: "ADMIN", createdAt: new Date("2025-11-26") },
-  ];
-  const demoStudentsRaw = [
-    {
-      id: "s1",
-      name: "Emma",
-      age: 10,
-      dob: null,
-      totalXp: 1250,
-      currentLevel: 3,
-      parentEmail: "test@parent.com",
-      user: { email: "emma2024@example.com", name: "Emma", createdAt: new Date("2025-11-26") },
-      guardian: { user: { email: "test@parent.com" } },
-    },
-    {
-      id: "s2",
-      name: "Jake",
-      age: 13,
-      dob: null,
-      totalXp: 800,
-      currentLevel: 2,
-      parentEmail: "test@parent.com",
-      user: { email: "jake2024@example.com", name: "Jake", createdAt: new Date("2025-11-26") },
-      guardian: { user: { email: "test@parent.com" } },
-    },
-  ];
-  const demoCoursesRaw = [
-    { id: "c1", title: "HTML Basics for Kids", language: "HTML", level: "BEGINNER", ageGroup: "AGES_7_10", isPublished: true },
-    { id: "c2", title: "CSS Magic: Style Your Pages", language: "CSS", level: "BEGINNER", ageGroup: "AGES_7_10", isPublished: true },
-    { id: "c3", title: "JavaScript Adventures", language: "JAVASCRIPT", level: "BEGINNER", ageGroup: "AGES_11_14", isPublished: true },
-    { id: "c4", title: "Python for Young Coders", language: "PYTHON", level: "BEGINNER", ageGroup: "AGES_11_14", isPublished: true },
-    { id: "c5", title: "Roblox Game Creator", language: "ROBLOX", level: "BEGINNER", ageGroup: "AGES_11_14", isPublished: true },
-    { id: "c6", title: "Advanced Web Development", language: "JAVASCRIPT", level: "INTERMEDIATE", ageGroup: "AGES_15_18", isPublished: true },
-  ];
-  const demoParentsRaw = [
-    { id: "p1", phone: "555-1234", address: "123 Demo St", user: { name: "Ghislain Ulrich", email: "ghislainulrich007@gmail.com" }, _count: { children: 1 } },
-    { id: "p2", phone: "555-4321", address: "456 Sample Ave", user: { name: "Ando Ulrich", email: "ulrichando007@gmail.com" }, _count: { children: 1 } },
-  ];
-  const demoSubscriptionsRaw = [
-    {
-      id: "sub1",
-      parentEmail: "ulrichando007@gmail.com",
-      planType: "FAMILY",
-      status: "ACTIVE",
-      priceCents: 0,
-      endDate: null,
-      currentPeriodEnd: new Date("2025-12-31"),
-      user: { email: "ulrichando007@gmail.com" },
-    },
-    {
-      id: "sub2",
-      parentEmail: "test@parent.com",
-      planType: "MONTHLY",
-      status: "ACTIVE",
-      priceCents: 2900,
-      endDate: new Date("2025-12-01"),
-      currentPeriodEnd: new Date("2025-12-01"),
-      user: { email: "test@parent.com" },
-    },
-  ];
+  let usersRaw: any[] = [];
+  let studentsRaw: any[] = [];
+  let coursesRaw: any[] = [];
+  let subscriptionsRaw: any[] = [];
+  let parentsRaw: any[] = [];
 
-  let usersRaw = demoUsersRaw;
-  let studentsRaw = demoStudentsRaw;
-  let coursesRaw = demoCoursesRaw;
-  let subscriptionsRaw = demoSubscriptionsRaw;
-  let parentsRaw = demoParentsRaw;
-
-  if (hasDbUrl && !useDemo) {
+  if (hasDbUrl) {
     try {
       [usersRaw, studentsRaw, coursesRaw, subscriptionsRaw, parentsRaw] = await Promise.all([
         prisma.user.findMany({
@@ -162,7 +105,7 @@ export default async function AdminDashboardPage() {
       subscriptionsRaw = demoSubscriptionsRaw;
       parentsRaw = demoParentsRaw;
     }
-  } else if (!hasDbUrl) {
+  } else {
     warning = "DATABASE_URL is not set. Showing demo admin data instead.";
   }
 

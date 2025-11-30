@@ -429,10 +429,10 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] text-slate-900">
+    <div className="min-h-screen bg-[#f5f7fb] dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         {dbError && (
-          <div className="w-full rounded-xl border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
+          <div className="w-full rounded-xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-4 py-3 text-sm">
             Database unavailable. Start the database to load and edit courses/lessons.
           </div>
         )}
@@ -440,8 +440,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
           <div
             className={`w-full rounded-xl border px-4 py-3 text-sm ${
               courseError || lessonError
-                ? "border-red-200 bg-red-50 text-red-700"
-                : "border-green-200 bg-green-50 text-green-700"
+                ? "border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                : "border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
             }`}
           >
             {courseError || lessonError || courseMessage}
@@ -449,8 +449,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         )}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Content Manager</h1>
-            <p className="text-slate-600 text-sm">Create and manage courses, lessons, live classes, and certificates</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Content Manager</h1>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Create and manage courses, lessons, live classes, and certificates</p>
           </div>
           {activeTab === "courses" && (
             <Button
@@ -502,7 +502,9 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
-                activeTab === tab.id ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-slate-200"
+                activeTab === tab.id
+                  ? "bg-slate-900 dark:bg-purple-600 text-white"
+                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
               }`}
             >
               {tab.label}
@@ -513,7 +515,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         {activeTab === "courses" && (
           <div className="grid lg:grid-cols-[380px,1fr] gap-6">
           {/* Courses list */}
-          <Card className="border border-slate-100 shadow-sm bg-white">
+          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
                 <BookOpen className="w-5 h-5" />
@@ -530,47 +532,47 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     key={course.id}
                     onClick={() => setSelectedId(course.id)}
                     className={`w-full p-3 rounded-xl text-left transition-all border ${
-                      active ? "bg-purple-50 border-purple-400 shadow" : "bg-white hover:bg-slate-50 border-slate-100"
+                      active ? "bg-purple-50 dark:bg-purple-900/30 border-purple-400 dark:border-purple-600 shadow" : "bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-100 dark:border-slate-600"
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <LanguageIcon language={langKey} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm truncate">{course.title}</h3>
+                        <h3 className="font-medium text-sm truncate text-slate-900 dark:text-slate-100">{course.title}</h3>
                         <div className="flex items-center gap-2 mt-1 text-xs">
                           <Badge variant="outline">{levelLabel}</Badge>
                           {course.isPublished ? (
-                            <Badge className="bg-green-100 text-green-700 text-xs">Live</Badge>
+                            <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs">Live</Badge>
                           ) : (
-                            <Badge className="bg-slate-100 text-slate-600 text-xs">Draft</Badge>
+                            <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs">Draft</Badge>
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                      <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                     </div>
                   </button>
                 );
               })}
               {courseList.length === 0 && (
                 <div className="text-center py-8">
-                  <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-slate-500 text-sm">No courses yet</p>
+                  <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">No courses yet</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Details and lessons */}
-          <Card className="border border-slate-100 shadow-sm bg-white min-h-[420px]">
+          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800 min-h-[420px]">
             {selected ? (
               <>
-                <div className="flex flex-col gap-4 border-b border-slate-100 p-6">
+                <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-slate-700 p-6">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex items-start gap-3">
                       <LanguageIcon language={(selected.language || "html").toLowerCase()} size="lg" />
                       <div>
-                        <div className="text-xl font-bold text-slate-900">{selected.title}</div>
-                        {selected.description && <p className="text-sm text-slate-600 mt-1">{selected.description}</p>}
+                        <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{selected.title}</div>
+                        {selected.description && <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{selected.description}</p>}
                         <div className="flex items-center gap-2 mt-2 text-xs">
                           <Badge variant="outline">{(selected.level || "BEGINNER").toLowerCase()}</Badge>
                           <Badge variant="outline">
@@ -603,7 +605,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-red-600"
+                        className="text-red-600 dark:text-red-400"
                         disabled={dbError}
                         onClick={() => handleDeleteCourse(selected.id)}
                       >
@@ -611,19 +613,19 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-slate-500">
-                    <Badge className="bg-purple-100 text-purple-700">
+                  <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                    <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
                       {(selected.level || "BEGINNER").toLowerCase()}
                     </Badge>
-                    <Badge className="bg-slate-100 text-slate-700">
+                    <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                       {selected.ageGroup ? selected.ageGroup.replace("AGES_", "").replace("_", "-") : "7-10"}
                     </Badge>
-                    {selected.totalXp ? <Badge className="bg-slate-100 text-slate-700">{selected.totalXp} XP</Badge> : null}
+                    {selected.totalXp ? <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">{selected.totalXp} XP</Badge> : null}
                   </div>
                 </div>
 
                 <div className="p-6 space-y-3">
-                  <div className="flex items-center justify-between text-sm font-semibold text-slate-900">
+                  <div className="flex items-center justify-between text-sm font-semibold text-slate-900 dark:text-slate-100">
                     <span>Lessons ({lessons.length})</span>
                     <Button
                       size="sm"
@@ -640,13 +642,13 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   </div>
 
                   {lessonError ? (
-                    <div className="text-sm text-red-600">{lessonError}</div>
+                    <div className="text-sm text-red-600 dark:text-red-400">{lessonError}</div>
                   ) : lessonsLoading ? (
-                    <div className="text-sm text-slate-500">Loading lessons...</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400">Loading lessons...</div>
                   ) : lessons.length === 0 ? (
-                    <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl">
-                      <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                      <p className="text-slate-500">No lessons yet</p>
+                    <div className="text-center py-10 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                      <FileText className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                      <p className="text-slate-500 dark:text-slate-400">No lessons yet</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -655,28 +657,28 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                         .map((lesson, index) => (
                           <div
                             key={lesson.id}
-                            className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition"
+                            className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition"
                           >
-                            <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-semibold">
+                            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center font-semibold">
                               {index + 1}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-sm text-slate-900">{lesson.title}</h4>
-                              {lesson.description && <p className="text-xs text-slate-500">{lesson.description}</p>}
-                              <p className="text-xs text-slate-500">{lesson.xpReward ?? 50} XP</p>
+                              <h4 className="font-medium text-sm text-slate-900 dark:text-slate-100">{lesson.title}</h4>
+                              {lesson.description && <p className="text-xs text-slate-500 dark:text-slate-400">{lesson.description}</p>}
+                              <p className="text-xs text-slate-500 dark:text-slate-400">{lesson.xpReward ?? 50} XP</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs">
                                 {(lesson as any).videoUrl || (lesson as any).video_url ? "Video" : "Text"}
                               </Badge>
                               <button
-                                className="text-xs text-amber-600 hover:text-amber-800"
+                                className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
                                 onClick={() => openQuizModal(lesson.id)}
                               >
                                 Quiz
                               </button>
                               <button
-                                className="text-xs text-purple-600 hover:text-purple-800"
+                                className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
                                 onClick={() => {
                                   setLessonForm({
                                     title: lesson.title || "",
@@ -695,7 +697,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                                 Edit
                               </button>
                               <button
-                                className="text-xs text-red-500 hover:text-red-700"
+                                className="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                                 onClick={async () => {
                                   if (!confirm("Delete this lesson?")) return;
                                   try {
@@ -724,9 +726,9 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </>
             ) : (
               <CardContent className="p-12 text-center">
-                <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Select a Course</h3>
-                <p className="text-slate-500">Choose a course from the list to view and manage its lessons</p>
+                <BookOpen className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">Select a Course</h3>
+                <p className="text-slate-500 dark:text-slate-400">Choose a course from the list to view and manage its lessons</p>
               </CardContent>
             )}
           </Card>
@@ -734,10 +736,10 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         )}
 
         {activeTab === "classes" && (
-          <Card className="border border-slate-100 shadow-sm bg-white">
+          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
             <CardContent className="p-8 text-center space-y-2">
-              <h3 className="text-lg font-semibold text-slate-900">Live Classes</h3>
-              <p className="text-slate-600 text-sm">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Live Classes</h3>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
                 Scheduling is demo-only in this local build. Use the instructor dashboard to create classes.
               </p>
             </CardContent>
@@ -745,7 +747,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         )}
 
         {activeTab === "certificates" && (
-          <Card className="border border-slate-100 shadow-sm bg-white">
+          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AwardIcon className="w-5 h-5 text-amber-500" />
@@ -753,25 +755,25 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-600 mb-6">
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
                 Award certificates to students who have completed courses or achieved milestones.
               </p>
               {demoStudents.length === 0 ? (
-                <div className="text-center text-slate-500 py-8 border border-dashed border-slate-200 rounded-xl">
+                <div className="text-center text-slate-500 dark:text-slate-400 py-8 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
                   No students available yet. Add students to issue certificates.
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {demoStudents.map((stu) => (
-                    <Card key={stu.id} className="bg-slate-50">
+                    <Card key={stu.id} className="bg-slate-50 dark:bg-slate-700">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold flex items-center justify-center">
                             {stu.name[0]}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900">{stu.name}</div>
-                            <div className="text-xs text-slate-500">{stu.xp} XP</div>
+                            <div className="font-semibold text-slate-900 dark:text-slate-100">{stu.name}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">{stu.xp} XP</div>
                           </div>
                         </div>
                         <Button
@@ -795,10 +797,10 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         )}
 
         {activeTab === "coupons" && (
-          <Card className="border border-slate-100 shadow-sm bg-white">
+          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
             <CardHeader className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Ticket className="w-5 h-5 text-green-600" />
+                <Ticket className="w-5 h-5 text-green-600 dark:text-green-500" />
                 Coupons
               </CardTitle>
               <Button
@@ -826,23 +828,23 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
             <CardContent>
               {coupons.length === 0 ? (
                 <div className="text-center py-10">
-                  <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-200 mx-auto mb-3 flex items-center justify-center">
-                    <Ticket className="w-6 h-6 text-slate-300" />
+                  <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-200 dark:border-slate-700 mx-auto mb-3 flex items-center justify-center">
+                    <Ticket className="w-6 h-6 text-slate-300 dark:text-slate-600" />
                   </div>
-                  <p className="font-semibold text-slate-800">No coupons yet</p>
-                  <p className="text-sm text-slate-500">Create discount coupons to attract more students.</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">No coupons yet</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Create discount coupons to attract more students.</p>
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {coupons.map((cpn) => (
-                    <Card key={cpn.code} className="border border-slate-100 shadow-sm">
+                    <Card key={cpn.code} className="border border-slate-100 dark:border-slate-700 shadow-sm">
                       <CardContent className="p-4 space-y-2">
                         <div className="flex items-start justify-between">
-                          <Badge className={cpn.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}>
+                          <Badge className={cpn.isActive ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400"}>
                             {cpn.isActive ? "Active" : "Inactive"}
                           </Badge>
                           <button
-                            className="text-xs text-red-500"
+                            className="text-xs text-red-500 dark:text-red-400"
                             onClick={() => deleteCoupon(cpn.code)}
                             type="button"
                           >
@@ -850,20 +852,20 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                           </button>
                         </div>
                         <div className="flex items-center gap-2">
-                          <code className="px-3 py-1 rounded bg-slate-100 font-mono text-sm">{cpn.code}</code>
-                          <button type="button" onClick={() => copyCoupon(cpn.code)} className="text-slate-500 hover:text-slate-800">
-                            {copiedCode === cpn.code ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          <code className="px-3 py-1 rounded bg-slate-100 dark:bg-slate-700 font-mono text-sm text-slate-900 dark:text-slate-100">{cpn.code}</code>
+                          <button type="button" onClick={() => copyCoupon(cpn.code)} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                            {copiedCode === cpn.code ? <Check className="w-4 h-4 text-green-600 dark:text-green-500" /> : <Copy className="w-4 h-4" />}
                           </button>
                         </div>
-                        <div className="text-lg font-bold text-green-600">
+                        <div className="text-lg font-bold text-green-600 dark:text-green-500">
                           {cpn.discountType === "percentage" ? `${cpn.discountValue}% OFF` : `$${(cpn.discountValue / 100).toFixed(2)} OFF`}
                         </div>
-                        {cpn.description && <p className="text-sm text-slate-500">{cpn.description}</p>}
-                        <div className="text-xs text-slate-500">
+                        {cpn.description && <p className="text-sm text-slate-500 dark:text-slate-400">{cpn.description}</p>}
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
                           Uses: {cpn.currentUses ?? 0}/{cpn.maxUses ?? "∞"}
                         </div>
                         {(cpn.validFrom || cpn.validUntil) && (
-                          <div className="text-xs text-slate-500 space-y-1">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
                             {cpn.validFrom && <div>From: {cpn.validFrom}</div>}
                             {cpn.validUntil && <div>Until: {cpn.validUntil}</div>}
                           </div>
@@ -880,9 +882,9 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
 
       {couponModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl relative">
             <button
-              className="absolute top-3 right-3 text-slate-500 hover:text-slate-700"
+              className="absolute top-3 right-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
               onClick={() => setCouponModalOpen(false)}
               type="button"
             >
@@ -896,8 +898,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               }}
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <Ticket className="w-5 h-5 text-green-600" />
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Ticket className="w-5 h-5 text-green-600 dark:text-green-500" />
                   Create Coupon
                 </h2>
                 <Button type="button" variant="outline" onClick={generateCouponCode}>
@@ -906,7 +908,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </div>
               <div className="grid grid-cols-[1fr,120px] gap-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Code</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Code</label>
                   <Input
                     value={couponForm.code}
                     onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
@@ -916,7 +918,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Uses</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Uses</label>
                   <Input
                     type="number"
                     value={couponForm.maxUses ?? 0}
@@ -927,18 +929,18 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Discount Type</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Discount Type</label>
                   <select
                     value={couponForm.discountType}
                     onChange={(e) => setCouponForm({ ...couponForm, discountType: e.target.value as "percentage" | "fixed" })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-200 dark:focus:ring-green-600"
                   >
                     <option value="percentage">Percentage</option>
                     <option value="fixed">Fixed (cents)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     {couponForm.discountType === "percentage" ? "Discount %" : "Amount (cents)"}
                   </label>
                   <Input
@@ -950,7 +952,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-700">Description</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
                 <Input
                   value={couponForm.description}
                   onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
@@ -960,7 +962,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Valid From</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Valid From</label>
                   <Input
                     type="date"
                     value={couponForm.validFrom}
@@ -969,7 +971,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Valid Until</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Valid Until</label>
                   <Input
                     type="date"
                     value={couponForm.validUntil}
@@ -984,9 +986,9 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   type="checkbox"
                   checked={couponForm.isActive}
                   onChange={(e) => setCouponForm({ ...couponForm, isActive: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-400"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-400"
                 />
-                <label htmlFor="coupon-active" className="text-sm text-slate-700">
+                <label htmlFor="coupon-active" className="text-sm text-slate-700 dark:text-slate-300">
                   Active
                 </label>
               </div>
@@ -1002,8 +1004,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
       )}
       {courseModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative">
-            <button className="absolute top-3 right-3 text-slate-500 hover:text-slate-700" onClick={() => setCourseModalOpen(false)} type="button">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl relative">
+            <button className="absolute top-3 right-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" onClick={() => setCourseModalOpen(false)} type="button">
               <X className="w-5 h-5" />
             </button>
             <form
@@ -1014,13 +1016,13 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               }}
             >
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   {editingCourseId ? "Edit Course" : "Create New Course"}
                 </h2>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Title</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
                   <Input
                     value={courseForm.title}
                     onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
@@ -1029,22 +1031,22 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Description</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
                   <textarea
                     value={courseForm.description}
                     onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
                     placeholder="What will students learn?"
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={3}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-slate-700">Language</label>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Language</label>
                     <select
                       value={courseForm.language}
                       onChange={(e) => setCourseForm({ ...courseForm, language: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     >
                       <option value="HTML">HTML</option>
                       <option value="CSS">CSS</option>
@@ -1054,11 +1056,11 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-slate-700">Level</label>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Level</label>
                     <select
                       value={courseForm.level}
                       onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     >
                       <option value="BEGINNER">Beginner</option>
                       <option value="INTERMEDIATE">Intermediate</option>
@@ -1068,11 +1070,11 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-slate-700">Age Group</label>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Age Group</label>
                     <select
                       value={courseForm.ageGroup}
                       onChange={(e) => setCourseForm({ ...courseForm, ageGroup: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     >
                       <option value="AGES_7_10">7-10 years</option>
                       <option value="AGES_11_14">11-14 years</option>
@@ -1080,7 +1082,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-slate-700">Total XP</label>
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Total XP</label>
                     <Input
                       type="number"
                       value={courseForm.totalXp}
@@ -1089,7 +1091,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     />
                   </div>
                 </div>
-                {courseError && <p className="text-sm text-red-600">{courseError}</p>}
+                {courseError && <p className="text-sm text-red-600 dark:text-red-400">{courseError}</p>}
               </div>
               <div className="flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setCourseModalOpen(false)}>
@@ -1106,8 +1108,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
 
       {lessonModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl relative">
-            <button className="absolute top-3 right-3 text-slate-500 hover:text-slate-700" onClick={() => setLessonModalOpen(false)} type="button">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl relative">
+            <button className="absolute top-3 right-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" onClick={() => setLessonModalOpen(false)} type="button">
               <X className="w-5 h-5" />
             </button>
             <form
@@ -1118,13 +1120,13 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               }}
             >
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                   {editingLessonId ? "Edit Lesson" : "Add New Lesson"}
                 </h2>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Title</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
                   <Input
                     value={lessonForm.title}
                     onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
@@ -1133,27 +1135,27 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Description</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
                   <textarea
                     value={lessonForm.description}
                     onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })}
                     placeholder="Brief description of this lesson"
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={2}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Content (Markdown supported)</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Content (Markdown supported)</label>
                   <textarea
                     value={lessonForm.content}
                     onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
                     placeholder="Lesson content..."
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={4}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Video URL (optional)</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Video URL (optional)</label>
                   <Input
                     value={lessonForm.videoUrl}
                     onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
@@ -1162,27 +1164,27 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Example Code</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Example Code</label>
                   <textarea
                     value={lessonForm.exampleCode}
                     onChange={(e) => setLessonForm({ ...lessonForm, exampleCode: e.target.value })}
                     placeholder="<h1>Hello World</h1>"
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner font-mono focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner font-mono focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={3}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Exercise Instructions</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Exercise Instructions</label>
                   <textarea
                     value={lessonForm.exerciseInstructions}
                     onChange={(e) => setLessonForm({ ...lessonForm, exerciseInstructions: e.target.value })}
                     placeholder="What should students do?"
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={2}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">XP Reward</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">XP Reward</label>
                   <Input
                     type="number"
                     value={lessonForm.xpReward}
@@ -1190,7 +1192,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     className="mt-1"
                   />
                 </div>
-                {lessonError && <p className="text-sm text-red-600">{lessonError}</p>}
+                {lessonError && <p className="text-sm text-red-600 dark:text-red-400">{lessonError}</p>}
               </div>
               <div className="flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setLessonModalOpen(false)}>
@@ -1207,8 +1209,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
 
       {certificateModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative">
-            <button className="absolute top-3 right-3 text-slate-500 hover:text-slate-700" onClick={() => setCertificateModal(false)} type="button">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative">
+            <button className="absolute top-3 right-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" onClick={() => setCertificateModal(false)} type="button">
               <X className="w-5 h-5" />
             </button>
             <form
@@ -1221,18 +1223,18 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               }}
             >
               <div>
-                <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <AwardIcon className="w-5 h-5 text-amber-500" />
                   Issue Certificate
                 </h2>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Student</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Student</label>
                   <select
                     value={certForm.student}
                     onChange={(e) => setCertForm({ ...certForm, student: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     required
                     disabled={demoStudents.length === 0}
                   >
@@ -1245,11 +1247,11 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Course</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Course</label>
                   <select
                     value={certForm.course}
                     onChange={(e) => setCertForm({ ...certForm, course: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     required
                   >
                     <option value="">Select course</option>
@@ -1261,11 +1263,11 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Achievement Type</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Achievement Type</label>
                   <select
                     value={certForm.achievement}
                     onChange={(e) => setCertForm({ ...certForm, achievement: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                   >
                     <option value="course_completion">Course Completion</option>
                     <option value="track_completion">Track Completion</option>
@@ -1288,8 +1290,8 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
 
       {quizModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative">
-            <button className="absolute top-3 right-3 text-slate-500 hover:text-slate-700" onClick={() => setQuizModalOpen(false)} type="button">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl relative">
+            <button className="absolute top-3 right-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" onClick={() => setQuizModalOpen(false)} type="button">
               <X className="w-5 h-5" />
             </button>
             <form
@@ -1297,26 +1299,26 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               onSubmit={(e) => e.preventDefault()}
             >
               <div>
-                <h2 className="text-xl font-semibold text-slate-900">Add Quiz Question</h2>
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Add Quiz Question</h2>
                 {quizQuestions.length > 0 && (
-                  <p className="text-xs text-slate-500 mt-1">{quizQuestions.length} question(s) saved for this lesson.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{quizQuestions.length} question(s) saved for this lesson.</p>
                 )}
               </div>
               {quizQuestions.length > 0 && (
-                <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-sm font-semibold text-slate-700">Existing Questions</p>
+                <div className="space-y-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700 p-3">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Existing Questions</p>
                   <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                     {quizQuestions.map((q, idx) => (
-                      <div key={idx} className="rounded-lg border border-slate-200 bg-white px-3 py-2 flex items-start justify-between gap-2 text-sm">
+                      <div key={idx} className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 flex items-start justify-between gap-2 text-sm">
                         <div className="flex-1">
-                          <p className="font-medium text-slate-800">{q.question || `Question ${idx + 1}`}</p>
-                          <p className="text-xs text-slate-500">
+                          <p className="font-medium text-slate-800 dark:text-slate-200">{q.question || `Question ${idx + 1}`}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             {q.questionType} • XP {q.xpReward ?? 10}
                           </p>
                         </div>
                         <button
                           type="button"
-                          className="text-xs text-red-500 hover:text-red-700"
+                          className="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                           onClick={() => {
                             setQuizQuestions((prev) => prev.filter((_, i) => i !== idx));
                           }}
@@ -1330,17 +1332,17 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               )}
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Question</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Question</label>
                   <textarea
                     value={quizForm.question}
                     onChange={(e) => setQuizForm({ ...quizForm, question: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={2}
                     placeholder="What does HTML stand for?"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Question Type</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Question Type</label>
                   <select
                     value={quizForm.questionType}
                     onChange={(e) =>
@@ -1349,7 +1351,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                         questionType: e.target.value as QuizQuestionForm["questionType"],
                       })
                     }
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                   >
                     <option value="MULTIPLE_CHOICE">Multiple Choice</option>
                     <option value="TRUE_FALSE">True / False</option>
@@ -1357,7 +1359,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Answer Options</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Answer Options</label>
                   <div className="space-y-2">
                     {quizForm.options.map((opt, idx) => (
                       <Input
@@ -1374,7 +1376,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Correct Answer</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Correct Answer</label>
                   <Input
                     value={quizForm.correctAnswer}
                     onChange={(e) => setQuizForm({ ...quizForm, correctAnswer: e.target.value })}
@@ -1382,17 +1384,17 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">Explanation (shown after answer)</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Explanation (shown after answer)</label>
                   <textarea
                     value={quizForm.explanation}
                     onChange={(e) => setQuizForm({ ...quizForm, explanation: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     rows={2}
                     placeholder="Why this answer is correct..."
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700">XP Reward</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">XP Reward</label>
                   <Input
                     type="number"
                     value={quizForm.xpReward}

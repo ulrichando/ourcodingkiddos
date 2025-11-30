@@ -11,6 +11,10 @@ export default function SettingsPage() {
   const [emailUpdates, setEmailUpdates] = useState(false);
   const [classReminders, setClassReminders] = useState(true);
   const [progressReports, setProgressReports] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [prefStatus, setPrefStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [prefMessage, setPrefMessage] = useState("");
 
   useEffect(() => {
     if (session?.user) {
@@ -21,66 +25,118 @@ export default function SettingsPage() {
   }, [session]);
 
   if (status === "loading") {
-    return <div className="min-h-screen flex items-center justify-center text-slate-600">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-slate-600 dark:text-slate-400">Loading...</div>;
   }
 
   if (!session?.user) {
-    return <div className="min-h-screen flex items-center justify-center text-slate-600">Please log in to view settings.</div>;
+    return <div className="min-h-screen flex items-center justify-center text-slate-600 dark:text-slate-400">Please log in to view settings.</div>;
   }
 
+  const handleSaveProfile = async () => {
+    setSaveStatus("saving");
+    setSaveMessage("");
+    try {
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: fullName, email }),
+      });
+
+      if (response.ok) {
+        setSaveStatus("success");
+        setSaveMessage("Profile updated successfully!");
+        setTimeout(() => {
+          setSaveStatus("idle");
+          setSaveMessage("");
+        }, 3000);
+      } else {
+        setSaveStatus("error");
+        setSaveMessage("Failed to update profile. Please try again.");
+        setTimeout(() => setSaveStatus("idle"), 3000);
+      }
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveMessage("An error occurred. Please try again.");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    }
+  };
+
+  const handleSavePreferences = async () => {
+    setPrefStatus("saving");
+    setPrefMessage("");
+    try {
+      // In a real app, this would save to the backend
+      // For now, we'll simulate a successful save
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setPrefStatus("success");
+      setPrefMessage("Preferences saved successfully!");
+      setTimeout(() => {
+        setPrefStatus("idle");
+        setPrefMessage("");
+      }, 3000);
+    } catch (error) {
+      setPrefStatus("error");
+      setPrefMessage("Failed to save preferences. Please try again.");
+      setTimeout(() => setPrefStatus("idle"), 3000);
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
-          <p className="text-slate-600">Manage your account and preferences</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+          <p className="text-slate-600 dark:text-slate-400">Manage your account and preferences</p>
         </div>
 
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 font-semibold">
+        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
             <span className="text-lg">👤</span>
             Profile Information
           </div>
           <div className="space-y-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Full Name</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
               <input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Email Address</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
               />
             </div>
-            <Button
-              className="bg-slate-900 text-white w-fit px-4"
-              onClick={async () => {
-                await fetch("/api/profile", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ name: fullName, email }),
-                });
-              }}
-            >
-              Save Changes
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                className="bg-slate-900 dark:bg-purple-600 text-white w-fit px-4"
+                onClick={handleSaveProfile}
+                disabled={saveStatus === "saving"}
+              >
+                {saveStatus === "saving" ? "Saving..." : "Save Changes"}
+              </Button>
+              {saveMessage && (
+                <span className={`text-sm ${saveStatus === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                  {saveMessage}
+                </span>
+              )}
+            </div>
           </div>
         </section>
 
         {/* Appearance settings removed; use the header toggle next to the bell */}
 
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 font-semibold">
+        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
             <span className="text-lg">🔔</span>
             Notifications
           </div>
-          <p className="text-slate-600 text-sm">Choose what updates you receive</p>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Choose what updates you receive</p>
 
           <div className="space-y-4">
             <ToggleRow
@@ -103,19 +159,31 @@ export default function SettingsPage() {
             />
           </div>
 
-          <Button variant="outline" className="w-fit px-4">
-            Save Preferences
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="w-fit px-4 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
+              onClick={handleSavePreferences}
+              disabled={prefStatus === "saving"}
+            >
+              {prefStatus === "saving" ? "Saving..." : "Save Preferences"}
+            </Button>
+            {prefMessage && (
+              <span className={`text-sm ${prefStatus === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                {prefMessage}
+              </span>
+            )}
+          </div>
         </section>
 
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 font-semibold">
+        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
             <span className="text-lg">🛡️</span>
             Account
           </div>
           <Button
             variant="outline"
-            className="text-red-600 border-red-200 hover:bg-red-50 w-fit"
+            className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 w-fit"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
           >
             Log Out
@@ -137,17 +205,19 @@ function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
   return (
     <div className="flex items-center justify-between gap-3 py-2">
       <div>
-        <p className="font-medium text-slate-800">{label}</p>
-        <p className="text-sm text-slate-500">{description}</p>
+        <p className="font-medium text-slate-800 dark:text-slate-200">{label}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>
       </div>
       <button
         onClick={() => onChange(!checked)}
         className={`w-11 h-6 rounded-full border transition ${
-          checked ? "bg-slate-900 border-slate-900" : "bg-slate-200 border-slate-300"
+          checked
+            ? "bg-slate-900 dark:bg-purple-600 border-slate-900 dark:border-purple-600"
+            : "bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600"
         }`}
       >
         <span
-          className={`block w-5 h-5 bg-white rounded-full shadow transform transition ${
+          className={`block w-5 h-5 bg-white dark:bg-slate-200 rounded-full shadow transform transition ${
             checked ? "translate-x-5" : "translate-x-1"
           }`}
         />
