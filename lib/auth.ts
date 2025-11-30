@@ -5,13 +5,6 @@ import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 
-const demoEmail = process.env.DEMO_ADMIN_EMAIL ?? "demo@ourcodingkiddos.com";
-const demoPassword = process.env.DEMO_ADMIN_PASSWORD ?? "demo1234";
-const demoParentEmail = process.env.DEMO_PARENT_EMAIL ?? "demo.parent@ourcodingkiddos.com";
-const demoInstructorEmail = process.env.DEMO_INSTRUCTOR_EMAIL ?? "demo.instructor@ourcodingkiddos.com";
-const demoStudentEmail = process.env.DEMO_STUDENT_EMAIL ?? "demo.student@ourcodingkiddos.com";
-const demoUserPassword = process.env.DEMO_USER_PASSWORD ?? "demo1234";
-
 // Email provider is enabled only if SMTP settings are present
 const emailProvider =
   process.env.EMAIL_SERVER && process.env.EMAIL_FROM
@@ -35,7 +28,7 @@ const providers: NextAuthOptions["providers"] = [
       const password = credentials?.password;
       if (!email || !password) return null;
 
-      // Primary: look up user in DB
+      // Look up user in DB only (no demo fallbacks)
       try {
         const user = await prisma.user.findUnique({ where: { email } });
         if (user?.hashedPassword) {
@@ -50,47 +43,7 @@ const providers: NextAuthOptions["providers"] = [
           };
         }
       } catch (e) {
-        // Swallow DB errors and allow fallback to demo login
-      }
-
-      // Fallback: allow demo admin login (env-configurable, with safe defaults)
-      if (email === demoEmail && password === demoPassword) {
-        return {
-          id: "demo-admin",
-          name: "Demo Admin",
-          email: demoEmail,
-          role: "ADMIN",
-        };
-      }
-
-      // Demo parent
-      if (email === demoParentEmail && password === demoUserPassword) {
-        return {
-          id: "demo-parent",
-          name: "Demo Parent",
-          email: demoParentEmail,
-          role: "PARENT",
-        };
-      }
-
-      // Demo instructor
-      if (email === demoInstructorEmail && password === demoUserPassword) {
-        return {
-          id: "demo-instructor",
-          name: "Demo Instructor",
-          email: demoInstructorEmail,
-          role: "INSTRUCTOR",
-        };
-      }
-
-      // Demo student
-      if (email === demoStudentEmail && password === demoUserPassword) {
-        return {
-          id: "demo-student",
-          name: "Demo Student",
-          email: demoStudentEmail,
-          role: "STUDENT",
-        };
+        // Swallow DB errors and reject authentication gracefully
       }
 
       return null;
