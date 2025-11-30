@@ -61,16 +61,11 @@ export default function ParentDashboardPage() {
             endDate: sub.endDate ? new Date(sub.endDate) : undefined,
           });
         } else {
-          // Demo free trial fallback
-          const start = new Date();
-          const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
-          setSubscription({ plan_type: "free_trial", status: "active", startDate: start, endDate: end });
+          setSubscription(null);
         }
       })
       .catch(() => {
-        const start = new Date();
-        const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
-        setSubscription({ plan_type: "free_trial", status: "active", startDate: start, endDate: end });
+        setSubscription(null);
       });
   }, [session?.user?.email]);
 
@@ -85,7 +80,9 @@ export default function ParentDashboardPage() {
       ? subscription.plan_type === "family"
         ? "Premium Family"
         : "Premium"
-      : "Free Trial";
+      : subscription?.plan_type === "free_trial"
+        ? "Free Trial"
+        : "No Plan";
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -286,7 +283,7 @@ export default function ParentDashboardPage() {
                   {
                     label: "Contact Instructor",
                     icon: MessageSquare,
-                    href: "/messages?to=demo.instructor@ourcodingkiddos.com&subject=Question%20about%20my%20student",
+                    href: "/messages",
                   },
                 ].map((action) => (
                   <Link key={action.label} href={action.href}>

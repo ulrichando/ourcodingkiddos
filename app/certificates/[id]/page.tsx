@@ -5,22 +5,12 @@ import { use } from "react";
 import { ArrowLeft, Calendar, Download } from "lucide-react";
 import Button from "../../../components/ui/button";
 
-const demoCerts = [
-  {
-    id: "cert-demo",
-    student: "Demo Student",
-    course: "HTML Basics for Kids",
-    issued: "Nov 28, 2025",
-    type: "Certificate of Completion",
-    code: "CK-DEMO-001",
-  },
-];
-
 export default function CertificateDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const cert = demoCerts.find((c) => c.id === id) || demoCerts[0];
+  const cert = null;
 
   const handleDownload = () => {
+    if (!cert) return;
     const html = `
       <html>
         <head>
@@ -69,6 +59,22 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
       URL.revokeObjectURL(url);
     }
   };
+
+  if (!cert) {
+    return (
+      <main className="min-h-screen bg-slate-50 text-slate-900">
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
+          <Link href="/certificates" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Certificates
+          </Link>
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-600">
+            No certificate found.
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">

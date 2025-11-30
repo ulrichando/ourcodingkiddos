@@ -5,18 +5,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import CertificateCard from "../../components/certificates/CertificateCard";
 
-const demoCertificates = [
-  {
-    id: "cert-demo",
-    course_title: "HTML Basics for Kids",
-    student_name: "Demo Student",
-    issued_date: "2025-11-28",
-    achievement_type: "course_completion" as const,
-  },
-];
-
 export default function CertificatesPage() {
-  const certificates = useMemo(() => demoCertificates, []);
+  const certificates = useMemo(() => [], []);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -30,11 +20,17 @@ export default function CertificatesPage() {
           <p className="text-slate-600">Celebrate your achievements!</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {certificates.map((cert) => (
-            <CertificateCard key={cert.id} certificate={cert} />
-          ))}
-        </div>
+        {certificates.length === 0 ? (
+          <div className="border border-dashed border-slate-200 rounded-xl p-10 text-center text-slate-500">
+            No certificates yet. Complete a course to earn your first certificate.
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            {certificates.map((cert) => (
+              <CertificateCard key={cert.id} certificate={cert} />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

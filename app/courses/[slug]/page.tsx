@@ -113,7 +113,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     course = null;
   }
 
-  if (!course && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false") {
+  const allowDemo = role === "ADMIN" && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false";
+
+  if (!course && allowDemo) {
     const demo = demoCourses.find(
       (d) =>
         d.slug === slugParam ||
@@ -126,8 +128,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     }
   }
 
-  // Fallback to mock courses (static data) even if demo flag is false, so preview links never 404 in development
-  if (!course && mockCourses.length) {
+  // Only allow mock course fallback for admin demo mode
+  if (!course && allowDemo && mockCourses.length) {
     const mock = mockCourses.find((c: any) => {
       const mockSlug = (c as any).slug ?? normalizeSlug(c.title);
       return c.id === slugParam || mockSlug === slugParam || normalizeSlug(c.title) === normalizedSlug || c.id === normalizedSlug;

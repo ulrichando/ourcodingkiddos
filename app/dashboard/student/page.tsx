@@ -18,33 +18,8 @@ type ClassItem = {
   meetingUrl?: string;
 };
 
-const demoContinue = [
-  {
-    id: "html-basics",
-    title: "HTML Basics for Kids",
-    description: "Learn to build your first web page!",
-    language: "html",
-    totalLessons: 8,
-    completed: 1,
-    progress: 13,
-  },
-  {
-    id: "css-magic",
-    title: "CSS Magic: Style Your Pages",
-    description: "Make sites beautiful with colors, fonts, and layouts.",
-    language: "css",
-    totalLessons: 10,
-    completed: 0,
-    progress: 0,
-    isNew: true,
-  },
-];
-
-const demoRecommended = [
-  { id: "css-magic-2", title: "CSS Magic: Style Your Pages", language: "css", level: "beginner", age: "7-10", xp: 500 },
-  { id: "js-adventures", title: "JavaScript Adventures", language: "javascript", level: "beginner", age: "11-14", xp: 750 },
-  { id: "python-kids", title: "Python for Young Coders", language: "python", level: "beginner", age: "11-14", xp: 750 },
-];
+const demoContinue: any[] = [];
+const demoRecommended: any[] = [];
 
 export default function StudentDashboard() {
   const searchParams = useSearchParams();
@@ -58,9 +33,9 @@ export default function StudentDashboard() {
     avatar?: string;
   }>({
     name: "Coder",
-    totalXp: 1300,
-    currentLevel: 3,
-    streakDays: 5,
+    totalXp: 0,
+    currentLevel: 1,
+    streakDays: 0,
   });
 
   React.useEffect(() => {
@@ -196,36 +171,42 @@ export default function StudentDashboard() {
         {/* Continue Learning */}
         <section className="space-y-3">
           <h3 className="text-xl font-bold flex items-center gap-2">Continue Learning</h3>
-          <div className="grid md:grid-cols-2 gap-4">
-            {demoContinue.map((c) => (
-              <Link key={c.id} href={`/courses/${c.id}`}>
-                <div className="rounded-2xl bg-white text-slate-900 shadow-lg hover:shadow-xl transition overflow-hidden">
-                  <div className="h-1 bg-slate-200 w-full">
-                    <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${c.progress}%` }} />
-                  </div>
-                  <div className="p-4 flex items-start gap-3">
-                    <LanguageIcon language={c.language || "html"} size="lg" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 text-xs">
-                        {c.isNew ? (
-                          <Badge className="bg-green-100 text-green-700">New</Badge>
-                        ) : (
-                          <Badge variant="outline">
-                            {c.completed}/{c.totalLessons} lessons • {c.progress}%
-                          </Badge>
-                        )}
-                      </div>
-                      <h4 className="font-bold text-lg line-clamp-1">{c.title}</h4>
-                      <p className="text-sm text-slate-500 line-clamp-1">{c.description}</p>
+          {demoContinue.length === 0 ? (
+            <div className="rounded-2xl border border-white/20 bg-white/5 text-white/80 p-6 text-center">
+              No courses in progress yet. Start a course to see it here.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {demoContinue.map((c) => (
+                <Link key={c.id} href={`/courses/${c.id}`}>
+                  <div className="rounded-2xl bg-white text-slate-900 shadow-lg hover:shadow-xl transition overflow-hidden">
+                    <div className="h-1 bg-slate-200 w-full">
+                      <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${c.progress}%` }} />
                     </div>
-                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
-                      {c.isNew ? "Start Learning" : "Continue"}
-                    </Button>
+                    <div className="p-4 flex items-start gap-3">
+                      <LanguageIcon language={c.language || "html"} size="lg" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 text-xs">
+                          {c.isNew ? (
+                            <Badge className="bg-green-100 text-green-700">New</Badge>
+                          ) : (
+                            <Badge variant="outline">
+                              {c.completed}/{c.totalLessons} lessons • {c.progress}%
+                            </Badge>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-lg line-clamp-1">{c.title}</h4>
+                        <p className="text-sm text-slate-500 line-clamp-1">{c.description}</p>
+                      </div>
+                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
+                        {c.isNew ? "Start Learning" : "Continue"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Badges */}
@@ -249,35 +230,41 @@ export default function StudentDashboard() {
           <h3 className="text-xl font-bold flex items-center gap-2">
             <Zap className="h-6 w-6 text-yellow-300" /> Start Something New
           </h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {demoRecommended.map((course) => (
-              <Link key={course.id} href={`/courses/${course.id}`}>
-                <div className="rounded-2xl bg-white text-slate-900 shadow-lg hover:-translate-y-1 transition overflow-hidden h-full">
-                  <div
-                    className={`h-24 ${
-                      course.language === "css"
-                        ? "bg-gradient-to-br from-sky-400 to-sky-600"
-                        : course.language === "javascript"
-                        ? "bg-gradient-to-br from-amber-400 to-orange-500"
-                        : "bg-gradient-to-br from-green-400 to-emerald-500"
-                    }`}
-                  />
-                  <div className="p-4 space-y-2 -mt-6">
-                    <LanguageIcon language={course.language} size="lg" />
-                    <h4 className="font-bold text-lg">{course.title}</h4>
-                    <div className="flex items-center gap-2 text-xs">
-                      <Badge variant="outline">{course.level}</Badge>
-                      <Badge variant="outline">Ages {course.age}</Badge>
-                    </div>
-                    <div className="flex items-center gap-1 text-amber-500">
-                      <Star className="h-4 w-4 fill-amber-400" />
-                      <span className="font-semibold">{course.xp} XP</span>
+          {demoRecommended.length === 0 ? (
+            <div className="rounded-2xl border border-white/20 bg-white/5 text-white/80 p-6 text-center">
+              No recommendations yet. Browse courses to get started.
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {demoRecommended.map((course) => (
+                <Link key={course.id} href={`/courses/${course.id}`}>
+                  <div className="rounded-2xl bg-white text-slate-900 shadow-lg hover:-translate-y-1 transition overflow-hidden h-full">
+                    <div
+                      className={`h-24 ${
+                        course.language === "css"
+                          ? "bg-gradient-to-br from-sky-400 to-sky-600"
+                          : course.language === "javascript"
+                          ? "bg-gradient-to-br from-amber-400 to-orange-500"
+                          : "bg-gradient-to-br from-green-400 to-emerald-500"
+                      }`}
+                    />
+                    <div className="p-4 space-y-2 -mt-6">
+                      <LanguageIcon language={course.language} size="lg" />
+                      <h4 className="font-bold text-lg">{course.title}</h4>
+                      <div className="flex items-center gap-2 text-xs">
+                        <Badge variant="outline">{course.level}</Badge>
+                        <Badge variant="outline">Ages {course.age}</Badge>
+                      </div>
+                      <div className="flex items-center gap-1 text-amber-500">
+                        <Star className="h-4 w-4 fill-amber-400" />
+                        <span className="font-semibold">{course.xp} XP</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Upcoming */}

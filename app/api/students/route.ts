@@ -141,6 +141,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const isElevated = role === "INSTRUCTOR" || role === "ADMIN";
+  const allowDemo = role === "ADMIN" && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false";
   const whereClause = isElevated
     ? { ...(studentId ? { id: studentId } : {}) }
     : { parentEmail: parentEmail ?? undefined, ...(studentId ? { id: studentId } : {}) };
@@ -160,22 +161,29 @@ export async function GET(request: NextRequest) {
     } as any,
   })) as any[];
 
-  if (students.length === 0 && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false") {
-    return NextResponse.json({
-      students: [
-        {
-          id: "demo-student-1",
-          name: "Demo Student",
-          age: 12,
-          avatar: "🦊",
-          totalXp: 1200,
-          currentLevel: 3,
-          streakDays: 2,
-          parentEmail: "demo.parent@ourcodingkiddos.com",
-          lastActiveDate: new Date().toISOString(),
-        },
-      ],
-    });
+  if (students.length === 0) {
+    const hasAuthenticatedParent = !!parentEmail || isElevated;
+
+    // Only show demo data when explicitly allowed and no authenticated parent context exists.
+    if (allowDemo && !hasAuthenticatedParent) {
+      return NextResponse.json({
+        students: [
+          {
+            id: "demo-student-1",
+            name: "Demo Student",
+            age: 12,
+            avatar: "🦊",
+            totalXp: 1200,
+            currentLevel: 3,
+            streakDays: 2,
+            parentEmail: "demo.parent@ourcodingkiddos.com",
+            lastActiveDate: new Date().toISOString(),
+          },
+        ],
+      });
+    }
+
+    return NextResponse.json({ students: [] });
   }
 
   return NextResponse.json({ students });
