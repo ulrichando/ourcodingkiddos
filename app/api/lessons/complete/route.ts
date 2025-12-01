@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { createNotification } from "../../notifications/route";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -27,16 +28,42 @@ export async function POST(request: Request) {
         totalXp: { increment: xpReward },
         lastActiveDate: new Date(),
       },
-      select: { totalXp: true, currentLevel: true },
+      select: { totalXp: true, currentLevel: true, name: true, parentEmail: true },
     });
 
     // Recalculate level (every 500 XP = new level)
     const newLevel = Math.max(1, Math.floor((updated.totalXp || 0) / 500) + 1);
-    if (newLevel !== updated.currentLevel) {
+    const leveledUp = newLevel !== updated.currentLevel;
+
+    if (leveledUp) {
       await prisma.studentProfile.update({
         where: { id: studentId },
         data: { currentLevel: newLevel },
       });
+
+      // Send level up notification to parent
+      if (updated.parentEmail) {
+        createNotification(
+          updated.parentEmail,
+          `${updated.name} Leveled Up! 🎊`,
+          `${updated.name} reached Level ${newLevel}! Keep up the great work!`,
+          "achievement",
+          "/dashboard/parent/reports",
+          { studentId, studentName: updated.name, newLevel, xpEarned: xpReward }
+        );
+      }
+    } else {
+      // Send XP earned notification to parent
+      if (updated.parentEmail && xpReward >= 100) {
+        createNotification(
+          updated.parentEmail,
+          `${updated.name} Earned ${xpReward} XP! ⭐`,
+          `${updated.name} completed a lesson and earned ${xpReward} XP!`,
+          "progress",
+          "/dashboard/parent/reports",
+          { studentId, studentName: updated.name, xpEarned: xpReward }
+        );
+      }
     }
 
     return NextResponse.json({

@@ -1,68 +1,94 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import Button from "../ui/button";
-import { Bell, Trophy, Flame, Calendar, TrendingUp, Info, CheckCheck, Users, BookOpen, Award } from "lucide-react";
+import { Bell, Trophy, Flame, Calendar, TrendingUp, Info, CheckCheck } from "lucide-react";
 
 type Notification = {
   id: string;
-  userEmail: string;
+  user_email: string;
   title: string;
   message: string;
-  type: "achievement" | "streak" | "class_reminder" | "progress" | "system" | "student_added" | "course_started" | "course_completed" | "welcome";
-  isRead: boolean;
+  type: "achievement" | "streak" | "class_reminder" | "progress" | "system";
+  is_read?: boolean;
   link?: string;
-  createdAt: string;
-  metadata?: Record<string, any>;
+  created_date?: string;
 };
 
 const typeIcons = {
-  achievement: { icon: Trophy, color: "text-amber-500", bg: "bg-amber-100 dark:bg-amber-900/30" },
-  streak: { icon: Flame, color: "text-orange-500", bg: "bg-orange-100 dark:bg-orange-900/30" },
-  class_reminder: { icon: Calendar, color: "text-blue-500", bg: "bg-blue-100 dark:bg-blue-900/30" },
-  progress: { icon: TrendingUp, color: "text-green-500", bg: "bg-green-100 dark:bg-green-900/30" },
-  system: { icon: Info, color: "text-purple-500", bg: "bg-purple-100 dark:bg-purple-900/30" },
-  student_added: { icon: Users, color: "text-cyan-500", bg: "bg-cyan-100 dark:bg-cyan-900/30" },
-  course_started: { icon: BookOpen, color: "text-indigo-500", bg: "bg-indigo-100 dark:bg-indigo-900/30" },
-  course_completed: { icon: Award, color: "text-emerald-500", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
-  welcome: { icon: Info, color: "text-pink-500", bg: "bg-pink-100 dark:bg-pink-900/30" },
+  achievement: { icon: Trophy, color: "text-amber-500", bg: "bg-amber-100" },
+  streak: { icon: Flame, color: "text-orange-500", bg: "bg-orange-100" },
+  class_reminder: { icon: Calendar, color: "text-blue-500", bg: "bg-blue-100" },
+  progress: { icon: TrendingUp, color: "text-green-500", bg: "bg-green-100" },
+  system: { icon: Info, color: "text-purple-500", bg: "bg-purple-100" },
 } as const;
 
+// Demo fallback data so there is always something visible in development
+const demoNotifications: Notification[] = [
+  {
+    id: "n1",
+    user_email: "demo@ourcodingkiddos.com",
+    title: "Welcome to Coding Kiddos!",
+    message: "Start exploring courses and add your first student.",
+    type: "system",
+    is_read: false,
+    link: "/courses",
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: "n2",
+    user_email: "demo@ourcodingkiddos.com",
+    title: "New Course Available!",
+    message: "HTML Basics for Kids is now live. Earn 500 XP.",
+    type: "progress",
+    is_read: false,
+    link: "/courses/html-basics",
+    created_date: new Date().toISOString(),
+  },
+  {
+    id: "n3",
+    user_email: "demo@ourcodingkiddos.com",
+    title: "Certificate earned!",
+    message: "Demo Student just earned HTML Basics for Kids. View the certificate.",
+    type: "achievement",
+    is_read: false,
+    link: "/certificates/cert-demo",
+    created_date: new Date().toISOString(),
+  },
+];
+
 export default function NotificationBell({ userEmail }: { userEmail?: string }) {
-  const [items, setItems] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const baseNotifications = useMemo(() => {
+    if (!userEmail) return demoNotifications;
+    return demoNotifications.map((n) => ({ ...n, user_email: userEmail }));
+  }, [userEmail]);
+
+  const [items, setItems] = useState<Notification[]>(baseNotifications);
   const [open, setOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch notifications from API
-  const fetchNotifications = async () => {
-    if (!userEmail) {
-      setLoading(false);
-      return;
-    }
-
+  const readStore = () => {
     try {
-      const res = await fetch("/api/notifications", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
-      }
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-    } finally {
-      setLoading(false);
+      const data = localStorage.getItem("ck_notification_read");
+      return data ? (JSON.parse(data) as string[]) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const persistRead = (ids: string[]) => {
+    try {
+      localStorage.setItem("ck_notification_read", JSON.stringify(ids));
+    } catch {
+      /* ignore */
     }
   };
 
   useEffect(() => {
-    fetchNotifications();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [userEmail]);
+    const readIds = readStore();
+    setItems(baseNotifications.map((n) => ({ ...n, is_read: readIds.includes(n.id) })));
+  }, [baseNotifications]);
 
   // Click-outside handler to close dropdown
   useEffect(() => {
@@ -81,39 +107,19 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
     };
   }, [open]);
 
-  const markAll = async () => {
-    try {
-      await fetch("/api/notifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ action: "markAllRead" }),
-      });
-      setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-    } catch (error) {
-      console.error("Failed to mark all as read:", error);
-    }
+  const unreadCount = items.filter((n) => !n.is_read).length;
+
+  const markAll = () => {
+    setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    persistRead(items.map((n) => n.id));
   };
 
-  const markOne = async (id: string) => {
-    try {
-      await fetch("/api/notifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ action: "markRead", notificationId: id }),
-      });
-      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
+  const markOne = (id: string) => {
+    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    const readIds = new Set(readStore());
+    readIds.add(id);
+    persistRead(Array.from(readIds));
   };
-
-  if (!userEmail) {
-    return null; // Don't show bell if user not logged in
-  }
 
   return (
     <div className="relative inline-flex items-center" ref={dropdownRef}>
@@ -147,12 +153,7 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
             )}
           </div>
           <div className="max-h-96 overflow-y-auto">
-            {loading ? (
-              <div className="p-6 text-center text-slate-500 dark:text-slate-400">
-                <Bell className="w-8 h-8 mx-auto mb-2 opacity-50 animate-pulse" />
-                <p className="text-sm">Loading...</p>
-              </div>
-            ) : items.length === 0 ? (
+            {items.length === 0 ? (
               <div className="p-6 text-center text-slate-500 dark:text-slate-400">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No notifications yet</p>
@@ -165,22 +166,22 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
                   <div
                     key={notification.id}
                     className={`p-3 border-b dark:border-slate-700 last:border-0 cursor-pointer transition-colors ${
-                      notification.isRead
+                      notification.is_read
                         ? "bg-white dark:bg-slate-800"
                         : "bg-purple-50 dark:bg-purple-900/20"
                     } hover:bg-slate-50 dark:hover:bg-slate-700`}
                     onClick={() => markOne(notification.id)}
                   >
                     <div className="flex gap-3">
-                      <div className={`w-9 h-9 rounded-full ${typeConfig.bg} flex items-center justify-center flex-shrink-0`}>
+                      <div className={`w-9 h-9 rounded-full ${typeConfig.bg} dark:bg-opacity-20 flex items-center justify-center flex-shrink-0`}>
                         <Icon className={`w-4 h-4 ${typeConfig.color}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className={`text-sm ${notification.isRead ? "text-slate-700 dark:text-slate-300" : "font-medium text-slate-900 dark:text-slate-100"}`}>
+                          <p className={`text-sm ${notification.is_read ? "text-slate-700 dark:text-slate-300" : "font-medium text-slate-900 dark:text-slate-100"}`}>
                             {notification.title}
                           </p>
-                          {!notification.isRead && <div className="w-2 h-2 bg-purple-500 dark:bg-purple-400 rounded-full flex-shrink-0 mt-1.5" />}
+                          {!notification.is_read && <div className="w-2 h-2 bg-purple-500 dark:bg-purple-400 rounded-full flex-shrink-0 mt-1.5" />}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{notification.message}</p>
                       </div>

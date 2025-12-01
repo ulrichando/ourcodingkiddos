@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
 import prisma from "../../../../lib/prisma";
+import { createNotification } from "../../notifications/route";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -40,6 +41,27 @@ export async function POST(request: Request) {
         : {}),
     },
   });
+
+  // Send welcome notification
+  if (role === "PARENT") {
+    createNotification(
+      email,
+      `Welcome to Our Coding Kiddos, ${name}! 👋`,
+      "Get started by adding your first student and exploring our interactive coding courses!",
+      "welcome",
+      "/dashboard/parent/add-student",
+      { userName: name, userRole: role }
+    );
+  } else if (role === "INSTRUCTOR") {
+    createNotification(
+      email,
+      `Welcome Instructor ${name}! 🎓`,
+      "You can now create classes, manage students, and share your coding expertise!",
+      "welcome",
+      "/dashboard/instructor",
+      { userName: name, userRole: role }
+    );
+  }
 
   return NextResponse.json({ status: "ok", user: { id: user.id, email: user.email } }, { status: 201 });
 }

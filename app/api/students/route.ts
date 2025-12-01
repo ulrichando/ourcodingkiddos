@@ -4,6 +4,7 @@ import prisma from "../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { getToken } from "next-auth/jwt";
+import { createNotification } from "../notifications/route";
 
 // Helper to build a student email from username
 function studentEmailFromUsername(username: string) {
@@ -48,6 +49,14 @@ export async function POST(request: NextRequest) {
   const parentEmail = effectiveParentEmail;
   const accessibility = body?.accessibility || {};
 
+  // New fields from enhanced form
+  const profileImage = body?.profileImage || null;
+  const birthday = body?.birthday || null;
+  const codingInterests = body?.codingInterests || [];
+  const learningStyle = body?.learningStyle || null;
+  const learningGoals = body?.learningGoals || null;
+  const parentNotes = body?.parentNotes || null;
+
   if (!name || !parentEmail) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
@@ -87,14 +96,19 @@ export async function POST(request: NextRequest) {
           create: {
             parentEmail,
             name,
-            avatar,
+            avatar: profileImage || avatar, // Use uploaded image if available, otherwise use avatar
             age,
             ageGroup: ageGroup || undefined,
+            dob: birthday ? new Date(birthday) : undefined, // Map birthday to dob field
             accessibilitySettings: {
               dyslexia_font: !!accessibility?.dyslexia_font,
               high_contrast: !!accessibility?.high_contrast,
               larger_text: !!accessibility?.larger_text,
+              reduce_motion: !!accessibility?.reduce_motion,
+              screen_reader: !!accessibility?.screen_reader,
+              keyboard_navigation: !!accessibility?.keyboard_navigation,
             },
+            badges: codingInterests.length > 0 ? { interests: codingInterests, learningStyle, learningGoals, parentNotes } : undefined,
           },
         } as any,
       },
@@ -106,6 +120,16 @@ export async function POST(request: NextRequest) {
         studentProfile: true,
       },
     });
+
+    // Send notification to parent
+    createNotification(
+      parentEmail,
+      "Student Added Successfully! 🎉",
+      `${name} has been added to your account. Username: ${username}`,
+      "student_added",
+      "/dashboard/parent/students",
+      { studentId: user.id, studentName: name, username }
+    );
 
     return NextResponse.json({ status: "ok", user, credentials: { username, password } });
   } catch (err: any) {

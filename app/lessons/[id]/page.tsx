@@ -3,13 +3,15 @@
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { use } from "react";
-import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Code2, Play, Star, Menu, X } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, Code2, Play, Star, Menu, X, Users, Lock } from "lucide-react";
 import CodeEditor from "@/components/playground/CodeEditor";
 import { Card, CardContent } from "@/components/ui/card";
 import Badge from "@/components/ui/badge";
 import { courses as mockCourses } from "@/data/courses";
 import QuizCard from "@/components/quiz/QuizCard";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Button from "@/components/ui/button";
 
 type CourseType = ((typeof mockCourses)[number]) & { slug?: string };
 type LessonType = CourseType["lessons"][number];
@@ -43,6 +45,8 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
   const resolved = use(params);
   const courseId = resolved?.id;
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
+  const userRole = (session as any)?.user?.role;
   const [course, setCourse] = useState<CourseType | null>(courseId ? findCourse(courseId) : null);
   const [isLoadingCourse, setIsLoadingCourse] = useState(!course);
   const [current, setCurrent] = useState(0);
@@ -250,6 +254,66 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
       setIsSaving(false);
     }
   };
+
+  // Block parents from accessing lessons
+  if (status === "authenticated" && userRole === "PARENT") {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-pink-50/20 dark:bg-gradient-to-br dark:from-slate-900 dark:via-purple-950/20 dark:to-pink-950/20 flex items-center justify-center p-4">
+        <Card className="max-w-2xl w-full border-2 border-purple-200 dark:border-purple-800 shadow-2xl">
+          <CardContent className="p-8 sm:p-12 text-center space-y-6">
+            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 flex items-center justify-center">
+              <Lock className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                Parent Access Notice
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 text-lg">
+                Lessons are designed for students to complete on their own. As a parent, you can:
+              </p>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 space-y-4 text-left">
+              <div className="flex items-start gap-3">
+                <Users className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">View Course Details</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">See what your students will learn</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Star className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">Track Progress</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Monitor your students' achievements</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">Assign to Students</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Let your students complete the lessons</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Link href="/courses" className="flex-1">
+                <Button variant="outline" className="w-full">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Courses
+                </Button>
+              </Link>
+              <Link href="/dashboard/parent/reports" className="flex-1">
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                  View Progress Reports
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
 
   if (isLoadingCourse) {
     return (
