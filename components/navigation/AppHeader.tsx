@@ -95,19 +95,21 @@ export default function AppHeader() {
 
   return (
     <header className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-4 sm:gap-6 w-full">
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between w-full">
+        {/* Logo - Always on the left */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+            <span className="h-9 w-9 sm:h-10 sm:w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-lg text-sm sm:text-base">
               CK
             </span>
-            <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">Coding Kiddos</span>
+            <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100">Coding Kiddos</span>
           </Link>
         </div>
 
         {isLoggedIn ? (
           <>
-            <nav className="header-nav hidden sm:flex flex-1 items-center justify-center gap-7">
+            {/* Desktop Navigation - Centered */}
+            <nav className="header-nav hidden sm:flex items-center justify-center gap-7 absolute left-1/2 transform -translate-x-1/2">
                 <Link href={dashboardHref} className={linkClass(dashboardHref)}>
                   <Home className="h-4 w-4 text-slate-500" />
                   Dashboard
@@ -125,9 +127,38 @@ export default function AppHeader() {
                   Messages
                 </Link>
             </nav>
-            <div className="flex items-center ml-auto gap-2 relative" ref={menuRef}>
+
+            {/* Right side elements - Mobile menu, theme, notifications, user menu */}
+            <div className="flex items-center gap-2 relative" ref={menuRef}>
+              {/* Theme toggle - visible on all screens */}
               <button
-                className="sm:hidden inline-flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+
+              {/* Desktop only - Notifications and User Menu */}
+              <div className="hidden sm:flex items-center gap-2">
+                {showBell && <NotificationBell userEmail={session?.user?.email || ""} />}
+                <button
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  <span className="h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-semibold flex items-center justify-center shadow">
+                    {userInitial}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    {userName}
+                    <ChevronDown className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                  </span>
+                </button>
+              </div>
+
+              {/* Mobile only - Menu button */}
+              <button
+                className="sm:hidden inline-flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 onClick={() => setMobileOpen((o) => !o)}
                 aria-label="Toggle navigation"
               >
@@ -140,26 +171,6 @@ export default function AppHeader() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 )}
-              </button>
-              <button
-                onClick={toggleTheme}
-                aria-label="Toggle theme"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-              {showBell && <NotificationBell userEmail={session?.user?.email || ""} />}
-              <button
-                onClick={() => setMenuOpen((o) => !o)}
-                className="inline-flex items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              >
-                <span className="h-9 w-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-semibold flex items-center justify-center shadow">
-                  {userInitial}
-                </span>
-                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1">
-                  {userName}
-                  <ChevronDown className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                </span>
               </button>
               {menuOpen && (
                 <div className="absolute right-0 top-12 w-60 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50 overflow-hidden">
@@ -193,7 +204,8 @@ export default function AppHeader() {
           </>
         ) : (
           <>
-            <nav className="header-nav hidden sm:flex flex-1 items-center justify-center gap-7 text-sm font-semibold text-slate-700 dark:text-slate-300">
+            {/* Desktop Navigation - Centered */}
+            <nav className="header-nav hidden sm:flex items-center justify-center gap-7 text-sm font-semibold text-slate-700 dark:text-slate-300 absolute left-1/2 transform -translate-x-1/2">
               <Link href="/courses" className="hover:text-slate-900 dark:hover:text-slate-100">
                 Courses
               </Link>
@@ -204,7 +216,9 @@ export default function AppHeader() {
                 Playground
               </Link>
             </nav>
-            <div className="flex items-center ml-auto gap-2">
+
+            {/* Right side elements */}
+            <div className="flex items-center gap-2">
               <button
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
