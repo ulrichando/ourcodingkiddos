@@ -21,6 +21,34 @@ export async function GET(request: Request) {
   const courseId = searchParams.get("courseId") ?? undefined;
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
+  const userEmail = session.user.email;
+
+  // Check subscription for students and parents
+  if (role === "STUDENT" || role === "PARENT") {
+    let checkEmail = userEmail;
+
+    if (role === "STUDENT") {
+      const studentProfile = await prisma.studentProfile.findFirst({
+        where: { userId },
+        select: { parentEmail: true },
+      });
+      checkEmail = studentProfile?.parentEmail || userEmail;
+    }
+
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        user: { email: checkEmail },
+        status: { in: ["ACTIVE", "TRIALING"] },
+      },
+    });
+
+    if (!subscription) {
+      return NextResponse.json(
+        { status: "error", message: "Active subscription required to access course progress." },
+        { status: 403 }
+      );
+    }
+  }
 
   const where: any = {};
   if (enrollmentId) where.enrollmentId = enrollmentId;
@@ -52,6 +80,37 @@ export async function PATCH(request: Request) {
   const parsed = updateSchema.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+  const userEmail = session.user.email;
+
+  // Check subscription for students and parents
+  if (role === "STUDENT" || role === "PARENT") {
+    let checkEmail = userEmail;
+
+    if (role === "STUDENT") {
+      const studentProfile = await prisma.studentProfile.findFirst({
+        where: { userId },
+        select: { parentEmail: true },
+      });
+      checkEmail = studentProfile?.parentEmail || userEmail;
+    }
+
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        user: { email: checkEmail },
+        status: { in: ["ACTIVE", "TRIALING"] },
+      },
+    });
+
+    if (!subscription) {
+      return NextResponse.json(
+        { status: "error", message: "Active subscription required to update course progress." },
+        { status: 403 }
+      );
+    }
   }
 
   const payload = parsed.data;

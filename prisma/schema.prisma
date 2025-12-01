@@ -93,6 +93,14 @@ model User {
   image          String?
   role           Role     @default(STUDENT)
 
+  // Stripe integration
+  stripeCustomerId String? @unique
+
+  // Notification preferences
+  emailUpdates     Boolean @default(false)
+  classReminders   Boolean @default(true)
+  progressReports  Boolean @default(true)
+
   studentProfile     StudentProfile?
   parentProfile      ParentProfile?
   enrollments        Enrollment[]
@@ -483,16 +491,159 @@ model UserBadge {
   @@unique([userId, badgeId])
 }
 
+// Conversations for messaging system
+model Conversation {
+  id          String   @id @default(cuid())
+  title       String?  // Optional group name
+  type        String   @default("direct") // direct, group, support
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastMessageAt DateTime?
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  userEmail      String
+  userRole       Role     // Using existing Role enum
+  userName       String?
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userEmail])
+  @@index([userEmail])
+}
+
 model Message {
   id                 String      @id @default(cuid())
+  conversationId     String
   fromEmail          String
-  toEmail            String
-  subject            String?
+  fromRole           Role
+  fromName           String?
   content            String
-  regardingStudentId String?
+  attachmentName     String?
+  attachmentUrl      String?
   isRead             Boolean     @default(false)
   messageType        MessageType @default(GENERAL)
   createdAt          DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([fromEmail])
+}
+
+// Support ticket system
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketCategory {
+  TECHNICAL
+  BILLING
+  ACCOUNT
+  COURSE_CONTENT
+  BOOKING
+  GENERAL
+}
+
+model SupportTicket {
+  id             String         @id @default(cuid())
+  ticketNumber   String         @unique // e.g., TKT-001234
+  userEmail      String
+  userRole       Role
+  userName       String?
+  subject        String
+  description    String
+  category       TicketCategory @default(GENERAL)
+  priority       TicketPriority @default(MEDIUM)
+  status         TicketStatus   @default(OPEN)
+  assignedToEmail String?       // Admin/support email
+  assignedToName  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  resolvedAt     DateTime?
+  closedAt       DateTime?
+
+  replies TicketReply[]
+
+  @@index([userEmail])
+  @@index([status])
+  @@index([assignedToEmail])
+}
+
+model TicketReply {
+  id         String   @id @default(cuid())
+  ticketId   String
+  fromEmail  String
+  fromRole   Role
+  fromName   String?
+  message    String
+  attachmentName String?
+  attachmentUrl  String?
+  isInternal Boolean  @default(false) // Internal notes visible only to admins
+  createdAt  DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+// 1-on-1 Class Request system
+enum ClassRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model ClassRequest {
+  id               String             @id @default(cuid())
+  parentEmail      String
+  parentName       String?
+  studentId        String?
+  studentName      String?
+  studentAge       Int?
+  requestedTopic   String             // e.g., "Python basics", "JavaScript help"
+  description      String?            // Additional details
+  preferredDays    Json?              // Array of preferred days
+  preferredTimes   Json?              // Array of preferred time ranges
+  duration         Int?               // Duration in minutes, default 60
+  status           ClassRequestStatus @default(PENDING)
+  instructorEmail  String?            // Assigned instructor
+  instructorName   String?
+  scheduledDate    DateTime?
+  scheduledTime    String?
+  bookingId        String?            // Link to Booking once scheduled
+  adminNotes       String?
+  parentNotes      String?
+  rejectionReason  String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  reviewedAt       DateTime?
+  scheduledAt      DateTime?
+
+  @@index([parentEmail])
+  @@index([status])
+  @@index([instructorEmail])
 }
 
 model Achievement {
@@ -582,4 +733,24 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PlatformSettings {
+  id                        String   @id @default("default")
+  siteName                  String   @default("Our Coding Kiddos")
+  maintenanceMode           Boolean  @default(false)
+  allowRegistration         Boolean  @default(true)
+  requireEmailVerification  Boolean  @default(false)
+  defaultXpPerLesson        Int      @default(50)
+  xpPerLevel                Int      @default(500)
+  maxStudentsPerParent      Int      @default(5)
+  sessionDurationMinutes    Int      @default(60)
+  enableNotifications       Boolean  @default(true)
+  enableMessaging           Boolean  @default(true)
+  enableCertificates        Boolean  @default(true)
+  enableBadges              Boolean  @default(true)
+  stripeEnabled             Boolean  @default(false)
+  demoMode                  Boolean  @default(false)
+  updatedAt                 DateTime @updatedAt
+  createdAt                 DateTime @default(now())
 }

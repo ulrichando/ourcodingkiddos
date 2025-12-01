@@ -54,9 +54,103 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
 
   try {
-    await prisma.user.delete({ where: { id } });
+    // Delete user with all related records using a transaction
+    await prisma.$transaction(async (tx) => {
+      // Delete related records first to avoid foreign key constraint errors
+
+      // Delete student profile related records
+      const studentProfile = await tx.studentProfile.findUnique({
+        where: { userId: id },
+        select: { id: true }
+      });
+
+      if (studentProfile) {
+        // Delete projects associated with this student
+        await tx.project.deleteMany({
+          where: { studentId: studentProfile.id }
+        });
+      }
+
+      // Delete parent profile related records
+      await tx.studentProfile.deleteMany({
+        where: {
+          guardian: {
+            userId: id
+          }
+        }
+      });
+
+      // Delete user badges
+      await tx.userBadge.deleteMany({ where: { userId: id } });
+
+      // Delete achievements
+      await tx.achievement.deleteMany({ where: { userId: id } });
+
+      // Delete portfolio items
+      await tx.portfolioItem.deleteMany({ where: { userId: id } });
+
+      // Delete bookings (as student or instructor)
+      await tx.booking.deleteMany({
+        where: {
+          OR: [
+            { studentId: id },
+            { instructorId: id }
+          ]
+        }
+      });
+
+      // Delete class sessions
+      await tx.classSession.deleteMany({ where: { instructorId: id } });
+
+      // Delete instructor availability
+      await tx.instructorAvailability.deleteMany({ where: { instructorId: id } });
+
+      // Delete certificates through enrollments
+      const enrollments = await tx.enrollment.findMany({
+        where: { userId: id },
+        select: { id: true }
+      });
+
+      for (const enrollment of enrollments) {
+        await tx.certificate.deleteMany({
+          where: { enrollmentId: enrollment.id }
+        });
+        await tx.progress.deleteMany({
+          where: { enrollmentId: enrollment.id }
+        });
+      }
+
+      // Delete enrollments
+      await tx.enrollment.deleteMany({ where: { userId: id } });
+
+      // Delete subscriptions
+      await tx.subscription.deleteMany({ where: { userId: id } });
+
+      // Delete payments
+      await tx.payment.deleteMany({ where: { userId: id } });
+
+      // Delete student profile
+      await tx.studentProfile.deleteMany({ where: { userId: id } });
+
+      // Delete parent profile
+      await tx.parentProfile.deleteMany({ where: { userId: id } });
+
+      // Delete accounts (OAuth)
+      await tx.account.deleteMany({ where: { userId: id } });
+
+      // Delete sessions
+      await tx.session.deleteMany({ where: { userId: id } });
+
+      // Finally delete the user
+      await tx.user.delete({ where: { id } });
+    });
+
     return NextResponse.json({ status: "ok" });
   } catch (e: any) {
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+    console.error("[admin/users/delete] Error:", e);
+    return NextResponse.json({
+      error: e.message || "Delete failed",
+      details: e.toString()
+    }, { status: 500 });
   }
 }

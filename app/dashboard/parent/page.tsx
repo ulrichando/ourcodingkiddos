@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Calendar, BookOpen, Award, ChevronRight, Clock, Star, TrendingUp, MessageSquare, Users, Activity, Zap, Target, Settings } from "lucide-react";
+import { Plus, Calendar, BookOpen, Award, ChevronRight, Clock, Star, TrendingUp, MessageSquare, Users, Activity, Zap, Target, Settings, Lock } from "lucide-react";
 import StudentCard from "../../../components/dashboard/StudentCard";
 import Button from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
@@ -100,6 +100,92 @@ export default function ParentDashboardPage() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
 
+        {/* No Subscription - Complete Lockout with Free Trial Prompt */}
+        {!isAdmin && !subscription ? (
+          <div className="space-y-6">
+            <Card className="border-2 border-purple-200 dark:border-purple-700 bg-gradient-to-r from-purple-50 via-pink-50 to-orange-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-orange-900/20 shadow-lg">
+              <CardContent className="p-6 sm:p-8">
+                <div className="flex flex-col lg:flex-row items-center gap-6">
+                  <div className="flex-shrink-0">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl">
+                      <Zap className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1 text-center lg:text-left space-y-3">
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                        Start Your <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Free 7-Day Trial!</span>
+                      </h2>
+                      <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
+                        Get full access to all courses, live classes, and features. No credit card required to start!
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-3 justify-center lg:justify-start items-center">
+                      <Link href="/checkout?plan=free-trial">
+                        <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white h-12 px-8 text-base font-semibold shadow-lg">
+                          Start Free Trial
+                          <ChevronRight className="w-5 h-5 ml-2" />
+                        </Button>
+                      </Link>
+                      <Link href="/pricing">
+                        <Button variant="outline" className="h-12 px-6 text-base">
+                          View All Plans
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400 justify-center lg:justify-start">
+                      <span className="inline-flex items-center gap-1">
+                        ✓ Full Course Access
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        ✓ Live Classes
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        ✓ No Credit Card
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        ✓ Cancel Anytime
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Locked Features Preview */}
+            <Card className="border-0 shadow-sm bg-slate-50/50 dark:bg-slate-800/50">
+              <CardContent className="p-8 sm:p-12 text-center space-y-6">
+                <div className="w-20 h-20 mx-auto rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                  <Lock className="w-10 h-10 text-slate-400 dark:text-slate-500" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                    Subscription Required
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+                    Start your free trial to add students, book classes, access courses, and unlock all premium features.
+                  </p>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                  {[
+                    { icon: Users, label: "Add Students" },
+                    { icon: Calendar, label: "Book Classes" },
+                    { icon: BookOpen, label: "Access Courses" },
+                    { icon: Award, label: "Track Progress" },
+                  ].map((feature) => (
+                    <div key={feature.label} className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <feature.icon className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{feature.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <>
+            {/* Existing dashboard content for subscribed users */}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {[
@@ -115,9 +201,13 @@ export default function ParentDashboardPage() {
                     ? `${Math.max(0, Math.ceil((subscription.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left`
                     : subscription?.status === "active"
                       ? "Active"
-                      : "Inactive",
+                      : !subscription
+                        ? "Not Started"
+                        : "Inactive",
                 icon: TrendingUp,
-                color: "text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30",
+                color: !subscription && !isAdmin
+                  ? "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30"
+                  : "text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30",
               },
             ].map((stat, i) => (
               <Card key={i} className="border-0 shadow-sm">
@@ -425,6 +515,8 @@ export default function ParentDashboardPage() {
             )}
           </div>
         </div>
+          </>
+        )}
       </div>
 
     </main>

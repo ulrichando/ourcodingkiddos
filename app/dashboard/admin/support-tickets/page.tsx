@@ -1,0 +1,329 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import AdminLayout from "../../../../components/admin/AdminLayout";
+import { Card, CardContent } from "../../../../components/ui/card";
+import Button from "../../../../components/ui/button";
+import { HelpCircle, MessageSquare, Clock, CheckCircle, Loader2, AlertCircle, User } from "lucide-react";
+
+type Ticket = {
+  id: string;
+  ticketNumber: string;
+  subject: string;
+  description: string;
+  category: string;
+  priority: string;
+  status: string;
+  userEmail: string;
+  userName?: string;
+  assignedToName?: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    replies: number;
+  };
+};
+
+const statusColors = {
+  OPEN: "bg-blue-100 text-blue-800",
+  IN_PROGRESS: "bg-yellow-100 text-yellow-800",
+  WAITING_FOR_CUSTOMER: "bg-orange-100 text-orange-800",
+  RESOLVED: "bg-green-100 text-green-800",
+  CLOSED: "bg-gray-100 text-gray-800",
+};
+
+const priorityColors = {
+  LOW: "text-slate-600",
+  MEDIUM: "text-blue-600",
+  HIGH: "text-orange-600",
+  URGENT: "text-red-600",
+};
+
+export default function AdminSupportTicketsPage() {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("all");
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  const loadTickets = async () => {
+    try {
+      const res = await fetch("/api/support-tickets");
+      const data = await res.json();
+      setTickets(data.tickets || []);
+    } catch (error) {
+      console.error("Failed to load tickets:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      const res = await fetch("/api/support-tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        loadTickets();
+      }
+    } catch (error) {
+      console.error("Failed to update ticket:", error);
+    }
+  };
+
+  const handleAssign = async (id: string) => {
+    const assignedToName = prompt("Enter your name to assign this ticket to yourself:");
+    if (!assignedToName) return;
+
+    const assignedToEmail = prompt("Enter your email:");
+    if (!assignedToEmail) return;
+
+    try {
+      const res = await fetch("/api/support-tickets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          assignedToName,
+          assignedToEmail,
+          status: "IN_PROGRESS"
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        loadTickets();
+        alert("Ticket assigned successfully!");
+      }
+    } catch (error) {
+      console.error("Failed to assign ticket:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const filteredTickets = filter === "all"
+    ? tickets
+    : tickets.filter(t => t.status === filter);
+
+  const openCount = tickets.filter(t => t.status === "OPEN").length;
+  const inProgressCount = tickets.filter(t => t.status === "IN_PROGRESS").length;
+  const resolvedCount = tickets.filter(t => t.status === "RESOLVED").length;
+
+  return (
+    <AdminLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Support Tickets</h1>
+          <p className="text-slate-600">Manage customer support requests</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Open</p>
+                  <p className="text-2xl font-bold text-blue-600">{openCount}</p>
+                </div>
+                <AlertCircle className="w-8 h-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">In Progress</p>
+                  <p className="text-2xl font-bold text-yellow-600">{inProgressCount}</p>
+                </div>
+                <Clock className="w-8 h-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Resolved</p>
+                  <p className="text-2xl font-bold text-green-600">{resolvedCount}</p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Total</p>
+                  <p className="text-2xl font-bold text-slate-900">{tickets.length}</p>
+                </div>
+                <HelpCircle className="w-8 h-8 text-slate-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant={filter === "all" ? "default" : "outline"}
+            onClick={() => setFilter("all")}
+          >
+            All Tickets
+          </Button>
+          <Button
+            size="sm"
+            variant={filter === "OPEN" ? "default" : "outline"}
+            onClick={() => setFilter("OPEN")}
+          >
+            Open
+          </Button>
+          <Button
+            size="sm"
+            variant={filter === "IN_PROGRESS" ? "default" : "outline"}
+            onClick={() => setFilter("IN_PROGRESS")}
+          >
+            In Progress
+          </Button>
+          <Button
+            size="sm"
+            variant={filter === "RESOLVED" ? "default" : "outline"}
+            onClick={() => setFilter("RESOLVED")}
+          >
+            Resolved
+          </Button>
+          <Button
+            size="sm"
+            variant={filter === "CLOSED" ? "default" : "outline"}
+            onClick={() => setFilter("CLOSED")}
+          >
+            Closed
+          </Button>
+        </div>
+
+        {/* Tickets List */}
+        <div className="space-y-4">
+          {filteredTickets.length === 0 ? (
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-12 text-center">
+                <p className="text-slate-500">No tickets found</p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredTickets.map(ticket => (
+              <Card
+                key={ticket.id}
+                className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => window.location.href = `/support?ticket=${ticket.id}`}
+              >
+                <CardContent className="p-6">
+                  <div className="space-y-3">
+                    {/* Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-mono text-slate-500">#{ticket.ticketNumber}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[ticket.status as keyof typeof statusColors]}`}>
+                            {ticket.status.replace(/_/g, " ")}
+                          </span>
+                          <span className={`text-xs font-semibold ${priorityColors[ticket.priority as keyof typeof priorityColors]}`}>
+                            {ticket.priority}
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900">{ticket.subject}</h3>
+                        <p className="text-sm text-slate-600 line-clamp-2 mt-1">{ticket.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Meta Info */}
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        {ticket.userName || ticket.userEmail}
+                      </div>
+                      {ticket._count && ticket._count.replies > 0 && (
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="w-4 h-4" />
+                          {ticket._count.replies} {ticket._count.replies === 1 ? "reply" : "replies"}
+                        </div>
+                      )}
+                      {ticket.assignedToName && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">
+                            Assigned to {ticket.assignedToName}
+                          </span>
+                        </div>
+                      )}
+                      <div className="text-xs">
+                        Category: {ticket.category.replace(/_/g, " ")}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-2 pt-3 border-t" onClick={(e) => e.stopPropagation()}>
+                      {ticket.status === "OPEN" && !ticket.assignedToName && (
+                        <Button size="sm" onClick={() => handleAssign(ticket.id)}>
+                          <User className="w-4 h-4 mr-1" />
+                          Assign to Me
+                        </Button>
+                      )}
+                      {ticket.status === "IN_PROGRESS" && (
+                        <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(ticket.id, "WAITING_FOR_CUSTOMER")}>
+                          Waiting for Customer
+                        </Button>
+                      )}
+                      {(ticket.status === "IN_PROGRESS" || ticket.status === "WAITING_FOR_CUSTOMER") && (
+                        <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(ticket.id, "RESOLVED")}>
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Mark Resolved
+                        </Button>
+                      )}
+                      {ticket.status === "RESOLVED" && (
+                        <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(ticket.id, "CLOSED")}>
+                          Close Ticket
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.location.href = `/support?ticket=${ticket.id}`}
+                      >
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        View & Reply
+                      </Button>
+                    </div>
+
+                    <div className="text-xs text-slate-500">
+                      Created {new Date(ticket.createdAt).toLocaleString()} • Updated {new Date(ticket.updatedAt).toLocaleString()}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}

@@ -18,6 +18,7 @@ export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileAnimating, setMobileAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const showBell = userRole === "PARENT" || userRole === "STUDENT";
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -65,6 +66,10 @@ export default function AppHeader() {
     }
   }, []);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
@@ -81,7 +86,7 @@ export default function AppHeader() {
 
   const linkClass = (href: string) =>
     `inline-flex items-center gap-2 text-sm font-semibold ${
-      pathname?.startsWith(href) ? "text-slate-900 dark:text-slate-100" : "text-slate-700 dark:text-slate-300"
+      mounted && pathname?.startsWith(href) ? "text-slate-900 dark:text-slate-100" : "text-slate-700 dark:text-slate-300"
     } hover:text-slate-900 dark:hover:text-slate-100`;
 
   const dashboardHref =
@@ -315,7 +320,7 @@ export default function AppHeader() {
                           href={dashboardHref}
                           onClick={() => setMobileOpen(false)}
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                            pathname?.startsWith(dashboardHref)
+                            mounted && pathname?.startsWith(dashboardHref)
                               ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/25"
                               : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
@@ -327,7 +332,7 @@ export default function AppHeader() {
                           href="/courses"
                           onClick={() => setMobileOpen(false)}
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                            pathname?.startsWith("/courses")
+                            mounted && pathname?.startsWith("/courses")
                               ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/25"
                               : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
@@ -339,7 +344,7 @@ export default function AppHeader() {
                           href="/schedule"
                           onClick={() => setMobileOpen(false)}
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                            pathname?.startsWith("/schedule")
+                            mounted && pathname?.startsWith("/schedule")
                               ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/25"
                               : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}
@@ -351,7 +356,7 @@ export default function AppHeader() {
                           href="/messages"
                           onClick={() => setMobileOpen(false)}
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                            pathname?.startsWith("/messages")
+                            mounted && pathname?.startsWith("/messages")
                               ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/25"
                               : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                           }`}

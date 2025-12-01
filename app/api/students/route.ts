@@ -40,6 +40,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Only parents can add students" }, { status: 403 });
   }
 
+  // Check subscription status for parents (admins bypass this check)
+  if (sessionRole === "PARENT") {
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        user: { email: effectiveParentEmail },
+        status: { in: ["ACTIVE", "TRIALING"] },
+      },
+    });
+
+    if (!subscription) {
+      return NextResponse.json(
+        { error: "Active subscription required. Please start your free trial or upgrade your plan to add students." },
+        { status: 403 }
+      );
+    }
+  }
+
   const name = String(body?.name || "").trim();
   let username = String(body?.username || "").trim();
   let password = String(body?.password || "");

@@ -1,221 +1,267 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
+import prisma from "../../../lib/prisma";
 
-type ChatMessage = {
-  id: string;
-  conversationId: string;
-  fromRole: "parent" | "instructor" | "student" | "support";
-  toRole: "parent" | "instructor" | "student" | "support";
-  fromName?: string;
-  toName?: string;
-  text: string;
-  createdAt: string;
-  attachmentName?: string;
-};
-
-type Conversation = {
-  id: string;
-  label: string;
-  roles: { from: ChatMessage["fromRole"]; to: ChatMessage["toRole"] };
-  time?: string;
-  preview?: string;
-  participants?: string[];
-};
-
-const RETENTION_DAYS = 30;
-
-const contacts = [
-  { id: "instructor-1", name: "Coach Alex", role: "instructor" },
-  { id: "instructor-2", name: "Coach Jay", role: "instructor" },
-  { id: "support-1", name: "Support", role: "support" },
-  { id: "student-1", name: "Demo Student", role: "student" },
-  { id: "parent-1", name: "Demo Parent", role: "parent" },
-];
-
-// Demo data only shown for demo mode
-const demoConversations: Conversation[] = [
-  {
-    id: "c1",
-    label: "Coach Alex (Instructor)",
-    roles: { from: "instructor", to: "parent" },
-    time: "2m ago",
-    preview: "Hi! Great job...",
-  },
-  {
-    id: "c2",
-    label: "Support",
-    roles: { from: "support", to: "parent" },
-    time: "1h ago",
-    preview: "Your free trial...",
-  },
-  {
-    id: "c3",
-    label: "Demo Student",
-    roles: { from: "parent", to: "student" },
-    time: "Yesterday",
-    preview: "Family chat",
-    participants: ["Demo Parent", "Demo Student"],
-  },
-];
-
-const demoMessages: ChatMessage[] = [
-  {
-    id: "m1",
-    conversationId: "c1",
-    fromRole: "instructor",
-    toRole: "parent",
-    fromName: "Coach Alex",
-    text: "Hi! Great job on the last lesson. 👍",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "m2",
-    conversationId: "c1",
-    fromRole: "parent",
-    toRole: "instructor",
-    fromName: "Parent",
-    text: "Thanks! What should we do next?",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "m3",
-    conversationId: "c1",
-    fromRole: "instructor",
-    toRole: "parent",
-    fromName: "Coach Alex",
-    text: "Try the CSS Magic course next. Want me to assign it?",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "m4",
-    conversationId: "c2",
-    fromRole: "support",
-    toRole: "parent",
-    fromName: "Support",
-    text: "Your free trial has 7 days left.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "m5",
-    conversationId: "c3",
-    fromRole: "parent",
-    toRole: "student",
-    fromName: "Demo Parent",
-    toName: "Demo Student",
-    text: "Let's review your HTML lesson tonight.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "m6",
-    conversationId: "c3",
-    fromRole: "student",
-    toRole: "parent",
-    fromName: "Demo Student",
-    toName: "Demo Parent",
-    text: "Sure! I finished the quiz and can show you.",
-    createdAt: new Date().toISOString(),
-  },
-];
-
-// Store user messages in memory (in production, this would be in a database)
-let userMessages: ChatMessage[] = [];
-let userConversations: Conversation[] = [];
+// Force dynamic - no caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const role = searchParams.get("role") as ChatMessage["fromRole"] | null;
-  const q = searchParams.get("q")?.toLowerCase() || "";
+  try {
+    const session = await getServerSession(authOptions);
 
-  // Check if user is authenticated
-  const session = await getServerSession(authOptions);
-  const userRole = (session as any)?.user?.role;
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  // Only show demo data for admin users in demo mode
-  const showDemoData = userRole === "ADMIN" && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false";
+    const userEmail = session.user.email.toLowerCase();
+    const userRole = (session as any)?.user?.role?.toUpperCase() || "PARENT";
 
-  // Use demo data or real user data
-  let conversations = showDemoData ? demoConversations : userConversations;
-  let messages = showDemoData ? demoMessages : userMessages;
+    // Fetch conversations where user is a participant
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        participants: {
+          some: {
+            userEmail
+          }
+        }
+      },
+      include: {
+        participants: true,
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1 // Get last message for preview
+        }
+      },
+      orderBy: {
+        lastMessageAt: 'desc'
+      }
+    });
 
-  // prune messages older than retention window
-  const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
-  messages = messages.filter((m) => new Date(m.createdAt).getTime() >= cutoff);
+    // Fetch all messages for user's conversations
+    const conversationIds = conversations.map(c => c.id);
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: {
+          in: conversationIds
+        }
+      },
+      orderBy: {
+        createdAt: 'asc'
+      }
+    });
 
-  const filteredMessages = role
-    ? messages.filter((m) => m.fromRole === role || m.toRole === role)
-    : messages;
-  const convosForRole = role
-    ? conversations.filter((c) => !c.roles || c.roles.from === role || c.roles.to === role)
-    : conversations;
-  const filteredConvos = q
-    ? convosForRole.filter((c) => {
-        const label = c.label.toLowerCase();
-        const participants = (c.participants || []).join(" ").toLowerCase();
-        return label.includes(q) || participants.includes(q);
-      })
-    : convosForRole;
+    // Get list of contacts (instructors, admins)
+    const contacts = await prisma.user.findMany({
+      where: {
+        role: {
+          in: ['INSTRUCTOR', 'ADMIN']
+        }
+      },
+      select: {
+        name: true,
+        email: true,
+        role: true
+      }
+    });
 
-  return NextResponse.json({ conversations: filteredConvos, messages: filteredMessages, contacts });
+    // Transform to frontend format
+    const transformedConvos = conversations.map(conv => {
+      const otherParticipants = conv.participants.filter(p => p.userEmail !== userEmail);
+      const lastMsg = conv.messages[0];
+
+      return {
+        id: conv.id,
+        name: conv.title || otherParticipants.map(p => p.userName || p.userEmail).join(", ") || "Conversation",
+        type: conv.type,
+        preview: lastMsg?.content?.substring(0, 50) || "",
+        time: lastMsg ? getRelativeTime(lastMsg.createdAt) : "",
+        roles: {
+          from: conv.participants.find(p => p.userEmail === userEmail)?.userRole || userRole,
+          to: otherParticipants[0]?.userRole || "SUPPORT"
+        },
+        participants: otherParticipants.map(p => p.userName || p.userEmail),
+        isOnline: Math.random() > 0.5 // Placeholder
+      };
+    });
+
+    const transformedMessages = messages.map(msg => ({
+      id: msg.id,
+      conversationId: msg.conversationId,
+      fromRole: msg.fromRole.toLowerCase(),
+      toRole: "parent", // Simplified
+      fromName: msg.fromName,
+      text: msg.content,
+      attachmentName: msg.attachmentName,
+      timestamp: new Date(msg.createdAt).getTime(),
+      status: "sent"
+    }));
+
+    const transformedContacts = contacts.map(c => ({
+      name: c.name || c.email,
+      email: c.email,
+      role: c.role.toLowerCase()
+    }));
+
+    return NextResponse.json({
+      conversations: transformedConvos,
+      messages: transformedMessages,
+      contacts: transformedContacts
+    });
+  } catch (error: any) {
+    console.error("GET /api/messages error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { action, fromRole, toRole, text, fromName, toName, participantNames, label, attachmentName } = body || {};
+  try {
+    const session = await getServerSession(authOptions);
 
-  if (action === "createConversation") {
-    const participantList: string[] = Array.isArray(participantNames) ? participantNames : toName ? [toName] : [];
-    const contact = contacts.find((c) => c.name === toName) || { name: toName || "New Contact", role: toRole };
-    const convoLabel =
-      label ||
-      (participantList.length > 0 ? `Group: ${participantList.join(", ")}` : contact.name || "New Conversation");
-
-    const convo: Conversation = {
-      id: `c${userConversations.length + 1}`,
-      label: convoLabel,
-      roles: { from: fromRole, to: (contact.role as any) || toRole },
-      time: "Just now",
-      preview: text || "",
-      participants: participantList.length ? participantList : undefined,
-    };
-    userConversations = [convo, ...userConversations];
-    if (text) {
-      const msg: ChatMessage = {
-        id: `m${userMessages.length + 1}`,
-        conversationId: convo.id,
-        fromRole,
-        toRole: (contact.role as any) || toRole,
-        fromName,
-        toName: contact.name,
-        text,
-        createdAt: new Date().toISOString(),
-        attachmentName,
-      };
-      userMessages = [...userMessages, msg];
-      return NextResponse.json({ conversation: convo, message: msg });
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json({ conversation: convo, message: null });
-  }
 
-  if (!fromRole || !toRole || !text) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    const userEmail = session.user.email.toLowerCase();
+    const userName = session.user.name || "User";
+    const userRole = (session as any)?.user?.role?.toUpperCase() || "PARENT";
+
+    const body = await req.json();
+    const {
+      action,
+      conversationId,
+      text,
+      toEmail,
+      toName,
+      toRole,
+      participantNames,
+      label,
+      attachmentName
+    } = body;
+
+    // Create new conversation
+    if (action === "createConversation") {
+      // Determine conversation type
+      const isGroup = participantNames && participantNames.length > 1;
+      const convType = toRole === "support" ? "support" : isGroup ? "group" : "direct";
+
+      // Find or create conversation
+      const conversation = await prisma.conversation.create({
+        data: {
+          title: label || (isGroup ? `Group: ${participantNames.join(", ")}` : null),
+          type: convType,
+          lastMessageAt: new Date(),
+          participants: {
+            create: [
+              {
+                userEmail,
+                userRole: userRole as any,
+                userName
+              },
+              {
+                userEmail: toEmail || `${toName?.toLowerCase().replace(/\s+/g, '')}@ourcodingkiddos.com`,
+                userRole: (toRole?.toUpperCase() || "SUPPORT") as any,
+                userName: toName
+              }
+            ]
+          }
+        },
+        include: {
+          participants: true
+        }
+      });
+
+      // Create first message if text provided
+      if (text) {
+        const message = await prisma.message.create({
+          data: {
+            conversationId: conversation.id,
+            fromEmail: userEmail,
+            fromRole: userRole as any,
+            fromName: userName,
+            content: text,
+            attachmentName
+          }
+        });
+
+        return NextResponse.json({
+          conversation: {
+            id: conversation.id,
+            name: conversation.title || toName || "New Conversation",
+            type: conversation.type
+          },
+          message: {
+            id: message.id,
+            conversationId: message.conversationId,
+            text: message.content,
+            fromRole: message.fromRole.toLowerCase(),
+            timestamp: new Date(message.createdAt).getTime()
+          }
+        });
+      }
+
+      return NextResponse.json({
+        conversation: {
+          id: conversation.id,
+          name: conversation.title || toName || "New Conversation"
+        }
+      });
+    }
+
+    // Send message to existing conversation
+    if (!conversationId || !text) {
+      return NextResponse.json({ error: "Missing conversationId or text" }, { status: 400 });
+    }
+
+    // Create message
+    const message = await prisma.message.create({
+      data: {
+        conversationId,
+        fromEmail: userEmail,
+        fromRole: userRole as any,
+        fromName: userName,
+        content: text,
+        attachmentName
+      }
+    });
+
+    // Update conversation lastMessageAt
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { lastMessageAt: new Date() }
+    });
+
+    return NextResponse.json({
+      message: {
+        id: message.id,
+        conversationId: message.conversationId,
+        text: message.content,
+        fromRole: message.fromRole.toLowerCase(),
+        fromName: message.fromName,
+        attachmentName: message.attachmentName,
+        timestamp: new Date(message.createdAt).getTime(),
+        status: "sent"
+      }
+    });
+  } catch (error: any) {
+    console.error("POST /api/messages error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  const { conversationId } = body;
-  const msg: ChatMessage = {
-    id: `m${userMessages.length + 1}`,
-    conversationId: conversationId ?? "c1",
-    fromRole,
-    toRole,
-    fromName,
-    toName,
-    text,
-    createdAt: new Date().toISOString(),
-    attachmentName,
-  };
-  userMessages = [...userMessages, msg];
-  // update preview/time
-  userConversations = userConversations.map((c) =>
-    c.id === msg.conversationId ? { ...c, preview: text || attachmentName || "Attachment", time: "Just now" } : c
-  );
-  return NextResponse.json({ message: msg });
+}
+
+// Helper function
+function getRelativeTime(date: Date): string {
+  const now = Date.now();
+  const diff = now - new Date(date).getTime();
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return new Date(date).toLocaleDateString();
 }

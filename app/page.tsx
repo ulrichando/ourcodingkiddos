@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Code2,
@@ -16,6 +17,23 @@ import {
   Shield,
   Clock,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Learn to Code - Interactive Online Coding Classes for Kids",
+  description: "Fun, interactive coding courses for ages 7-18. Learn HTML, CSS, JavaScript, Python, and Roblox game development. Live classes with expert instructors. Start your free trial today!",
+  keywords: ["coding for kids", "programming classes", "learn to code", "kids coding courses", "online coding school", "HTML for kids", "Python for kids", "JavaScript for kids", "Roblox coding"],
+  openGraph: {
+    title: "Our Coding Kiddos - Turn Your Child Into a Future Coder",
+    description: "Fun, interactive coding courses for ages 7-18. From building games in Roblox to creating real websites. Start free trial!",
+    url: "https://ourcodingkiddos.com",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Our Coding Kiddos - Turn Your Child Into a Future Coder",
+    description: "Fun, interactive coding courses for ages 7-18. Start your free trial today!",
+  },
+};
 
 const languages = [
   { name: "HTML", icon: Code2, color: "from-orange-400 to-red-500", description: "Build web page structures" },

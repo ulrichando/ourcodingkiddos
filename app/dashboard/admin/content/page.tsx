@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import ContentManagerView from "../../../../components/admin/ContentManagerView";
+import AdminLayout from "../../../../components/admin/AdminLayout";
 import fs from "fs/promises";
 import path from "path";
 import { courses as fallbackCourses } from "../../../../data/courses";
@@ -39,5 +40,9 @@ export default async function AdminContentPage() {
 
   const homePath = role === "ADMIN" ? "/dashboard/admin" : "/dashboard/instructor";
 
-  return <ContentManagerView courses={courses} homePath={homePath} dbError={dbError} />;
+  return (
+    <AdminLayout>
+      <ContentManagerView courses={courses} homePath={homePath} dbError={dbError} />
+    </AdminLayout>
+  );
 }

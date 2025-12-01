@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
-import AdminDashboardShell from "../../../components/admin/AdminDashboardShell";
+import AdminOverview from "../../../components/admin/AdminOverview";
+import AdminLayout from "../../../components/admin/AdminLayout";
 import {
   demoUsersRaw,
   demoStudentsRaw,
@@ -185,15 +186,16 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <AdminDashboardShell
-      userEmail={session.user.email}
-      stats={stats}
-      users={users}
-      parents={parents}
-      students={students}
-      courses={courses}
-      subscriptions={subscriptionsWithFallback}
-      warning={warning}
-    />
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <AdminOverview
+          stats={stats}
+          recentUsers={users}
+          totalUsers={users.length}
+          totalCourses={courses.length}
+          warning={warning}
+        />
+      </div>
+    </AdminLayout>
   );
 }

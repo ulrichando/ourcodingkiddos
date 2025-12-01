@@ -18,6 +18,7 @@ import {
   X,
   ChevronDown,
   Bell,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import NotificationBell from "../notifications/NotificationBell";
@@ -41,6 +42,12 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
     { name: "Courses", href: "/courses", icon: BookOpen },
     { name: "Schedule", href: "/schedule", icon: Calendar },
     { name: "Messages", href: "/messages", icon: MessageSquare },
+  ];
+
+  // Additional links for dropdown menu
+  const parentMenuLinks = [
+    { name: "1-on-1 Classes", href: "/dashboard/parent/class-requests", icon: Users },
+    { name: "Support", href: "/support", icon: Settings },
   ];
 
   const studentLinks: NavLink[] = [
@@ -102,6 +109,19 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
                   <p className="text-sm text-slate-500 truncate">{displayEmail}</p>
                 </div>
                 <div className="border-t border-slate-100" />
+                {userType === "parent" && (
+                  <>
+                    <Link href="/dashboard/parent/class-requests" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">
+                      <Users className="w-4 h-4" />
+                      1-on-1 Classes
+                    </Link>
+                    <Link href="/support" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">
+                      <HelpCircle className="w-4 h-4" />
+                      Support
+                    </Link>
+                    <div className="border-t border-slate-100" />
+                  </>
+                )}
                 <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">
                   <Settings className="w-4 h-4" />
                   Settings

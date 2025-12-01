@@ -1,4 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Pricing - Affordable Coding Classes for Kids | Start Free Trial",
+  description: "Simple, transparent pricing for kids coding courses. Start with a free 7-day trial. Monthly plans from $29/month. Family plans available. Live classes included. Cancel anytime.",
+  keywords: ["coding classes pricing", "kids coding cost", "affordable programming courses", "coding subscription for kids", "free coding trial"],
+  openGraph: {
+    title: "Affordable Pricing for Kids Coding Classes",
+    description: "Start with a free 7-day trial. Monthly plans from $29. Live classes included. Cancel anytime.",
+    url: "https://ourcodingkiddos.com/pricing",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Affordable Pricing for Kids Coding Classes",
+    description: "Start with a free 7-day trial. Plans from $29/month with live classes included.",
+  },
+};
 
 const plans = [
   {

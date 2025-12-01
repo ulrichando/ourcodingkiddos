@@ -64,6 +64,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
+  // Check subscription status for students and parents (admins and instructors bypass this check)
+  const role = (session.user as any).role;
+  const userEmail = session.user.email;
+
+  if (role === "STUDENT" || role === "PARENT") {
+    // For students, check their parent's subscription via parentEmail in studentProfile
+    // For parents, check their own subscription
+    let checkEmail = userEmail;
+
+    if (role === "STUDENT") {
+      const studentProfile = await prisma.studentProfile.findFirst({
+        where: { userId: (session.user as any).id },
+        select: { parentEmail: true },
+      });
+      checkEmail = studentProfile?.parentEmail || userEmail;
+    }
+
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        user: { email: checkEmail },
+        status: { in: ["ACTIVE", "TRIALING"] },
+      },
+    });
+
+    if (!subscription) {
+      return NextResponse.json(
+        { status: "error", message: "Active subscription required. Please start your free trial or upgrade your plan to book classes." },
+        { status: 403 }
+      );
+    }
+  }
+
   const payload = parsed.data;
   try {
     const booking = await prisma.booking.create({

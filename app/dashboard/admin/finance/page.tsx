@@ -1,6 +1,6 @@
 "use client";
 
-import AdminNav from "../../../../components/admin/AdminNav";
+import AdminLayout from "../../../../components/admin/AdminLayout";
 import AdminStatCard from "../../../../components/admin/AdminStatCard";
 
 const financeStats: { label: string; value: string; sublabel: string; accent: "purple" | "orange" | "green" | "blue" }[] =
@@ -19,14 +19,15 @@ const invoices = [
 
 export default function AdminFinancePage() {
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between gap-4">
+    <AdminLayout>
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Finance</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Finance</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Financial Overview</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            Monitor revenue, subscriptions, and financial metrics
+          </p>
         </div>
-        <AdminNav />
-      </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         {financeStats.map((stat) => (
@@ -69,6 +70,7 @@ export default function AdminFinancePage() {
           </table>
         </div>
       </div>
-    </main>
+      </main>
+    </AdminLayout>
   );
 }

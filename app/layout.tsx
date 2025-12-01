@@ -1,12 +1,55 @@
+import type { Metadata } from "next";
 import "./globals.css";
 import AppHeader from "../components/navigation/AppHeader";
 import ChatBot from "../components/chat/ChatBot";
 import AuthProvider from "../components/providers/AuthProvider";
 import ThemeHydrator from "../components/providers/ThemeHydrator";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import StructuredData from "../components/seo/StructuredData";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: {
+    default: "Our Coding Kiddos - Learn to Code",
+    template: "%s | Our Coding Kiddos"
+  },
+  description: "Empowering young minds with coding skills. Interactive online coding classes for kids in HTML, CSS, JavaScript, Python, and Roblox.",
+  keywords: ["coding for kids", "programming classes", "learn to code", "kids coding", "online coding courses", "HTML for kids", "Python for kids", "JavaScript for kids"],
+  authors: [{ name: "Our Coding Kiddos" }],
+  creator: "Our Coding Kiddos",
+  publisher: "Our Coding Kiddos",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" }
+    ],
+    apple: [
+      { url: "/apple-icon.svg", type: "image/svg+xml" }
+    ]
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Our Coding Kiddos"
+  },
+  formatDetection: {
+    telephone: false
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Our Coding Kiddos",
+    title: "Our Coding Kiddos - Learn to Code",
+    description: "Empowering young minds with coding skills. Interactive online coding classes for kids.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Our Coding Kiddos - Learn to Code",
+    description: "Empowering young minds with coding skills. Interactive online coding classes for kids.",
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           .animate-gradient { background-size: 200% 200%; animation: gradient-shift 3s ease infinite; }
         `}</style>
 
+        <StructuredData />
         <AuthProvider>
           <ThemeHydrator />
           <ErrorBoundary>

@@ -20,9 +20,24 @@ export default function SettingsPage() {
     if (session?.user) {
       setFullName(session.user.name ?? "");
       setEmail(session.user.email ?? "");
-      // appearance now handled by header toggle
+      // Load user preferences
+      loadPreferences();
     }
   }, [session]);
+
+  const loadPreferences = async () => {
+    try {
+      const response = await fetch("/api/preferences");
+      if (response.ok) {
+        const data = await response.json();
+        setEmailUpdates(data.preferences.emailUpdates);
+        setClassReminders(data.preferences.classReminders);
+        setProgressReports(data.preferences.progressReports);
+      }
+    } catch (error) {
+      console.error("Failed to load preferences:", error);
+    }
+  };
 
   if (status === "loading") {
     return <div className="min-h-screen flex items-center justify-center text-slate-600 dark:text-slate-400">Loading...</div>;
@@ -65,19 +80,31 @@ export default function SettingsPage() {
     setPrefStatus("saving");
     setPrefMessage("");
     try {
-      // In a real app, this would save to the backend
-      // For now, we'll simulate a successful save
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await fetch("/api/preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailUpdates,
+          classReminders,
+          progressReports,
+        }),
+      });
 
-      setPrefStatus("success");
-      setPrefMessage("Preferences saved successfully!");
-      setTimeout(() => {
-        setPrefStatus("idle");
-        setPrefMessage("");
-      }, 3000);
+      if (response.ok) {
+        setPrefStatus("success");
+        setPrefMessage("Preferences saved successfully!");
+        setTimeout(() => {
+          setPrefStatus("idle");
+          setPrefMessage("");
+        }, 3000);
+      } else {
+        setPrefStatus("error");
+        setPrefMessage("Failed to save preferences. Please try again.");
+        setTimeout(() => setPrefStatus("idle"), 3000);
+      }
     } catch (error) {
       setPrefStatus("error");
-      setPrefMessage("Failed to save preferences. Please try again.");
+      setPrefMessage("An error occurred. Please try again.");
       setTimeout(() => setPrefStatus("idle"), 3000);
     }
   };

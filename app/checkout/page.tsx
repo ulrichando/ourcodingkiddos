@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   ArrowLeft,
   Check,
@@ -39,6 +40,7 @@ const plans: Plan[] = [
 ];
 
 export default function CheckoutPage() {
+  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [selected, setSelected] = useState("monthly");
   const [cardName, setCardName] = useState("");
@@ -51,6 +53,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal" | "bank">("card");
   const [coupons, setCoupons] = useState<any[]>([]);
   const [checkingPromo, setCheckingPromo] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fromUrl = searchParams.get("plan");
@@ -118,6 +122,45 @@ export default function CheckoutPage() {
   };
 
   const finalPrice = Math.max(0, plan.price - discount);
+
+  const handleCheckout = async () => {
+    if (!session) {
+      window.location.href = '/auth/login?callbackUrl=/checkout?plan=' + selected;
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId: selected,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err: any) {
+      console.error('Checkout error:', err);
+      setError(err.message || 'Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100">
@@ -272,9 +315,27 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                <Button className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2">
-                  <Lock className="h-4 w-4" />
-                  {plan.id === "free-trial" ? "Start Free Trial" : `Pay $${finalPrice.toFixed(2)}`}
+                {error && (
+                  <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-400">
+                    {error}
+                  </div>
+                )}
+                <Button
+                  onClick={handleCheckout}
+                  disabled={loading}
+                  className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4" />
+                      {plan.id === "free-trial" ? "Start Free Trial" : `Pay $${finalPrice.toFixed(2)}`}
+                    </>
+                  )}
                 </Button>
                 <p className="text-xs text-center text-slate-500 dark:text-slate-400">
                   🔒 Your payment is secured with 256-bit SSL encryption

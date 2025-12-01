@@ -195,7 +195,7 @@ export default function SchedulePage() {
                             setWeekStart(startOfWeek(day));
                           }}
                           className={`flex flex-col items-center px-3 py-2 rounded-xl min-w-[60px] text-sm font-semibold ${
-                            active ? "bg-purple-500 text-white" : "hover:bg-slate-100 text-slate-700"
+                            active ? "bg-purple-500 text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                           }`}
                         >
                           <span className="opacity-70">{formatDay(day, { weekday: "short" })}</span>
