@@ -89,14 +89,15 @@ export function Modal({ isOpen, onClose, title, children, footer, size = "md" }:
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
     >
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={modalRef}
         className={`w-full ${sizeClasses[size]} rounded-2xl bg-admin-input border border-white/10 p-6 space-y-4 shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
       >
         <div className="flex items-center justify-between">
           <h3 id="modal-title" className="text-lg font-semibold text-white">

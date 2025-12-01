@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../lib/auth";
 
 type ChatMessage = {
   id: string;
@@ -31,7 +33,8 @@ const contacts = [
   { id: "parent-1", name: "Demo Parent", role: "parent" },
 ];
 
-let conversations: Conversation[] = [
+// Demo data only shown for demo mode
+const demoConversations: Conversation[] = [
   {
     id: "c1",
     label: "Coach Alex (Instructor)",
@@ -56,7 +59,7 @@ let conversations: Conversation[] = [
   },
 ];
 
-let messages: ChatMessage[] = [
+const demoMessages: ChatMessage[] = [
   {
     id: "m1",
     conversationId: "c1",
@@ -115,10 +118,25 @@ let messages: ChatMessage[] = [
   },
 ];
 
+// Store user messages in memory (in production, this would be in a database)
+let userMessages: ChatMessage[] = [];
+let userConversations: Conversation[] = [];
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const role = searchParams.get("role") as ChatMessage["fromRole"] | null;
   const q = searchParams.get("q")?.toLowerCase() || "";
+
+  // Check if user is authenticated
+  const session = await getServerSession(authOptions);
+  const userRole = (session as any)?.user?.role;
+
+  // Only show demo data for admin users in demo mode
+  const showDemoData = userRole === "ADMIN" && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false";
+
+  // Use demo data or real user data
+  let conversations = showDemoData ? demoConversations : userConversations;
+  let messages = showDemoData ? demoMessages : userMessages;
 
   // prune messages older than retention window
   const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
@@ -153,17 +171,17 @@ export async function POST(req: Request) {
       (participantList.length > 0 ? `Group: ${participantList.join(", ")}` : contact.name || "New Conversation");
 
     const convo: Conversation = {
-      id: `c${conversations.length + 1}`,
+      id: `c${userConversations.length + 1}`,
       label: convoLabel,
       roles: { from: fromRole, to: (contact.role as any) || toRole },
       time: "Just now",
       preview: text || "",
       participants: participantList.length ? participantList : undefined,
     };
-    conversations = [convo, ...conversations];
+    userConversations = [convo, ...userConversations];
     if (text) {
       const msg: ChatMessage = {
-        id: `m${messages.length + 1}`,
+        id: `m${userMessages.length + 1}`,
         conversationId: convo.id,
         fromRole,
         toRole: (contact.role as any) || toRole,
@@ -173,9 +191,10 @@ export async function POST(req: Request) {
         createdAt: new Date().toISOString(),
         attachmentName,
       };
-      messages = [...messages, msg];
+      userMessages = [...userMessages, msg];
+      return NextResponse.json({ conversation: convo, message: msg });
     }
-    return NextResponse.json({ conversation: convo, message: messages[messages.length - 1] });
+    return NextResponse.json({ conversation: convo, message: null });
   }
 
   if (!fromRole || !toRole || !text) {
@@ -183,7 +202,7 @@ export async function POST(req: Request) {
   }
   const { conversationId } = body;
   const msg: ChatMessage = {
-    id: `m${messages.length + 1}`,
+    id: `m${userMessages.length + 1}`,
     conversationId: conversationId ?? "c1",
     fromRole,
     toRole,
@@ -193,9 +212,9 @@ export async function POST(req: Request) {
     createdAt: new Date().toISOString(),
     attachmentName,
   };
-  messages = [...messages, msg];
+  userMessages = [...userMessages, msg];
   // update preview/time
-  conversations = conversations.map((c) =>
+  userConversations = userConversations.map((c) =>
     c.id === msg.conversationId ? { ...c, preview: text || attachmentName || "Attachment", time: "Just now" } : c
   );
   return NextResponse.json({ message: msg });

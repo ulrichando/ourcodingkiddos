@@ -212,11 +212,12 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         case "title":
           comparison = a.title.localeCompare(b.title);
           break;
-        case "level":
+        case "level": {
           const levelOrder = { beginner: 1, intermediate: 2, advanced: 3 };
           comparison = (levelOrder[a.level.toLowerCase() as keyof typeof levelOrder] || 0) -
                       (levelOrder[b.level.toLowerCase() as keyof typeof levelOrder] || 0);
           break;
+        }
         case "xp":
           comparison = (a.totalXp || 0) - (b.totalXp || 0);
           break;
@@ -248,7 +249,6 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
     }
     // intentionally do not include selectedId in deps to avoid overwriting local additions
     // when selection changes; we only resync when the incoming courses prop changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courses]);
 
   useEffect(() => {

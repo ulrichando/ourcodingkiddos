@@ -40,6 +40,19 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!session?.user || (session as any).user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Prevent admin from deleting themselves
+  const currentUser = await prisma.user.findUnique({
+    where: { email: session.user.email! },
+    select: { id: true },
+  });
+
+  if (currentUser?.id === id) {
+    return NextResponse.json({
+      error: "You cannot delete your own admin account. Please ask another admin to do this."
+    }, { status: 403 });
+  }
+
   try {
     await prisma.user.delete({ where: { id } });
     return NextResponse.json({ status: "ok" });

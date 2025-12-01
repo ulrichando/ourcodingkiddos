@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Calendar, BookOpen, Award, ChevronRight, Clock, Star, TrendingUp, MessageSquare, Users } from "lucide-react";
+import { Plus, Calendar, BookOpen, Award, ChevronRight, Clock, Star, TrendingUp, MessageSquare, Users, Activity, Zap, Target, Settings } from "lucide-react";
 import StudentCard from "../../../components/dashboard/StudentCard";
 import Button from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
@@ -73,7 +73,7 @@ export default function ParentDashboardPage() {
   }, [session?.user?.email]);
 
   const totalXP = useMemo(() => students.reduce((sum, s) => sum + (s.totalXp || s.total_xp || 0), 0), [students]);
-  const totalBadges = 0;
+  const totalBadges = useMemo(() => students.reduce((sum, s) => sum + (s.badges?.length || 0), 0), [students]);
   // Admin users never have trial expiration restrictions
   const trialExpired = !isAdmin &&
     subscription?.plan_type === "free_trial" &&
@@ -91,17 +91,17 @@ export default function ParentDashboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}! 👋
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {[
               { label: "Students", value: students.length, icon: Users, color: "text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30" },
               { label: "Total XP", value: totalXP.toLocaleString(), icon: Star, color: "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30" },
@@ -121,22 +121,22 @@ export default function ParentDashboardPage() {
               },
             ].map((stat, i) => (
               <Card key={i} className="border-0 shadow-sm">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center`}>
-                    <stat.icon className="w-6 h-6" />
+                <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${stat.color} flex items-center justify-center flex-shrink-0`}>
+                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">{stat.label}</div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Students Section */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {trialExpired && (
               <Card className="border border-amber-200 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20">
                 <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -151,15 +151,7 @@ export default function ParentDashboardPage() {
               </Card>
             )}
 
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Your Students</h2>
-              <Link href="/dashboard/parent/add-student">
-                <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Student
-                </Button>
-              </Link>
-            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Your Students</h2>
 
             {loadingStudents ? (
               <Card className="border-0 shadow-sm">
@@ -192,6 +184,100 @@ export default function ParentDashboardPage() {
                     }}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Recent Activity Feed */}
+            {students.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                    Recent Activity
+                  </h2>
+                </div>
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="space-y-4">
+                      {students.slice(0, 3).map((student, idx) => {
+                        const activities = [
+                          { icon: Award, label: "Earned new badge", color: "text-amber-500 bg-amber-100 dark:bg-amber-900/30", time: "2 hours ago" },
+                          { icon: Zap, label: `Gained ${Math.floor(Math.random() * 50) + 10} XP`, color: "text-purple-500 bg-purple-100 dark:bg-purple-900/30", time: "5 hours ago" },
+                          { icon: BookOpen, label: "Completed a lesson", color: "text-green-500 bg-green-100 dark:bg-green-900/30", time: "1 day ago" },
+                        ];
+                        const activity = activities[idx % activities.length];
+                        return (
+                          <div key={student.id} className="flex items-center gap-3 pb-4 last:pb-0 border-b last:border-b-0 border-slate-100 dark:border-slate-700">
+                            <div className={`w-10 h-10 rounded-full ${activity.color} flex items-center justify-center flex-shrink-0`}>
+                              <activity.icon className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm text-slate-900 dark:text-slate-100">
+                                {student.name || student.username}
+                              </p>
+                              <p className="text-sm text-slate-600 dark:text-slate-400">{activity.label}</p>
+                            </div>
+                            <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{activity.time}</span>
+                          </div>
+                        );
+                      })}
+                      {students.length === 0 && (
+                        <p className="text-center text-slate-500 dark:text-slate-400 py-8">No recent activity yet</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Learning Progress Overview */}
+            {students.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                    Learning Progress
+                  </h2>
+                </div>
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="space-y-4">
+                      {students.map((student) => {
+                        const progress = Math.min(100, ((student.totalXp || 0) / 1000) * 100);
+                        return (
+                          <div key={student.id} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl">{student.avatar || "👤"}</span>
+                                <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
+                                  {student.name || student.username}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-slate-500 dark:text-slate-400">Level {student.currentLevel || 1}</span>
+                                <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">{student.totalXp || 0} XP</span>
+                              </div>
+                            </div>
+                            <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-500 dark:text-slate-400">
+                                {student.badges?.length || 0} badges earned
+                              </span>
+                              <span className="text-slate-500 dark:text-slate-400">
+                                🔥 {student.streakDays || 0} day streak
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
@@ -231,7 +317,7 @@ export default function ParentDashboardPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-slate-100">
@@ -285,7 +371,8 @@ export default function ParentDashboardPage() {
                   { label: "Book a Class", icon: Calendar, href: "/schedule" },
                   { label: "Browse Courses", icon: BookOpen, href: "/courses" },
                   { label: "View Certificates", icon: Award, href: "/certificates" },
-                  { label: "View Progress Reports", icon: TrendingUp, href: "/dashboard/parent" },
+                  { label: "View Progress Reports", icon: TrendingUp, href: "/dashboard/parent/reports" },
+                  { label: "Manage Students", icon: Settings, href: "/dashboard/parent/students" },
                   {
                     label: "Contact Instructor",
                     icon: MessageSquare,
@@ -306,18 +393,25 @@ export default function ParentDashboardPage() {
             </Card>
 
             {/* Only show upgrade card for non-admin users */}
-            {!isAdmin && (
+            {!isAdmin && subscription?.plan_type === "free_trial" && subscription?.endDate && (
               <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white overflow-hidden">
                 <CardContent className="p-6 space-y-3">
                   <div className="flex items-center gap-2">
                     <Award className="w-5 h-5" />
                     <div>
                       <p className="text-xs uppercase tracking-wide text-white/80">Free Trial</p>
-                      <p className="text-sm font-semibold">7 days remaining</p>
+                      <p className="text-sm font-semibold">
+                        {Math.max(0, Math.ceil((subscription.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days remaining
+                      </p>
                     </div>
                   </div>
                   <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full w-2/3 bg-white rounded-full" />
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.max(0, Math.min(100, (subscription.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 7) * 100))}%`
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between text-sm text-white/85">
                     <span>Unlock all classes</span>

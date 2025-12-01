@@ -129,6 +129,7 @@ model StudentProfile {
   badges     Json?
   themePreference ThemePreference?
   accessibilitySettings Json?
+  archivedAt DateTime? // Soft delete: when student is archived
 
   user     User @relation(fields: [userId], references: [id])
   guardian ParentProfile? @relation("ParentGuardian", fields: [guardianId], references: [id])

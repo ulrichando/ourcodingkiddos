@@ -109,7 +109,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ status: "ok", user, credentials: { username, password } });
   } catch (err: any) {
-    // eslint-disable-next-line no-console
     console.error("[students] create failed", err);
     const msg =
       err?.code === "P2002" || err?.message?.includes("Unique constraint")
@@ -158,6 +157,8 @@ export async function GET(request: NextRequest) {
       streakDays: true,
       parentEmail: true,
       lastActiveDate: true,
+      archivedAt: true,
+      userId: true,
     } as any,
   })) as any[];
 
