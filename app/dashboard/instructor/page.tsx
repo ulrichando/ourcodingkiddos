@@ -60,16 +60,16 @@ export default function InstructorDashboard() {
   const uniqueStudentCount = students.length;
 
   return (
-    <main className="min-h-screen bg-[#f6f8fb] text-slate-800">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Instructor Dashboard</h1>
-            <p className="text-slate-600">Welcome back, {userName}!</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Instructor Dashboard</h1>
+            <p className="text-slate-600 dark:text-slate-400">Welcome back, {userName}!</p>
           </div>
           <Link
             href="/dashboard/instructor/create-class"
-            className="inline-flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-md font-semibold shadow"
+            className="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-semibold shadow"
           >
             <Plus className="h-4 w-4" /> Create Class
           </Link>
@@ -77,36 +77,36 @@ export default function InstructorDashboard() {
 
         <div className="grid md:grid-cols-4 gap-4">
           {[
-            { label: "Today's Classes", value: todays.length, icon: Calendar, color: "bg-purple-100 text-purple-600" },
-            { label: "Total Students", value: uniqueStudentCount, icon: Users, color: "bg-blue-100 text-blue-600" },
-            { label: "Upcoming Sessions", value: upcoming.length, icon: Clock, color: "bg-green-100 text-green-600" },
-            { label: "Total Bookings", value: bookings.length, icon: BookOpen, color: "bg-amber-100 text-amber-600" },
+            { label: "Today's Classes", value: todays.length, icon: Calendar, color: "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400" },
+            { label: "Total Students", value: uniqueStudentCount, icon: Users, color: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" },
+            { label: "Upcoming Sessions", value: upcoming.length, icon: Clock, color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
+            { label: "Total Bookings", value: bookings.length, icon: BookOpen, color: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-3"
+              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 flex items-center gap-3"
             >
               <span className={`h-10 w-10 rounded-xl flex items-center justify-center ${stat.color}`}>
                 <stat.icon className="h-5 w-5" />
               </span>
               <div>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <div className="text-sm text-slate-600">{stat.label}</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</div>
               </div>
             </div>
           ))}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl border border-slate-100 p-6 lg:col-span-2 space-y-4 min-h-[260px]">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 lg:col-span-2 space-y-4 min-h-[260px]">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900">Upcoming Classes</h3>
-              <Link href="/dashboard/instructor" className="text-xs font-semibold text-slate-600 flex items-center gap-1">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Upcoming Classes</h3>
+              <Link href="/dashboard/instructor" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200">
                 View All <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
             {upcoming.length === 0 ? (
-              <div className="border border-dashed border-slate-200 rounded-xl p-6 text-center text-slate-500 text-sm">
+              <div className="border border-dashed border-slate-200 dark:border-slate-600 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm">
                 No classes yet. Create one to get started.
               </div>
             ) : (
@@ -114,7 +114,7 @@ export default function InstructorDashboard() {
                 {upcoming.map((session) => (
                   <div
                     key={session.id}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition"
+                    className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition"
                   >
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex flex-col items-center justify-center">
                       <span className="text-xs font-medium">
@@ -124,12 +124,12 @@ export default function InstructorDashboard() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-slate-800">{session.title}</h3>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">{session.title}</h3>
                         {session.start && new Date().toDateString() === session.start.toDateString() && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Today</span>
+                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Today</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
+                      <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mt-1">
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
                           {session.start
@@ -140,7 +140,7 @@ export default function InstructorDashboard() {
                           <Users className="h-4 w-4" />
                           {session.bookings}/{session.maxStudents ?? "∞"}
                         </span>
-                        <span className="text-xs px-2 py-1 rounded-full border border-slate-200 capitalize">
+                        <span className="text-xs px-2 py-1 rounded-full border border-slate-200 dark:border-slate-600 capitalize text-slate-700 dark:text-slate-300">
                           {(session.sessionType || session.type || "").toLowerCase()}
                         </span>
                       </div>
@@ -148,7 +148,7 @@ export default function InstructorDashboard() {
                     {session.meetingUrl && (
                       <Link
                         href={session.meetingUrl}
-                        className="inline-flex items-center gap-1 bg-blue-500 text-white px-3 py-2 rounded-md text-sm"
+                        className="inline-flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -162,34 +162,34 @@ export default function InstructorDashboard() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-100 p-5 space-y-2">
-              <h3 className="font-semibold text-slate-900">Quick Actions</h3>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 space-y-2">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Quick Actions</h3>
               {[
                 { label: "View Students", href: "/dashboard/instructor/students", icon: Users },
                 { label: "Manage Content", href: "/dashboard/instructor/content", icon: BookOpen },
                 { label: "Messages", href: "/messages", icon: MessageSquare },
                 { label: "Availability", href: "/dashboard/instructor/availability", icon: Calendar },
               ].map((action) => (
-                <Link key={action.label} href={action.href} className="flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900">
-                  <action.icon className="h-4 w-4 text-slate-500" /> {action.label}
+                <Link key={action.label} href={action.href} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100">
+                  <action.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" /> {action.label}
                 </Link>
               ))}
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 p-5">
-              <h3 className="font-semibold text-slate-900 mb-3">Recent Bookings</h3>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">Recent Bookings</h3>
               {bookings.length === 0 ? (
-                <p className="text-sm text-slate-500">No recent bookings</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">No recent bookings</p>
               ) : (
                 <div className="space-y-3">
                   {bookings.map((booking) => (
                     <div key={booking.id} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm text-purple-700">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-sm text-purple-700 dark:text-purple-400">
                         {booking.student[0]}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800">{booking.student} booked</p>
-                        <p className="text-xs text-slate-500">{booking.sessionTitle}</p>
+                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{booking.student} booked</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{booking.sessionTitle}</p>
                       </div>
                     </div>
                   ))}

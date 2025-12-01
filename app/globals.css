@@ -165,7 +165,7 @@ body {
 
 /* Lesson pages */
 .lesson-page {
-  background: #0b1224;
+  /* Background handled by Tailwind classes for both themes */
 }
 .lesson-overview {
   background: #ffffff;

@@ -120,14 +120,14 @@ export default function CheckoutPage() {
   const finalPrice = Math.max(0, plan.price - discount);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 text-slate-900">
+    <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
-          <Link href="/pricing" className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900">
+          <Link href="/pricing" className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
             <ArrowLeft className="h-4 w-4" /> Back to Plans
           </Link>
-          <div className="hidden sm:flex items-center gap-4 text-xs text-slate-600">
-            <div className="inline-flex items-center gap-1 text-green-600">
+          <div className="hidden sm:flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+            <div className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
               <Shield className="h-3.5 w-3.5" />
               100% Secure
             </div>
@@ -140,18 +140,18 @@ export default function CheckoutPage() {
 
         {/* Steps */}
         <div className="flex items-center justify-center gap-4 text-sm">
-          <div className="flex items-center gap-2 text-purple-600">
-            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
+          <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+            <div className="w-6 h-6 rounded-full bg-purple-600 dark:bg-purple-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
             <span className="font-medium">Choose Plan</span>
           </div>
-          <div className="w-12 h-0.5 bg-purple-600" />
-          <div className="flex items-center gap-2 text-purple-600">
-            <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold">2</div>
+          <div className="w-12 h-0.5 bg-purple-600 dark:bg-purple-500" />
+          <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+            <div className="w-6 h-6 rounded-full bg-purple-600 dark:bg-purple-500 text-white flex items-center justify-center text-xs font-bold">2</div>
             <span className="font-medium">Payment</span>
           </div>
-          <div className="w-12 h-0.5 bg-slate-200" />
+          <div className="w-12 h-0.5 bg-slate-200 dark:bg-slate-700" />
           <div className="flex items-center gap-2 text-slate-400">
-            <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold">3</div>
+            <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center text-xs font-bold">3</div>
             <span>Complete</span>
           </div>
         </div>
@@ -160,26 +160,26 @@ export default function CheckoutPage() {
           {/* Left column: Payment method & card details */}
           <div className="space-y-6">
             {/* Payment method */}
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 space-y-4">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                <CreditCard className="h-5 w-5 text-purple-600" />
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+              <div className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 Payment Method
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { id: "card", label: "Credit Card", icon: <CreditCard className="h-5 w-5 text-slate-600" /> },
+                  { id: "card", label: "Credit Card", icon: <CreditCard className="h-5 w-5 text-slate-600 dark:text-slate-400" /> },
                   { id: "paypal", label: "PayPal", icon: <div className="w-6 h-6 bg-blue-600 text-white text-xs font-bold rounded flex items-center justify-center">P</div> },
-                  { id: "bank", label: "Bank", icon: <Building2 className="h-5 w-5 text-slate-600" /> },
+                  { id: "bank", label: "Bank", icon: <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" /> },
                 ].map((opt) => (
                   <button
                     key={opt.id}
                     onClick={() => setPaymentMethod(opt.id as any)}
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
-                      paymentMethod === opt.id ? "border-purple-500 bg-purple-50 shadow-sm" : "border-slate-200 hover:border-slate-300"
+                      paymentMethod === opt.id ? "border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-sm" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                     }`}
                   >
                     {opt.icon}
-                    <span className="text-sm font-medium">{opt.label}</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{opt.label}</span>
                   </button>
                 ))}
               </div>
@@ -187,13 +187,13 @@ export default function CheckoutPage() {
 
             {/* Card details */}
             {paymentMethod === "card" && (
-              <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 space-y-4">
-                <div className="flex items-center gap-2 text-lg font-semibold">
-                  <CreditCard className="h-5 w-5 text-purple-600" />
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                <div className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   Card Details
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-slate-700">Cardholder Name</label>
+                  <label className="text-sm text-slate-700 dark:text-slate-300">Cardholder Name</label>
                   <Input
                     value={cardName}
                     onChange={(e) => setCardName(e.target.value)}
@@ -202,7 +202,7 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-slate-700">Card Number</label>
+                  <label className="text-sm text-slate-700 dark:text-slate-300">Card Number</label>
                   <div className="relative">
                     <Input
                       value={cardNumber}
@@ -219,7 +219,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-slate-700">Expiry Date</label>
+                    <label className="text-sm text-slate-700 dark:text-slate-300">Expiry Date</label>
                     <Input
                       value={expiry}
                       onChange={(e) => setExpiry(e.target.value)}
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-slate-700">Security Code (CVV)</label>
+                    <label className="text-sm text-slate-700 dark:text-slate-300">Security Code (CVV)</label>
                     <div className="relative">
                       <Input
                         value={cvv}
@@ -243,8 +243,8 @@ export default function CheckoutPage() {
 
                 {/* Promo */}
                 <div className="space-y-2">
-                  <label className="text-sm text-slate-700 flex items-center gap-2">
-                    <Gift className="h-4 w-4 text-purple-500" />
+                  <label className="text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Gift className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                     Have a promo code?
                   </label>
                   <div className="grid grid-cols-[1fr,120px] gap-2">
@@ -266,7 +266,7 @@ export default function CheckoutPage() {
                     </Button>
                   </div>
                   {promoApplied && (
-                    <p className="text-sm text-green-600 flex items-center gap-1">
+                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
                       <CheckCircle2 className="h-4 w-4" /> Promo applied! You save ${discount.toFixed(2)}
                     </p>
                   )}
@@ -276,32 +276,32 @@ export default function CheckoutPage() {
                   <Lock className="h-4 w-4" />
                   {plan.id === "free-trial" ? "Start Free Trial" : `Pay $${finalPrice.toFixed(2)}`}
                 </Button>
-                <p className="text-xs text-center text-slate-500">
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400">
                   🔒 Your payment is secured with 256-bit SSL encryption
                 </p>
               </div>
             )}
 
             {paymentMethod === "paypal" && (
-              <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 space-y-3 text-center">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 space-y-3 text-center">
                 <div className="w-14 h-14 bg-blue-600 text-white font-bold rounded-2xl flex items-center justify-center mx-auto text-xl">P</div>
-                <p className="text-slate-600">You'll be redirected to PayPal to complete payment.</p>
+                <p className="text-slate-600 dark:text-slate-400">You'll be redirected to PayPal to complete payment.</p>
                 <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white">Continue with PayPal</Button>
               </div>
             )}
 
             {paymentMethod === "bank" && (
-              <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 space-y-3 text-center">
-                <Building2 className="w-12 h-12 text-slate-600 mx-auto" />
-                <p className="text-slate-600">Connect your bank account for direct payment.</p>
-                <Button className="w-full h-12 bg-slate-900 hover:bg-slate-950 text-white">Connect Bank</Button>
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 space-y-3 text-center">
+                <Building2 className="w-12 h-12 text-slate-600 dark:text-slate-400 mx-auto" />
+                <p className="text-slate-600 dark:text-slate-400">Connect your bank account for direct payment.</p>
+                <Button className="w-full h-12 bg-slate-900 dark:bg-slate-100 hover:bg-slate-950 dark:hover:bg-slate-200 text-white dark:text-slate-900">Connect Bank</Button>
               </div>
             )}
           </div>
 
           {/* Right column: Summary */}
           <div className="space-y-4 lg:sticky lg:top-20 self-start">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
               <div className="bg-gradient-to-br from-purple-600 to-pink-600 text-white p-6">
                 <Badge className="bg-white/20 text-white border-0 mb-2">
                   {plan.id === "free-trial" ? "🎉 Free Trial" : "✨ Selected Plan"}
@@ -313,36 +313,36 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <div className="p-6 space-y-3">
-                <h3 className="font-semibold text-slate-800">Order Summary</h3>
-                <div className="flex justify-between text-sm text-slate-600">
+                <h3 className="font-semibold text-slate-800 dark:text-slate-200">Order Summary</h3>
+                <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
                   <span>{plan.name}</span>
                   <span className="font-medium">${plan.price.toFixed(2)}</span>
                 </div>
                 {promoApplied && (
-                  <div className="flex justify-between text-sm text-green-600">
+                  <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
                     <span>Promo Discount</span>
                     <span>- ${discount.toFixed(2)}</span>
                   </div>
                 )}
                 <Separator />
-                <div className="flex justify-between text-lg font-semibold">
+                <div className="flex justify-between text-lg font-semibold text-slate-900 dark:text-slate-100">
                   <span>Total Due Today</span>
-                  <span className="text-purple-600">{plan.id === "free-trial" ? "$0.00" : `$${finalPrice.toFixed(2)}`}</span>
+                  <span className="text-purple-600 dark:text-purple-400">{plan.id === "free-trial" ? "$0.00" : `$${finalPrice.toFixed(2)}`}</span>
                 </div>
                 {plan.id === "free-trial" && (
-                  <div className="mt-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <div className="mt-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                     After 7 days, you'll be charged $29/month unless you cancel.
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
                 What's Included
               </h3>
-              <ul className="space-y-2 text-sm text-slate-700">
+              <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
                 {[
                   { icon: Zap, text: "Unlimited course access" },
                   { icon: Users, text: `${plan.maxStudents} student account${plan.maxStudents > 1 ? "s" : ""}` },
@@ -358,26 +358,26 @@ export default function CheckoutPage() {
               </ul>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-5">
               <div className="flex gap-1 mb-2">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
                 ))}
               </div>
-              <p className="text-sm text-slate-600 italic mb-3">
+              <p className="text-sm text-slate-600 dark:text-slate-400 italic mb-3">
                 "My daughter went from watching videos to creating her own apps. Worth every penny!"
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-slate-200" />
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700" />
                 <div>
-                  <p className="font-semibold text-sm">Sarah M.</p>
-                  <p className="text-xs text-slate-500">Parent • Premium Member</p>
+                  <p className="font-semibold text-sm text-slate-900 dark:text-slate-100">Sarah M.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Parent • Premium Member</p>
                 </div>
               </div>
             </div>
 
-            <div className="text-center text-sm text-slate-600">
-              <div className="flex items-center justify-center gap-2 text-green-600">
+            <div className="text-center text-sm text-slate-600 dark:text-slate-400">
+              <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
                 <Shield className="h-5 w-5" />
                 30-Day Money Back Guarantee
               </div>
@@ -387,7 +387,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Footer badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600">
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600 dark:text-slate-400">
           <div className="inline-flex items-center gap-2">
             <Shield className="h-4 w-4 text-green-500" />
             Secure Payment

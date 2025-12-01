@@ -33,14 +33,14 @@ export default function AdminInstructorsPage() {
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900">Instructors</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Instructors</h1>
         </div>
         <AdminNav />
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading instructors…</p>}
-      {error && <p className="text-sm text-rose-600">Failed to load instructors</p>}
+      {loading && <p className="text-sm text-slate-500 dark:text-slate-400">Loading instructors…</p>}
+      {error && <p className="text-sm text-rose-600 dark:text-rose-400">Failed to load instructors</p>}
       {!loading && !error && <AdminUsersClient initialUsers={users} defaultRole="INSTRUCTOR" />}
     </main>
   );

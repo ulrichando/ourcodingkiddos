@@ -58,20 +58,20 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-slate-900">Subscription Plans</h1>
-          <p className="text-slate-600">Choose the best plan for your family</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Subscription Plans</h1>
+          <p className="text-slate-600 dark:text-slate-400">Choose the best plan for your family</p>
         </div>
 
-        <div className="border-2 border-purple-300 bg-purple-50 rounded-2xl p-4 flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2 font-semibold text-slate-800">
-            <span className="text-purple-600">👑</span> Current Plan
-            <span className="text-purple-600">{currentPlan.name}</span>
-            <span className="text-slate-500">({info})</span>
+        <div className="border-2 border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/30 rounded-2xl p-4 flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200">
+            <span className="text-purple-600 dark:text-purple-400">👑</span> Current Plan
+            <span className="text-purple-600 dark:text-purple-400">{currentPlan.name}</span>
+            <span className="text-slate-500 dark:text-slate-400">({info})</span>
           </div>
-          <span className="text-xs font-semibold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">{status}</span>
+          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full">{status}</span>
         </div>
 
         <div className="grid md:grid-cols-4 gap-5">
@@ -81,21 +81,21 @@ export default function SubscriptionPage() {
               <Card
                 key={plan.name}
                 className={`overflow-hidden border ${
-                  isCurrent ? "border-purple-500 shadow-purple-100 scale-[1.02]" : "border-slate-200"
+                  isCurrent ? "border-purple-500 shadow-purple-100 dark:shadow-purple-900/20 scale-[1.02]" : "border-slate-200 dark:border-slate-700"
                 }`}
               >
                 {plan.popular && (
-                  <div className="text-xs font-semibold bg-purple-100 text-purple-700 px-3 py-1 text-center">MOST POPULAR</div>
+                  <div className="text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 text-center">MOST POPULAR</div>
                 )}
                 <CardContent className="p-5 space-y-4">
                   <div>
-                    <p className="text-lg font-bold text-slate-900">{plan.name}</p>
+                    <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{plan.name}</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-slate-900">{plan.price}</span>
-                      <span className="text-slate-500">{plan.period}</span>
+                      <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">{plan.price}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{plan.period}</span>
                     </div>
                   </div>
-                  <ul className="space-y-2 text-sm text-slate-700">
+                  <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
                     {plan.features.map((f) => (
                       <li key={f} className="flex items-center gap-2">
                         <span className="text-emerald-500">✔</span>
@@ -117,7 +117,7 @@ export default function SubscriptionPage() {
           })}
         </div>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
           All plans include access to the code playground and basic support. Cancel anytime. No long-term commitments.
         </p>
       </div>

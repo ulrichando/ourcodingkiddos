@@ -25,8 +25,8 @@ export default function AdminCoursesPage() {
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900">Courses</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Courses</h1>
         </div>
         <AdminNav />
       </div>
@@ -42,7 +42,7 @@ export default function AdminCoursesPage() {
             render: (c) => (
               <span
                 className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  c.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                  c.published ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300" : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
                 }`}
               >
                 {c.published ? "Published" : "Draft"}
@@ -56,8 +56,8 @@ export default function AdminCoursesPage() {
             label: "Actions",
             render: (c) => (
               <div className="flex gap-2 text-xs">
-                <button className="px-2 py-1 rounded bg-slate-100 text-slate-700">Edit</button>
-                <button className="px-2 py-1 rounded bg-amber-100 text-amber-700">
+                <button className="px-2 py-1 rounded bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600">Edit</button>
+                <button className="px-2 py-1 rounded bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800">
                   {c.published ? "Unpublish" : "Publish"}
                 </button>
               </div>

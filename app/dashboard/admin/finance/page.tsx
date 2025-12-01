@@ -22,8 +22,8 @@ export default function AdminFinancePage() {
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900">Finance</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Finance</h1>
         </div>
         <AdminNav />
       </div>
@@ -34,11 +34,11 @@ export default function AdminFinancePage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-5">
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Recent Invoices</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">Recent Invoices</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="text-left text-slate-600 border-b">
+            <thead className="text-left text-slate-600 dark:text-slate-300 border-b dark:border-slate-700">
               <tr>
                 <th className="py-2 pr-4">Invoice</th>
                 <th className="py-2 pr-4">User</th>
@@ -47,7 +47,7 @@ export default function AdminFinancePage() {
                 <th className="py-2 pr-4">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y dark:divide-slate-700 text-slate-700 dark:text-slate-300">
               {invoices.map((inv) => (
                 <tr key={inv.id}>
                   <td className="py-2 pr-4">{inv.id}</td>
@@ -56,7 +56,7 @@ export default function AdminFinancePage() {
                   <td className="py-2 pr-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        inv.status === "Paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                        inv.status === "Paid" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300" : "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
                       }`}
                     >
                       {inv.status}

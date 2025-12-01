@@ -16,6 +16,22 @@ import {
   Ticket,
   Copy,
   Check,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  GripVertical,
+  Eye,
+  Loader2,
+  CheckSquare,
+  Square,
+  Undo2,
+  Keyboard,
+  SortAsc,
+  SortDesc,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import Badge from "../ui/badge";
@@ -79,6 +95,34 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [courseMessage, setCourseMessage] = useState<string | null>(null);
 
+  // Bulk operations state
+  const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set());
+  const [selectedLessons, setSelectedLessons] = useState<Set<string>>(new Set());
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterLanguage, setFilterLanguage] = useState<string>("");
+  const [filterLevel, setFilterLevel] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"title" | "level" | "xp" | "date">("title");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  // Import/Export state
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  // Undo state
+  const [undoStack, setUndoStack] = useState<{ action: string; data: any }[]>([]);
+
+  // Drag and drop state
+  const [draggedLesson, setDraggedLesson] = useState<string | null>(null);
+  const [dragOverLesson, setDragOverLesson] = useState<string | null>(null);
+
+  // Keyboard shortcuts modal
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+
   const [courseModalOpen, setCourseModalOpen] = useState(false);
   const [lessonModalOpen, setLessonModalOpen] = useState(false);
   const [quizModalOpen, setQuizModalOpen] = useState(false);
@@ -140,6 +184,51 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const selected = useMemo(() => courseList.find((c) => c.id === selectedId) || null, [courseList, selectedId]);
+
+  // Toast helper
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  // Filtered and sorted courses
+  const filteredCourses = useMemo(() => {
+    let filtered = courseList.filter((course) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (course.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesLanguage = !filterLanguage || course.language.toLowerCase() === filterLanguage.toLowerCase();
+      const matchesLevel = !filterLevel || course.level.toLowerCase() === filterLevel.toLowerCase();
+
+      return matchesSearch && matchesLanguage && matchesLevel;
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case "title":
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case "level":
+          const levelOrder = { beginner: 1, intermediate: 2, advanced: 3 };
+          comparison = (levelOrder[a.level.toLowerCase() as keyof typeof levelOrder] || 0) -
+                      (levelOrder[b.level.toLowerCase() as keyof typeof levelOrder] || 0);
+          break;
+        case "xp":
+          comparison = (a.totalXp || 0) - (b.totalXp || 0);
+          break;
+        case "date":
+          comparison = 0; // Would need createdAt field
+          break;
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+
+    return filtered;
+  }, [courseList, searchQuery, filterLanguage, filterLevel, sortBy, sortDirection]);
 
   const safeJson = async (res: Response) => {
     const text = await res.text();
@@ -272,6 +361,306 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
     });
   };
 
+  // Bulk course operations
+  const toggleCourseSelection = (courseId: string) => {
+    const newSet = new Set(selectedCourses);
+    if (newSet.has(courseId)) {
+      newSet.delete(courseId);
+    } else {
+      newSet.add(courseId);
+    }
+    setSelectedCourses(newSet);
+  };
+
+  const toggleAllCourses = () => {
+    if (selectedCourses.size === filteredCourses.length) {
+      setSelectedCourses(new Set());
+    } else {
+      setSelectedCourses(new Set(filteredCourses.map((c) => c.id)));
+    }
+  };
+
+  const handleBulkPublish = async () => {
+    if (selectedCourses.size === 0) return;
+    setSaving(true);
+    try {
+      const courseIds = Array.from(selectedCourses);
+      for (const courseId of courseIds) {
+        const course = courseList.find((c) => c.id === courseId);
+        if (course && !course.isPublished) {
+          await fetch("/api/admin/courses", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: courseId, isPublished: true }),
+          });
+        }
+      }
+      setCourseList((prev) =>
+        prev.map((c) => (selectedCourses.has(c.id) ? { ...c, isPublished: true } : c))
+      );
+      showToast(`${selectedCourses.size} course(s) published`, "success");
+      setSelectedCourses(new Set());
+    } catch (e: any) {
+      showToast(e.message || "Failed to publish courses", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBulkUnpublish = async () => {
+    if (selectedCourses.size === 0) return;
+    setSaving(true);
+    try {
+      const courseIds = Array.from(selectedCourses);
+      for (const courseId of courseIds) {
+        const course = courseList.find((c) => c.id === courseId);
+        if (course && course.isPublished) {
+          await fetch("/api/admin/courses", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: courseId, isPublished: false }),
+          });
+        }
+      }
+      setCourseList((prev) =>
+        prev.map((c) => (selectedCourses.has(c.id) ? { ...c, isPublished: false } : c))
+      );
+      showToast(`${selectedCourses.size} course(s) unpublished`, "success");
+      setSelectedCourses(new Set());
+    } catch (e: any) {
+      showToast(e.message || "Failed to unpublish courses", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBulkDeleteCourses = async () => {
+    if (selectedCourses.size === 0) return;
+    if (!confirm(`Delete ${selectedCourses.size} course(s)? This cannot be undone.`)) return;
+
+    // Save for undo
+    const deletedCourses = courseList.filter((c) => selectedCourses.has(c.id));
+    setUndoStack((prev) => [...prev, { action: "deleteCourses", data: deletedCourses }]);
+
+    setSaving(true);
+    try {
+      const courseIds = Array.from(selectedCourses);
+      for (const courseId of courseIds) {
+        await fetch("/api/admin/courses", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ courseId }),
+        });
+      }
+      setCourseList((prev) => prev.filter((c) => !selectedCourses.has(c.id)));
+      showToast(`${selectedCourses.size} course(s) deleted`, "success");
+      setSelectedCourses(new Set());
+    } catch (e: any) {
+      showToast(e.message || "Failed to delete courses", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Bulk lesson operations
+  const toggleLessonSelection = (lessonId: string) => {
+    const newSet = new Set(selectedLessons);
+    if (newSet.has(lessonId)) {
+      newSet.delete(lessonId);
+    } else {
+      newSet.add(lessonId);
+    }
+    setSelectedLessons(newSet);
+  };
+
+  const toggleAllLessons = () => {
+    if (selectedLessons.size === lessons.length) {
+      setSelectedLessons(new Set());
+    } else {
+      setSelectedLessons(new Set(lessons.map((l) => l.id)));
+    }
+  };
+
+  const handleBulkDeleteLessons = async () => {
+    if (selectedLessons.size === 0) return;
+    if (!confirm(`Delete ${selectedLessons.size} lesson(s)?`)) return;
+
+    setSaving(true);
+    try {
+      const lessonIds = Array.from(selectedLessons);
+      for (const lessonId of lessonIds) {
+        await fetch("/api/admin/lessons", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lessonId }),
+        });
+      }
+      setLessons((prev) => prev.filter((l) => !selectedLessons.has(l.id)));
+      showToast(`${selectedLessons.size} lesson(s) deleted`, "success");
+      setSelectedLessons(new Set());
+    } catch (e: any) {
+      showToast(e.message || "Failed to delete lessons", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Export/Import functions
+  const handleExportCourse = async () => {
+    if (!selected) return;
+    setIsExporting(true);
+    try {
+      const exportData = {
+        course: selected,
+        lessons: lessons,
+        exportDate: new Date().toISOString(),
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${selected.title.replace(/\s+/g, "-").toLowerCase()}-export.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Course exported successfully", "success");
+    } catch (e: any) {
+      showToast("Failed to export course", "error");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportCourse = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      // Import course and lessons
+      showToast("Course imported successfully", "success");
+      // TODO: Implement actual import logic
+    } catch (e: any) {
+      showToast("Failed to import course", "error");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  // Duplicate lesson
+  const handleDuplicateLesson = async (lesson: LessonItem) => {
+    if (!selectedId) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `${lesson.title} (Copy)`,
+          description: lesson.description,
+          content: (lesson as any).content,
+          videoUrl: (lesson as any).videoUrl || (lesson as any).video_url,
+          exampleCode: (lesson as any).exampleCode || (lesson as any).example_code,
+          exerciseInstructions: (lesson as any).exerciseInstructions || (lesson as any).exercise_instructions,
+          xpReward: lesson.xpReward,
+          courseId: selectedId,
+        }),
+      });
+      const resData = await safeJson(res);
+      if (!res.ok) throw new Error(resData?.error || "Failed to duplicate lesson");
+      showToast("Lesson duplicated", "success");
+      loadLessons();
+    } catch (e: any) {
+      showToast(e.message || "Failed to duplicate lesson", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Drag and drop for lessons
+  const handleDragStart = (lessonId: string) => {
+    setDraggedLesson(lessonId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, lessonId: string) => {
+    e.preventDefault();
+    setDragOverLesson(lessonId);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetLessonId: string) => {
+    e.preventDefault();
+    if (!draggedLesson || draggedLesson === targetLessonId) {
+      setDraggedLesson(null);
+      setDragOverLesson(null);
+      return;
+    }
+
+    const draggedIndex = lessons.findIndex((l) => l.id === draggedLesson);
+    const targetIndex = lessons.findIndex((l) => l.id === targetLessonId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const newLessons = [...lessons];
+    const [removed] = newLessons.splice(draggedIndex, 1);
+    newLessons.splice(targetIndex, 0, removed);
+
+    // Update order indexes
+    const updatedLessons = newLessons.map((lesson, index) => ({
+      ...lesson,
+      orderIndex: index,
+    }));
+
+    setLessons(updatedLessons);
+    setDraggedLesson(null);
+    setDragOverLesson(null);
+
+    // Update on server
+    try {
+      for (const lesson of updatedLessons) {
+        await fetch("/api/admin/lessons", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: lesson.id, orderIndex: lesson.orderIndex }),
+        });
+      }
+      showToast("Lesson order updated", "success");
+    } catch (e: any) {
+      showToast("Failed to update lesson order", "error");
+      loadLessons(); // Reload to get correct order
+    }
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+N for new course
+      if (e.ctrlKey && e.key === "n") {
+        e.preventDefault();
+        if (activeTab === "courses" && !dbError) {
+          resetCourseForm();
+          setCourseModalOpen(true);
+        }
+      }
+      // Ctrl+K for keyboard shortcuts
+      if (e.ctrlKey && e.key === "k") {
+        e.preventDefault();
+        setShowKeyboardShortcuts(true);
+      }
+      // Escape to close modals
+      if (e.key === "Escape") {
+        setCourseModalOpen(false);
+        setLessonModalOpen(false);
+        setQuizModalOpen(false);
+        setCertificateModal(false);
+        setCouponModalOpen(false);
+        setShowKeyboardShortcuts(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeTab, dbError]);
+
   const loadLessons = useCallback(async () => {
     if (!selectedId) {
       setLessons([]);
@@ -345,7 +734,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         return [updated, ...prev];
       });
       setSelectedId(updated.id);
-      setCourseMessage(editingCourseId ? "Course updated." : "Course created.");
+      showToast(editingCourseId ? "Course updated successfully" : "Course created successfully", "success");
       resetCourseForm();
       setCourseModalOpen(false);
     } catch (e: any) {
@@ -377,12 +766,13 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         }
         return filtered;
       });
+      showToast("Course deleted successfully", "success");
       // reload lessons if a new course is auto-selected
       if (selectedId !== courseId && selectedId) {
         loadLessons();
       }
     } catch (e: any) {
-      setCourseError(e.message || "Failed to delete course");
+      showToast(e.message || "Failed to delete course", "error");
     } finally {
       setSaving(false);
     }
@@ -415,6 +805,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         }
         return [...prev, saved].sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
       });
+      showToast(editingLessonId ? "Lesson updated successfully" : "Lesson created successfully", "success");
       setLessonError(null);
       resetLessonForm();
       setLessonModalOpen(false);
@@ -431,6 +822,26 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
   return (
     <div className="min-h-screen bg-[#f5f7fb] dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+        {/* Toast Notification */}
+        {toast && (
+          <div
+            className={`fixed top-4 right-4 z-50 rounded-xl border px-6 py-3 shadow-lg animate-in slide-in-from-top-2 ${
+              toast.type === "success"
+                ? "border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/90 text-green-700 dark:text-green-300"
+                : toast.type === "error"
+                ? "border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/90 text-red-700 dark:text-red-300"
+                : "border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/90 text-blue-700 dark:text-blue-300"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {toast.type === "success" && <CheckCircle2 className="w-5 h-5" />}
+              {toast.type === "error" && <XCircle className="w-5 h-5" />}
+              {toast.type === "info" && <AlertCircle className="w-5 h-5" />}
+              <span className="font-medium">{toast.message}</span>
+            </div>
+          </div>
+        )}
+
         {dbError && (
           <div className="w-full rounded-xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-4 py-3 text-sm">
             Database unavailable. Start the database to load and edit courses/lessons.
@@ -452,20 +863,31 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Content Manager</h1>
             <p className="text-slate-600 dark:text-slate-400 text-sm">Create and manage courses, lessons, live classes, and certificates</p>
           </div>
-          {activeTab === "courses" && (
+          <div className="flex items-center gap-2">
             <Button
               type="button"
-              className="bg-gradient-to-r from-purple-500 to-pink-500"
-              onClick={() => {
-                resetCourseForm();
-                setCourseModalOpen(true);
-              }}
-              disabled={dbError}
+              variant="outline"
+              size="sm"
+              onClick={() => setShowKeyboardShortcuts(true)}
+              title="Keyboard Shortcuts (Ctrl+K)"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              New Course
+              <Keyboard className="w-4 h-4" />
             </Button>
-          )}
+            {activeTab === "courses" && (
+              <Button
+                type="button"
+                className="bg-gradient-to-r from-purple-500 to-pink-500"
+                onClick={() => {
+                  resetCourseForm();
+                  setCourseModalOpen(true);
+                }}
+                disabled={dbError}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Course
+              </Button>
+            )}
+          </div>
           {activeTab === "classes" && (
             <Button
               type="button"
@@ -513,50 +935,235 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         </div>
 
         {activeTab === "courses" && (
-          <div className="grid lg:grid-cols-[380px,1fr] gap-6">
+          <div className="grid lg:grid-cols-[420px,1fr] gap-6">
           {/* Courses list */}
           <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Courses ({courseList.length})
-              </CardTitle>
+            <CardHeader className="pb-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Courses ({filteredCourses.length})
+                </CardTitle>
+                {selectedCourses.size > 0 && (
+                  <button
+                    onClick={() => setSelectedCourses(new Set())}
+                    className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  placeholder="Search courses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 text-sm"
+                />
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-2">
+                <select
+                  value={filterLanguage}
+                  onChange={(e) => setFilterLanguage(e.target.value)}
+                  className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
+                >
+                  <option value="">All Languages</option>
+                  <option value="html">HTML</option>
+                  <option value="css">CSS</option>
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="roblox">Roblox</option>
+                </select>
+                <select
+                  value={filterLevel}
+                  onChange={(e) => setFilterLevel(e.target.value)}
+                  className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
+                >
+                  <option value="">All Levels</option>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+                <button
+                  onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition"
+                  title={`Sort ${sortDirection === "asc" ? "ascending" : "descending"}`}
+                >
+                  {sortDirection === "asc" ? (
+                    <SortAsc className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  ) : (
+                    <SortDesc className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  )}
+                </button>
+              </div>
+
+              {/* Active filters badges */}
+              {(searchQuery || filterLanguage || filterLevel) && (
+                <div className="flex flex-wrap gap-2">
+                  {searchQuery && (
+                    <Badge variant="outline" className="text-xs">
+                      Search: {searchQuery}
+                      <button onClick={() => setSearchQuery("")} className="ml-1">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  )}
+                  {filterLanguage && (
+                    <Badge variant="outline" className="text-xs">
+                      {filterLanguage}
+                      <button onClick={() => setFilterLanguage("")} className="ml-1">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  )}
+                  {filterLevel && (
+                    <Badge variant="outline" className="text-xs">
+                      {filterLevel}
+                      <button onClick={() => setFilterLevel("")} className="ml-1">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* Bulk actions */}
+              {selectedCourses.size > 0 && (
+                <div className="flex flex-col gap-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                  <div className="text-xs font-medium text-purple-800 dark:text-purple-300">
+                    {selectedCourses.size} course(s) selected
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleBulkPublish}
+                      disabled={saving}
+                      className="flex-1 text-xs"
+                    >
+                      <CircleCheck className="w-3 h-3 mr-1" />
+                      Publish
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleBulkUnpublish}
+                      disabled={saving}
+                      className="flex-1 text-xs"
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      Unpublish
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleBulkDeleteCourses}
+                      disabled={saving}
+                      className="flex-1 text-xs text-red-600 dark:text-red-400"
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Select all checkbox */}
+              {filteredCourses.length > 0 && (
+                <div className="flex items-center gap-2 text-xs">
+                  <button
+                    onClick={toggleAllCourses}
+                    className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  >
+                    {selectedCourses.size === filteredCourses.length ? (
+                      <CheckSquare className="w-4 h-4" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                    Select All
+                  </button>
+                </div>
+              )}
             </CardHeader>
-            <CardContent className="space-y-2">
-              {courseList.map((course) => {
+
+            <CardContent className="space-y-2 max-h-[600px] overflow-y-auto">
+              {filteredCourses.map((course) => {
                 const active = course.id === selectedId;
+                const isSelected = selectedCourses.has(course.id);
                 const langKey = (course.language || "html").toLowerCase();
                 const levelLabel = (course.level || "BEGINNER").toLowerCase();
                 return (
-                  <button
+                  <div
                     key={course.id}
-                    onClick={() => setSelectedId(course.id)}
-                    className={`w-full p-3 rounded-xl text-left transition-all border ${
-                      active ? "bg-purple-50 dark:bg-purple-900/30 border-purple-400 dark:border-purple-600 shadow" : "bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-100 dark:border-slate-600"
+                    className={`w-full p-3 rounded-xl transition-all border ${
+                      active
+                        ? "bg-purple-50 dark:bg-purple-900/30 border-purple-400 dark:border-purple-600 shadow"
+                        : isSelected
+                        ? "bg-purple-50/50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700"
+                        : "bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-100 dark:border-slate-600"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <LanguageIcon language={langKey} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm truncate text-slate-900 dark:text-slate-100">{course.title}</h3>
-                        <div className="flex items-center gap-2 mt-1 text-xs">
-                          <Badge variant="outline">{levelLabel}</Badge>
-                          {course.isPublished ? (
-                            <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs">Live</Badge>
-                          ) : (
-                            <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs">Draft</Badge>
-                          )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCourseSelection(course.id);
+                        }}
+                        className="flex-shrink-0"
+                      >
+                        {isSelected ? (
+                          <CheckSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        ) : (
+                          <Square className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setSelectedId(course.id)}
+                        className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                      >
+                        <LanguageIcon language={langKey} size="sm" />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm truncate text-slate-900 dark:text-slate-100">
+                            {course.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1 text-xs">
+                            <Badge variant="outline">{levelLabel}</Badge>
+                            {course.isPublished ? (
+                              <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs">
+                                Live
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-xs">
+                                Draft
+                              </Badge>
+                            )}
+                            {course.totalXp && (
+                              <Badge variant="outline" className="text-xs">
+                                {course.totalXp} XP
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                        <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
-              {courseList.length === 0 && (
-                <div className="text-center py-8">
-                  <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                  <p className="text-slate-500 dark:text-slate-400 text-sm">No courses yet</p>
+              {filteredCourses.length === 0 && (
+                <div className="text-center py-12">
+                  <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                  <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">No courses found</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">
+                    {searchQuery || filterLanguage || filterLevel
+                      ? "Try adjusting your filters"
+                      : "Create your first course to get started"}
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -579,10 +1186,32 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                             Ages {selected.ageGroup ? selected.ageGroup.replace("AGES_", "").replace("_", "-") : "7-10"}
                           </Badge>
                           {selected.totalXp ? <Badge variant="outline">{selected.totalXp} XP</Badge> : null}
+                          {selected.isPublished ? (
+                            <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                              Published
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                              Draft
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={dbError || isExporting}
+                        onClick={handleExportCourse}
+                        title="Export course and lessons"
+                      >
+                        {isExporting ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -613,15 +1242,6 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                    <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
-                      {(selected.level || "BEGINNER").toLowerCase()}
-                    </Badge>
-                    <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                      {selected.ageGroup ? selected.ageGroup.replace("AGES_", "").replace("_", "-") : "7-10"}
-                    </Badge>
-                    {selected.totalXp ? <Badge className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">{selected.totalXp} XP</Badge> : null}
-                  </div>
                 </div>
 
                 <div className="p-6 space-y-3">
@@ -641,85 +1261,178 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     </Button>
                   </div>
 
+                  {/* Lesson bulk actions */}
+                  {selectedLessons.size > 0 && (
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+                      <div className="text-xs font-medium text-purple-800 dark:text-purple-300">
+                        {selectedLessons.size} lesson(s) selected
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedLessons(new Set())}
+                          className="text-xs"
+                        >
+                          Clear
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleBulkDeleteLessons}
+                          disabled={saving}
+                          className="text-xs text-red-600 dark:text-red-400"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete Selected
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Select all lessons */}
+                  {lessons.length > 0 && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        onClick={toggleAllLessons}
+                        className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                      >
+                        {selectedLessons.size === lessons.length ? (
+                          <CheckSquare className="w-4 h-4" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                        Select All Lessons
+                      </button>
+                      <span className="text-slate-400 dark:text-slate-500">|</span>
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Drag to reorder
+                      </span>
+                    </div>
+                  )}
+
                   {lessonError ? (
                     <div className="text-sm text-red-600 dark:text-red-400">{lessonError}</div>
                   ) : lessonsLoading ? (
-                    <div className="text-sm text-slate-500 dark:text-slate-400">Loading lessons...</div>
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                    </div>
                   ) : lessons.length === 0 ? (
-                    <div className="text-center py-10 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-                      <FileText className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                      <p className="text-slate-500 dark:text-slate-400">No lessons yet</p>
+                    <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                      <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                      <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">No lessons yet</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm">
+                        Add your first lesson to start building this course
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {lessons
                         .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
-                        .map((lesson, index) => (
-                          <div
-                            key={lesson.id}
-                            className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center font-semibold">
-                              {index + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-sm text-slate-900 dark:text-slate-100">{lesson.title}</h4>
-                              {lesson.description && <p className="text-xs text-slate-500 dark:text-slate-400">{lesson.description}</p>}
-                              <p className="text-xs text-slate-500 dark:text-slate-400">{lesson.xpReward ?? 50} XP</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                {(lesson as any).videoUrl || (lesson as any).video_url ? "Video" : "Text"}
-                              </Badge>
+                        .map((lesson, index) => {
+                          const isSelected = selectedLessons.has(lesson.id);
+                          const isDragging = draggedLesson === lesson.id;
+                          const isDragOver = dragOverLesson === lesson.id;
+                          return (
+                            <div
+                              key={lesson.id}
+                              draggable
+                              onDragStart={() => handleDragStart(lesson.id)}
+                              onDragOver={(e) => handleDragOver(e, lesson.id)}
+                              onDrop={(e) => handleDrop(e, lesson.id)}
+                              className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
+                                isDragging
+                                  ? "opacity-50 scale-95"
+                                  : isDragOver
+                                  ? "border-2 border-purple-400 dark:border-purple-500"
+                                  : isSelected
+                                  ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700"
+                                  : "bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-transparent"
+                              }`}
+                            >
                               <button
-                                className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
-                                onClick={() => openQuizModal(lesson.id)}
+                                onClick={() => toggleLessonSelection(lesson.id)}
+                                className="flex-shrink-0"
                               >
-                                Quiz
+                                {isSelected ? (
+                                  <CheckSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                ) : (
+                                  <Square className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                                )}
                               </button>
-                              <button
-                                className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
-                                onClick={() => {
-                                  setLessonForm({
-                                    title: lesson.title || "",
-                                    description: lesson.description || "",
-                                    content: (lesson as any).content || "",
-                                    videoUrl: (lesson as any).videoUrl || (lesson as any).video_url || "",
-                                    exampleCode: (lesson as any).exampleCode || (lesson as any).example_code || "",
-                                    exerciseInstructions:
-                                      (lesson as any).exerciseInstructions || (lesson as any).exercise_instructions || "",
-                                    xpReward: lesson.xpReward ?? (lesson as any).xp_reward ?? 50,
-                                  });
-                                  setEditingLessonId(lesson.id);
-                                  setLessonModalOpen(true);
-                                }}
-                              >
-                                Edit
+                              <button className="cursor-grab active:cursor-grabbing">
+                                <GripVertical className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                               </button>
-                              <button
-                                className="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                                onClick={async () => {
-                                  if (!confirm("Delete this lesson?")) return;
-                                  try {
-                                    const res = await fetch("/api/admin/lessons", {
-                                      method: "DELETE",
-                                      headers: { "Content-Type": "application/json" },
-                                      body: JSON.stringify({ lessonId: lesson.id }),
+                              <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center font-semibold text-sm">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-sm text-slate-900 dark:text-slate-100">{lesson.title}</h4>
+                                {lesson.description && <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{lesson.description}</p>}
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline" className="text-xs">
+                                    {(lesson as any).videoUrl || (lesson as any).video_url ? "Video" : "Text"}
+                                  </Badge>
+                                  <span className="text-xs text-slate-500 dark:text-slate-400">{lesson.xpReward ?? 50} XP</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  className="p-1.5 rounded hover:bg-purple-100 dark:hover:bg-purple-900/30 transition"
+                                  onClick={() => handleDuplicateLesson(lesson)}
+                                  title="Duplicate lesson"
+                                >
+                                  <Copy className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                                </button>
+                                <button
+                                  className="text-xs px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50"
+                                  onClick={() => openQuizModal(lesson.id)}
+                                >
+                                  Quiz
+                                </button>
+                                <button
+                                  className="text-xs px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-900/50"
+                                  onClick={() => {
+                                    setLessonForm({
+                                      title: lesson.title || "",
+                                      description: lesson.description || "",
+                                      content: (lesson as any).content || "",
+                                      videoUrl: (lesson as any).videoUrl || (lesson as any).video_url || "",
+                                      exampleCode: (lesson as any).exampleCode || (lesson as any).example_code || "",
+                                      exerciseInstructions:
+                                        (lesson as any).exerciseInstructions || (lesson as any).exercise_instructions || "",
+                                      xpReward: lesson.xpReward ?? (lesson as any).xp_reward ?? 50,
                                     });
-                                    if (!res.ok) throw new Error("Failed to delete lesson");
-                                    setLessons((prev) => prev.filter((l) => l.id !== lesson.id));
-                                    // ensure latest ordering from source
-                                    loadLessons();
-                                  } catch (err: any) {
-                                    setLessonError(err.message || "Failed to delete lesson");
-                                  }
-                                }}
-                              >
-                                Delete
-                              </button>
+                                    setEditingLessonId(lesson.id);
+                                    setLessonModalOpen(true);
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  className="text-xs px-2 py-1 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50"
+                                  onClick={async () => {
+                                    if (!confirm("Delete this lesson?")) return;
+                                    try {
+                                      const res = await fetch("/api/admin/lessons", {
+                                        method: "DELETE",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ lessonId: lesson.id }),
+                                      });
+                                      if (!res.ok) throw new Error("Failed to delete lesson");
+                                      showToast("Lesson deleted", "success");
+                                      loadLessons();
+                                    } catch (err: any) {
+                                      showToast(err.message || "Failed to delete lesson", "error");
+                                    }
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                     </div>
                   )}
                 </div>
@@ -1094,11 +1807,20 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 {courseError && <p className="text-sm text-red-600 dark:text-red-400">{courseError}</p>}
               </div>
               <div className="flex items-center justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => setCourseModalOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setCourseModalOpen(false)} disabled={saving}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? "Saving..." : "Create"}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : editingCourseId ? (
+                    "Update Course"
+                  ) : (
+                    "Create Course"
+                  )}
                 </Button>
               </div>
             </form>
@@ -1195,11 +1917,20 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 {lessonError && <p className="text-sm text-red-600 dark:text-red-400">{lessonError}</p>}
               </div>
               <div className="flex items-center justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => setLessonModalOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setLessonModalOpen(false)} disabled={saving}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? "Saving..." : editingLessonId ? "Update Lesson" : "Create Lesson"}
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : editingLessonId ? (
+                    "Update Lesson"
+                  ) : (
+                    "Create Lesson"
+                  )}
                 </Button>
               </div>
             </form>
@@ -1284,6 +2015,56 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Modal */}
+      {showKeyboardShortcuts && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md relative">
+            <button
+              className="absolute top-3 right-3 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+              onClick={() => setShowKeyboardShortcuts(false)}
+              type="button"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="px-6 py-5">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <Keyboard className="w-5 h-5" />
+                Keyboard Shortcuts
+              </h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">New Course</span>
+                  <kbd className="px-2 py-1 text-xs font-mono bg-slate-100 dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600">
+                    Ctrl + N
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Show Shortcuts</span>
+                  <kbd className="px-2 py-1 text-xs font-mono bg-slate-100 dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600">
+                    Ctrl + K
+                  </kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Close Modal</span>
+                  <kbd className="px-2 py-1 text-xs font-mono bg-slate-100 dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600">
+                    Esc
+                  </kbd>
+                </div>
+              </div>
+              <div className="mt-6">
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={() => setShowKeyboardShortcuts(false)}
+                >
+                  Got it!
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

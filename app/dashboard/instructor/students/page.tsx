@@ -50,52 +50,52 @@ export default function InstructorStudentsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500 flex items-center gap-2">
-              <Link href="/dashboard/instructor" className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-800">
+            <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
+              <Link href="/dashboard/instructor" className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
                 <ArrowLeft className="h-4 w-4" /> Back to dashboard
               </Link>
             </p>
-            <h1 className="text-2xl font-bold text-slate-900 mt-1">Students</h1>
-            <p className="text-slate-600">View all students and see who is online.</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">Students</h1>
+            <p className="text-slate-600 dark:text-slate-400">View all students and see who is online.</p>
           </div>
         </div>
 
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <CardContent className="p-4">
             {loading ? (
-              <div className="text-center text-slate-500 py-8">Loading students...</div>
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8">Loading students...</div>
             ) : students.length === 0 ? (
-              <div className="text-center text-slate-500 py-8">No students yet.</div>
+              <div className="text-center text-slate-500 dark:text-slate-400 py-8">No students yet.</div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
                 {students.map((s) => {
                   const status = renderStatus(s.lastActive);
                   return (
                     <div key={s.id} className="flex items-center justify-between py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+                        <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-lg">
                           {s.avatar || <Smile className="h-5 w-5" />}
                         </div>
                         <div>
-                          <div className="font-semibold text-slate-800">{s.name}</div>
-                          <div className="text-sm text-slate-500 flex items-center gap-2">
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">{s.name}</div>
+                          <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
                             {s.email && (
                               <>
                                 <Mail className="h-4 w-4" /> {s.email}
                               </>
                             )}
-                            {s.age ? <span className="ml-2 text-xs text-slate-500">Age {s.age}</span> : null}
+                            {s.age ? <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">Age {s.age}</span> : null}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <span
                           className={`inline-flex items-center gap-1 text-sm font-semibold px-3 py-1 rounded-full ${
-                            status.online ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
+                            status.online ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
                           }`}
                         >
                           {status.online ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />} {status.label}

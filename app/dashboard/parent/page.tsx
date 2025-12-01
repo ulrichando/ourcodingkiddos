@@ -28,6 +28,9 @@ export default function ParentDashboardPage() {
     endDate?: Date;
   } | null>(null);
 
+  // Check if user is admin - admins bypass all subscription restrictions
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+
   useEffect(() => {
     if (!session?.user?.email) return;
     setLoadingStudents(true);
@@ -71,12 +74,14 @@ export default function ParentDashboardPage() {
 
   const totalXP = useMemo(() => students.reduce((sum, s) => sum + (s.totalXp || s.total_xp || 0), 0), [students]);
   const totalBadges = 0;
-  const trialExpired =
+  // Admin users never have trial expiration restrictions
+  const trialExpired = !isAdmin &&
     subscription?.plan_type === "free_trial" &&
     subscription?.endDate &&
     subscription.endDate.getTime() < Date.now();
-  const planLabel =
-    subscription?.plan_type && subscription.plan_type !== "free_trial"
+  const planLabel = isAdmin
+    ? "Admin Access"
+    : subscription?.plan_type && subscription.plan_type !== "free_trial"
       ? subscription.plan_type === "family"
         ? "Premium Family"
         : "Premium"
@@ -85,33 +90,34 @@ export default function ParentDashboardPage() {
         : "No Plan";
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}! 👋
           </h1>
-          <p className="text-slate-600">Here&apos;s what&apos;s happening with your young coders today.</p>
+          <p className="text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             {[
-              { label: "Students", value: students.length, icon: Users, color: "text-purple-600 bg-purple-100" },
-              { label: "Total XP", value: totalXP.toLocaleString(), icon: Star, color: "text-amber-600 bg-amber-100" },
-              { label: "Badges Earned", value: totalBadges, icon: Award, color: "text-green-600 bg-green-100" },
-              { label: "Upcoming Classes", value: upcoming.length, icon: Calendar, color: "text-blue-600 bg-blue-100" },
+              { label: "Students", value: students.length, icon: Users, color: "text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30" },
+              { label: "Total XP", value: totalXP.toLocaleString(), icon: Star, color: "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30" },
+              { label: "Badges Earned", value: totalBadges, icon: Award, color: "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30" },
+              { label: "Upcoming Classes", value: upcoming.length, icon: Calendar, color: "text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30" },
               {
                 label: planLabel,
-                value:
-                  subscription?.plan_type === "free_trial" && subscription?.endDate
+                value: isAdmin
+                  ? "Unlimited"
+                  : subscription?.plan_type === "free_trial" && subscription?.endDate
                     ? `${Math.max(0, Math.ceil((subscription.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days left`
                     : subscription?.status === "active"
                       ? "Active"
                       : "Inactive",
                 icon: TrendingUp,
-                color: "text-pink-600 bg-pink-100",
+                color: "text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30",
               },
             ].map((stat, i) => (
               <Card key={i} className="border-0 shadow-sm">
@@ -120,8 +126,8 @@ export default function ParentDashboardPage() {
                     <stat.icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-slate-900">{stat.value}</div>
-                  <div className="text-sm text-slate-500">{stat.label}</div>
+                  <div className="text-xl font-bold text-slate-900 dark:text-slate-100">{stat.value}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</div>
                 </div>
               </CardContent>
             </Card>
@@ -132,11 +138,11 @@ export default function ParentDashboardPage() {
           {/* Students Section */}
           <div className="lg:col-span-2 space-y-6">
             {trialExpired && (
-              <Card className="border border-amber-200 bg-amber-50">
+              <Card className="border border-amber-200 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20">
                 <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-amber-800">Free trial ended</p>
-                    <p className="text-sm text-amber-700">Upgrade to continue accessing classes and progress.</p>
+                    <p className="font-semibold text-amber-800 dark:text-amber-400">Free trial ended</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-500">Upgrade to continue accessing classes and progress.</p>
                   </div>
                   <Link href="/checkout?plan=monthly">
                     <Button className="bg-purple-600 text-white hover:bg-purple-700">Upgrade</Button>
@@ -146,7 +152,7 @@ export default function ParentDashboardPage() {
             )}
 
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">Your Students</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Your Students</h2>
               <Link href="/dashboard/parent/add-student">
                 <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
                   <Plus className="w-4 h-4 mr-2" />
@@ -157,14 +163,14 @@ export default function ParentDashboardPage() {
 
             {loadingStudents ? (
               <Card className="border-0 shadow-sm">
-                <CardContent className="p-12 text-center text-slate-500">Loading students...</CardContent>
+                <CardContent className="p-12 text-center text-slate-500 dark:text-slate-400">Loading students...</CardContent>
               </Card>
             ) : students.length === 0 ? (
-              <Card className="border-2 border-dashed border-slate-200">
+              <Card className="border-2 border-dashed border-slate-200 dark:border-slate-600">
                 <CardContent className="p-12 text-center space-y-3">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-purple-100 flex items-center justify-center text-3xl">👤</div>
-                  <h3 className="text-lg font-semibold text-slate-800">Add Your First Student</h3>
-                  <p className="text-slate-500">Get started by adding your child&apos;s profile.</p>
+                  <div className="w-16 h-16 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-3xl">👤</div>
+                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Add Your First Student</h3>
+                  <p className="text-slate-500 dark:text-slate-400">Get started by adding your child&apos;s profile.</p>
                   <Link href="/dashboard/parent/add-student">
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
@@ -192,7 +198,7 @@ export default function ParentDashboardPage() {
             {/* Explore Courses */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">Explore Courses</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Explore Courses</h2>
                 <Link href="/courses">
                   <Button variant="ghost">
                     View All
@@ -202,8 +208,8 @@ export default function ParentDashboardPage() {
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
-                  { name: "HTML Basics", level: "Beginner", color: "bg-orange-100 text-orange-600" },
-                  { name: "Python for Kids", level: "Beginner", color: "bg-green-100 text-green-600" },
+                  { name: "HTML Basics", level: "Beginner", color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400" },
+                  { name: "Python for Kids", level: "Beginner", color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
                 ].map((course) => (
                   <Link key={course.name} href="/courses" className="block">
                     <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -212,10 +218,10 @@ export default function ParentDashboardPage() {
                         <BookOpen className="w-6 h-6" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-slate-800">{course.name}</h3>
-                        <p className="text-sm text-slate-500">{course.level}</p>
+                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">{course.name}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{course.level}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400" />
+                      <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                     </CardContent>
                   </Card>
                   </Link>
@@ -228,15 +234,15 @@ export default function ParentDashboardPage() {
           <div className="space-y-6">
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Calendar className="w-5 h-5 text-purple-500" />
+                <CardTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-slate-100">
+                  <Calendar className="w-5 h-5 text-purple-500 dark:text-purple-400" />
                   Upcoming Classes
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {upcoming.length === 0 || trialExpired ? (
                   <div className="text-center py-6 space-y-2">
-                    <p className="text-slate-500">
+                    <p className="text-slate-500 dark:text-slate-400">
                       {trialExpired ? "Trial ended. Upgrade to keep booking classes." : "No upcoming classes"}
                     </p>
                     <Link href="/schedule">
@@ -248,18 +254,18 @@ export default function ParentDashboardPage() {
                 ) : (
                   <div className="space-y-3">
                     {upcoming.map((cls) => (
-                      <div key={cls.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
-                        <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                          <Clock className="w-5 h-5 text-purple-600" />
+                      <div key={cls.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700">
+                        <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                          <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{cls.title}</p>
-                          <p className="text-xs text-slate-500">
+                          <p className="font-medium text-sm text-slate-900 dark:text-slate-100">{cls.title}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             {cls.start.toLocaleDateString()} {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                           </p>
                         </div>
                         {cls.meetingUrl && (
-                          <span className="inline-flex items-center gap-1 text-sm text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-sm text-slate-400 dark:text-slate-500">
                             <Video className="w-4 h-4" /> Join (student only)
                           </span>
                         )}
@@ -272,7 +278,7 @@ export default function ParentDashboardPage() {
 
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg text-slate-900 dark:text-slate-100">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
@@ -289,9 +295,9 @@ export default function ParentDashboardPage() {
                   <Link key={action.label} href={action.href}>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start font-semibold text-slate-800 hover:text-slate-900 flex items-center gap-3 px-0"
+                      className="w-full justify-start font-semibold text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-3 px-0"
                     >
-                      <action.icon className="w-4 h-4 text-slate-700 flex-shrink-0" />
+                      <action.icon className="w-4 h-4 text-slate-700 dark:text-slate-400 flex-shrink-0" />
                       <span className="text-sm">{action.label}</span>
                     </Button>
                   </Link>
@@ -299,27 +305,30 @@ export default function ParentDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white overflow-hidden">
-              <CardContent className="p-6 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-white/80">Free Trial</p>
-                    <p className="text-sm font-semibold">7 days remaining</p>
+            {/* Only show upgrade card for non-admin users */}
+            {!isAdmin && (
+              <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white overflow-hidden">
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-5 h-5" />
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-white/80">Free Trial</p>
+                      <p className="text-sm font-semibold">7 days remaining</p>
+                    </div>
                   </div>
-                </div>
-                <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full w-2/3 bg-white rounded-full" />
-                </div>
-                <div className="flex items-center justify-between text-sm text-white/85">
-                  <span>Unlock all classes</span>
-                  <span className="font-semibold">Upgrade</span>
-                </div>
-                <Link href="/pricing">
-                  <Button className="w-full bg-white text-purple-600 hover:bg-slate-100">Upgrade Now</Button>
-                </Link>
-              </CardContent>
-            </Card>
+                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full w-2/3 bg-white rounded-full" />
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-white/85">
+                    <span>Unlock all classes</span>
+                    <span className="font-semibold">Upgrade</span>
+                  </div>
+                  <Link href="/pricing">
+                    <Button className="w-full bg-white text-purple-600 hover:bg-slate-100">Upgrade Now</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

@@ -70,16 +70,16 @@ export default function NotificationsPage() {
   const unreadCount = items.filter((n) => !n.is_read).length;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-sm text-slate-600 hover:text-slate-900 inline-flex items-center gap-2">
-            <span className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-              <Bell className="w-4 h-4 text-slate-700" />
+          <Link href="/" className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 inline-flex items-center gap-2">
+            <span className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+              <Bell className="w-4 h-4 text-slate-700 dark:text-slate-300" />
             </span>
             Notifications
           </Link>
-          {unreadCount > 0 && <span className="text-xs text-purple-600">{unreadCount} unread</span>}
+          {unreadCount > 0 && <span className="text-xs text-purple-600 dark:text-purple-400">{unreadCount} unread</span>}
         </div>
         <Button variant="outline" size="sm">
           Mark all read
@@ -89,9 +89,9 @@ export default function NotificationsPage() {
       {items.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="font-medium text-slate-700">No notifications</h3>
-            <p className="text-sm text-slate-500">You're all caught up!</p>
+            <Bell className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+            <h3 className="font-medium text-slate-700 dark:text-slate-300">No notifications</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">You're all caught up!</p>
           </CardContent>
         </Card>
       ) : (
@@ -100,20 +100,20 @@ export default function NotificationsPage() {
             const typeConfig = typeIcons[notification.type] || typeIcons.system;
             const Icon = typeConfig.icon;
             const content = (
-              <Card key={notification.id} className={`transition-colors ${!notification.is_read ? "border-purple-200 bg-purple-50/50" : ""}`}>
+              <Card key={notification.id} className={`transition-colors ${!notification.is_read ? "border-purple-200 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-900/20" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex gap-4">
-                    <div className={`w-10 h-10 rounded-full ${typeConfig.bg} flex items-center justify-center flex-shrink-0`}>
+                    <div className={`w-10 h-10 rounded-full ${typeConfig.bg} dark:opacity-80 flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`w-5 h-5 ${typeConfig.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className={`font-medium ${notification.is_read ? "text-slate-700" : "text-slate-900"}`}>{notification.title}</h3>
-                            {!notification.is_read && <span className="h-2 w-2 bg-purple-500 rounded-full" />}
+                            <h3 className={`font-medium ${notification.is_read ? "text-slate-700 dark:text-slate-300" : "text-slate-900 dark:text-slate-100"}`}>{notification.title}</h3>
+                            {!notification.is_read && <span className="h-2 w-2 bg-purple-500 dark:bg-purple-400 rounded-full" />}
                           </div>
-                          <p className="text-sm text-slate-600 mt-1">{notification.message}</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{notification.message}</p>
                         </div>
                       </div>
                     </div>

@@ -62,13 +62,13 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
 
   if (!cert) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-900">
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
         <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
-          <Link href="/certificates" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+          <Link href="/certificates" className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
             <ArrowLeft className="h-4 w-4" />
             Back to Certificates
           </Link>
-          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-600">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-slate-600 dark:text-slate-400">
             No certificate found.
           </div>
         </div>
@@ -77,37 +77,37 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
-        <Link href="/certificates" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+        <Link href="/certificates" className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200">
           <ArrowLeft className="h-4 w-4" />
           Back to Certificates
         </Link>
 
-        <div className="bg-white shadow-lg rounded-2xl border border-amber-200 overflow-hidden">
-          <div className="bg-gradient-to-b from-amber-50 to-white p-8">
-            <div className="max-w-3xl mx-auto border-[3px] border-amber-400 rounded-xl p-8 space-y-6 text-center">
-              <div className="w-14 h-14 rounded-full bg-amber-500 text-white flex items-center justify-center mx-auto text-2xl font-bold">
+        <div className="bg-white dark:bg-slate-800 shadow-lg rounded-2xl border border-amber-200 dark:border-amber-700 overflow-hidden">
+          <div className="bg-gradient-to-b from-amber-50 to-white dark:from-amber-900/20 dark:to-slate-800 p-8">
+            <div className="max-w-3xl mx-auto border-[3px] border-amber-400 dark:border-amber-600 rounded-xl p-8 space-y-6 text-center">
+              <div className="w-14 h-14 rounded-full bg-amber-500 dark:bg-amber-600 text-white flex items-center justify-center mx-auto text-2xl font-bold">
                 🎖️
               </div>
               <div className="space-y-2">
-                <p className="text-xl font-semibold text-amber-800">{cert.type}</p>
-                <p className="text-sm text-slate-600">This is to certify that</p>
-                <p className="text-2xl font-bold text-slate-900">{cert.student}</p>
-                <p className="text-sm text-slate-600">has successfully completed</p>
-                <p className="text-lg font-semibold text-purple-700">{cert.course}</p>
+                <p className="text-xl font-semibold text-amber-800 dark:text-amber-400">{cert.type}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">This is to certify that</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{cert.student}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">has successfully completed</p>
+                <p className="text-lg font-semibold text-purple-700 dark:text-purple-400">{cert.course}</p>
               </div>
-              <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
+              <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                 <Calendar className="h-4 w-4" />
                 {cert.issued}
               </div>
-              <div className="pt-4 border-t border-amber-200">
-                <p className="text-sm text-slate-500">Coding Kiddos</p>
-                <p className="text-xs text-slate-400">Verification Code: {cert.code}</p>
+              <div className="pt-4 border-t border-amber-200 dark:border-amber-700">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Coding Kiddos</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">Verification Code: {cert.code}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white border-t border-amber-200 px-6 py-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-800 border-t border-amber-200 dark:border-amber-700 px-6 py-4 flex items-center justify-between">
             <Link href="/certificates">
               <Button variant="outline">Back</Button>
             </Link>

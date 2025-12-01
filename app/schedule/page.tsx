@@ -69,19 +69,19 @@ export default function SchedulePage() {
   }, [selectedDate]);
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Schedule</h1>
-          <p className="text-slate-600">Book classes and manage your schedule</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Schedule</h1>
+          <p className="text-slate-600 dark:text-slate-400">Book classes and manage your schedule</p>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Left sidebar */}
           <div className="space-y-6">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
+                <div className="flex items-center justify-between text-sm font-semibold text-slate-800 dark:text-slate-200">
                   <span>{formatDay(selectedDate, { month: "long", year: "numeric" })}</span>
                   <div className="flex gap-2">
                     <Button
@@ -124,7 +124,7 @@ export default function SchedulePage() {
                           setWeekStart(startOfWeek(date));
                         }}
                         className={`w-10 h-10 rounded-lg text-sm font-medium ${
-                          isSelected ? "bg-purple-500 text-white" : "hover:bg-slate-100 text-slate-700"
+                          isSelected ? "bg-purple-500 text-white" : "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         {date.getDate()}
@@ -135,23 +135,23 @@ export default function SchedulePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="p-4 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
                   <Filter className="w-4 h-4" />
                   Filters
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-slate-500">Class Type</p>
-                  <select className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Class Type</p>
+                  <select className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100">
                     {classTypes.map((t) => (
                       <option key={t}>{t}</option>
                     ))}
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-slate-500">Language</p>
-                  <select className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Language</p>
+                  <select className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100">
                     {languages.map((l) => (
                       <option key={l}>{l}</option>
                     ))}
@@ -160,17 +160,17 @@ export default function SchedulePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="p-4">
-                <p className="text-sm font-semibold text-slate-800 mb-2">My Bookings</p>
-                <p className="text-sm text-slate-500">No upcoming classes</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">My Bookings</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">No upcoming classes</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Main content */}
           <div className="lg:col-span-3 space-y-6">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <Button
@@ -220,24 +220,24 @@ export default function SchedulePage() {
             </Card>
 
             <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                 {formatDay(selectedDate, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
               </h2>
               {classes.filter((c) => isSameDay(c.start, selectedDate)).length === 0 ? (
                 <>
-                  <Card className="border-2 border-dashed border-slate-200">
+                  <Card className="border-2 border-dashed border-slate-200 dark:border-slate-700 dark:bg-slate-800">
                     <CardContent className="p-12 text-center space-y-2">
-                      <div className="w-12 h-12 mx-auto rounded-lg bg-slate-100 flex items-center justify-center">
-                        <CalendarIcon className="w-6 h-6 text-slate-400" />
+                      <div className="w-12 h-12 mx-auto rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                        <CalendarIcon className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                       </div>
-                      <p className="font-semibold text-slate-800">No classes on this day</p>
-                      <p className="text-sm text-slate-500">Try selecting a different date or see upcoming classes below</p>
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">No classes on this day</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Try selecting a different date or see upcoming classes below</p>
                     </CardContent>
                   </Card>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-slate-800">Upcoming classes</h3>
+                      <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Upcoming classes</h3>
                       <Button size="sm" variant="ghost" onClick={() => setSelectedDate(classes[0]?.start || today)}>
                         Jump to next
                       </Button>
@@ -245,14 +245,14 @@ export default function SchedulePage() {
                     {classes
                       .filter((cls) => cls.start >= new Date())
                       .map((cls) => (
-                      <Card key={cls.id} className="border border-slate-200">
+                      <Card key={cls.id} className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800">
                         <CardContent className="p-4 flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-purple-600" />
+                          <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-purple-600 dark:text-purple-300" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-semibold text-slate-900">{cls.title}</p>
-                            <p className="text-sm text-slate-600">
+                            <p className="font-semibold text-slate-900 dark:text-slate-100">{cls.title}</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                               {cls.start.toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} ·{" "}
                               {(cls.sessionType || cls.type || "").toLowerCase()}
                             </p>
@@ -278,14 +278,14 @@ export default function SchedulePage() {
                   {classes
                     .filter((c) => isSameDay(c.start, selectedDate))
                     .map((cls) => (
-                      <Card key={cls.id} className="border border-slate-200">
+                      <Card key={cls.id} className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800">
                         <CardContent className="p-4 flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-purple-600" />
+                          <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-purple-600 dark:text-purple-300" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-semibold text-slate-900">{cls.title}</p>
-                            <p className="text-sm text-slate-600">
+                            <p className="font-semibold text-slate-900 dark:text-slate-100">{cls.title}</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                               {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} ·{" "}
                               {(cls.sessionType || cls.type || "").toLowerCase()}
                             </p>
