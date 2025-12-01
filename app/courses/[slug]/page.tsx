@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Play, Clock, Star, BookOpen, CheckCircle2, Code2 } from "lucide-react";
+import { ArrowLeft, Play, Clock, Star, BookOpen, CheckCircle2, Code2, LogIn, UserPlus } from "lucide-react";
 import LanguageIcon from "../../../components/ui/LanguageIcon";
 import Badge from "../../../components/ui/badge";
 import { Card, CardContent } from "../../../components/ui/card";
@@ -72,17 +72,13 @@ const demoCourses = [
 ];
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  // Require authentication to view course details
+  // Allow browsing course details, but require login to start lessons
   const session = await getServerSession(authOptions);
-
-  if (!session) {
-    const resolved = await params;
-    redirect(`/auth/login?callbackUrl=/courses/${resolved?.slug || ""}`);
-  }
+  const isAuthenticated = !!session;
 
   // Gate: parents can browse but not start lessons (for kids). If role === PARENT, redirect to their dashboard.
   const role = (session as any)?.user?.role;
-  if (role === "PARENT") {
+  if (isAuthenticated && role === "PARENT") {
     redirect("/dashboard/parent");
   }
 
@@ -254,24 +250,51 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                     <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
                     Free Course
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 mb-2">Ready to Start?</h3>
-                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium">Begin your coding journey today</p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 mb-2">
+                    {isAuthenticated ? "Ready to Start?" : "Start Learning Today!"}
+                  </h3>
+                  <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium">
+                    {isAuthenticated ? "Begin your coding journey" : "Sign up free to start this course"}
+                  </p>
                 </div>
-                {/** When we render demo/static data we may not have a DB id. Use slug, id, or a normalized title to ensure lessons route resolves. */}
-                <Link
-                  href={`/lessons/${
-                    (course as any)?.id ||
-                    (course as any)?.slug ||
-                    normalizeSlug((course as any)?.title || slugParam) ||
-                    slugParam
-                  }`}
-                  className="block group"
-                >
-                  <div className="relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white font-bold py-3.5 sm:py-4 shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02]">
-                    <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    <span className="text-lg">Start Learning</span>
+
+                {isAuthenticated ? (
+                  <Link
+                    href={`/lessons/${
+                      (course as any)?.id ||
+                      (course as any)?.slug ||
+                      normalizeSlug((course as any)?.title || slugParam) ||
+                      slugParam
+                    }`}
+                    className="block group"
+                  >
+                    <div className="relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white font-bold py-3.5 sm:py-4 shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02]">
+                      <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      <span className="text-lg">Start Learning</span>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="space-y-3">
+                    <Link
+                      href="/auth/register"
+                      className="block group"
+                    >
+                      <div className="relative w-full inline-flex items-center justify-center gap-2 sm:gap-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white font-bold py-3.5 sm:py-4 shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02]">
+                        <UserPlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        <span className="text-lg">Sign Up Free</span>
+                      </div>
+                    </Link>
+                    <Link
+                      href={`/auth/login?callbackUrl=/courses/${slugParam}`}
+                      className="block"
+                    >
+                      <div className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white dark:bg-slate-700 border-2 border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 font-semibold py-3 hover:bg-purple-50 dark:hover:bg-slate-600 transition-all duration-300">
+                        <LogIn className="w-4 h-4" />
+                        <span>Already have an account?</span>
+                      </div>
+                    </Link>
                   </div>
-                </Link>
+                )}
                 <div className="space-y-3 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
                   <p className="text-xs font-bold text-slate-600 dark:text-slate-500 uppercase tracking-wider">What's Included</p>
                   <Feature icon={<CheckCircle2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />}>

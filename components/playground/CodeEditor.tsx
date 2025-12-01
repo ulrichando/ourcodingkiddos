@@ -96,41 +96,41 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-slate-900 shadow-xl bg-[#0a1326]">
-      <div className={`flex items-center justify-between px-4 py-3 bg-gradient-to-r ${languageColors[language]}`}>
+    <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-slate-900 shadow-xl bg-[#0a1326]">
+      <div className={`flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r ${languageColors[language]}`}>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-400" />
-            <div className="w-3 h-3 rounded-full bg-yellow-400" />
-            <div className="w-3 h-3 rounded-full bg-green-400" />
+          <div className="flex gap-1 sm:gap-1.5">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400" />
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400" />
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400" />
           </div>
-          <span className="text-white/90 font-medium ml-2 uppercase text-sm">{language}</span>
+          <span className="text-white/90 font-medium ml-1 sm:ml-2 uppercase text-xs sm:text-sm">{language}</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="ghost" className="text-white hover:bg-white/20" onClick={copyCode}>
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button size="sm" variant="ghost" className="text-white hover:bg-white/20 p-1.5 sm:p-2" onClick={copyCode} title="Copy">
+            {copied ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           </Button>
-          <Button size="sm" variant="ghost" className="text-white hover:bg-white/20" onClick={resetCode}>
-            <RotateCcw className="w-4 h-4" />
+          <Button size="sm" variant="ghost" className="text-white hover:bg-white/20 p-1.5 sm:p-2" onClick={resetCode} title="Reset">
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </Button>
           <Button
             size="sm"
-            className="bg-white text-slate-900 hover:bg-slate-100"
+            className="bg-white text-slate-900 hover:bg-slate-100 px-2 sm:px-3"
             onClick={runCode}
             disabled={isRunning}
           >
-            <Play className={`w-4 h-4 mr-1 ${isRunning ? "animate-pulse" : ""}`} />
-            Run
+            <Play className={`w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1 ${isRunning ? "animate-pulse" : ""}`} />
+            <span className="hidden sm:inline">Run</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 divide-x divide-slate-700">
-        <div className="relative">
-          <div className="absolute left-0 top-0 bottom-0 w-12 bg-slate-800 flex flex-col items-center pt-4 text-slate-500 text-xs font-mono">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-slate-700">
+        <div className="relative border-b md:border-b-0 border-slate-700">
+          <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 bg-slate-800 flex flex-col items-center pt-3 sm:pt-4 text-slate-500 text-[10px] sm:text-xs font-mono">
             {code.split("\n").map((_, i) => (
-              <div key={i} className="h-6 flex items-center">
+              <div key={i} className="h-5 sm:h-6 flex items-center">
                 {i + 1}
               </div>
             ))}
@@ -139,24 +139,24 @@ export default function CodeEditor({
             value={code}
             onChange={handleCodeChange}
             readOnly={readOnly}
-            className="w-full h-80 pl-14 pr-4 py-4 bg-slate-900 text-slate-100 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="w-full h-64 sm:h-80 md:h-96 pl-10 sm:pl-14 pr-3 sm:pr-4 py-3 sm:py-4 bg-slate-900 text-slate-100 font-mono text-xs sm:text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             spellCheck={false}
             placeholder="Write your code here..."
           />
         </div>
 
         {showPreview && (
-          <div className="bg-white h-80 overflow-auto">
-            <div className="px-3 py-2 bg-slate-100 border-b text-xs font-medium text-slate-500">Preview</div>
+          <div className="bg-white h-64 sm:h-80 md:h-96 overflow-auto">
+            <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 border-b text-[10px] sm:text-xs font-medium text-slate-500">Preview</div>
             {output ? (
               <iframe
                 srcDoc={output}
-                className="w-full h-[calc(100%-2.5rem)] border-0"
+                className="w-full h-[calc(100%-2rem)] sm:h-[calc(100%-2.5rem)] border-0"
                 sandbox="allow-scripts"
                 title="Code Preview"
               />
             ) : (
-              <div className="flex items-center justify-center h-[calc(100%-2.5rem)] text-slate-400">
+              <div className="flex items-center justify-center h-[calc(100%-2rem)] sm:h-[calc(100%-2.5rem)] text-slate-400 text-xs sm:text-sm px-4 text-center">
                 Click "Run" to see the output
               </div>
             )}

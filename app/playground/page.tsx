@@ -113,52 +113,52 @@ export default function PlaygroundPage() {
     <main className="min-h-screen bg-gradient-to-b from-[#080d18] via-[#0a1020] to-[#050812] text-white">
       {/* Header */}
       <header className="bg-[#080d18] border-b border-slate-900/60">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
               CK
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <input
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                className="bg-transparent text-white text-lg font-semibold border-none outline-none focus:ring-2 focus:ring-purple-500 rounded px-2 py-1"
+                className="bg-transparent text-white text-sm sm:text-lg font-semibold border-none outline-none focus:ring-2 focus:ring-purple-500 rounded px-1 sm:px-2 py-1 w-full max-w-xs"
               />
-              <p className="text-slate-400 text-sm">Code Playground</p>
+              <p className="text-slate-400 text-xs sm:text-sm hidden sm:block">Code Playground</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-slate-200 hover:text-white">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Button variant="ghost" size="sm" className="text-slate-200 hover:text-white hidden md:flex">
               <FolderOpen className="w-4 h-4 mr-2" />
-              Open
+              <span className="hidden lg:inline">Open</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-slate-200 hover:text-white" onClick={handleDownload}>
-              <Download className="w-4 h-4 mr-2" />
-              Download
+            <Button variant="ghost" size="sm" className="text-slate-200 hover:text-white p-2" onClick={handleDownload} title="Download">
+              <Download className="w-4 h-4" />
+              <span className="hidden md:inline ml-2">Download</span>
             </Button>
-            <Button size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500">
-              <Save className="w-4 h-4 mr-2" />
-              Save
+            <Button size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500 p-2">
+              <Save className="w-4 h-4" />
+              <span className="hidden md:inline ml-2">Save</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Tabs */}
-      <div className="bg-[#121a2f] border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap">
+      <div className="bg-[#121a2f] border-b border-slate-800 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 flex">
           {languageTabs.map((lang) => (
             <button
               key={lang.id}
               onClick={() => setActiveLanguage(lang.id as any)}
-              className={`px-5 py-3 text-sm font-semibold border-b-2 flex items-center gap-2 ${
+              className={`px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold border-b-2 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                 activeLanguage === lang.id
                   ? "border-purple-400 text-white bg-slate-800/70"
                   : "border-transparent text-slate-400 hover:text-white"
               }`}
             >
-              <lang.icon className={`w-4 h-4 ${lang.color}`} />
+              <lang.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${lang.color}`} />
               {lang.label}
             </button>
           ))}
@@ -166,7 +166,7 @@ export default function PlaygroundPage() {
       </div>
 
       {/* Editor */}
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <CodeEditor
           initialCode={code[activeLanguage]}
           language={activeLanguage}
