@@ -44,7 +44,7 @@ export async function GET() {
         ],
         status: { in: ["ACTIVE", "TRIALING", "PAST_DUE"] },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { currentPeriodEnd: "desc" },
       select: {
         id: true,
         planType: true,
