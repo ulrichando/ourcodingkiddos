@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MessageCircle, X, Send, Bot, RefreshCcw, Mail } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { MessageCircle, X, Send, Bot, RefreshCcw, Mail, LogIn } from "lucide-react";
 import Button from "../ui/button";
 import Input from "../ui/input";
 import { Card } from "../ui/card";
@@ -32,11 +33,33 @@ const faqResponses: Record<string, string> = {
 
 export default function ChatBot() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const userName = session?.user?.name?.split(" ")[0] || "there";
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([{ role: "assistant", content: "Hi there! 👋 I'm Cody. How can I help?" }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: isAuthenticated
+        ? `Hi ${userName}! 👋 I'm Cody, your coding assistant. How can I help you today?`
+        : "Hi there! 👋 I'm Cody. Browse our FAQs below or sign in for personalized assistance!",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Update welcome message when authentication status changes
+  useEffect(() => {
+    setMessages([
+      {
+        role: "assistant",
+        content: isAuthenticated
+          ? `Hi ${userName}! 👋 I'm Cody, your coding assistant. How can I help you today?`
+          : "Hi there! 👋 I'm Cody. Browse our FAQs below or sign in for personalized assistance!",
+      },
+    ]);
+  }, [isAuthenticated, userName]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,6 +75,19 @@ export default function ChatBot() {
   };
 
   const handleSend = async () => {
+    // Prevent sending if not authenticated
+    if (!isAuthenticated) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant" as const,
+          content: "Please sign in to send custom messages. You can still use the quick reply buttons below! 😊",
+        },
+      ]);
+      setInput("");
+      return;
+    }
+
     if (!input.trim()) return;
     const userMessage = input.trim();
     setInput("");
@@ -81,11 +117,22 @@ export default function ChatBot() {
 
   const handleGotoMessages = () => {
     setIsOpen(false);
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
     router.push("/messages");
   };
 
   const handleClear = () => {
-    setMessages([{ role: "assistant", content: "Hi there! 👋 I'm Cody. How can I help?" }]);
+    setMessages([
+      {
+        role: "assistant",
+        content: isAuthenticated
+          ? `Hi ${userName}! 👋 I'm Cody, your coding assistant. How can I help you today?`
+          : "Hi there! 👋 I'm Cody. Browse our FAQs below or sign in for personalized assistance!",
+      },
+    ]);
     setInput("");
   };
 
@@ -93,49 +140,49 @@ export default function ChatBot() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center ${
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center ${
           isOpen ? "hidden" : ""
         }`}
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 z-50 w-96 h-[500px] flex flex-col shadow-2xl rounded-2xl overflow-hidden border-0 bg-white dark:bg-slate-800">
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <Bot className="w-6 h-6" />
+        <Card className="fixed inset-4 sm:inset-auto sm:bottom-6 sm:right-6 z-50 sm:w-96 sm:h-[500px] flex flex-col shadow-2xl rounded-2xl sm:rounded-2xl overflow-hidden border-0 bg-white dark:bg-slate-800">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 sm:p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <Bot className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <h3 className="font-bold">Cody the Helper</h3>
-                <p className="text-xs text-white/80">Always here to help!</p>
+                <h3 className="font-bold text-sm sm:text-base">Cody the Helper</h3>
+                <p className="text-[10px] sm:text-xs text-white/80">Always here to help!</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
-              <X className="w-5 h-5" />
+            <button onClick={() => setIsOpen(false)} className="p-1.5 sm:p-2 hover:bg-white/20 rounded-full transition-colors">
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-slate-50 dark:bg-slate-900">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 ${
                     msg.role === "user" ? "bg-purple-500 text-white rounded-br-sm" : "bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 rounded-bl-sm shadow-sm"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-line">{msg.content}</p>
+                  <p className="text-xs sm:text-sm whitespace-pre-line">{msg.content}</p>
                 </div>
               </div>
             ))}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-slate-700 rounded-2xl px-4 py-3 shadow-sm">
+                <div className="bg-white dark:bg-slate-700 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce delay-100" />
-                    <div className="w-2 h-2 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce delay-200" />
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce" />
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce delay-100" />
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce delay-200" />
                   </div>
                 </div>
               </div>
@@ -143,7 +190,7 @@ export default function ChatBot() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="px-4 py-2 flex flex-wrap gap-2 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+          <div className="px-3 sm:px-4 py-2 flex flex-wrap gap-1.5 sm:gap-2 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
             {quickReplies.slice(0, 3).map((reply) => (
               <button
                 key={reply.text}
@@ -153,12 +200,14 @@ export default function ChatBot() {
                 {reply.text}
               </button>
             ))}
-            <button
-              onClick={handleGotoMessages}
-              className="text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-            >
-              Open Messages
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={handleGotoMessages}
+                className="text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                Open Messages
+              </button>
+            )}
             <button
               onClick={handleClear}
               className="text-xs px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors inline-flex items-center gap-1"
@@ -168,26 +217,55 @@ export default function ChatBot() {
             </button>
           </div>
 
-          <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button onClick={handleSend} disabled={!input.trim() || isTyping} className="bg-gradient-to-r from-purple-500 to-pink-500">
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-2">
-              <span className="inline-flex items-center gap-1">
-                <Mail className="w-3 h-3" />
-                support@ourcodingkiddos.com
-              </span>
-              <span>We reply within a few minutes</span>
-            </div>
+          <div className="p-3 sm:p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+            {isAuthenticated ? (
+              <>
+                <div className="flex gap-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    placeholder="Type your message..."
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSend} disabled={!input.trim() || isTyping} className="bg-gradient-to-r from-purple-500 to-pink-500">
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                  <span className="inline-flex items-center gap-1 truncate">
+                    <Mail className="w-3 h-3 flex-shrink-0" />
+                    <span className="hidden sm:inline">support@ourcodingkiddos.com</span>
+                    <span className="sm:hidden">Email us</span>
+                  </span>
+                  <span className="hidden sm:inline ml-2 flex-shrink-0">Quick replies</span>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <Input
+                    value=""
+                    disabled
+                    placeholder="Sign in to send custom messages..."
+                    className="flex-1 opacity-60 cursor-not-allowed"
+                  />
+                  <Button disabled className="bg-slate-300 dark:bg-slate-600 cursor-not-allowed">
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+                <button
+                  onClick={() => router.push("/auth/login")}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm hover:brightness-110 transition-all"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign in to chat
+                </button>
+                <p className="text-[10px] sm:text-[11px] text-center text-slate-500 dark:text-slate-400">
+                  Use quick replies above or sign in for custom messages
+                </p>
+              </div>
+            )}
           </div>
 
           <style>{`

@@ -72,8 +72,15 @@ const demoCourses = [
 ];
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  // Gate: parents can browse but not start lessons (for kids). If role === PARENT, redirect to their dashboard.
+  // Require authentication to view course details
   const session = await getServerSession(authOptions);
+
+  if (!session) {
+    const resolved = await params;
+    redirect(`/auth/login?callbackUrl=/courses/${resolved?.slug || ""}`);
+  }
+
+  // Gate: parents can browse but not start lessons (for kids). If role === PARENT, redirect to their dashboard.
   const role = (session as any)?.user?.role;
   if (role === "PARENT") {
     redirect("/dashboard/parent");
