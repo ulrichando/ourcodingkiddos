@@ -10,35 +10,30 @@ export default function StudentLoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const inputValue = username.trim().toLowerCase();
+    const emailValue = email.trim().toLowerCase();
     const passwordValue = password;
 
-    if (!inputValue || !passwordValue) {
-      setError("Please enter your username or email and password");
+    if (!emailValue || !passwordValue) {
+      setError("Please enter your email and password");
       return;
     }
 
     setError(null);
     setLoading(true);
 
-    // If input contains @, treat as email. Otherwise, convert username to student email format
-    const email = inputValue.includes("@")
-      ? inputValue
-      : `${inputValue}@students.ourcodingkiddos.com`;
-
     try {
       const res = await signIn("credentials", {
         redirect: false,
-        email,
+        email: emailValue,
         password: passwordValue,
       });
-      if (res?.error) throw new Error("Wrong username or password. Try again!");
+      if (res?.error) throw new Error("Wrong email or password. Try again!");
       const session = await getSession();
       const sessionRole = typeof (session?.user as any)?.role === "string"
         ? ((session?.user as any)?.role as string).toUpperCase()
@@ -77,16 +72,16 @@ export default function StudentLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-bold text-purple-700 dark:text-purple-300">
-                Your Username or Email
+                Your Email
               </label>
               <input
-                name="username"
-                type="text"
+                name="email"
+                type="email"
                 required
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g., emma2024 or emma@email.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@example.com"
                 className="w-full rounded-xl border-2 border-purple-200 dark:border-purple-600 bg-purple-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-500 px-4 py-3 text-lg focus:outline-none focus:ring-4 focus:ring-purple-300 dark:focus:ring-purple-600 focus:border-purple-400"
               />
             </div>

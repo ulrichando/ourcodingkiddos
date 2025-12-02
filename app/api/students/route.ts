@@ -8,10 +8,6 @@ import { createNotification } from "../notifications/route";
 import { logCreate } from "../../../lib/audit";
 import { isSubscriptionValid } from "../../../lib/subscription";
 
-// Helper to build a student email from username
-function studentEmailFromUsername(username: string) {
-  return `${username.toLowerCase()}@students.ourcodingkiddos.com`;
-}
 
 export async function POST(request: NextRequest) {
   // Try server session, fall back to JWT token parsing
@@ -76,7 +72,6 @@ export async function POST(request: NextRequest) {
   }
 
   const name = String(body?.name || "").trim();
-  let username = String(body?.username || "").trim();
   let password = String(body?.password || "");
   const providedEmail = String(body?.email || "").trim().toLowerCase();
   const age = Number(body?.age) || null;
@@ -93,36 +88,17 @@ export async function POST(request: NextRequest) {
   const learningGoals = body?.learningGoals || null;
   const parentNotes = body?.parentNotes || null;
 
-  if (!name || !parentEmail) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  if (!name || !parentEmail || !providedEmail) {
+    return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
   }
 
   try {
-    // If username is empty, generate one from name + random suffix
-    if (!username) {
-      const base = name.toLowerCase().replace(/\s+/g, "").slice(0, 12) || "student";
-      username = `${base}${Math.floor(100 + Math.random() * 900)}`;
-    }
-
-    // Use provided email if available, otherwise generate from username
-    let email = providedEmail || studentEmailFromUsername(username);
+    const email = providedEmail;
 
     // Check if email already exists
-    if (providedEmail) {
-      const existingUser = await prisma.user.findUnique({ where: { email: providedEmail } });
-      if (existingUser) {
-        return NextResponse.json({ error: "This email is already registered" }, { status: 400 });
-      }
-    } else {
-      // Ensure username-based email uniqueness
-      let attempts = 0;
-      while (attempts < 3) {
-        const existing = await prisma.user.findUnique({ where: { email } });
-        if (!existing) break;
-        username = `${username}${Math.floor(Math.random() * 10)}`;
-        email = studentEmailFromUsername(username);
-        attempts++;
-      }
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return NextResponse.json({ error: "This email is already registered" }, { status: 400 });
     }
 
     if (!password) {
@@ -168,29 +144,28 @@ export async function POST(request: NextRequest) {
     });
 
     // Log student creation
-    logCreate(parentEmail, "Student", user.id, `Added student: ${name} (${username})`, undefined, {
+    logCreate(parentEmail, "Student", user.id, `Added student: ${name} (${email})`, undefined, {
       studentName: name,
-      username,
+      email,
       ageGroup,
     }).catch(() => {});
 
     // Send notification to parent
-    const loginInfo = providedEmail ? `Email: ${providedEmail}` : `Username: ${username}`;
     createNotification(
       parentEmail,
       "Student Added Successfully! 🎉",
-      `${name} has been added to your account. ${loginInfo}`,
+      `${name} has been added to your account. Email: ${email}`,
       "student_added",
       "/dashboard/parent/students",
-      { studentId: user.id, studentName: name, username, email }
+      { studentId: user.id, studentName: name, email }
     );
 
-    return NextResponse.json({ status: "ok", user, credentials: { username, password, email } });
+    return NextResponse.json({ status: "ok", user, credentials: { password, email } });
   } catch (err: any) {
     console.error("[students] create failed", err);
     const msg =
       err?.code === "P2002" || err?.message?.includes("Unique constraint")
-        ? "Username already taken"
+        ? "Email already taken"
         : err?.message || "Could not create student";
     return NextResponse.json({ error: msg }, { status: 500 });
   }

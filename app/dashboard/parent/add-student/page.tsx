@@ -37,7 +37,6 @@ export default function AddStudentPage() {
 
   // Profile fields
   const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
@@ -107,7 +106,7 @@ export default function AddStudentPage() {
     );
   };
 
-  const canProceedStep1 = name && username && password && age;
+  const canProceedStep1 = name && email && password && age;
   const canProceedStep2 = true; // Optional fields
   const canSubmit = canProceedStep1;
 
@@ -122,9 +121,8 @@ export default function AddStudentPage() {
         credentials: "include",
         body: JSON.stringify({
           name,
-          username,
           password,
-          email: email.trim().toLowerCase() || undefined,
+          email: email.trim().toLowerCase(),
           age: Number(age),
           birthday: birthday || undefined,
           ageGroup,
@@ -141,12 +139,9 @@ export default function AddStudentPage() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json?.error || "Could not create student");
       const creds = json?.credentials;
-      const loginMethod = creds?.email && !creds.email.includes("@students.ourcodingkiddos.com")
-        ? `Email: ${creds.email}`
-        : `Username: ${creds?.username}`;
       setSuccess(
         creds
-          ? `Student created! ${loginMethod} • Password: ${creds.password}`
+          ? `Student created! Email: ${creds.email} • Password: ${creds.password}`
           : "Student account created successfully!"
       );
       setTimeout(() => router.push("/dashboard/parent"), 1500);
@@ -282,11 +277,12 @@ export default function AddStudentPage() {
                   </label>
 
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
-                    Username (for login) *
+                    Email (for login) *
                     <input
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="e.g., emma2024"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="child@example.com"
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
                   </label>
@@ -300,20 +296,6 @@ export default function AddStudentPage() {
                       placeholder="e.g., coder123"
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
-                  </label>
-
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1 sm:col-span-2">
-                    Email (Optional)
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="child@example.com"
-                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
-                    />
-                    <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">
-                      If your child has their own email, they can use it to login. Otherwise, they&apos;ll use their username.
-                    </p>
                   </label>
 
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
@@ -342,7 +324,7 @@ export default function AddStudentPage() {
                 </div>
 
                 <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
-                  <strong>Note:</strong> Share the username and password with your child to access their student portal.
+                  <strong>Note:</strong> Share the email and password with your child to access their student portal.
                 </p>
               </div>
             )}
