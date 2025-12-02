@@ -38,9 +38,21 @@ export default function InstructorDashboard() {
       }));
       setSessions(normalized);
     });
-    // simple demo bookings/students fallback (could be replaced with real fetch)
-    setBookings([]);
-    setStudents([]);
+
+    // Fetch dashboard data (students and bookings)
+    fetch("/api/instructor/dashboard", { credentials: "include" })
+      .then((res) => res.ok ? res.json() : { students: [], bookings: [] })
+      .then((data) => {
+        if (!mounted) return;
+        setStudents(data.students || []);
+        setBookings(data.bookings || []);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setStudents([]);
+        setBookings([]);
+      });
+
     return () => {
       mounted = false;
     };
@@ -182,17 +194,34 @@ export default function InstructorDashboard() {
                 <p className="text-sm text-slate-500 dark:text-slate-400">No recent bookings</p>
               ) : (
                 <div className="space-y-3">
-                  {bookings.map((booking) => (
-                    <div key={booking.id} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-sm text-purple-700 dark:text-purple-400">
-                        {booking.student[0]}
+                  {bookings.slice(0, 5).map((booking) => {
+                    const timeAgo = (dateStr: string) => {
+                      const date = new Date(dateStr);
+                      const now = new Date();
+                      const diffMs = now.getTime() - date.getTime();
+                      const diffMins = Math.floor(diffMs / 60000);
+                      const diffHours = Math.floor(diffMs / 3600000);
+                      const diffDays = Math.floor(diffMs / 86400000);
+                      if (diffMins < 1) return "just now";
+                      if (diffMins < 60) return `${diffMins}m ago`;
+                      if (diffHours < 24) return `${diffHours}h ago`;
+                      return `${diffDays}d ago`;
+                    };
+                    return (
+                      <div key={booking.id} className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-sm">
+                          {booking.avatar || booking.student?.[0] || "👤"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{booking.student} booked</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{booking.sessionTitle}</p>
+                        </div>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                          {timeAgo(booking.createdAt)}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{booking.student} booked</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{booking.sessionTitle}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

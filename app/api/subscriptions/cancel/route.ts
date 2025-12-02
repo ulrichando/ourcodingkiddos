@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { stripe } from "../../../../lib/stripe";
+import { createAuditLog } from "../../../../lib/audit";
 
 /**
  * POST /api/subscriptions/cancel - Cancel user's subscription at period end
@@ -90,6 +91,23 @@ export async function POST() {
     });
 
     console.log("[Cancel Subscription] Database updated, cancelAtPeriodEnd:", updatedSubscription.cancelAtPeriodEnd);
+
+    // Create audit log
+    await createAuditLog({
+      userId,
+      userEmail: userEmail || "unknown",
+      action: "UPDATE",
+      resource: "Subscription",
+      resourceId: subscription.id,
+      details: `Subscription scheduled for cancellation at period end`,
+      severity: "WARNING",
+      metadata: {
+        subscriptionId: subscription.id,
+        stripeSubscriptionId: subscription.stripeSubscriptionId,
+        cancelAt: subscription.currentPeriodEnd,
+        planType: subscription.planType,
+      },
+    });
 
     return NextResponse.json({
       success: true,

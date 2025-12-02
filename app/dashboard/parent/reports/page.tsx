@@ -2,15 +2,81 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, TrendingUp, Award, BookOpen, Calendar, Download, Star, Zap, Target, Clock } from "lucide-react";
+import { ArrowLeft, TrendingUp, Award, BookOpen, Calendar, Download, Star, Zap, Target, Clock, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
 
+type StudentProgress = {
+  student: {
+    id: string;
+    name: string;
+    avatar: string | null;
+    totalXp: number;
+    currentLevel: number;
+    streakDays: number;
+    lastActiveDate: string | null;
+  };
+  stats: {
+    totalLessonsCompleted: number;
+    totalBadges: number;
+    totalAchievements: number;
+    totalXp: number;
+    currentLevel: number;
+    streakDays: number;
+  };
+  skills: Array<{
+    skill: string;
+    progress: number;
+    completed: number;
+    total: number;
+  }>;
+  badges: Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon: string | null;
+    category: string | null;
+    rarity: string | null;
+    awardedAt: string;
+  }>;
+  recentAchievements: Array<{
+    id: string;
+    title: string;
+    detail: string | null;
+    icon: string | null;
+    xpAwarded: number;
+    createdAt: string;
+  }>;
+  courseProgress: Array<{
+    courseId: string;
+    courseTitle: string;
+    language: string;
+    completedLessons: number;
+    totalLessons: number;
+    progress: number;
+    xpEarned: number;
+    status: string;
+  }>;
+};
+
+type Student = {
+  id: string;
+  name: string;
+  age: number | null;
+  avatar: string | null;
+  totalXp: number;
+  currentLevel: number;
+  streakDays: number;
+  lastActiveDate: string | null;
+};
+
 export default function ProgressReportsPage() {
   const { data: session } = useSession();
-  const [students, setStudents] = useState<any[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [studentProgress, setStudentProgress] = useState<Record<string, StudentProgress>>({});
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState<Record<string, boolean>>({});
   const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "all">("month");
 
   useEffect(() => {
@@ -18,13 +84,34 @@ export default function ProgressReportsPage() {
     setLoading(true);
     fetch("/api/students", { credentials: "include" })
       .then((r) => r.json())
-      .then((data) => setStudents(data.students || []))
+      .then((data) => {
+        const studentList = data.students || [];
+        setStudents(studentList);
+        // Fetch progress for each student
+        studentList.forEach((student: Student) => {
+          fetchStudentProgress(student.id);
+        });
+      })
       .catch(() => setStudents([]))
       .finally(() => setLoading(false));
   }, [session?.user?.email]);
 
+  const fetchStudentProgress = async (studentId: string) => {
+    setLoadingProgress((prev) => ({ ...prev, [studentId]: true }));
+    try {
+      const res = await fetch(`/api/students/${studentId}/progress`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setStudentProgress((prev) => ({ ...prev, [studentId]: data }));
+      }
+    } catch (error) {
+      console.error(`Failed to fetch progress for student ${studentId}:`, error);
+    } finally {
+      setLoadingProgress((prev) => ({ ...prev, [studentId]: false }));
+    }
+  };
+
   const downloadReport = (studentId: string) => {
-    // In a real implementation, this would generate and download a PDF
     alert(`Generating PDF report for student... (Feature coming soon)`);
   };
 
@@ -35,6 +122,41 @@ export default function ProgressReportsPage() {
       case "all": return "All Time";
     }
   };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  };
+
+  const getSkillColor = (skill: string) => {
+    const colors: Record<string, string> = {
+      HTML: "bg-orange-500",
+      CSS: "bg-blue-500",
+      JAVASCRIPT: "bg-yellow-500",
+      PYTHON: "bg-green-500",
+      ROBLOX: "bg-red-500",
+    };
+    return colors[skill] || "bg-purple-500";
+  };
+
+  // Calculate totals from all students' progress
+  const totals = Object.values(studentProgress).reduce(
+    (acc, progress) => ({
+      totalXp: acc.totalXp + (progress?.stats?.totalXp || 0),
+      totalBadges: acc.totalBadges + (progress?.stats?.totalBadges || 0),
+      totalLessons: acc.totalLessons + (progress?.stats?.totalLessonsCompleted || 0),
+      maxStreak: Math.max(acc.maxStreak, progress?.stats?.streakDays || 0),
+    }),
+    { totalXp: 0, totalBadges: 0, totalLessons: 0, maxStreak: 0 }
+  );
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -74,8 +196,9 @@ export default function ProgressReportsPage() {
 
         {loading ? (
           <Card className="border-0 shadow-sm">
-            <CardContent className="p-12 text-center text-slate-500 dark:text-slate-400">
-              Loading reports...
+            <CardContent className="p-12 text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto text-purple-500 mb-4" />
+              <p className="text-slate-500 dark:text-slate-400">Loading reports...</p>
             </CardContent>
           </Card>
         ) : students.length === 0 ? (
@@ -103,25 +226,25 @@ export default function ProgressReportsPage() {
                   {[
                     {
                       label: "Total XP Earned",
-                      value: students.reduce((sum, s) => sum + (s.totalXp || 0), 0).toLocaleString(),
+                      value: totals.totalXp.toLocaleString(),
                       icon: Star,
                       color: "text-amber-600 bg-amber-100 dark:bg-amber-900/30"
                     },
                     {
                       label: "Badges Earned",
-                      value: students.reduce((sum, s) => sum + (s.badges?.length || 0), 0),
+                      value: totals.totalBadges,
                       icon: Award,
                       color: "text-green-600 bg-green-100 dark:bg-green-900/30"
                     },
                     {
                       label: "Lessons Completed",
-                      value: students.reduce((sum, s) => sum + (s.completedLessons || 0), 0),
+                      value: totals.totalLessons,
                       icon: BookOpen,
                       color: "text-blue-600 bg-blue-100 dark:bg-blue-900/30"
                     },
                     {
-                      label: "Active Days",
-                      value: Math.max(...students.map(s => s.streakDays || 0)),
+                      label: "Best Streak",
+                      value: totals.maxStreak,
                       icon: Calendar,
                       color: "text-purple-600 bg-purple-100 dark:bg-purple-900/30"
                     },
@@ -140,9 +263,9 @@ export default function ProgressReportsPage() {
 
             {/* Individual Student Reports */}
             {students.map((student) => {
+              const progress = studentProgress[student.id];
+              const isLoadingProgress = loadingProgress[student.id];
               const progressPercentage = Math.min(100, ((student.totalXp || 0) / 1000) * 100);
-              const weeklyXP = Math.floor((student.totalXp || 0) * 0.15); // Simulated weekly XP
-              const weeklyGrowth = weeklyXP > 0 ? "+12%" : "0%"; // Simulated growth
 
               return (
                 <Card key={student.id} className="border-0 shadow-sm">
@@ -152,7 +275,7 @@ export default function ProgressReportsPage() {
                         <span className="text-3xl sm:text-4xl">{student.avatar || "👤"}</span>
                         <div>
                           <CardTitle className="text-lg sm:text-xl text-slate-900 dark:text-slate-100">
-                            {student.name || student.username}
+                            {student.name}
                           </CardTitle>
                           <p className="text-sm text-slate-500 dark:text-slate-400">
                             Level {student.currentLevel || 1} • {student.totalXp || 0} XP
@@ -180,98 +303,159 @@ export default function ProgressReportsPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4 sm:space-y-6">
-                    {/* Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-slate-700 dark:text-slate-300">Overall Progress</span>
-                        <span className="text-purple-600 dark:text-purple-400 font-semibold">{Math.round(progressPercentage)}%</span>
+                    {isLoadingProgress ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
                       </div>
-                      <div className="h-3 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
-                          style={{ width: `${progressPercentage}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Zap className="w-4 h-4 text-purple-500" />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">XP This {selectedPeriod === "week" ? "Week" : "Month"}</span>
-                        </div>
-                        <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">{weeklyXP}</div>
-                        <div className="text-xs text-green-600 dark:text-green-400">{weeklyGrowth}</div>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Award className="w-4 h-4 text-amber-500" />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">Badges</span>
-                        </div>
-                        <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">{student.badges?.length || 0}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">earned</div>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Target className="w-4 h-4 text-blue-500" />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">Lessons</span>
-                        </div>
-                        <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">{student.completedLessons || 0}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">completed</div>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Clock className="w-4 h-4 text-green-500" />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">Streak</span>
-                        </div>
-                        <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">🔥 {student.streakDays || 0}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">days</div>
-                      </div>
-                    </div>
-
-                    {/* Recent Achievements */}
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300">Recent Achievements</h4>
-                      <div className="space-y-2">
-                        {[
-                          { text: "Completed HTML Basics lesson", time: "2 days ago", icon: "✅" },
-                          { text: "Earned 'Quick Learner' badge", time: "5 days ago", icon: "🏆" },
-                          { text: "Reached Level " + (student.currentLevel || 1), time: "1 week ago", icon: "⭐" },
-                        ].map((achievement, idx) => (
-                          <div key={idx} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                            <span className="text-xl">{achievement.icon}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{achievement.text}</p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">{achievement.time}</p>
-                            </div>
+                    ) : (
+                      <>
+                        {/* Progress Bar */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium text-slate-700 dark:text-slate-300">Overall Progress</span>
+                            <span className="text-purple-600 dark:text-purple-400 font-semibold">{Math.round(progressPercentage)}%</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Skills Progress */}
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300">Skills Progress</h4>
-                      {[
-                        { skill: "HTML", progress: 75, color: "bg-orange-500" },
-                        { skill: "CSS", progress: 45, color: "bg-blue-500" },
-                        { skill: "JavaScript", progress: 30, color: "bg-yellow-500" },
-                      ].map((item, idx) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-medium text-slate-700 dark:text-slate-300">{item.skill}</span>
-                            <span className="text-slate-500 dark:text-slate-400">{item.progress}%</span>
-                          </div>
-                          <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div className="h-3 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
-                              className={`h-full ${item.color} rounded-full transition-all duration-500`}
-                              style={{ width: `${item.progress}%` }}
+                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                              style={{ width: `${progressPercentage}%` }}
                             />
                           </div>
                         </div>
-                      ))}
-                    </div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                          <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Zap className="w-4 h-4 text-purple-500" />
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Total XP</span>
+                            </div>
+                            <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                              {progress?.stats?.totalXp || student.totalXp || 0}
+                            </div>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Award className="w-4 h-4 text-amber-500" />
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Badges</span>
+                            </div>
+                            <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                              {progress?.stats?.totalBadges || 0}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">earned</div>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Target className="w-4 h-4 text-blue-500" />
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Lessons</span>
+                            </div>
+                            <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                              {progress?.stats?.totalLessonsCompleted || 0}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">completed</div>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Clock className="w-4 h-4 text-green-500" />
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Streak</span>
+                            </div>
+                            <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                              🔥 {progress?.stats?.streakDays || student.streakDays || 0}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">days</div>
+                          </div>
+                        </div>
+
+                        {/* Recent Achievements */}
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300">Recent Achievements</h4>
+                          {progress?.recentAchievements && progress.recentAchievements.length > 0 ? (
+                            <div className="space-y-2">
+                              {progress.recentAchievements.slice(0, 3).map((achievement) => (
+                                <div key={achievement.id} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                  <span className="text-xl">{achievement.icon || "🏆"}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{achievement.title}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                      {formatTimeAgo(achievement.createdAt)}
+                                      {achievement.xpAwarded > 0 && ` • +${achievement.xpAwarded} XP`}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : progress?.badges && progress.badges.length > 0 ? (
+                            <div className="space-y-2">
+                              {progress.badges.slice(0, 3).map((badge) => (
+                                <div key={badge.id} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                  <span className="text-xl">{badge.icon || "🏅"}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">Earned &quot;{badge.name}&quot; badge</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">{formatTimeAgo(badge.awardedAt)}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-slate-500 dark:text-slate-400 p-2">No achievements yet. Keep learning!</p>
+                          )}
+                        </div>
+
+                        {/* Skills Progress */}
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300">Skills Progress</h4>
+                          {progress?.skills && progress.skills.length > 0 ? (
+                            progress.skills.map((item) => (
+                              <div key={item.skill} className="space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-medium text-slate-700 dark:text-slate-300">{item.skill}</span>
+                                  <span className="text-slate-500 dark:text-slate-400">
+                                    {item.progress}% ({item.completed}/{item.total} lessons)
+                                  </span>
+                                </div>
+                                <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full ${getSkillColor(item.skill)} rounded-full transition-all duration-500`}
+                                    style={{ width: `${item.progress}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">No course progress yet. Start a course to see skill progress!</p>
+                          )}
+                        </div>
+
+                        {/* Course Progress */}
+                        {progress?.courseProgress && progress.courseProgress.length > 0 && (
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300">Course Progress</h4>
+                            {progress.courseProgress.map((course) => (
+                              <div key={course.courseId} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium text-slate-900 dark:text-slate-100">{course.courseTitle}</span>
+                                  <span className="text-xs text-slate-500 dark:text-slate-400">{course.language}</span>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-slate-500 dark:text-slate-400">
+                                      {course.completedLessons}/{course.totalLessons} lessons
+                                    </span>
+                                    <span className="font-semibold text-purple-600 dark:text-purple-400">{course.progress}%</span>
+                                  </div>
+                                  <div className="h-2 w-full bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                                      style={{ width: `${course.progress}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               );

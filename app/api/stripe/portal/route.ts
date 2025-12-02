@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 
 /**
  * GET /api/stripe/portal - Redirect to Stripe Customer Portal
@@ -33,6 +34,19 @@ export async function GET() {
       customer: user.stripeCustomerId,
       return_url: `${baseUrl}/settings`,
       configuration: process.env.STRIPE_CUSTOMER_PORTAL_CONFIG || undefined,
+    });
+
+    // Create audit log for portal access
+    await createAuditLog({
+      userId: user.id,
+      userEmail: session.user.email,
+      action: "VIEW",
+      resource: "PaymentMethod",
+      details: `Accessed Stripe Customer Portal to manage payment methods`,
+      severity: "INFO",
+      metadata: {
+        stripeCustomerId: user.stripeCustomerId,
+      },
     });
 
     return NextResponse.redirect(portalSession.url);
@@ -72,6 +86,19 @@ export async function POST(req: NextRequest) {
       customer: user.stripeCustomerId,
       return_url: `${baseUrl}/settings`,
       configuration: process.env.STRIPE_CUSTOMER_PORTAL_CONFIG || undefined,
+    });
+
+    // Create audit log for portal access
+    await createAuditLog({
+      userId: user.id,
+      userEmail: session.user.email,
+      action: "VIEW",
+      resource: "PaymentMethod",
+      details: `Accessed Stripe Customer Portal to manage payment methods`,
+      severity: "INFO",
+      metadata: {
+        stripeCustomerId: user.stripeCustomerId,
+      },
     });
 
     return NextResponse.json({ url: portalSession.url });

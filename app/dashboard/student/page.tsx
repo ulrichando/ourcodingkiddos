@@ -18,8 +18,33 @@ type ClassItem = {
   meetingUrl?: string;
 };
 
-const demoContinue: any[] = [];
-const demoRecommended: any[] = [];
+type StudentStats = {
+  lessonsCompleted: number;
+  quizzesPassed: number;
+  badgesEarned: number;
+  streakDays: number;
+  totalXp: number;
+  currentLevel: number;
+};
+
+type ContinueCourse = {
+  id: string;
+  title: string;
+  language: string;
+  progress: number;
+  completed: number;
+  totalLessons: number;
+};
+
+type RecommendedCourse = {
+  id: string;
+  title: string;
+  description: string;
+  language: string;
+  level: string;
+  ageGroup: string;
+  totalXp: number;
+};
 
 export default function StudentDashboard() {
   const searchParams = useSearchParams();
@@ -37,6 +62,17 @@ export default function StudentDashboard() {
     currentLevel: 1,
     streakDays: 0,
   });
+  const [stats, setStats] = React.useState<StudentStats>({
+    lessonsCompleted: 0,
+    quizzesPassed: 0,
+    badgesEarned: 0,
+    streakDays: 0,
+    totalXp: 0,
+    currentLevel: 1,
+  });
+  const [continueLearning, setContinueLearning] = React.useState<ContinueCourse[]>([]);
+  const [recommendedCourses, setRecommendedCourses] = React.useState<RecommendedCourse[]>([]);
+  const [badges, setBadges] = React.useState<any[]>([]);
 
   React.useEffect(() => {
     fetch("/api/classes", { cache: "no-store" })
@@ -90,7 +126,19 @@ export default function StudentDashboard() {
               streakDays: s.streak_days || s.streakDays || 0,
               avatar: s.avatar || avatarParam,
             });
-            return;
+          }
+        })
+        .catch(() => {});
+
+      // Fetch stats for this student
+      fetch(`/api/students/${studentId}/stats`, { cache: "no-store" })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) {
+            setStats(data.stats || stats);
+            setContinueLearning(data.continueLearning || []);
+            setRecommendedCourses(data.recommendedCourses || []);
+            setBadges(data.badges || []);
           }
         })
         .catch(() => {});
@@ -171,13 +219,13 @@ export default function StudentDashboard() {
         {/* Continue Learning */}
         <section className="space-y-3">
           <h3 className="text-xl font-bold flex items-center gap-2">Continue Learning</h3>
-          {demoContinue.length === 0 ? (
+          {continueLearning.length === 0 ? (
             <div className="rounded-2xl border border-white/20 bg-white/5 text-white/80 p-6 text-center">
               No courses in progress yet. Start a course to see it here.
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
-              {demoContinue.map((c) => (
+              {continueLearning.map((c) => (
                 <Link key={c.id} href={`/courses/${c.id}`}>
                   <div className="rounded-2xl bg-white text-slate-900 shadow-lg hover:shadow-xl transition overflow-hidden">
                     <div className="h-1 bg-slate-200 w-full">
@@ -187,19 +235,14 @@ export default function StudentDashboard() {
                       <LanguageIcon language={c.language || "html"} size="lg" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 text-xs">
-                          {c.isNew ? (
-                            <Badge className="bg-green-100 text-green-700">New</Badge>
-                          ) : (
-                            <Badge variant="outline">
-                              {c.completed}/{c.totalLessons} lessons • {c.progress}%
-                            </Badge>
-                          )}
+                          <Badge variant="outline">
+                            {c.completed}/{c.totalLessons} lessons • {c.progress}%
+                          </Badge>
                         </div>
                         <h4 className="font-bold text-lg line-clamp-1">{c.title}</h4>
-                        <p className="text-sm text-slate-500 line-clamp-1">{c.description}</p>
                       </div>
                       <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
-                        {c.isNew ? "Start Learning" : "Continue"}
+                        Continue
                       </Button>
                     </div>
                   </div>
@@ -220,9 +263,20 @@ export default function StudentDashboard() {
               View All <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 text-center py-10 text-white/70">
-            No badges yet. Complete lessons and quizzes to earn badges!
-          </div>
+          {badges.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 text-center py-10 text-white/70">
+              No badges yet. Complete lessons and quizzes to earn badges!
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              {badges.slice(0, 6).map((badge: any) => (
+                <div key={badge.id} className="rounded-xl bg-white/10 border border-white/10 p-3 text-center">
+                  <div className="text-3xl mb-1">{badge.badge?.icon || "🏅"}</div>
+                  <div className="text-xs font-medium text-white/90 line-clamp-1">{badge.badge?.name || "Badge"}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Recommended */}
@@ -230,34 +284,36 @@ export default function StudentDashboard() {
           <h3 className="text-xl font-bold flex items-center gap-2">
             <Zap className="h-6 w-6 text-yellow-300" /> Start Something New
           </h3>
-          {demoRecommended.length === 0 ? (
+          {recommendedCourses.length === 0 ? (
             <div className="rounded-2xl border border-white/20 bg-white/5 text-white/80 p-6 text-center">
               No recommendations yet. Browse courses to get started.
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {demoRecommended.map((course) => (
+              {recommendedCourses.map((course) => (
                 <Link key={course.id} href={`/courses/${course.id}`}>
                   <div className="rounded-2xl bg-white text-slate-900 shadow-lg hover:-translate-y-1 transition overflow-hidden h-full">
                     <div
                       className={`h-24 ${
-                        course.language === "css"
+                        course.language?.toLowerCase() === "css"
                           ? "bg-gradient-to-br from-sky-400 to-sky-600"
-                          : course.language === "javascript"
+                          : course.language?.toLowerCase() === "javascript"
                           ? "bg-gradient-to-br from-amber-400 to-orange-500"
-                          : "bg-gradient-to-br from-green-400 to-emerald-500"
+                          : course.language?.toLowerCase() === "python"
+                          ? "bg-gradient-to-br from-green-400 to-emerald-500"
+                          : "bg-gradient-to-br from-purple-400 to-pink-500"
                       }`}
                     />
                     <div className="p-4 space-y-2 -mt-6">
-                      <LanguageIcon language={course.language} size="lg" />
+                      <LanguageIcon language={course.language || "html"} size="lg" />
                       <h4 className="font-bold text-lg">{course.title}</h4>
                       <div className="flex items-center gap-2 text-xs">
-                        <Badge variant="outline">{course.level}</Badge>
-                        <Badge variant="outline">Ages {course.age}</Badge>
+                        <Badge variant="outline">{course.level || "Beginner"}</Badge>
+                        <Badge variant="outline">{course.ageGroup?.replace("AGES_", "Ages ").replace("_", "-") || "All Ages"}</Badge>
                       </div>
                       <div className="flex items-center gap-1 text-amber-500">
                         <Star className="h-4 w-4 fill-amber-400" />
-                        <span className="font-semibold">{course.xp} XP</span>
+                        <span className="font-semibold">{course.totalXp || 100} XP</span>
                       </div>
                     </div>
                   </div>
@@ -309,10 +365,10 @@ export default function StudentDashboard() {
         {/* Stats */}
         <section className="grid md:grid-cols-4 gap-3">
           {[
-            { label: "Lessons Done", value: 1, icon: BookOpen, color: "from-green-400 to-emerald-500" },
-            { label: "Quizzes Passed", value: 0, icon: Aim, color: "from-blue-400 to-cyan-500" },
-            { label: "Day Streak", value: streakDays, icon: Flame, color: "from-orange-400 to-red-500" },
-            { label: "Badges Earned", value: 0, icon: Trophy, color: "from-yellow-400 to-amber-500" },
+            { label: "Lessons Done", value: stats.lessonsCompleted, icon: BookOpen, color: "from-green-400 to-emerald-500" },
+            { label: "Quizzes Passed", value: stats.quizzesPassed, icon: Aim, color: "from-blue-400 to-cyan-500" },
+            { label: "Day Streak", value: stats.streakDays || streakDays, icon: Flame, color: "from-orange-400 to-red-500" },
+            { label: "Badges Earned", value: stats.badgesEarned, icon: Trophy, color: "from-yellow-400 to-amber-500" },
           ].map((stat) => (
             <div key={stat.label} className="rounded-2xl bg-white/10 border border-white/10 p-4 text-center">
               <div className={`w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>

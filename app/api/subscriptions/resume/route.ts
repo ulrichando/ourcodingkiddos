@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { stripe } from "../../../../lib/stripe";
+import { createAuditLog } from "../../../../lib/audit";
 
 /**
  * POST /api/subscriptions/resume - Resume a subscription that was set to cancel
@@ -71,6 +72,22 @@ export async function POST() {
     });
 
     console.log("[Resume Subscription] Database updated, cancelAtPeriodEnd:", updatedSubscription.cancelAtPeriodEnd);
+
+    // Create audit log
+    await createAuditLog({
+      userId,
+      userEmail: userEmail || "unknown",
+      action: "UPDATE",
+      resource: "Subscription",
+      resourceId: subscription.id,
+      details: `Subscription resumed (cancellation undone)`,
+      severity: "INFO",
+      metadata: {
+        subscriptionId: subscription.id,
+        stripeSubscriptionId: subscription.stripeSubscriptionId,
+        planType: subscription.planType,
+      },
+    });
 
     return NextResponse.json({
       success: true,

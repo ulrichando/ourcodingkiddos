@@ -65,6 +65,44 @@ export async function GET() {
       }
     });
 
+    // Get additional metrics for reports
+    const [
+      totalBadgesAwarded,
+      totalXpEarned,
+      completedLessons,
+      avgQuizScoreResult,
+      totalCertificates,
+      canceledSubscriptions,
+    ] = await Promise.all([
+      prisma.userBadge.count(),
+      prisma.studentProfile.aggregate({
+        _sum: { totalXp: true }
+      }),
+      prisma.progress.count({
+        where: { status: "COMPLETED" }
+      }),
+      prisma.progress.aggregate({
+        where: { quizScore: { not: null } },
+        _avg: { quizScore: true }
+      }),
+      prisma.certificate.count(),
+      prisma.subscription.count({
+        where: { status: "CANCELED" }
+      }),
+    ]);
+
+    // Calculate completion rate
+    const totalProgressRecords = await prisma.progress.count();
+    const completionRate = totalProgressRecords > 0
+      ? Math.round((completedLessons / totalProgressRecords) * 100)
+      : 0;
+
+    // Calculate churn rate
+    const totalSubsEver = await prisma.subscription.count();
+    const churnRate = totalSubsEver > 0
+      ? Math.round((canceledSubscriptions / totalSubsEver) * 100)
+      : 0;
+
     // Get top courses by enrollment
     const topCourses = await prisma.course.findMany({
       select: {
@@ -129,6 +167,13 @@ export async function GET() {
         totalEnrollments,
         activeSubscriptions,
         totalRevenue: totalRevenue._sum.amount || 0,
+        totalBadgesAwarded,
+        totalXpEarned: totalXpEarned._sum.totalXp || 0,
+        completedLessons,
+        completionRate,
+        avgQuizScore: avgQuizScoreResult._avg.quizScore || 0,
+        totalCertificates,
+        churnRate,
       },
       activity: {
         newUsers,

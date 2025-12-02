@@ -40,6 +40,8 @@ export default function ParentDashboardPage() {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [accessStatus, setAccessStatus] = useState<AccessStatus | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
 
   // Session is still loading
   const sessionLoading = sessionStatus === "loading";
@@ -66,6 +68,14 @@ export default function ParentDashboardPage() {
       const futureOnly = normalized.filter((cls) => cls.start >= buffer);
       setUpcoming(futureOnly);
     });
+
+    // Fetch recent activities
+    setLoadingActivities(true);
+    fetch("/api/students/activity", { credentials: "include" })
+      .then((r) => r.ok ? r.json() : { activities: [] })
+      .then((data) => setActivities(data.activities || []))
+      .catch(() => setActivities([]))
+      .finally(() => setLoadingActivities(false));
 
     // Subscription lookup with access status
     setLoadingSubscription(true);
@@ -457,29 +467,58 @@ export default function ParentDashboardPage() {
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-4 sm:p-6">
                     <div className="space-y-4">
-                      {students.slice(0, 3).map((student, idx) => {
-                        const activities = [
-                          { icon: Award, label: "Earned new badge", color: "text-amber-500 bg-amber-100 dark:bg-amber-900/30", time: "2 hours ago" },
-                          { icon: Zap, label: `Gained ${Math.floor(Math.random() * 50) + 10} XP`, color: "text-purple-500 bg-purple-100 dark:bg-purple-900/30", time: "5 hours ago" },
-                          { icon: BookOpen, label: "Completed a lesson", color: "text-green-500 bg-green-100 dark:bg-green-900/30", time: "1 day ago" },
-                        ];
-                        const activity = activities[idx % activities.length];
-                        return (
-                          <div key={student.id} className="flex items-center gap-3 pb-4 last:pb-0 border-b last:border-b-0 border-slate-100 dark:border-slate-700">
-                            <div className={`w-10 h-10 rounded-full ${activity.color} flex items-center justify-center flex-shrink-0`}>
-                              <activity.icon className="w-5 h-5" />
+                      {loadingActivities ? (
+                        <p className="text-center text-slate-500 dark:text-slate-400 py-4">Loading activities...</p>
+                      ) : activities.length > 0 ? (
+                        activities.slice(0, 5).map((activity) => {
+                          const getActivityStyle = (type: string) => {
+                            switch (type) {
+                              case "badge":
+                                return { icon: Award, color: "text-amber-500 bg-amber-100 dark:bg-amber-900/30" };
+                              case "achievement":
+                                return { icon: Zap, color: "text-purple-500 bg-purple-100 dark:bg-purple-900/30" };
+                              case "lesson":
+                                return { icon: BookOpen, color: "text-green-500 bg-green-100 dark:bg-green-900/30" };
+                              default:
+                                return { icon: Activity, color: "text-blue-500 bg-blue-100 dark:bg-blue-900/30" };
+                            }
+                          };
+                          const style = getActivityStyle(activity.type);
+                          const ActivityIcon = style.icon;
+                          const timeAgo = (dateStr: string) => {
+                            const date = new Date(dateStr);
+                            const now = new Date();
+                            const diffMs = now.getTime() - date.getTime();
+                            const diffMins = Math.floor(diffMs / 60000);
+                            const diffHours = Math.floor(diffMs / 3600000);
+                            const diffDays = Math.floor(diffMs / 86400000);
+                            if (diffMins < 1) return "just now";
+                            if (diffMins < 60) return `${diffMins} min ago`;
+                            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+                            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+                            return date.toLocaleDateString();
+                          };
+                          return (
+                            <div key={activity.id} className="flex items-center gap-3 pb-4 last:pb-0 border-b last:border-b-0 border-slate-100 dark:border-slate-700">
+                              <div className={`w-10 h-10 rounded-full ${style.color} flex items-center justify-center flex-shrink-0`}>
+                                <ActivityIcon className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm text-slate-900 dark:text-slate-100">
+                                  {activity.studentName}
+                                </p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                  {activity.title}
+                                  {activity.xp > 0 && ` (+${activity.xp} XP)`}
+                                </p>
+                              </div>
+                              <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                                {timeAgo(activity.timestamp)}
+                              </span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm text-slate-900 dark:text-slate-100">
-                                {student.name || student.username}
-                              </p>
-                              <p className="text-sm text-slate-600 dark:text-slate-400">{activity.label}</p>
-                            </div>
-                            <span className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{activity.time}</span>
-                          </div>
-                        );
-                      })}
-                      {students.length === 0 && (
+                          );
+                        })
+                      ) : (
                         <p className="text-center text-slate-500 dark:text-slate-400 py-8">No recent activity yet</p>
                       )}
                     </div>
