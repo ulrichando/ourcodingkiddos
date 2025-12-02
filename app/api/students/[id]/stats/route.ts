@@ -14,7 +14,11 @@ export async function GET(
       include: {
         user: {
           include: {
-            badges: true,
+            badges: {
+              include: {
+                badge: true,
+              },
+            },
             achievements: true,
           },
         },
@@ -25,10 +29,12 @@ export async function GET(
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    // Get completed lessons count
+    // Get completed lessons count through enrollments
     const completedLessons = await prisma.progress.count({
       where: {
-        userId: student.userId,
+        enrollment: {
+          userId: student.userId,
+        },
         status: "COMPLETED",
       },
     });
@@ -36,7 +42,9 @@ export async function GET(
     // Get quizzes passed (lessons with quiz score >= 70)
     const quizzesPassed = await prisma.progress.count({
       where: {
-        userId: student.userId,
+        enrollment: {
+          userId: student.userId,
+        },
         quizScore: { gte: 70 },
       },
     });
@@ -73,8 +81,8 @@ export async function GET(
     const enrolledCourseIds = enrollments.map((e) => e.courseId);
     const recommendedCourses = await prisma.course.findMany({
       where: {
-        id: { notIn: enrolledCourseIds },
-        status: "PUBLISHED",
+        id: { notIn: enrolledCourseIds.length > 0 ? enrolledCourseIds : ["none"] },
+        isPublished: true,
       },
       take: 3,
       select: {
@@ -98,6 +106,16 @@ export async function GET(
       totalLessons: e.course.lessons.length,
     }));
 
+    // Format badges for response
+    const formattedBadges = student.user.badges.map((ub) => ({
+      id: ub.badge.id,
+      key: ub.badge.key,
+      name: ub.badge.name,
+      description: ub.badge.description,
+      icon: ub.badge.icon,
+      awardedAt: ub.awardedAt,
+    }));
+
     return NextResponse.json({
       stats: {
         lessonsCompleted: completedLessons,
@@ -109,7 +127,7 @@ export async function GET(
       },
       continueLearning,
       recommendedCourses,
-      badges: student.user.badges,
+      badges: formattedBadges,
     });
   } catch (error) {
     console.error("[students/[id]/stats] Error:", error);

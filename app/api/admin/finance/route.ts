@@ -101,7 +101,7 @@ export async function GET() {
 
     const totalSubsStartOfMonth = await prisma.subscription.count({
       where: {
-        createdAt: { lt: startOfMonth },
+        startDate: { lt: startOfMonth },
         OR: [
           { status: { in: ["ACTIVE", "TRIALING"] } },
           {

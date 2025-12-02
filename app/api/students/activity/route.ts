@@ -74,15 +74,22 @@ export async function GET() {
       },
     });
 
-    // Fetch recent completed lessons
+    // Fetch recent completed lessons through enrollments
     const recentProgress = await prisma.progress.findMany({
       where: {
-        userId: { in: userIds },
+        enrollment: {
+          userId: { in: userIds },
+        },
         status: "COMPLETED",
       },
       orderBy: { completedAt: "desc" },
       take: 10,
       include: {
+        enrollment: {
+          select: {
+            userId: true,
+          },
+        },
         lesson: {
           select: {
             title: true,
@@ -132,7 +139,7 @@ export async function GET() {
     });
 
     recentProgress.forEach((p) => {
-      const student = studentMap.get(p.userId);
+      const student = studentMap.get(p.enrollment.userId);
       if (student && p.completedAt) {
         activities.push({
           id: `lesson-${p.id}`,

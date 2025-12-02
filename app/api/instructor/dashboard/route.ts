@@ -21,21 +21,28 @@ export async function GET() {
   }
 
   try {
-    // Get instructor's sessions
-    const sessions = await prisma.classSession.findMany({
+    // Get instructor's sessions with bookings
+    const classSessions = await prisma.classSession.findMany({
       where: role === "ADMIN" ? {} : { instructorEmail },
       include: {
         bookings: {
           include: {
-            studentProfile: {
+            student: {
               select: {
                 id: true,
                 name: true,
-                avatar: true,
+                image: true,
+                studentProfile: {
+                  select: {
+                    id: true,
+                    name: true,
+                    avatar: true,
+                  },
+                },
               },
             },
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { startsAt: "desc" },
         },
       },
       orderBy: { startTime: "asc" },
@@ -43,47 +50,55 @@ export async function GET() {
 
     // Get unique students from all bookings
     const studentSet = new Map<string, any>();
-    sessions.forEach((s) => {
+    classSessions.forEach((s) => {
       s.bookings.forEach((b) => {
-        if (b.studentProfile && !studentSet.has(b.studentProfile.id)) {
-          studentSet.set(b.studentProfile.id, {
-            id: b.studentProfile.id,
-            name: b.studentProfile.name,
-            avatar: b.studentProfile.avatar,
+        const studentProfile = b.student?.studentProfile;
+        const studentId = studentProfile?.id || b.student?.id;
+        if (studentId && !studentSet.has(studentId)) {
+          studentSet.set(studentId, {
+            id: studentId,
+            name: studentProfile?.name || b.student?.name || "Student",
+            avatar: studentProfile?.avatar || b.student?.image || null,
           });
         }
       });
     });
     const students = Array.from(studentSet.values());
 
-    // Get recent bookings
-    const recentBookings = await prisma.classBooking.findMany({
+    // Get recent bookings for the instructor's sessions
+    const recentBookings = await prisma.booking.findMany({
       where: {
-        classSession: role === "ADMIN" ? {} : { instructorEmail },
+        session: role === "ADMIN" ? {} : { instructorEmail },
       },
       include: {
-        studentProfile: {
+        student: {
           select: {
             name: true,
-            avatar: true,
+            image: true,
+            studentProfile: {
+              select: {
+                name: true,
+                avatar: true,
+              },
+            },
           },
         },
-        classSession: {
+        session: {
           select: {
             title: true,
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { startsAt: "desc" },
       take: 10,
     });
 
     const formattedBookings = recentBookings.map((b) => ({
       id: b.id,
-      student: b.studentProfile?.name || "Unknown",
-      avatar: b.studentProfile?.avatar || "👤",
-      sessionTitle: b.classSession?.title || "Class",
-      createdAt: b.createdAt,
+      student: b.student?.studentProfile?.name || b.student?.name || "Unknown",
+      avatar: b.student?.studentProfile?.avatar || b.student?.image || "👤",
+      sessionTitle: b.session?.title || "Class",
+      createdAt: b.startsAt, // Use startsAt as the timestamp
     }));
 
     return NextResponse.json({
