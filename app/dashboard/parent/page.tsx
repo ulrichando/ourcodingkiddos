@@ -39,6 +39,7 @@ export default function ParentDashboardPage() {
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [accessStatus, setAccessStatus] = useState<AccessStatus | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   // Check if user is admin - admins bypass all subscription restrictions
   const isAdmin = (session?.user as any)?.role === "ADMIN";
@@ -64,6 +65,7 @@ export default function ParentDashboardPage() {
     });
 
     // Subscription lookup with access status
+    setLoadingSubscription(true);
     fetch("/api/subscriptions", { cache: "no-store" })
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
@@ -91,16 +93,17 @@ export default function ParentDashboardPage() {
           daysRemaining: null,
           message: "Unable to load subscription status.",
         });
-      });
+      })
+      .finally(() => setLoadingSubscription(false));
   }, [session?.user?.email]);
 
   const totalXP = useMemo(() => students.reduce((sum, s) => sum + (s.totalXp || s.total_xp || 0), 0), [students]);
   const totalBadges = useMemo(() => students.reduce((sum, s) => sum + (s.badges?.length || 0), 0), [students]);
 
-  // Determine access state
+  // Determine access state - only evaluate after loading is complete
   const hasAccess = isAdmin || accessStatus?.hasAccess === true;
-  const subscriptionBlocked = !hasAccess && accessStatus?.status && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
-  const noSubscription = !hasAccess && (!subscription || accessStatus?.status === "none");
+  const subscriptionBlocked = !loadingSubscription && !hasAccess && accessStatus?.status && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
+  const noSubscription = !loadingSubscription && !hasAccess && (!subscription || accessStatus?.status === "none");
 
   // Plan label for display
   const planLabel = isAdmin
