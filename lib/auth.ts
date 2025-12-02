@@ -36,9 +36,10 @@ const providers: NextAuthOptions["providers"] = [
       }
 
       // Look up user in DB only (no demo fallbacks)
+      // Using prismaBase (without Accelerate extension) for auth
       try {
         console.log('[Auth] Looking up user:', email);
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prismaBase.user.findUnique({ where: { email } });
         console.log('[Auth] User found:', !!user, user?.email);
 
         if (user?.hashedPassword) {

@@ -15,7 +15,14 @@ function createPrismaClient() {
 const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 // Base client for NextAuth adapter (doesn't work with extensions)
-const prismaBase = globalForPrisma.prismaBase ?? new PrismaClient();
+// Uses direct Postgres URL since Accelerate URL requires the extension
+const prismaBase = globalForPrisma.prismaBase ?? new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.POSTGRES_URL,
+    },
+  },
+});
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
