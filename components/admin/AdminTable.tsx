@@ -1,7 +1,7 @@
 import React from "react";
 
 type Column<T> = {
-  key: keyof T;
+  key: keyof T | string;
   label: string;
   render?: (row: T) => React.ReactNode;
   className?: string;
@@ -33,7 +33,7 @@ export function AdminTable<T extends Record<string, any>>({ columns, data }: Adm
             <tr key={idx} className="hover:bg-slate-50/60">
               {columns.map((col) => (
                 <td key={String(col.key)} className={`px-4 py-3 text-sm text-slate-700 ${col.className ?? ""}`}>
-                  {col.render ? col.render(row) : String(row[col.key])}
+                  {col.render ? col.render(row) : (col.key in row ? String(row[col.key as keyof T]) : "")}
                 </td>
               ))}
             </tr>
