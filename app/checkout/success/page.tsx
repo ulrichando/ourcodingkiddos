@@ -3,13 +3,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Sparkles, ArrowRight } from "lucide-react";
+import { CheckCircle, Sparkles, ArrowRight, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/button";
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{
+    planType?: string;
+    daysRemaining?: number;
+  } | null>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
@@ -18,9 +23,42 @@ export default function CheckoutSuccessPage() {
       return;
     }
 
-    // Simulate loading for better UX
-    const timer = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(timer);
+    // Verify the session and create subscription if needed
+    async function verifySession() {
+      try {
+        const response = await fetch("/api/stripe/verify-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error("Verification failed:", data.error);
+          setError(data.error || "Failed to verify subscription");
+        } else {
+          // Extract subscription info for display
+          if (data.subscription) {
+            const endDate = data.subscription.endDate || data.subscription.trialEndsAt;
+            const daysRemaining = endDate
+              ? Math.ceil((new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+              : null;
+            setSubscriptionInfo({
+              planType: data.subscription.planType,
+              daysRemaining: daysRemaining || undefined,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Verification error:", err);
+        setError("Failed to verify subscription. Please contact support.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    verifySession();
   }, [sessionId, router]);
 
   if (loading) {
@@ -28,7 +66,34 @@ export default function CheckoutSuccessPage() {
       <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-slate-600 dark:text-slate-400">Processing your subscription...</p>
+          <p className="text-slate-600 dark:text-slate-400">Activating your subscription...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="max-w-md mx-auto px-4 text-center space-y-6">
+          <div className="bg-white dark:bg-slate-800 rounded-full p-6 shadow-xl inline-block">
+            <AlertCircle className="w-20 h-20 text-amber-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Subscription Activation Issue
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400">{error}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-500">
+            Don&apos;t worry - your payment was processed. Please try refreshing the page or contact support if the issue persists.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button onClick={() => window.location.reload()} className="bg-purple-600 hover:bg-purple-700 text-white">
+              Try Again
+            </Button>
+            <Link href="/dashboard/parent">
+              <Button variant="outline">Go to Dashboard</Button>
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -55,6 +120,11 @@ export default function CheckoutSuccessPage() {
           <p className="text-xl text-slate-600 dark:text-slate-400">
             Your subscription is now active
           </p>
+          {subscriptionInfo?.planType === "FREE_TRIAL" && subscriptionInfo.daysRemaining && (
+            <p className="text-lg text-purple-600 dark:text-purple-400 font-medium">
+              You have {subscriptionInfo.daysRemaining} days of free trial access!
+            </p>
+          )}
         </div>
 
         {/* What's Next */}
