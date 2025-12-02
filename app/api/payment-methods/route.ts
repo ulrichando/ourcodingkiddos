@@ -57,21 +57,53 @@ export async function GET() {
       });
     }
 
-    // Fetch payment methods from Stripe
-    const paymentMethods = await stripe.paymentMethods.list({
+    // Fetch payment methods from Stripe customer
+    const paymentMethodsResponse = await stripe.paymentMethods.list({
       customer: stripeCustomerId,
       type: "card",
     });
 
-    // Get the default payment method
+    // Get the default payment method from customer
     const customer = await stripe.customers.retrieve(stripeCustomerId);
     let defaultPaymentMethodId: string | null = null;
     if ("invoice_settings" in customer && customer.invoice_settings) {
       defaultPaymentMethodId = customer.invoice_settings.default_payment_method as string | null;
     }
 
+    // Collect all payment methods
+    const allPaymentMethods = [...paymentMethodsResponse.data];
+
+    // If no payment methods found on customer, check active subscriptions
+    // (payment method might be attached to subscription only for older signups)
+    if (allPaymentMethods.length === 0) {
+      const subscriptions = await stripe.subscriptions.list({
+        customer: stripeCustomerId,
+        status: "all",
+        limit: 5,
+      });
+
+      for (const sub of subscriptions.data) {
+        if (sub.default_payment_method) {
+          const pmId = typeof sub.default_payment_method === "string"
+            ? sub.default_payment_method
+            : sub.default_payment_method.id;
+
+          try {
+            const pm = await stripe.paymentMethods.retrieve(pmId);
+            if (pm.type === "card") {
+              allPaymentMethods.push(pm);
+              defaultPaymentMethodId = pmId;
+              break;
+            }
+          } catch (e) {
+            // Payment method might have been removed, continue
+          }
+        }
+      }
+    }
+
     // Format the response
-    const formattedMethods = paymentMethods.data.map((pm) => ({
+    const formattedMethods = allPaymentMethods.map((pm) => ({
       id: pm.id,
       brand: pm.card?.brand || "unknown",
       last4: pm.card?.last4 || "****",

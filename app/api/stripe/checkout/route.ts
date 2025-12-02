@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       client_reference_id: user.id,
       payment_method_types: ['card'],
-      mode: planId === 'free-trial' ? 'subscription' : 'subscription',
+      mode: 'subscription',
       line_items: [
         {
           price: priceId,
@@ -85,6 +85,8 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         planId: planId,
       },
+      // Always collect payment method, even for free trials
+      payment_method_collection: 'always',
       subscription_data: planId === 'free-trial' ? {
         trial_period_days: 7,
         metadata: {
