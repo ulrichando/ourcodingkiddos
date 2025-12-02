@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
-
-// Audit logging is not yet implemented in the database
-// This returns an empty state until AuditLog model is added to schema
+import prisma from "../../../../lib/prisma";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -16,15 +14,48 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get("limit") || "100");
+  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
   const offset = parseInt(searchParams.get("offset") || "0");
 
-  // Return empty state - audit logging not yet implemented
-  return NextResponse.json({
-    logs: [],
-    total: 0,
-    limit,
-    offset,
-    message: "Audit logging coming soon",
-  });
+  try {
+    // Get total count
+    const total = await prisma.auditLog.count();
+
+    // Get paginated logs
+    const logs = await prisma.auditLog.findMany({
+      orderBy: { timestamp: "desc" },
+      take: limit,
+      skip: offset,
+    });
+
+    // Transform to match frontend expected format
+    const transformedLogs = logs.map((log) => ({
+      id: log.id,
+      timestamp: log.timestamp.toISOString(),
+      userId: log.userId,
+      user: log.userEmail,
+      action: log.action,
+      resource: log.resource,
+      resourceId: log.resourceId,
+      details: log.details,
+      ipAddress: log.ipAddress || "unknown",
+      userAgent: log.userAgent,
+      status: log.status as "success" | "failed",
+      severity: log.severity,
+      metadata: log.metadata as Record<string, any> | null,
+    }));
+
+    return NextResponse.json({
+      logs: transformedLogs,
+      total,
+      limit,
+      offset,
+    });
+  } catch (error) {
+    console.error("[AuditAPI] Error fetching audit logs:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch audit logs", logs: [], total: 0 },
+      { status: 500 }
+    );
+  }
 }

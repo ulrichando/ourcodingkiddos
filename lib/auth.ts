@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import prisma, { prismaBase } from "./prisma";
 import type { UserRole } from "../types/next-auth";
 import { checkRateLimit, resetRateLimit } from "./validation";
+import { logLogin, logFailedLogin } from "./audit";
 
 // Email provider is enabled only if SMTP settings are present
 const emailProvider =
@@ -28,10 +29,14 @@ const providers: NextAuthOptions["providers"] = [
     async authorize(credentials) {
       const email = credentials?.email?.toLowerCase().trim();
       const password = credentials?.password;
-      if (!email || !password) return null;
+      if (!email || !password) {
+        logFailedLogin(email || "unknown", "Missing credentials").catch(() => {});
+        return null;
+      }
 
       // Rate limiting: prevent brute force attacks
       if (!checkRateLimit(email, 5, 15 * 60 * 1000)) {
+        logFailedLogin(email, "Rate limit exceeded").catch(() => {});
         throw new Error("Too many login attempts. Please try again later.");
       }
 
@@ -45,10 +50,16 @@ const providers: NextAuthOptions["providers"] = [
         if (user?.hashedPassword) {
           const valid = await bcrypt.compare(password, user.hashedPassword);
           console.log('[Auth] Password valid:', valid);
-          if (!valid) return null;
+          if (!valid) {
+            logFailedLogin(email, "Invalid password").catch(() => {});
+            return null;
+          }
 
           // Reset rate limit on successful login
           resetRateLimit(email);
+
+          // Log successful login
+          logLogin(email, user.id).catch(() => {});
 
           return {
             id: user.id,
@@ -59,8 +70,10 @@ const providers: NextAuthOptions["providers"] = [
           };
         }
         console.log('[Auth] No hashed password found for user');
+        logFailedLogin(email, "No password set for account").catch(() => {});
       } catch (e: any) {
         console.error('[Auth] Database error:', e.message);
+        logFailedLogin(email, `Database error: ${e.message}`).catch(() => {});
       }
 
       return null;

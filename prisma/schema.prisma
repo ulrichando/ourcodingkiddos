@@ -756,3 +756,45 @@ model PlatformSettings {
   updatedAt                 DateTime @updatedAt
   createdAt                 DateTime @default(now())
 }
+
+// Audit logging for tracking system activities
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+model AuditLog {
+  id          String        @id @default(cuid())
+  timestamp   DateTime      @default(now())
+  userId      String?
+  userEmail   String
+  action      AuditAction
+  resource    String        // e.g., "User", "Course", "Session"
+  resourceId  String?       // ID of the affected resource
+  details     String        // Human-readable description
+  ipAddress   String?
+  userAgent   String?
+  status      String        @default("success") // "success" or "failed"
+  severity    AuditSeverity @default(INFO)
+  metadata    Json?         // Additional context (error codes, old/new values, etc.)
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([timestamp])
+  @@index([action])
+  @@index([resource])
+  @@index([severity])
+}
