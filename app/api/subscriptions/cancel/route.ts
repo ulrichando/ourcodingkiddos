@@ -10,28 +10,32 @@ import { stripe } from "../../../../lib/stripe";
  * The user retains access until the period ends
  */
 export async function POST() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const userEmail = session.user.email;
-  const userRole = (session.user as any).role;
-
-  // Admin and instructors cannot cancel (they have special access)
-  if (userRole === "ADMIN" || userRole === "INSTRUCTOR") {
-    return NextResponse.json(
-      { error: "Admin and instructor accounts cannot be canceled" },
-      { status: 400 }
-    );
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userEmail = session.user.email;
+    const userId = (session.user as any).id;
+    const userRole = (session.user as any).role;
+
+    console.log("[Cancel Subscription] User:", userEmail, "Role:", userRole);
+
+    // Admin and instructors cannot cancel (they have special access)
+    if (userRole === "ADMIN" || userRole === "INSTRUCTOR") {
+      return NextResponse.json(
+        { error: "Admin and instructor accounts cannot be canceled" },
+        { status: 400 }
+      );
+    }
+
     // Find the user's active subscription
     const subscription = await prisma.subscription.findFirst({
       where: {
         OR: [
+          { userId: userId },
           { user: { email: userEmail } },
           { parentEmail: userEmail },
         ],
@@ -40,6 +44,8 @@ export async function POST() {
         },
       },
     });
+
+    console.log("[Cancel Subscription] Found subscription:", subscription?.id, "Status:", subscription?.status);
 
     if (!subscription) {
       return NextResponse.json(
@@ -55,15 +61,27 @@ export async function POST() {
       );
     }
 
-    // Cancel the subscription at period end in Stripe
+    // Cancel the subscription at period end in Stripe (if it has a Stripe subscription)
     if (subscription.stripeSubscriptionId) {
-      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
-        cancel_at_period_end: true,
-      });
+      console.log("[Cancel Subscription] Canceling Stripe subscription:", subscription.stripeSubscriptionId);
+      try {
+        await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+          cancel_at_period_end: true,
+        });
+        console.log("[Cancel Subscription] Stripe subscription updated successfully");
+      } catch (stripeError: any) {
+        console.error("[Cancel Subscription] Stripe error:", stripeError.message);
+        // If Stripe subscription doesn't exist or is already canceled, continue with DB update
+        if (stripeError.code !== "resource_missing") {
+          throw stripeError;
+        }
+      }
+    } else {
+      console.log("[Cancel Subscription] No Stripe subscription ID, updating database only");
     }
 
     // Update the subscription in the database
-    await prisma.subscription.update({
+    const updatedSubscription = await prisma.subscription.update({
       where: { id: subscription.id },
       data: {
         cancelAtPeriodEnd: true,
@@ -71,15 +89,17 @@ export async function POST() {
       },
     });
 
+    console.log("[Cancel Subscription] Database updated, cancelAtPeriodEnd:", updatedSubscription.cancelAtPeriodEnd);
+
     return NextResponse.json({
       success: true,
       message: "Subscription will be canceled at the end of the current billing period",
       cancelAt: subscription.currentPeriodEnd,
     });
-  } catch (error) {
-    console.error("POST /api/subscriptions/cancel error", error);
+  } catch (error: any) {
+    console.error("POST /api/subscriptions/cancel error:", error.message, error.stack);
     return NextResponse.json(
-      { error: "Failed to cancel subscription" },
+      { error: error.message || "Failed to cancel subscription" },
       { status: 500 }
     );
   }
