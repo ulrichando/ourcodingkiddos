@@ -12,36 +12,101 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await req.json().catch(() => ({}));
-  const { name, email, role, password } = body ?? {};
+  const { name, email, role, password, phone, address } = body ?? {};
 
   try {
-    const data: any = {};
-    if (name) data.name = name;
-    if (email) data.email = String(email).toLowerCase();
-    if (role) data.role = String(role).toUpperCase();
-    if (password) data.hashedPassword = await bcrypt.hash(password, 10);
+    // Build user update data
+    const userData: any = {};
+    if (name !== undefined) userData.name = name || null;
+    if (email) userData.email = String(email).toLowerCase();
+    if (role) userData.role = String(role).toUpperCase();
+    if (password) userData.hashedPassword = await bcrypt.hash(password, 10);
 
+    // Update user
     const updated = await prisma.user.update({
       where: { id },
-      data,
-      select: { id: true, name: true, email: true, role: true },
+      data: userData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        image: true,
+        createdAt: true,
+      },
     });
 
+    // Handle phone and address updates via parentProfile
+    let updatedPhone = null;
+    let updatedAddress = null;
+
+    if (phone !== undefined || address !== undefined) {
+      // Check if parent profile exists
+      const existingProfile = await prisma.parentProfile.findUnique({
+        where: { userId: id },
+      });
+
+      if (existingProfile) {
+        // Update existing profile
+        const profileUpdate = await prisma.parentProfile.update({
+          where: { userId: id },
+          data: {
+            ...(phone !== undefined ? { phone: phone || null } : {}),
+            ...(address !== undefined ? { address: address || null } : {}),
+          },
+        });
+        updatedPhone = profileUpdate.phone;
+        updatedAddress = profileUpdate.address;
+      } else if (phone || address) {
+        // Create new profile if phone or address provided
+        const newProfile = await prisma.parentProfile.create({
+          data: {
+            userId: id,
+            phone: phone || null,
+            address: address || null,
+          },
+        });
+        updatedPhone = newProfile.phone;
+        updatedAddress = newProfile.address;
+      }
+    } else {
+      // Fetch existing phone/address if not being updated
+      const existingProfile = await prisma.parentProfile.findUnique({
+        where: { userId: id },
+        select: { phone: true, address: true },
+      });
+      updatedPhone = existingProfile?.phone || null;
+      updatedAddress = existingProfile?.address || null;
+    }
+
     // Log user update
+    const changedFields = [
+      ...Object.keys(userData),
+      ...(phone !== undefined ? ["phone"] : []),
+      ...(address !== undefined ? ["address"] : []),
+    ];
+
     logUpdate(
       session.user.email || "unknown",
       "User",
       id,
       `Admin updated user: ${updated.email}`,
       (session as any).user.id,
-      { changes: Object.keys(data) }
+      { changes: changedFields }
     ).catch(() => {});
 
-    return NextResponse.json({ user: updated });
+    return NextResponse.json({
+      user: {
+        ...updated,
+        phone: updatedPhone,
+        address: updatedAddress,
+      },
+    });
   } catch (e: any) {
     if (e.code === "P2002") {
       return NextResponse.json({ error: "Email already exists" }, { status: 409 });
     }
+    console.error("[admin/users/update] Error:", e);
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }

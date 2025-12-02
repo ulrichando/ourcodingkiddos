@@ -18,11 +18,30 @@ export async function GET() {
       name: true,
       email: true,
       role: true,
+      image: true,
       createdAt: true,
+      parentProfile: {
+        select: {
+          phone: true,
+          address: true,
+        },
+      },
     },
   });
 
-  return NextResponse.json({ users });
+  // Flatten the response to include phone and address at the user level
+  const formattedUsers = users.map((user) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    image: user.image,
+    phone: user.parentProfile?.phone || null,
+    address: user.parentProfile?.address || null,
+    createdAt: user.createdAt,
+  }));
+
+  return NextResponse.json({ users: formattedUsers });
 }
 
 export async function POST(req: Request) {
@@ -32,7 +51,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { name, email, role = "PARENT", password } = body ?? {};
+  const { name, email, role = "PARENT", password, phone, address } = body ?? {};
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
@@ -40,14 +59,40 @@ export async function POST(req: Request) {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user with optional parent profile if phone/address provided
     const user = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         role,
         hashedPassword,
+        // Create parent profile if phone or address is provided, or if role is PARENT
+        ...(role === "PARENT" || phone || address
+          ? {
+              parentProfile: {
+                create: {
+                  phone: phone || null,
+                  address: address || null,
+                },
+              },
+            }
+          : {}),
       },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        image: true,
+        createdAt: true,
+        parentProfile: {
+          select: {
+            phone: true,
+            address: true,
+          },
+        },
+      },
     });
 
     // Log admin user creation
@@ -60,11 +105,23 @@ export async function POST(req: Request) {
       { role, email: user.email }
     ).catch(() => {});
 
-    return NextResponse.json({ user });
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+        phone: user.parentProfile?.phone || null,
+        address: user.parentProfile?.address || null,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (e: any) {
     if (e.code === "P2002") {
       return NextResponse.json({ error: "Email already exists" }, { status: 409 });
     }
+    console.error("[admin/users/create] Error:", e);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 }
