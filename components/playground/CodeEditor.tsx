@@ -9,6 +9,7 @@ type Props = {
   onCodeChange?: (code: string) => void;
   readOnly?: boolean;
   showPreview?: boolean;
+  theme?: "dark" | "light";
 };
 
 const languageColors: Record<NonNullable<Props["language"]>, string> = {
@@ -26,11 +27,14 @@ export default function CodeEditor({
   onCodeChange,
   readOnly = false,
   showPreview = true,
+  theme = "light",
 }: Props) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState("");
   const [copied, setCopied] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+
+  const isDark = theme === "dark";
 
   useEffect(() => {
     setCode(initialCode);
@@ -57,7 +61,7 @@ export default function CodeEditor({
             const originalLog = console.log;
             console.log = function(...args) {
               const output = document.getElementById('output');
-              output.innerHTML += args.map(a => 
+              output.innerHTML += args.map(a =>
                 typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
               ).join(' ') + '<br>';
               originalLog.apply(console, args);
@@ -96,7 +100,12 @@ export default function CodeEditor({
   };
 
   return (
-    <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-slate-900 shadow-xl bg-[#0a1326]">
+    <div className={`rounded-xl sm:rounded-2xl overflow-hidden border shadow-xl transition-colors duration-300 ${
+      isDark
+        ? "border-slate-900 bg-[#0a1326]"
+        : "border-slate-200 bg-white"
+    }`}>
+      {/* Header with language color gradient */}
       <div className={`flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r ${languageColors[language]}`}>
         <div className="flex items-center gap-2">
           <div className="flex gap-1 sm:gap-1.5">
@@ -126,28 +135,47 @@ export default function CodeEditor({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 md:divide-x divide-slate-700">
-        <div className="relative border-b md:border-b-0 border-slate-700">
-          <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 bg-slate-800 flex flex-col items-center pt-3 sm:pt-4 text-slate-500 text-[10px] sm:text-xs font-mono">
+      {/* Editor and Preview */}
+      <div className={`grid grid-cols-1 md:grid-cols-2 md:divide-x transition-colors duration-300 ${
+        isDark ? "divide-slate-700" : "divide-slate-200"
+      }`}>
+        {/* Code Editor */}
+        <div className={`relative border-b md:border-b-0 transition-colors duration-300 ${
+          isDark ? "border-slate-700" : "border-slate-200"
+        }`}>
+          {/* Line Numbers */}
+          <div className={`absolute left-0 top-0 bottom-0 w-8 sm:w-12 flex flex-col items-center pt-3 sm:pt-4 text-[10px] sm:text-xs font-mono transition-colors duration-300 ${
+            isDark
+              ? "bg-slate-800 text-slate-500"
+              : "bg-slate-100 text-slate-400"
+          }`}>
             {code.split("\n").map((_, i) => (
               <div key={i} className="h-5 sm:h-6 flex items-center">
                 {i + 1}
               </div>
             ))}
           </div>
+          {/* Textarea */}
           <textarea
             value={code}
             onChange={handleCodeChange}
             readOnly={readOnly}
-            className="w-full h-64 sm:h-80 md:h-96 pl-10 sm:pl-14 pr-3 sm:pr-4 py-3 sm:py-4 bg-slate-900 text-slate-100 font-mono text-xs sm:text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className={`w-full h-64 sm:h-80 md:h-96 pl-10 sm:pl-14 pr-3 sm:pr-4 py-3 sm:py-4 font-mono text-xs sm:text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-colors duration-300 ${
+              isDark
+                ? "bg-slate-900 text-slate-100"
+                : "bg-white text-slate-800"
+            }`}
             spellCheck={false}
             placeholder="Write your code here..."
           />
         </div>
 
+        {/* Preview Panel */}
         {showPreview && (
           <div className="bg-white h-64 sm:h-80 md:h-96 overflow-auto">
-            <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 border-b text-[10px] sm:text-xs font-medium text-slate-500">Preview</div>
+            <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 border-b border-slate-200 text-[10px] sm:text-xs font-medium text-slate-500">
+              Preview
+            </div>
             {output ? (
               <iframe
                 srcDoc={output}
@@ -157,7 +185,7 @@ export default function CodeEditor({
               />
             ) : (
               <div className="flex items-center justify-center h-[calc(100%-2rem)] sm:h-[calc(100%-2.5rem)] text-slate-400 text-xs sm:text-sm px-4 text-center">
-                Click "Run" to see the output
+                Click &quot;Run&quot; to see the output
               </div>
             )}
           </div>
