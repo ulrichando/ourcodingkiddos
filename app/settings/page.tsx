@@ -34,6 +34,9 @@ export default function SettingsPage() {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [accessStatus, setAccessStatus] = useState<AccessStatus | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelStatus, setCancelStatus] = useState<"idle" | "canceling" | "success" | "error">("idle");
+  const [cancelMessage, setCancelMessage] = useState("");
 
   useEffect(() => {
     if (session?.user) {
@@ -143,6 +146,38 @@ export default function SettingsPage() {
       setPrefStatus("error");
       setPrefMessage("An error occurred. Please try again.");
       setTimeout(() => setPrefStatus("idle"), 3000);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelStatus("canceling");
+    setCancelMessage("");
+    try {
+      const response = await fetch("/api/subscriptions/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.ok) {
+        setCancelStatus("success");
+        setCancelMessage("Your subscription has been set to cancel at the end of the current billing period.");
+        setShowCancelModal(false);
+        // Reload subscription data to reflect the change
+        loadSubscription();
+        setTimeout(() => {
+          setCancelStatus("idle");
+          setCancelMessage("");
+        }, 5000);
+      } else {
+        const data = await response.json();
+        setCancelStatus("error");
+        setCancelMessage(data.error || "Failed to cancel subscription. Please try again.");
+        setTimeout(() => setCancelStatus("idle"), 3000);
+      }
+    } catch (error) {
+      setCancelStatus("error");
+      setCancelMessage("An error occurred. Please try again.");
+      setTimeout(() => setCancelStatus("idle"), 3000);
     }
   };
 
@@ -314,23 +349,31 @@ export default function SettingsPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
+                {/* Upgrade button - show for trial users or active subscribers who can upgrade */}
                 {accessStatus.hasAccess && subscription?.planType !== "unlimited" && subscription?.planType !== "instructor" && (
-                  <Link href="/api/stripe/portal">
-                    <Button variant="outline" className="dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
-                      Manage Subscription
-                    </Button>
-                  </Link>
-                )}
-
-                {accessStatus.status === "trialing" && (
                   <Link href="/pricing">
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                      Upgrade Now
+                      {accessStatus.status === "trialing" ? "Upgrade Now" : "Change Plan"}
                     </Button>
                   </Link>
                 )}
 
-                {!accessStatus.hasAccess && accessStatus.status !== "none" && (
+                {/* Cancel button - show for active/trialing users (not for canceled or admin/instructor) */}
+                {accessStatus.hasAccess &&
+                 !subscription?.cancelAtPeriodEnd &&
+                 subscription?.planType !== "unlimited" &&
+                 subscription?.planType !== "instructor" && (
+                  <Button
+                    variant="outline"
+                    className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    onClick={() => setShowCancelModal(true)}
+                  >
+                    Cancel Subscription
+                  </Button>
+                )}
+
+                {/* Update Payment - show for past_due or unpaid */}
+                {!accessStatus.hasAccess && (accessStatus.status === "past_due" || accessStatus.status === "unpaid") && (
                   <Link href="/api/stripe/portal">
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                       Update Payment Method
@@ -338,6 +381,16 @@ export default function SettingsPage() {
                   </Link>
                 )}
 
+                {/* Resubscribe - show for expired or canceled */}
+                {!accessStatus.hasAccess && (accessStatus.status === "expired" || accessStatus.status === "canceled") && (
+                  <Link href="/pricing">
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                      Resubscribe
+                    </Button>
+                  </Link>
+                )}
+
+                {/* Start trial - show for users with no subscription */}
                 {accessStatus.status === "none" && (
                   <Link href="/checkout?plan=free-trial">
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white">
@@ -346,6 +399,17 @@ export default function SettingsPage() {
                   </Link>
                 )}
               </div>
+
+              {/* Cancel status message */}
+              {cancelMessage && (
+                <div className={`p-3 rounded-lg ${
+                  cancelStatus === "success"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300"
+                }`}>
+                  <p className="text-sm">{cancelMessage}</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
@@ -373,6 +437,69 @@ export default function SettingsPage() {
           </Button>
         </section>
       </div>
+
+      {/* Cancel Subscription Confirmation Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowCancelModal(false)}
+          />
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full mx-4 p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Cancel Subscription?
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-slate-600 dark:text-slate-300">
+                Are you sure you want to cancel your subscription? You will:
+              </p>
+              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">✕</span>
+                  <span>Lose access to all premium courses and live classes</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">✕</span>
+                  <span>No longer be able to book 1-on-1 sessions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-0.5">✓</span>
+                  <span>Keep access until the end of your current billing period</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1 dark:border-slate-600 dark:text-slate-200"
+                onClick={() => setShowCancelModal(false)}
+                disabled={cancelStatus === "canceling"}
+              >
+                Keep Subscription
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                onClick={handleCancelSubscription}
+                disabled={cancelStatus === "canceling"}
+              >
+                {cancelStatus === "canceling" ? "Canceling..." : "Yes, Cancel"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
