@@ -144,17 +144,50 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account }) {
-      // For Google OAuth, check if user exists and set default role
+    async signIn({ user, account, profile }) {
+      // For Google OAuth, link to existing account if email matches
       if (account?.provider === "google" && user.email) {
         const existingUser = await prismaBase.user.findUnique({
           where: { email: user.email },
+          include: { accounts: { where: { provider: "google" } } },
         });
-        // If user doesn't exist, they'll be created by the adapter with default role
-        // We can update the role after creation if needed
-        if (!existingUser) {
-          // New Google user - will be created with PARENT role by default
-          // Admin can change to INSTRUCTOR later
+
+        if (existingUser) {
+          // User exists - check if Google account is already linked
+          if (existingUser.accounts.length === 0) {
+            // Link Google account to existing user
+            console.log('[Auth] Linking Google account to existing user:', user.email);
+            await prismaBase.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+              },
+            });
+          } else {
+            // Update existing Google account tokens
+            console.log('[Auth] Updating Google tokens for:', user.email);
+            await prismaBase.account.update({
+              where: { id: existingUser.accounts[0].id },
+              data: {
+                access_token: account.access_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
+              },
+            });
+          }
+          // Use existing user ID for the session
+          user.id = existingUser.id;
+          user.role = existingUser.role as UserRole;
+        } else {
+          // New Google user - will be created by the adapter
           console.log('[Auth] New Google OAuth user:', user.email);
         }
       }
