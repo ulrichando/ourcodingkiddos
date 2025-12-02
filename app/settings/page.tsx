@@ -20,6 +20,15 @@ interface AccessStatus {
   message: string;
 }
 
+interface PaymentMethod {
+  id: string;
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
+}
+
 export default function SettingsPage() {
   const { data: session, status } = useSession();
   const [fullName, setFullName] = useState("");
@@ -38,6 +47,11 @@ export default function SettingsPage() {
   const [cancelStatus, setCancelStatus] = useState<"idle" | "canceling" | "success" | "error">("idle");
   const [cancelMessage, setCancelMessage] = useState("");
   const [resumeStatus, setResumeStatus] = useState<"idle" | "resuming" | "success" | "error">("idle");
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState<"idle" | "deleting" | "error">("idle");
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   useEffect(() => {
     if (session?.user) {
@@ -47,6 +61,8 @@ export default function SettingsPage() {
       loadPreferences();
       // Load subscription data
       loadSubscription();
+      // Load payment methods
+      loadPaymentMethods();
     }
   }, [session]);
 
@@ -78,6 +94,34 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Failed to load preferences:", error);
     }
+  };
+
+  const loadPaymentMethods = async () => {
+    setLoadingPaymentMethods(true);
+    try {
+      const response = await fetch("/api/payment-methods");
+      if (response.ok) {
+        const data = await response.json();
+        setPaymentMethods(data.paymentMethods || []);
+      }
+    } catch (error) {
+      console.error("Failed to load payment methods:", error);
+    } finally {
+      setLoadingPaymentMethods(false);
+    }
+  };
+
+  const getCardBrandIcon = (brand: string) => {
+    const brands: Record<string, string> = {
+      visa: "💳 Visa",
+      mastercard: "💳 Mastercard",
+      amex: "💳 Amex",
+      discover: "💳 Discover",
+      diners: "💳 Diners",
+      jcb: "💳 JCB",
+      unionpay: "💳 UnionPay",
+    };
+    return brands[brand.toLowerCase()] || `💳 ${brand}`;
   };
 
   if (status === "loading") {
@@ -209,6 +253,34 @@ export default function SettingsPage() {
       setResumeStatus("error");
       setCancelMessage("An error occurred. Please try again.");
       setTimeout(() => setResumeStatus("idle"), 3000);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") {
+      return;
+    }
+
+    setDeleteStatus("deleting");
+    try {
+      const response = await fetch("/api/account/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.ok) {
+        // Sign out and redirect to home page after account deletion
+        signOut({ callbackUrl: "/" });
+      } else {
+        const data = await response.json();
+        setDeleteStatus("error");
+        alert(data.error || "Failed to delete account. Please try again.");
+        setTimeout(() => setDeleteStatus("idle"), 3000);
+      }
+    } catch (error) {
+      setDeleteStatus("error");
+      alert("An error occurred. Please try again.");
+      setTimeout(() => setDeleteStatus("idle"), 3000);
     }
   };
 
@@ -464,18 +536,100 @@ export default function SettingsPage() {
           )}
         </section>
 
+        {/* Payment Methods Section */}
+        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
+            <span className="text-lg">💳</span>
+            Payment Methods
+          </div>
+
+          {loadingPaymentMethods ? (
+            <div className="animate-pulse space-y-3">
+              <div className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+            </div>
+          ) : paymentMethods.length > 0 ? (
+            <div className="space-y-3">
+              {paymentMethods.map((card) => (
+                <div
+                  key={card.id}
+                  className={`flex items-center justify-between p-4 rounded-lg border ${
+                    card.isDefault
+                      ? "border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20"
+                      : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl">
+                      {card.brand.toLowerCase() === "visa" && "💳"}
+                      {card.brand.toLowerCase() === "mastercard" && "💳"}
+                      {card.brand.toLowerCase() === "amex" && "💳"}
+                      {!["visa", "mastercard", "amex"].includes(card.brand.toLowerCase()) && "💳"}
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-800 dark:text-slate-200">
+                        {card.brand.charAt(0).toUpperCase() + card.brand.slice(1)} •••• {card.last4}
+                      </p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Expires {card.expMonth.toString().padStart(2, "0")}/{card.expYear}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {card.isDefault && (
+                      <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-full">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <Link href="/api/stripe/portal">
+                <Button variant="outline" className="w-full mt-2 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
+                  Manage Payment Methods
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="text-center py-6 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                <span className="text-2xl">💳</span>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400">No payment methods on file</p>
+              {accessStatus?.hasAccess && (
+                <Link href="/api/stripe/portal">
+                  <Button variant="outline" className="dark:border-slate-600 dark:text-slate-200">
+                    Add Payment Method
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
+        </section>
+
         <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
             <span className="text-lg">🛡️</span>
             Account
           </div>
-          <Button
-            variant="outline"
-            className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 w-fit"
-            onClick={() => signOut({ callbackUrl: "/auth/login" })}
-          >
-            Log Out
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              className="text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 w-fit"
+              onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            >
+              Log Out
+            </Button>
+            <Button
+              variant="outline"
+              className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 w-fit"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Delete Account
+            </Button>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Deleting your account will permanently remove all your data and cannot be undone.
+          </p>
         </section>
       </div>
 
@@ -536,6 +690,100 @@ export default function SettingsPage() {
                 disabled={cancelStatus === "canceling"}
               >
                 {cancelStatus === "canceling" ? "Canceling..." : "Yes, Cancel"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => {
+              setShowDeleteModal(false);
+              setDeleteConfirmText("");
+              setDeleteStatus("idle");
+            }}
+          />
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full mx-4 p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <span className="text-2xl">🗑️</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Delete Account?
+                </h3>
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                  This action is permanent
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-slate-600 dark:text-slate-300">
+                Are you sure you want to permanently delete your account? This will:
+              </p>
+              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">✕</span>
+                  <span>Cancel any active subscriptions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">✕</span>
+                  <span>Delete all your progress and certificates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">✕</span>
+                  <span>Remove all student profiles linked to this account</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-0.5">✕</span>
+                  <span>Permanently erase all your data</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Type <span className="font-bold text-red-600 dark:text-red-400">DELETE</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-600"
+              />
+            </div>
+
+            {deleteStatus === "error" && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Failed to delete account. Please try again or contact support.
+              </p>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1 dark:border-slate-600 dark:text-slate-200"
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText("");
+                  setDeleteStatus("idle");
+                }}
+                disabled={deleteStatus === "deleting"}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== "DELETE" || deleteStatus === "deleting"}
+              >
+                {deleteStatus === "deleting" ? "Deleting..." : "Delete Forever"}
               </Button>
             </div>
           </div>
