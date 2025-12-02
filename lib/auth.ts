@@ -37,9 +37,13 @@ const providers: NextAuthOptions["providers"] = [
 
       // Look up user in DB only (no demo fallbacks)
       try {
+        console.log('[Auth] Looking up user:', email);
         const user = await prisma.user.findUnique({ where: { email } });
+        console.log('[Auth] User found:', !!user, user?.email);
+
         if (user?.hashedPassword) {
           const valid = await bcrypt.compare(password, user.hashedPassword);
+          console.log('[Auth] Password valid:', valid);
           if (!valid) return null;
 
           // Reset rate limit on successful login
@@ -53,8 +57,9 @@ const providers: NextAuthOptions["providers"] = [
             role: user.role as UserRole,
           };
         }
-      } catch (e) {
-        // Swallow DB errors and reject authentication gracefully
+        console.log('[Auth] No hashed password found for user');
+      } catch (e: any) {
+        console.error('[Auth] Database error:', e.message);
       }
 
       return null;
