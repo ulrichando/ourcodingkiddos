@@ -18,13 +18,12 @@ export async function GET() {
     const userEmail = session.user.email;
     const userId = (session.user as any).id;
 
-    // Find the user's subscription to get the Stripe customer ID
-    const subscription = await prisma.subscription.findFirst({
+    // First check User record for stripeCustomerId (primary source)
+    const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { userId: userId },
-          { user: { email: userEmail } },
-          { parentEmail: userEmail },
+          { id: userId },
+          { email: userEmail },
         ],
       },
       select: {
@@ -32,7 +31,26 @@ export async function GET() {
       },
     });
 
-    if (!subscription?.stripeCustomerId) {
+    let stripeCustomerId = user?.stripeCustomerId;
+
+    // Fallback: check subscription record if user doesn't have it
+    if (!stripeCustomerId) {
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          OR: [
+            { userId: userId },
+            { user: { email: userEmail } },
+            { parentEmail: userEmail },
+          ],
+        },
+        select: {
+          stripeCustomerId: true,
+        },
+      });
+      stripeCustomerId = subscription?.stripeCustomerId;
+    }
+
+    if (!stripeCustomerId) {
       return NextResponse.json({
         paymentMethods: [],
         message: "No payment methods on file",
@@ -41,12 +59,12 @@ export async function GET() {
 
     // Fetch payment methods from Stripe
     const paymentMethods = await stripe.paymentMethods.list({
-      customer: subscription.stripeCustomerId,
+      customer: stripeCustomerId,
       type: "card",
     });
 
     // Get the default payment method
-    const customer = await stripe.customers.retrieve(subscription.stripeCustomerId);
+    const customer = await stripe.customers.retrieve(stripeCustomerId);
     let defaultPaymentMethodId: string | null = null;
     if ("invoice_settings" in customer && customer.invoice_settings) {
       defaultPaymentMethodId = customer.invoice_settings.default_payment_method as string | null;
@@ -64,7 +82,7 @@ export async function GET() {
 
     return NextResponse.json({
       paymentMethods: formattedMethods,
-      customerId: subscription.stripeCustomerId,
+      customerId: stripeCustomerId,
     });
   } catch (error: any) {
     console.error("GET /api/payment-methods error:", error.message);
