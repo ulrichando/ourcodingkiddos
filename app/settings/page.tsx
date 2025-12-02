@@ -2,7 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import Button from "../../components/ui/button";
+
+interface SubscriptionData {
+  planType: string;
+  status: string;
+  currentPeriodEnd?: string;
+  trialEndsAt?: string;
+  cancelAtPeriodEnd?: boolean;
+}
+
+interface AccessStatus {
+  hasAccess: boolean;
+  status: "active" | "trialing" | "expired" | "past_due" | "canceled" | "unpaid" | "none";
+  daysRemaining: number | null;
+  message: string;
+}
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -15,6 +31,9 @@ export default function SettingsPage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [prefStatus, setPrefStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [prefMessage, setPrefMessage] = useState("");
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [accessStatus, setAccessStatus] = useState<AccessStatus | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   useEffect(() => {
     if (session?.user) {
@@ -22,8 +41,26 @@ export default function SettingsPage() {
       setEmail(session.user.email ?? "");
       // Load user preferences
       loadPreferences();
+      // Load subscription data
+      loadSubscription();
     }
   }, [session]);
+
+  const loadSubscription = async () => {
+    setLoadingSubscription(true);
+    try {
+      const response = await fetch("/api/subscriptions", { cache: "no-store" });
+      if (response.ok) {
+        const data = await response.json();
+        setSubscription(data.subscription || null);
+        setAccessStatus(data.accessStatus || null);
+      }
+    } catch (error) {
+      console.error("Failed to load subscription:", error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
 
   const loadPreferences = async () => {
     try {
@@ -201,6 +238,125 @@ export default function SettingsPage() {
               </span>
             )}
           </div>
+        </section>
+
+        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
+            <span className="text-lg">💳</span>
+            Subscription
+          </div>
+
+          {loadingSubscription ? (
+            <div className="animate-pulse space-y-3">
+              <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-32" />
+              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-48" />
+            </div>
+          ) : accessStatus ? (
+            <div className="space-y-4">
+              {/* Subscription Status */}
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${
+                  accessStatus.status === "active" || accessStatus.status === "trialing"
+                    ? "bg-green-500"
+                    : accessStatus.status === "past_due" || accessStatus.status === "unpaid"
+                      ? "bg-red-500"
+                      : "bg-amber-500"
+                }`} />
+                <div>
+                  <p className="font-medium text-slate-800 dark:text-slate-200">
+                    {subscription?.planType === "FREE_TRIAL" || subscription?.planType === "free_trial"
+                      ? "Free Trial"
+                      : subscription?.planType === "MONTHLY" || subscription?.planType === "monthly"
+                        ? "Premium Monthly"
+                        : subscription?.planType === "ANNUAL" || subscription?.planType === "annual"
+                          ? "Premium Annual"
+                          : subscription?.planType === "FAMILY" || subscription?.planType === "family"
+                            ? "Premium Family"
+                            : subscription?.planType === "unlimited"
+                              ? "Admin Access"
+                              : subscription?.planType === "instructor"
+                                ? "Instructor Access"
+                                : "No Plan"}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {accessStatus.message}
+                  </p>
+                </div>
+              </div>
+
+              {/* Days Remaining */}
+              {accessStatus.daysRemaining !== null && accessStatus.hasAccess && (
+                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    <span className="font-medium">{accessStatus.daysRemaining}</span> days remaining
+                    {subscription?.currentPeriodEnd && (
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {" "}(renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()})
+                      </span>
+                    )}
+                    {subscription?.trialEndsAt && accessStatus.status === "trialing" && (
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {" "}(trial ends {new Date(subscription.trialEndsAt).toLocaleDateString()})
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {/* Cancel pending notice */}
+              {subscription?.cancelAtPeriodEnd && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                  <p className="text-sm text-amber-800 dark:text-amber-300">
+                    Your subscription is set to cancel at the end of the current period.
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3">
+                {accessStatus.hasAccess && subscription?.planType !== "unlimited" && subscription?.planType !== "instructor" && (
+                  <Link href="/api/stripe/portal">
+                    <Button variant="outline" className="dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
+                      Manage Subscription
+                    </Button>
+                  </Link>
+                )}
+
+                {accessStatus.status === "trialing" && (
+                  <Link href="/pricing">
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                      Upgrade Now
+                    </Button>
+                  </Link>
+                )}
+
+                {!accessStatus.hasAccess && accessStatus.status !== "none" && (
+                  <Link href="/api/stripe/portal">
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                      Update Payment Method
+                    </Button>
+                  </Link>
+                )}
+
+                {accessStatus.status === "none" && (
+                  <Link href="/checkout?plan=free-trial">
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                      Start Free Trial
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-slate-600 dark:text-slate-400">No subscription information available.</p>
+              <Link href="/pricing">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                  View Plans
+                </Button>
+              </Link>
+            </div>
+          )}
         </section>
 
         <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">

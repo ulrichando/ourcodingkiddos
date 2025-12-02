@@ -133,46 +133,8 @@ export default function ParentDashboardPage() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
 
-        {/* Loading State */}
-        {isLoading ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Card key={i} className="border-0 shadow-sm">
-                  <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-16" />
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-24" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-32" />
-                <Card className="border-0 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      {[1, 2].map((i) => (
-                        <div key={i} className="h-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="space-y-4">
-                <Card className="border-0 shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="h-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        ) : subscriptionBlocked ? (
-          /* Payment Failed / Subscription Blocked - Show Update Payment Prompt */
+        {/* Payment Failed / Subscription Blocked - Show Update Payment Prompt */}
+        {subscriptionBlocked ? (
           <div className="space-y-6">
             <Card className={`border-2 shadow-lg ${
               accessStatus?.status === "past_due" || accessStatus?.status === "unpaid"
