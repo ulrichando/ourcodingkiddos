@@ -23,5 +23,9 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: UserRole;
+    // Google OAuth tokens for Calendar API
+    googleAccessToken?: string;
+    googleRefreshToken?: string;
+    googleTokenExpires?: number;
   }
 }

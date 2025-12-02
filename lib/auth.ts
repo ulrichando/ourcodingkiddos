@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import prisma, { prismaBase } from "./prisma";
 import type { UserRole } from "../types/next-auth";
@@ -25,8 +26,26 @@ const emailProvider =
       })
     : null;
 
+// Google OAuth provider for instructors (with Calendar API access for Google Meet)
+const googleProvider =
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        authorization: {
+          params: {
+            prompt: "consent",
+            access_type: "offline",
+            response_type: "code",
+            scope: "openid email profile https://www.googleapis.com/auth/calendar",
+          },
+        },
+      })
+    : null;
+
 const providers: NextAuthOptions["providers"] = [
   emailProvider,
+  googleProvider,
   CredentialsProvider({
     name: "Email and Password",
     credentials: {
@@ -95,10 +114,26 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers,
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+      }
+      // Store Google account info for Calendar API access
+      if (account?.provider === "google") {
+        token.googleAccessToken = account.access_token;
+        token.googleRefreshToken = account.refresh_token;
+        token.googleTokenExpires = account.expires_at;
+      }
+      // Fetch role from DB if not set (for OAuth users)
+      if (!token.role && token.email) {
+        const dbUser = await prismaBase.user.findUnique({
+          where: { email: token.email },
+          select: { role: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role as UserRole;
+        }
       }
       return token;
     },
@@ -108,6 +143,22 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
       }
       return session;
+    },
+    async signIn({ user, account }) {
+      // For Google OAuth, check if user exists and set default role
+      if (account?.provider === "google" && user.email) {
+        const existingUser = await prismaBase.user.findUnique({
+          where: { email: user.email },
+        });
+        // If user doesn't exist, they'll be created by the adapter with default role
+        // We can update the role after creation if needed
+        if (!existingUser) {
+          // New Google user - will be created with PARENT role by default
+          // Admin can change to INSTRUCTOR later
+          console.log('[Auth] New Google OAuth user:', user.email);
+        }
+      }
+      return true;
     },
   },
   pages: {
