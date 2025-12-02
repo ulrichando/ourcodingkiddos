@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Code2, Palette, FileCode, Terminal, Download, Save, FolderOpen, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Code2, Palette, FileCode, Terminal, Download, Save, FolderOpen } from "lucide-react";
 import CodeEditor from "../../components/playground/CodeEditor";
 import Button from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -91,6 +91,25 @@ export default function PlaygroundPage() {
   const [code, setCode] = useState<Record<string, string>>(starterCode);
   const [theme, setTheme] = useState<"dark" | "light">("light");
 
+  // Sync with global theme
+  useEffect(() => {
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "dark" : "light");
+    };
+
+    checkTheme();
+
+    // Watch for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const isDark = theme === "dark";
 
   const handleDownload = () => {
@@ -102,10 +121,6 @@ export default function PlaygroundPage() {
     a.download = `${projectName}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -140,16 +155,6 @@ export default function PlaygroundPage() {
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`p-2 ${isDark ? "text-slate-200 hover:text-white" : "text-slate-600 hover:text-slate-900"}`}
-              onClick={toggleTheme}
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
             <Button
               variant="ghost"
               size="sm"
