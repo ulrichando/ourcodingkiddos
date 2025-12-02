@@ -14,7 +14,32 @@ type UserRow = {
   address?: string | null;
   image?: string | null;
   createdAt: string;
+  lastSeen?: string | null;
 };
+
+// User is considered online if seen within the last 2 minutes
+function isOnline(lastSeen: string | null | undefined): boolean {
+  if (!lastSeen) return false;
+  const lastSeenDate = new Date(lastSeen);
+  const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+  return lastSeenDate > twoMinutesAgo;
+}
+
+function formatLastSeen(lastSeen: string | null | undefined): string {
+  if (!lastSeen) return "Never";
+  const date = new Date(lastSeen);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
 
 const roleOrder = ["ALL", "PARENT", "STUDENT", "INSTRUCTOR", "ADMIN"] as const;
 
@@ -123,6 +148,25 @@ export default function AdminUsersClient({
 
       <AdminTable<UserRow>
         columns={[
+          {
+            key: "status",
+            label: "Status",
+            render: (u) => (
+              <div className="flex items-center gap-2">
+                <span
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    isOnline(u.lastSeen)
+                      ? "bg-emerald-500 animate-pulse"
+                      : "bg-slate-300 dark:bg-slate-600"
+                  }`}
+                  title={isOnline(u.lastSeen) ? "Online" : "Offline"}
+                />
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {isOnline(u.lastSeen) ? "Online" : formatLastSeen(u.lastSeen)}
+                </span>
+              </div>
+            ),
+          },
           {
             key: "name",
             label: "Name",

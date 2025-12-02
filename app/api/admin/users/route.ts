@@ -20,6 +20,7 @@ export async function GET() {
       role: true,
       image: true,
       createdAt: true,
+      lastSeen: true,
       parentProfile: {
         select: {
           phone: true,
@@ -39,6 +40,7 @@ export async function GET() {
     phone: user.parentProfile?.phone || null,
     address: user.parentProfile?.address || null,
     createdAt: user.createdAt,
+    lastSeen: user.lastSeen,
   }));
 
   return NextResponse.json({ users: formattedUsers });

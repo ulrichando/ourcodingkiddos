@@ -103,6 +103,9 @@ model User {
   classReminders   Boolean @default(true)
   progressReports  Boolean @default(true)
 
+  // Online status tracking
+  lastSeen         DateTime?
+
   studentProfile     StudentProfile?
   parentProfile      ParentProfile?
   enrollments        Enrollment[]
