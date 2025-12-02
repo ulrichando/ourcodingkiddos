@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
+import { logCreate } from "../../../lib/audit";
 
 const bookingSchema = z.object({
   instructorId: z.string(),
@@ -110,6 +111,17 @@ export async function POST(request: Request) {
         notes: payload.notes,
       },
     });
+
+    // Log booking creation
+    logCreate(
+      session.user.email || "unknown",
+      "Booking",
+      booking.id,
+      `Booked ${payload.type} session for ${new Date(payload.startsAt).toLocaleDateString()}`,
+      (session.user as any).id,
+      { type: payload.type, startsAt: payload.startsAt }
+    ).catch(() => {});
+
     return NextResponse.json({ status: "ok", data: booking }, { status: 201 });
   } catch (error) {
     console.error("POST /api/bookings error", error);

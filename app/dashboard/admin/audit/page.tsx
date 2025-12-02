@@ -58,6 +58,7 @@ export default function AuditLogsPage() {
   const [filterResource, setFilterResource] = useState<string>("all");
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [autoRefreshLoaded, setAutoRefreshLoaded] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
@@ -90,6 +91,22 @@ export default function AuditLogsPage() {
   useEffect(() => {
     loadLogs();
   }, [page]);
+
+  // Load auto-refresh preference from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("audit_autoRefresh");
+    if (saved === "true") {
+      setAutoRefresh(true);
+    }
+    setAutoRefreshLoaded(true);
+  }, []);
+
+  // Persist auto-refresh preference after initial load
+  useEffect(() => {
+    if (autoRefreshLoaded) {
+      localStorage.setItem("audit_autoRefresh", autoRefresh.toString());
+    }
+  }, [autoRefresh, autoRefreshLoaded]);
 
   useEffect(() => {
     if (!autoRefresh) return;

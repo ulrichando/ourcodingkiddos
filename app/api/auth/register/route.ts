@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { Role } from "@prisma/client";
+import { Role } from "../../../../generated/prisma-client";
 import prisma from "../../../../lib/prisma";
 import { createNotification } from "../../notifications/route";
+import { logCreate } from "../../../../lib/audit";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -41,6 +42,9 @@ export async function POST(request: Request) {
         : {}),
     },
   });
+
+  // Log user registration
+  logCreate(email, "User", user.id, `New ${role.toLowerCase()} registered: ${name}`, user.id, { role }).catch(() => {});
 
   // Send welcome notification
   if (role === "PARENT") {

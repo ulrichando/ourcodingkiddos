@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { getToken } from "next-auth/jwt";
 import { createNotification } from "../notifications/route";
+import { logCreate } from "../../../lib/audit";
 
 // Helper to build a student email from username
 function studentEmailFromUsername(username: string) {
@@ -137,6 +138,13 @@ export async function POST(request: NextRequest) {
         studentProfile: true,
       },
     });
+
+    // Log student creation
+    logCreate(parentEmail, "Student", user.id, `Added student: ${name} (${username})`, undefined, {
+      studentName: name,
+      username,
+      ageGroup,
+    }).catch(() => {});
 
     // Send notification to parent
     createNotification(

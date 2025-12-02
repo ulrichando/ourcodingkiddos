@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
-import { CourseLevel, Language, AgeGroup } from "@prisma/client";
+import { CourseLevel, Language, AgeGroup } from "../../../generated/prisma-client";
+import { logCreate } from "../../../lib/audit";
 
 // Force dynamic rendering - disable all caching for this route
 export const dynamic = 'force-dynamic';
@@ -83,6 +84,16 @@ export async function POST(request: Request) {
         slug: parse.data.slug.toLowerCase(),
       },
     });
+
+    // Log course creation
+    const userEmail = session.user.email || "unknown";
+    const userId = (session.user as any).id;
+    logCreate(userEmail, "Course", course.id, `Created course: ${course.title}`, userId, {
+      title: course.title,
+      language: course.language,
+      level: course.level,
+    }).catch(() => {});
+
     return NextResponse.json({ status: "ok", data: course }, { status: 201 });
   } catch (error) {
     console.error("POST /api/courses error", error);

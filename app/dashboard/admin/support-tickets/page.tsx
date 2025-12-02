@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import { HelpCircle, MessageSquare, Clock, CheckCircle, Loader2, AlertCircle, User } from "lucide-react";
+import { HelpCircle, MessageSquare, Clock, CheckCircle, Loader2, AlertCircle, User, Plus, X } from "lucide-react";
 
 type Ticket = {
   id: string;
@@ -39,10 +39,27 @@ const priorityColors = {
   URGENT: "text-red-600",
 };
 
+const categoryLabels: Record<string, string> = {
+  TECHNICAL: "Technical",
+  BILLING: "Billing",
+  ACCOUNT: "Account",
+  COURSE_CONTENT: "Course Content",
+  BOOKING: "Booking",
+  GENERAL: "General",
+};
+
 export default function AdminSupportTicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [showNewTicket, setShowNewTicket] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    subject: "",
+    description: "",
+    category: "GENERAL",
+    priority: "MEDIUM"
+  });
 
   useEffect(() => {
     loadTickets();
@@ -106,6 +123,43 @@ export default function AdminSupportTicketsPage() {
     }
   };
 
+  const handleSubmitTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/support-tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          ...formData
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Support ticket created successfully!");
+        setShowNewTicket(false);
+        setFormData({
+          subject: "",
+          description: "",
+          category: "GENERAL",
+          priority: "MEDIUM"
+        });
+        loadTickets();
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Failed to create ticket:", error);
+      alert("Failed to create ticket. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -127,9 +181,15 @@ export default function AdminSupportTicketsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Support Tickets</h1>
-          <p className="text-slate-600">Manage customer support requests</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Support Tickets</h1>
+            <p className="text-slate-600">Manage customer support requests</p>
+          </div>
+          <Button onClick={() => setShowNewTicket(true)} className="self-start">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Ticket
+          </Button>
         </div>
 
         {/* Stats */}
@@ -324,6 +384,108 @@ export default function AdminSupportTicketsPage() {
           )}
         </div>
       </div>
+
+      {/* New Ticket Modal */}
+      {showNewTicket && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl">
+            <form onSubmit={handleSubmitTicket}>
+              <div className="p-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-slate-900">Create Support Ticket</h2>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewTicket(false)}
+                    className="p-2 hover:bg-slate-100 rounded-lg"
+                  >
+                    <X className="w-5 h-5 text-slate-500" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Subject <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.subject}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="Brief description of your issue"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Provide details about the issue..."
+                    rows={5}
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-900"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Category
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-900"
+                    >
+                      {Object.entries(categoryLabels).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Priority
+                    </label>
+                    <select
+                      value={formData.priority}
+                      onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-900"
+                    >
+                      <option value="LOW">Low</option>
+                      <option value="MEDIUM">Medium</option>
+                      <option value="HIGH">High</option>
+                      <option value="URGENT">Urgent</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                  <Button type="button" variant="outline" onClick={() => setShowNewTicket(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Create Ticket
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

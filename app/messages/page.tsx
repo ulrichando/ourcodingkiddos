@@ -51,6 +51,7 @@ export default function MessagesPage() {
   const [showMobileSidebar, setShowMobileSidebar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const prevMessageCount = useRef(0);
   const inferRole = (recipient: string) => {
     const lower = recipient.toLowerCase();
     if (lower.includes("@students.")) return "student";
@@ -91,9 +92,14 @@ export default function MessagesPage() {
 
   const activeLabel = conversations.find((c) => c.id === activeId)?.name || "Select a conversation";
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom only when NEW messages are added (not on initial load or conversation switch)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const currentCount = activeMessages.length;
+    // Only scroll if message count increased (new message sent/received)
+    if (currentCount > prevMessageCount.current && prevMessageCount.current > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    prevMessageCount.current = currentCount;
   }, [activeMessages]);
 
   // Close emoji picker when clicking outside

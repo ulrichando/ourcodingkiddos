@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
+import { logUpdate, logDelete } from "../../../../lib/audit";
 
 const updateSchema = z
   .object({
@@ -51,6 +52,18 @@ export async function PATCH(
         endsAt: parsed.data.endsAt ? new Date(parsed.data.endsAt) : undefined,
       },
     });
+
+    // Log booking update
+    const statusText = parsed.data.status === "CANCELLED" ? "Cancelled" : "Updated";
+    logUpdate(
+      session.user.email || "unknown",
+      "Booking",
+      id,
+      `${statusText} booking`,
+      userId,
+      { changes: Object.keys(parsed.data) }
+    ).catch(() => {});
+
     return NextResponse.json({ status: "ok", data: booking });
   } catch (error) {
     console.error("PATCH /api/bookings/:id error", error);
@@ -76,6 +89,10 @@ export async function DELETE(
       return NextResponse.json({ status: "forbidden" }, { status: 403 });
     }
     await prisma.booking.delete({ where: { id } });
+
+    // Log booking deletion
+    logDelete(session.user.email || "unknown", "Booking", id, "Deleted booking", userId).catch(() => {});
+
     return NextResponse.json({ status: "ok" });
   } catch (error) {
     console.error("DELETE /api/bookings/:id error", error);

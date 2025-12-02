@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
+import { logCreate, logUpdate } from "../../../lib/audit";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -130,6 +131,16 @@ export async function POST(req: Request) {
         }
       });
 
+      // Log ticket creation
+      logCreate(
+        userEmail,
+        "SupportTicket",
+        ticket.id,
+        `Created support ticket: ${ticketNumber} - ${subject}`,
+        (session as any).user?.id,
+        { category: ticket.category, priority: ticket.priority, userRole }
+      ).catch(() => {});
+
       return NextResponse.json({ success: true, ticket });
     }
 
@@ -155,6 +166,16 @@ export async function POST(req: Request) {
           status: userRole === "ADMIN" ? "IN_PROGRESS" : "WAITING_FOR_CUSTOMER"
         }
       });
+
+      // Log reply
+      logUpdate(
+        userEmail,
+        "SupportTicket",
+        ticketId,
+        `Added reply to ticket${isInternal ? " (internal note)" : ""}`,
+        (session as any).user?.id,
+        { userRole, isInternal: isInternal || false }
+      ).catch(() => {});
 
       return NextResponse.json({ success: true, reply });
     }
@@ -214,6 +235,21 @@ export async function PATCH(req: Request) {
       where: { id },
       data: updateData
     });
+
+    // Log ticket update
+    const changes = [];
+    if (status) changes.push(`status: ${status}`);
+    if (priority) changes.push(`priority: ${priority}`);
+    if (assignedToName) changes.push(`assigned to: ${assignedToName}`);
+
+    logUpdate(
+      userEmail,
+      "SupportTicket",
+      id,
+      `Updated ticket: ${changes.join(", ")}`,
+      (session as any).user?.id,
+      { status, priority, assignedToEmail, assignedToName }
+    ).catch(() => {});
 
     return NextResponse.json({ success: true, ticket });
   } catch (error: any) {

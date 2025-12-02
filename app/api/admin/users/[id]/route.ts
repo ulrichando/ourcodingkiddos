@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
 import { authOptions } from "lib/auth";
 import prisma from "lib/prisma";
+import { logUpdate, logDelete } from "lib/audit";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,6 +26,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       data,
       select: { id: true, name: true, email: true, role: true },
     });
+
+    // Log user update
+    logUpdate(
+      session.user.email || "unknown",
+      "User",
+      id,
+      `Admin updated user: ${updated.email}`,
+      (session as any).user.id,
+      { changes: Object.keys(data) }
+    ).catch(() => {});
+
     return NextResponse.json({ user: updated });
   } catch (e: any) {
     if (e.code === "P2002") {
@@ -144,6 +156,15 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       // Finally delete the user
       await tx.user.delete({ where: { id } });
     });
+
+    // Log user deletion
+    logDelete(
+      session.user.email || "unknown",
+      "User",
+      id,
+      `Admin deleted user account`,
+      (session as any).user.id
+    ).catch(() => {});
 
     return NextResponse.json({ status: "ok" });
   } catch (e: any) {

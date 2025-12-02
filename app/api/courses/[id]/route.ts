@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
-import { CourseLevel } from "@prisma/client";
+import { CourseLevel } from "../../../../generated/prisma-client";
+import { logUpdate, logDelete } from "../../../../lib/audit";
 
 function normalizeSlug(text: string | null | undefined) {
   if (!text) return "";
@@ -74,6 +75,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       where: { id },
       data: parsed.data,
     });
+
+    // Log course update
+    const userEmail = session.user.email || "unknown";
+    const userId = (session.user as any).id;
+    logUpdate(userEmail, "Course", course.id, `Updated course: ${course.title}`, userId, {
+      changes: Object.keys(parsed.data),
+    }).catch(() => {});
+
     return NextResponse.json({ status: "ok", data: course });
   } catch (error) {
     console.error("PATCH /api/courses/:id error", error);
@@ -89,7 +98,16 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   }
   const { id } = await params;
   try {
+    // Get course info before deletion for logging
+    const course = await prisma.course.findUnique({ where: { id }, select: { title: true } });
+
     await prisma.course.delete({ where: { id } });
+
+    // Log course deletion
+    const userEmail = session.user.email || "unknown";
+    const userId = (session.user as any).id;
+    logDelete(userEmail, "Course", id, `Deleted course: ${course?.title || id}`, userId).catch(() => {});
+
     return NextResponse.json({ status: "ok" });
   } catch (error) {
     console.error("DELETE /api/courses/:id error", error);

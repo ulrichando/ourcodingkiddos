@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "lib/auth";
 import prisma from "lib/prisma";
 import bcrypt from "bcryptjs";
+import { logCreate } from "lib/audit";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -48,6 +49,17 @@ export async function POST(req: Request) {
       },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
+
+    // Log admin user creation
+    logCreate(
+      session.user.email || "unknown",
+      "User",
+      user.id,
+      `Admin created user: ${user.email} (${role})`,
+      (session as any).user.id,
+      { role, email: user.email }
+    ).catch(() => {});
+
     return NextResponse.json({ user });
   } catch (e: any) {
     if (e.code === "P2002") {
