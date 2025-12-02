@@ -4,12 +4,14 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<"parent" | "instructor">("parent");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -109,17 +111,26 @@ export default function RegisterPage() {
                 className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-600"
               />
             </label>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Password
-              <input
-                name="password"
-                required
-                minLength={6}
-                type="password"
-                placeholder="Create a password"
-                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-600"
-              />
-            </label>
+            <div className="space-y-1">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
+              <div className="relative">
+                <input
+                  name="password"
+                  required
+                  minLength={6}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
             {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
             <button
               type="submit"
