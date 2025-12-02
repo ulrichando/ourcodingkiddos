@@ -188,10 +188,6 @@ export default function AppHeader() {
                   <Settings className="w-4 h-4" />
                   Settings
                 </Link>
-                <Link href="/subscription" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700">
-                  <Award className="w-4 h-4" />
-                  Subscription
-                </Link>
                 <div className="border-t border-slate-100 dark:border-slate-700" />
                 <button
                   onClick={async () => {
@@ -376,14 +372,6 @@ export default function AppHeader() {
                         >
                           <Settings className="w-5 h-5 flex-shrink-0" />
                           <span>Settings</span>
-                        </Link>
-                        <Link
-                          href="/subscription"
-                          onClick={() => setMobileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
-                        >
-                          <Award className="w-5 h-5 flex-shrink-0" />
-                          <span>Subscription</span>
                         </Link>
                       </div>
                     </>
