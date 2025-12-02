@@ -255,9 +255,9 @@ export default function CreateClassPage() {
                 Checking Google account...
               </div>
             ) : !hasGoogleAccount ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-sm text-amber-600 dark:text-amber-400">
-                  Connect your Google account to automatically generate Meet links.
+                  Connect your Google account to automatically generate Meet links, or paste your own meeting link below.
                 </p>
                 <Button
                   type="button"
@@ -272,6 +272,20 @@ export default function CreateClassPage() {
                   </svg>
                   Connect Google Account
                 </Button>
+                <div className="flex items-center gap-2 pt-2">
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-slate-600" />
+                  <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">or paste link manually</span>
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-slate-600" />
+                </div>
+                <input
+                  value={meetingUrl}
+                  onChange={(e) => setMeetingUrl(e.target.value)}
+                  placeholder="https://meet.google.com/... or https://zoom.us/..."
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  You can paste any meeting link (Google Meet, Zoom, etc.) to use for this class.
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
