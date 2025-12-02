@@ -1,11 +1,12 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("POSTGRES_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
 }
 
 enum Role {

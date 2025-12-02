@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma-client";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
 // Ensure a single Prisma client across hot reloads in development.

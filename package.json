@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --no-engine",
     "create:admin": "node scripts/create-admin.js"
   },
   "dependencies": {
