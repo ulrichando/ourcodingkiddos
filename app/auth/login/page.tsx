@@ -146,6 +146,15 @@ export default function LoginPage() {
             </p>
           </div>
 
+          <div className="text-center">
+            <Link
+              href="/auth/student-login"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-4 py-2 rounded-lg"
+            >
+              🎮 Student? Click here to login
+            </Link>
+          </div>
+
           <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
             <Link href="#" className="hover:text-slate-700 dark:hover:text-slate-300">
               Forgot password?

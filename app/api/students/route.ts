@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
   const name = String(body?.name || "").trim();
   let username = String(body?.username || "").trim();
   let password = String(body?.password || "");
+  const providedEmail = String(body?.email || "").trim().toLowerCase();
   const age = Number(body?.age) || null;
   const ageGroup = String(body?.ageGroup || "").toUpperCase() || null;
   const avatar = String(body?.avatar || "");
@@ -103,15 +104,25 @@ export async function POST(request: NextRequest) {
       username = `${base}${Math.floor(100 + Math.random() * 900)}`;
     }
 
-    // Ensure username uniqueness
-    let email = studentEmailFromUsername(username);
-    let attempts = 0;
-    while (attempts < 3) {
-      const existing = await prisma.user.findUnique({ where: { email } });
-      if (!existing) break;
-      username = `${username}${Math.floor(Math.random() * 10)}`;
-      email = studentEmailFromUsername(username);
-      attempts++;
+    // Use provided email if available, otherwise generate from username
+    let email = providedEmail || studentEmailFromUsername(username);
+
+    // Check if email already exists
+    if (providedEmail) {
+      const existingUser = await prisma.user.findUnique({ where: { email: providedEmail } });
+      if (existingUser) {
+        return NextResponse.json({ error: "This email is already registered" }, { status: 400 });
+      }
+    } else {
+      // Ensure username-based email uniqueness
+      let attempts = 0;
+      while (attempts < 3) {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (!existing) break;
+        username = `${username}${Math.floor(Math.random() * 10)}`;
+        email = studentEmailFromUsername(username);
+        attempts++;
+      }
     }
 
     if (!password) {
@@ -164,16 +175,17 @@ export async function POST(request: NextRequest) {
     }).catch(() => {});
 
     // Send notification to parent
+    const loginInfo = providedEmail ? `Email: ${providedEmail}` : `Username: ${username}`;
     createNotification(
       parentEmail,
       "Student Added Successfully! 🎉",
-      `${name} has been added to your account. Username: ${username}`,
+      `${name} has been added to your account. ${loginInfo}`,
       "student_added",
       "/dashboard/parent/students",
-      { studentId: user.id, studentName: name, username }
+      { studentId: user.id, studentName: name, username, email }
     );
 
-    return NextResponse.json({ status: "ok", user, credentials: { username, password } });
+    return NextResponse.json({ status: "ok", user, credentials: { username, password, email } });
   } catch (err: any) {
     console.error("[students] create failed", err);
     const msg =

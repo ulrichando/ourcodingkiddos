@@ -39,6 +39,7 @@ export default function AddStudentPage() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
   const [birthday, setBirthday] = useState("");
   const [avatar, setAvatar] = useState(avatars[0]);
@@ -123,6 +124,7 @@ export default function AddStudentPage() {
           name,
           username,
           password,
+          email: email.trim().toLowerCase() || undefined,
           age: Number(age),
           birthday: birthday || undefined,
           ageGroup,
@@ -139,9 +141,12 @@ export default function AddStudentPage() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json?.error || "Could not create student");
       const creds = json?.credentials;
+      const loginMethod = creds?.email && !creds.email.includes("@students.ourcodingkiddos.com")
+        ? `Email: ${creds.email}`
+        : `Username: ${creds?.username}`;
       setSuccess(
         creds
-          ? `Student created! Username: ${creds.username} • Password: ${creds.password}`
+          ? `Student created! ${loginMethod} • Password: ${creds.password}`
           : "Student account created successfully!"
       );
       setTimeout(() => router.push("/dashboard/parent"), 1500);
@@ -295,6 +300,20 @@ export default function AddStudentPage() {
                       placeholder="e.g., coder123"
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
+                  </label>
+
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1 sm:col-span-2">
+                    Email (Optional)
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="child@example.com"
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
+                    />
+                    <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">
+                      If your child has their own email, they can use it to login. Otherwise, they&apos;ll use their username.
+                    </p>
                   </label>
 
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
