@@ -170,7 +170,7 @@ export default function StudentDashboard() {
 
   return (
     <main className="min-h-screen bg-[#3d0f68] text-white">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-3">
@@ -271,8 +271,8 @@ export default function StudentDashboard() {
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
               {badges.slice(0, 6).map((badge: any) => (
                 <div key={badge.id} className="rounded-xl bg-white/10 border border-white/10 p-3 text-center">
-                  <div className="text-3xl mb-1">{badge.badge?.icon || "🏅"}</div>
-                  <div className="text-xs font-medium text-white/90 line-clamp-1">{badge.badge?.name || "Badge"}</div>
+                  <div className="text-3xl mb-1">{badge.icon || "🏅"}</div>
+                  <div className="text-xs font-medium text-white/90 line-clamp-1">{badge.name || "Badge"}</div>
                 </div>
               ))}
             </div>

@@ -40,8 +40,8 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
-      <section className="pt-16 pb-10 px-4">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <section className="pt-16 pb-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-8">
           <div className="text-center space-y-3">
             <span className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold">
               Learn to Code

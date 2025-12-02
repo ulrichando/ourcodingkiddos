@@ -148,8 +148,8 @@ export default function ParentDashboardPage() {
         {/* Show loading state while fetching subscription data */}
         {isLoading ? (
           <div className="animate-pulse space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-              {[1, 2, 3, 4, 5].map((i) => (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
                 <Card key={i} className="border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -164,7 +164,7 @@ export default function ParentDashboardPage() {
               ))}
             </div>
             <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
+              <div className="lg:col-span-2 space-y-6">
                 <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-32" />
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-6">
@@ -172,7 +172,7 @@ export default function ParentDashboardPage() {
                   </CardContent>
                 </Card>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <Card className="border-0 shadow-sm">
                   <CardContent className="p-6">
                     <div className="h-32 bg-slate-200 dark:bg-slate-700 rounded" />
@@ -362,46 +362,30 @@ export default function ParentDashboardPage() {
             {/* Existing dashboard content for subscribed users */}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
             {[
               { label: "Students", value: students.length, icon: Users, color: "text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30" },
               { label: "Total XP", value: totalXP.toLocaleString(), icon: Star, color: "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30" },
               { label: "Badges Earned", value: totalBadges, icon: Award, color: "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30" },
               { label: "Upcoming Classes", value: upcoming.length, icon: Calendar, color: "text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30" },
-              {
-                label: planLabel,
-                value: isAdmin
-                  ? "Unlimited"
-                  : accessStatus?.daysRemaining !== null
-                    ? `${Math.max(0, accessStatus.daysRemaining)} days left`
-                    : accessStatus?.hasAccess
-                      ? "Active"
-                      : !subscription
-                        ? "Not Started"
-                        : "Inactive",
-                icon: TrendingUp,
-                color: !subscription && !isAdmin
-                  ? "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30"
-                  : "text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30",
-              },
             ].map((stat, i) => (
               <Card key={i} className="border-0 shadow-sm">
-                <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${stat.color} flex items-center justify-center flex-shrink-0`}>
-                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{stat.value}</div>
-                  <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">{stat.label}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center flex-shrink-0`}>
+                    <stat.icon className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{stat.value}</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400 truncate">{stat.label}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Students Section */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* Show warning when trial is ending soon (3 days or less) */}
             {accessStatus?.status === "trialing" && accessStatus.daysRemaining !== null && accessStatus.daysRemaining <= 3 && (
               <Card className="border border-amber-200 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20">
@@ -581,7 +565,7 @@ export default function ParentDashboardPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-6">
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-slate-100">
