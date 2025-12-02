@@ -37,6 +37,7 @@ export default function SettingsPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelStatus, setCancelStatus] = useState<"idle" | "canceling" | "success" | "error">("idle");
   const [cancelMessage, setCancelMessage] = useState("");
+  const [resumeStatus, setResumeStatus] = useState<"idle" | "resuming" | "success" | "error">("idle");
 
   useEffect(() => {
     if (session?.user) {
@@ -178,6 +179,36 @@ export default function SettingsPage() {
       setCancelStatus("error");
       setCancelMessage("An error occurred. Please try again.");
       setTimeout(() => setCancelStatus("idle"), 3000);
+    }
+  };
+
+  const handleResumeSubscription = async () => {
+    setResumeStatus("resuming");
+    setCancelMessage("");
+    try {
+      const response = await fetch("/api/subscriptions/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.ok) {
+        setResumeStatus("success");
+        setCancelMessage("Your subscription has been resumed!");
+        loadSubscription();
+        setTimeout(() => {
+          setResumeStatus("idle");
+          setCancelMessage("");
+        }, 3000);
+      } else {
+        const data = await response.json();
+        setResumeStatus("error");
+        setCancelMessage(data.error || "Failed to resume subscription. Please try again.");
+        setTimeout(() => setResumeStatus("idle"), 3000);
+      }
+    } catch (error) {
+      setResumeStatus("error");
+      setCancelMessage("An error occurred. Please try again.");
+      setTimeout(() => setResumeStatus("idle"), 3000);
     }
   };
 
@@ -338,12 +369,22 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              {/* Cancel pending notice */}
+              {/* Cancel pending notice with Resume button */}
               {subscription?.cancelAtPeriodEnd && (
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                  <p className="text-sm text-amber-800 dark:text-amber-300">
-                    Your subscription is set to cancel at the end of the current period.
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-sm text-amber-800 dark:text-amber-300">
+                      Your subscription is set to cancel at the end of the current period.
+                    </p>
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white w-fit"
+                      onClick={handleResumeSubscription}
+                      disabled={resumeStatus === "resuming"}
+                    >
+                      {resumeStatus === "resuming" ? "Resuming..." : "Resume Subscription"}
+                    </Button>
+                  </div>
                 </div>
               )}
 
