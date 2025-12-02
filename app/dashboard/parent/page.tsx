@@ -106,8 +106,10 @@ export default function ParentDashboardPage() {
   // Determine access state - only evaluate after loading is complete
   const isLoading = sessionLoading || loadingSubscription;
   const hasAccess = isAdmin || accessStatus?.hasAccess === true;
-  const subscriptionBlocked = !isLoading && !hasAccess && accessStatus?.status && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
-  const noSubscription = !isLoading && !hasAccess && (!subscription || accessStatus?.status === "none");
+
+  // Only show blocking states after loading is complete
+  const subscriptionBlocked = !isLoading && !hasAccess && accessStatus !== null && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
+  const noSubscription = !isLoading && !hasAccess && accessStatus !== null && accessStatus.status === "none";
 
   // Plan label for display
   const planLabel = isAdmin
