@@ -5,17 +5,13 @@ import AdminStatCard from "../../../../components/admin/AdminStatCard";
 
 const financeStats: { label: string; value: string; sublabel: string; accent: "purple" | "orange" | "green" | "blue" }[] =
   [
-    { label: "MRR", value: "$42.3k", sublabel: "+6% vs last month", accent: "green" },
-    { label: "ARPU", value: "$38", sublabel: "Avg revenue per user", accent: "blue" },
-    { label: "Refunds", value: "$520", sublabel: "Last 30 days", accent: "orange" },
-    { label: "Churn", value: "3.2%", sublabel: "Rolling 30d", accent: "purple" },
+    { label: "MRR", value: "$0", sublabel: "Monthly recurring revenue", accent: "green" },
+    { label: "ARPU", value: "$0", sublabel: "Avg revenue per user", accent: "blue" },
+    { label: "Refunds", value: "$0", sublabel: "Last 30 days", accent: "orange" },
+    { label: "Churn", value: "0%", sublabel: "Rolling 30d", accent: "purple" },
   ];
 
-const invoices = [
-  { id: "INV-1001", user: "Alex Kim", amount: "$49", status: "Paid", date: "2025-02-10" },
-  { id: "INV-1002", user: "Emma Johnson", amount: "$29", status: "Paid", date: "2025-02-09" },
-  { id: "INV-1003", user: "Sam Coach", amount: "$29", status: "Open", date: "2025-02-08" },
-];
+const invoices: { id: string; user: string; amount: string; status: string; date: string }[] = [];
 
 export default function AdminFinancePage() {
   return (

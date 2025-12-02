@@ -25,10 +25,10 @@ type AdminOverviewProps = {
 export default function AdminOverview({ stats, recentUsers, totalUsers, totalCourses, warning }: AdminOverviewProps) {
   // Calculate growth percentage (mock for now - can be real data later)
   const growthMetrics = {
-    users: 12,
-    students: 8,
-    revenue: 15,
-    courses: 5,
+    users: 0,
+    students: 0,
+    revenue: 0,
+    courses: 0,
   };
 
   const statCards = [
