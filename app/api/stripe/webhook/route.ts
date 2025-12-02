@@ -6,7 +6,8 @@ import Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const signature = headers().get('stripe-signature');
+  const headersList = await headers();
+  const signature = headersList.get('stripe-signature');
 
   if (!signature) {
     return NextResponse.json({ error: 'No signature' }, { status: 400 });
@@ -74,7 +75,6 @@ export async function POST(req: NextRequest) {
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId || session.client_reference_id;
-  const planId = session.metadata?.planId;
 
   if (!userId) {
     console.error('No userId in checkout session metadata');
@@ -128,6 +128,14 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       break;
   }
 
+  // Get current period dates from the subscription items
+  const currentPeriodStart = (subscription as any).current_period_start
+    ? new Date((subscription as any).current_period_start * 1000)
+    : new Date();
+  const currentPeriodEnd = (subscription as any).current_period_end
+    ? new Date((subscription as any).current_period_end * 1000)
+    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days from now
+
   // Upsert subscription in database
   await prisma.subscription.upsert({
     where: {
@@ -135,8 +143,8 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     },
     update: {
       status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart,
+      currentPeriodEnd,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       canceledAt: subscription.canceled_at
         ? new Date(subscription.canceled_at * 1000)
@@ -150,10 +158,10 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       stripeSubscriptionId: subscription.id,
       stripeCustomerId: subscription.customer as string,
       priceId,
-      planType: planId as any,
+      planType: (planId as any) || 'MONTHLY',
       status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart,
+      currentPeriodEnd,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       trialEndsAt: subscription.trial_end
         ? new Date(subscription.trial_end * 1000)
@@ -179,26 +187,25 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  if (!invoice.subscription) return;
+  const subscriptionId = (invoice as any).subscription;
+  if (!subscriptionId) return;
 
-  const subscription = await stripe.subscriptions.retrieve(
-    invoice.subscription as string
-  );
-
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
   await handleSubscriptionUpdate(subscription);
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  if (!invoice.subscription) return;
+  const subscriptionId = (invoice as any).subscription;
+  if (!subscriptionId) return;
 
   await prisma.subscription.updateMany({
     where: {
-      stripeSubscriptionId: invoice.subscription as string,
+      stripeSubscriptionId: subscriptionId as string,
     },
     data: {
       status: 'PAST_DUE',
     },
   });
 
-  console.log(`Payment failed for subscription ${invoice.subscription}`);
+  console.log(`Payment failed for subscription ${subscriptionId}`);
 }
