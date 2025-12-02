@@ -494,39 +494,6 @@ export default function ParentDashboardPage() {
               </div>
             )}
 
-            {/* Explore Courses */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Explore Courses</h2>
-                <Link href="/courses">
-                  <Button variant="ghost">
-                    View All
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {[
-                  { name: "HTML Basics", level: "Beginner", color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400" },
-                  { name: "Python for Kids", level: "Beginner", color: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
-                ].map((course) => (
-                  <Link key={course.name} href="/courses" className="block">
-                    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${course.color}`}>
-                        <BookOpen className="w-6 h-6" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">{course.name}</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{course.level}</p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
-                    </CardContent>
-                  </Card>
-                  </Link>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Sidebar */}
