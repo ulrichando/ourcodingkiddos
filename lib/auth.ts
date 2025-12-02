@@ -10,9 +10,16 @@ import { logLogin, logFailedLogin } from "./audit";
 
 // Email provider is enabled only if SMTP settings are present
 const emailProvider =
-  process.env.EMAIL_SERVER && process.env.EMAIL_FROM
+  process.env.EMAIL_SERVER_HOST && process.env.EMAIL_FROM
     ? EmailProvider({
-        server: process.env.EMAIL_SERVER,
+        server: {
+          host: process.env.EMAIL_SERVER_HOST,
+          port: Number(process.env.EMAIL_SERVER_PORT) || 465,
+          auth: {
+            user: process.env.EMAIL_SERVER_USER || "resend",
+            pass: process.env.EMAIL_SERVER_PASSWORD || "",
+          },
+        },
         from: process.env.EMAIL_FROM,
         maxAge: 24 * 60 * 60, // 24h
       })
