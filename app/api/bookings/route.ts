@@ -4,6 +4,7 @@ import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
 import { logCreate } from "../../../lib/audit";
+import { isSubscriptionValid } from "../../../lib/subscription";
 
 const bookingSchema = z.object({
   instructorId: z.string(),
@@ -84,14 +85,33 @@ export async function POST(request: Request) {
 
     const subscription = await prisma.subscription.findFirst({
       where: {
-        user: { email: checkEmail },
-        status: { in: ["ACTIVE", "TRIALING"] },
+        OR: [
+          { user: { email: checkEmail } },
+          { parentEmail: checkEmail },
+        ],
+      },
+      orderBy: { currentPeriodEnd: "desc" },
+      select: {
+        status: true,
+        planType: true,
+        endDate: true,
+        currentPeriodEnd: true,
+        trialEndsAt: true,
       },
     });
 
-    if (!subscription) {
+    if (!isSubscriptionValid(subscription)) {
+      const status = subscription?.status?.toUpperCase();
+      let errorMessage = "Active subscription required. Please start your free trial or upgrade your plan to book classes.";
+
+      if (status === "PAST_DUE" || status === "UNPAID") {
+        errorMessage = "Your payment has failed. Please update your payment method to continue booking classes.";
+      } else if (status === "CANCELED") {
+        errorMessage = "Your subscription has been canceled. Please resubscribe to book classes.";
+      }
+
       return NextResponse.json(
-        { status: "error", message: "Active subscription required. Please start your free trial or upgrade your plan to book classes." },
+        { status: "error", message: errorMessage },
         { status: 403 }
       );
     }

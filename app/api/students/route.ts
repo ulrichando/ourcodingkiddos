@@ -6,6 +6,7 @@ import { authOptions } from "../../../lib/auth";
 import { getToken } from "next-auth/jwt";
 import { createNotification } from "../notifications/route";
 import { logCreate } from "../../../lib/audit";
+import { isSubscriptionValid } from "../../../lib/subscription";
 
 // Helper to build a student email from username
 function studentEmailFromUsername(username: string) {
@@ -45,16 +46,32 @@ export async function POST(request: NextRequest) {
   if (sessionRole === "PARENT") {
     const subscription = await prisma.subscription.findFirst({
       where: {
-        user: { email: effectiveParentEmail },
-        status: { in: ["ACTIVE", "TRIALING"] },
+        OR: [
+          { user: { email: effectiveParentEmail } },
+          { parentEmail: effectiveParentEmail },
+        ],
+      },
+      orderBy: { currentPeriodEnd: "desc" },
+      select: {
+        status: true,
+        planType: true,
+        endDate: true,
+        currentPeriodEnd: true,
+        trialEndsAt: true,
       },
     });
 
-    if (!subscription) {
-      return NextResponse.json(
-        { error: "Active subscription required. Please start your free trial or upgrade your plan to add students." },
-        { status: 403 }
-      );
+    if (!isSubscriptionValid(subscription)) {
+      const status = subscription?.status?.toUpperCase();
+      let errorMessage = "Active subscription required. Please start your free trial or upgrade your plan to add students.";
+
+      if (status === "PAST_DUE" || status === "UNPAID") {
+        errorMessage = "Your payment has failed. Please update your payment method to continue adding students.";
+      } else if (status === "CANCELED") {
+        errorMessage = "Your subscription has been canceled. Please resubscribe to add students.";
+      }
+
+      return NextResponse.json({ error: errorMessage }, { status: 403 });
     }
   }
 

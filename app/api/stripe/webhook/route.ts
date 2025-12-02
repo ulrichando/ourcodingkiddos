@@ -128,13 +128,52 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       break;
   }
 
-  // Get current period dates from the subscription items
-  const currentPeriodStart = (subscription as any).current_period_start
-    ? new Date((subscription as any).current_period_start * 1000)
+  // Get current period dates from the subscription
+  // Use type assertion as these properties exist on the Stripe API response
+  const stripeSubscription = subscription as Stripe.Subscription & {
+    current_period_start?: number;
+    current_period_end?: number;
+  };
+  const currentPeriodStart = stripeSubscription.current_period_start
+    ? new Date(stripeSubscription.current_period_start * 1000)
     : new Date();
-  const currentPeriodEnd = (subscription as any).current_period_end
-    ? new Date((subscription as any).current_period_end * 1000)
+  const currentPeriodEnd = stripeSubscription.current_period_end
+    ? new Date(stripeSubscription.current_period_end * 1000)
     : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days from now
+
+  // Get trial end date for free trial plans
+  const trialEndsAt = subscription.trial_end
+    ? new Date(subscription.trial_end * 1000)
+    : null;
+
+  // Determine planType from metadata or default
+  let planType: 'FREE_TRIAL' | 'MONTHLY' | 'ANNUAL' | 'FAMILY' = 'MONTHLY';
+  if (planId) {
+    const normalizedPlanId = planId.toUpperCase().replace('-', '_');
+    if (normalizedPlanId === 'FREE_TRIAL' || normalizedPlanId === 'FREE-TRIAL') {
+      planType = 'FREE_TRIAL';
+    } else if (normalizedPlanId === 'FAMILY') {
+      planType = 'FAMILY';
+    } else if (normalizedPlanId === 'ANNUAL') {
+      planType = 'ANNUAL';
+    } else {
+      planType = 'MONTHLY';
+    }
+  } else if (subscription.status === 'trialing') {
+    planType = 'FREE_TRIAL';
+  }
+
+  // Set startDate and endDate for subscription tracking
+  // - startDate: when the subscription started
+  // - endDate: when access should end (trial end for free trial, period end for paid)
+  const startDate = currentPeriodStart;
+  const endDate = planType === 'FREE_TRIAL' && trialEndsAt ? trialEndsAt : currentPeriodEnd;
+
+  // Get user's email for parentEmail field
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  });
 
   // Upsert subscription in database
   await prisma.subscription.upsert({
@@ -145,31 +184,32 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       status,
       currentPeriodStart,
       currentPeriodEnd,
+      startDate,
+      endDate,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       canceledAt: subscription.canceled_at
         ? new Date(subscription.canceled_at * 1000)
         : null,
-      trialEndsAt: subscription.trial_end
-        ? new Date(subscription.trial_end * 1000)
-        : null,
+      trialEndsAt,
     },
     create: {
       userId,
       stripeSubscriptionId: subscription.id,
       stripeCustomerId: subscription.customer as string,
       priceId,
-      planType: (planId as any) || 'MONTHLY',
+      planType,
       status,
       currentPeriodStart,
       currentPeriodEnd,
+      startDate,
+      endDate,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      trialEndsAt: subscription.trial_end
-        ? new Date(subscription.trial_end * 1000)
-        : null,
+      trialEndsAt,
+      parentEmail: user?.email || null,
     },
   });
 
-  console.log(`Subscription ${subscription.id} updated for user ${userId}`);
+  console.log(`Subscription ${subscription.id} updated for user ${userId} - Status: ${status}, Plan: ${planType}, Ends: ${endDate.toISOString()}`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
