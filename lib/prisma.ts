@@ -22,15 +22,19 @@ function createPrismaClient(): PrismaClient {
 const prisma: PrismaClient = globalForPrisma.prisma ?? createPrismaClient();
 
 // Base client for NextAuth adapter (doesn't work with extensions)
-// Uses direct Postgres URL for auth operations
-const directDbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-const prismaBase: PrismaClient = globalForPrisma.prismaBase ?? new PrismaClient({
-  datasources: directDbUrl ? {
-    db: {
-      url: directDbUrl,
-    },
-  } : undefined,
-});
+// Uses POSTGRES_URL if available, otherwise falls back to DATABASE_URL
+function createPrismaBaseClient(): PrismaClient {
+  if (process.env.POSTGRES_URL) {
+    return new PrismaClient({
+      datasources: {
+        db: { url: process.env.POSTGRES_URL },
+      },
+    });
+  }
+  return new PrismaClient();
+}
+
+const prismaBase: PrismaClient = globalForPrisma.prismaBase ?? createPrismaBaseClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
