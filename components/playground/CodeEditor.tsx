@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Button from "../ui/button";
-import { Play, RotateCcw, Copy, Check } from "lucide-react";
+import { Play, RotateCcw, Copy, Check, Loader2 } from "lucide-react";
 
 type Props = {
   initialCode?: string;
@@ -20,6 +20,46 @@ const languageColors: Record<NonNullable<Props["language"]>, string> = {
   roblox: "from-red-500 to-pink-500",
 };
 
+// Pyodide instance cache
+let pyodideInstance: any = null;
+let pyodideLoading = false;
+let pyodideLoadPromise: Promise<any> | null = null;
+
+async function loadPyodide() {
+  if (pyodideInstance) return pyodideInstance;
+  if (pyodideLoadPromise) return pyodideLoadPromise;
+
+  pyodideLoading = true;
+  pyodideLoadPromise = new Promise(async (resolve, reject) => {
+    try {
+      // Load Pyodide script
+      if (!(window as any).loadPyodide) {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+        script.async = true;
+        await new Promise<void>((res, rej) => {
+          script.onload = () => res();
+          script.onerror = () => rej(new Error("Failed to load Pyodide"));
+          document.head.appendChild(script);
+        });
+      }
+
+      // Initialize Pyodide
+      pyodideInstance = await (window as any).loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+      });
+
+      pyodideLoading = false;
+      resolve(pyodideInstance);
+    } catch (error) {
+      pyodideLoading = false;
+      reject(error);
+    }
+  });
+
+  return pyodideLoadPromise;
+}
+
 export default function CodeEditor({
   initialCode = "",
   language = "html",
@@ -31,8 +71,11 @@ export default function CodeEditor({
 }: Props) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState("");
+  const [pythonOutput, setPythonOutput] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [isPyodideLoading, setIsPyodideLoading] = useState(false);
+  const [pythonError, setPythonError] = useState<string | null>(null);
 
   const isDark = theme === "dark";
 
@@ -40,13 +83,65 @@ export default function CodeEditor({
     setCode(initialCode);
   }, [initialCode]);
 
+  // Preload Pyodide when Python tab is selected
+  useEffect(() => {
+    if (language === "python" && !pyodideInstance && !pyodideLoading) {
+      setIsPyodideLoading(true);
+      loadPyodide()
+        .then(() => setIsPyodideLoading(false))
+        .catch(() => setIsPyodideLoading(false));
+    }
+  }, [language]);
+
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
     setCode(newCode);
     onCodeChange?.(newCode);
   };
 
+  const runPython = async () => {
+    setIsRunning(true);
+    setPythonOutput([]);
+    setPythonError(null);
+
+    try {
+      if (!pyodideInstance) {
+        setIsPyodideLoading(true);
+        await loadPyodide();
+        setIsPyodideLoading(false);
+      }
+
+      // Capture print output
+      const outputs: string[] = [];
+      pyodideInstance.setStdout({
+        batched: (text: string) => {
+          outputs.push(text);
+        },
+      });
+      pyodideInstance.setStderr({
+        batched: (text: string) => {
+          outputs.push(`Error: ${text}`);
+        },
+      });
+
+      // Run the Python code
+      await pyodideInstance.runPythonAsync(code);
+
+      setPythonOutput(outputs);
+    } catch (error: any) {
+      setPythonError(error.message || "An error occurred");
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   const runCode = () => {
+    if (language === "python") {
+      runPython();
+      onRun?.(code);
+      return;
+    }
+
     setIsRunning(true);
 
     if (language === "html" || language === "css" || language === "javascript") {
@@ -56,7 +151,7 @@ export default function CodeEditor({
         html = `<style>${code}</style><div class="preview">Preview Area</div>`;
       } else if (language === "javascript") {
         html = `
-          <div id="output"></div>
+          <div id="output" style="font-family: monospace; padding: 16px;"></div>
           <script>
             const originalLog = console.log;
             console.log = function(...args) {
@@ -76,12 +171,6 @@ export default function CodeEditor({
       }
 
       setOutput(html);
-    } else if (language === "python") {
-      setOutput(`<div class="p-4 font-mono text-sm">
-        <p class="text-slate-500 mb-2"># Python output simulation</p>
-        <p class="text-green-600">Code ready to run!</p>
-        <p class="text-slate-400 mt-2">Note: Full Python execution requires a backend service.</p>
-      </div>`);
     }
 
     setTimeout(() => setIsRunning(false), 500);
@@ -97,6 +186,8 @@ export default function CodeEditor({
   const resetCode = () => {
     setCode(initialCode);
     setOutput("");
+    setPythonOutput([]);
+    setPythonError(null);
   };
 
   return (
@@ -114,6 +205,12 @@ export default function CodeEditor({
             <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-400" />
           </div>
           <span className="text-white/90 font-medium ml-1 sm:ml-2 uppercase text-xs sm:text-sm">{language}</span>
+          {language === "python" && isPyodideLoading && (
+            <span className="text-white/70 text-xs flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Loading Python...
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
@@ -127,9 +224,13 @@ export default function CodeEditor({
             size="sm"
             className="bg-white text-slate-900 hover:bg-slate-100 px-2 sm:px-3"
             onClick={runCode}
-            disabled={isRunning}
+            disabled={isRunning || (language === "python" && isPyodideLoading)}
           >
-            <Play className={`w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1 ${isRunning ? "animate-pulse" : ""}`} />
+            {isRunning ? (
+              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1 animate-spin" />
+            ) : (
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1" />
+            )}
             <span className="hidden sm:inline">Run</span>
           </Button>
         </div>
@@ -171,7 +272,7 @@ export default function CodeEditor({
         </div>
 
         {/* Preview Panel */}
-        {showPreview && (
+        {showPreview && language !== "python" && (
           <div className="bg-white h-64 sm:h-80 md:h-96 overflow-auto">
             <div className="px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 border-b border-slate-200 text-[10px] sm:text-xs font-medium text-slate-500">
               Preview
@@ -188,6 +289,42 @@ export default function CodeEditor({
                 Click &quot;Run&quot; to see the output
               </div>
             )}
+          </div>
+        )}
+
+        {/* Python Output Panel */}
+        {language === "python" && (
+          <div className={`h-64 sm:h-80 md:h-96 overflow-auto ${isDark ? "bg-slate-900" : "bg-slate-50"}`}>
+            <div className={`px-2 sm:px-3 py-1.5 sm:py-2 border-b text-[10px] sm:text-xs font-medium sticky top-0 ${
+              isDark
+                ? "bg-slate-800 border-slate-700 text-slate-400"
+                : "bg-slate-100 border-slate-200 text-slate-500"
+            }`}>
+              Python Output
+            </div>
+            <div className="p-3 sm:p-4 font-mono text-xs sm:text-sm">
+              {isPyodideLoading && !pythonOutput.length && !pythonError && (
+                <div className={`flex items-center gap-2 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading Python environment...
+                </div>
+              )}
+              {!isPyodideLoading && !pythonOutput.length && !pythonError && (
+                <div className={isDark ? "text-slate-500" : "text-slate-400"}>
+                  Click &quot;Run&quot; to execute your Python code
+                </div>
+              )}
+              {pythonOutput.map((line, i) => (
+                <div key={i} className={`${isDark ? "text-green-400" : "text-green-600"}`}>
+                  {line}
+                </div>
+              ))}
+              {pythonError && (
+                <div className="text-red-500 whitespace-pre-wrap">
+                  {pythonError}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
