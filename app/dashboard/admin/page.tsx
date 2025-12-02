@@ -151,21 +151,6 @@ export default async function AdminDashboardPage() {
     endDate: formatDate(s.endDate ?? s.currentPeriodEnd ?? null),
   }));
 
-  // If no subscriptions, create a demo one so demo data reflects active plan
-  const subscriptionsWithFallback =
-    subscriptions.length > 0
-      ? subscriptions
-      : [
-          {
-            id: "demo-sub",
-            parentEmail: "demo.parent@ourcodingkiddos.com",
-            plan: "Monthly",
-            status: "active",
-            price: "$29/mo",
-            endDate: "—",
-          },
-        ];
-
   const parents = parentsRaw.map((p) => ({
     id: p.id,
     name: p.user?.name || "Parent",
@@ -176,7 +161,7 @@ export default async function AdminDashboardPage() {
   }));
 
   const studentCount = students.length > 0 ? students.length : users.filter((u) => u.type === "student").length;
-  const activeSubsCount = subscriptionsWithFallback.filter((s) => s.status === "active").length;
+  const activeSubsCount = subscriptions.filter((s) => s.status === "active").length;
 
   const stats = {
     totalParents: users.filter((u) => u.type === "parent").length,
