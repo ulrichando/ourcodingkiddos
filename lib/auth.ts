@@ -3,7 +3,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
-import prisma from "./prisma";
+import prisma, { prismaBase } from "./prisma";
 import type { UserRole } from "../types/next-auth";
 import { checkRateLimit, resetRateLimit } from "./validation";
 
@@ -63,7 +63,7 @@ const providers: NextAuthOptions["providers"] = [
 ].filter(Boolean) as NextAuthOptions["providers"];
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prismaBase),
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   providers,
