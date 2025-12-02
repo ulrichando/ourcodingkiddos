@@ -126,12 +126,6 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
                   <Settings className="w-4 h-4" />
                   Settings
                 </Link>
-                {userType === "parent" && (
-                  <Link href="/pricing" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-50">
-                    <Award className="w-4 h-4" />
-                    Subscription
-                  </Link>
-                )}
                 <button
                   onClick={onLogout}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
