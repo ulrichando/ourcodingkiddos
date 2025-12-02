@@ -4,10 +4,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-  typescript: true,
-});
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const STRIPE_PRICE_IDS = {
   'free-trial': process.env.STRIPE_FREE_TRIAL_PRICE_ID || '',
