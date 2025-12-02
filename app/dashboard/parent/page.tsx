@@ -111,18 +111,18 @@ export default function ParentDashboardPage() {
   const subscriptionBlocked = !isLoading && !hasAccess && accessStatus !== null && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
   const noSubscription = !isLoading && !hasAccess && accessStatus !== null && accessStatus.status === "none";
 
-  // Plan label for display
+  // Plan label for display - show "Free Trial" if status is trialing
   const planLabel = isAdmin
     ? "Admin Access"
-    : subscription?.planType
-      ? subscription.planType.toUpperCase() === "FREE_TRIAL"
-        ? "Free Trial"
-        : subscription.planType.toUpperCase() === "FAMILY"
+    : accessStatus?.status === "trialing"
+      ? "Free Trial"
+      : subscription?.planType
+        ? subscription.planType.toUpperCase() === "FAMILY"
           ? "Premium Family"
           : subscription.planType.toUpperCase() === "ANNUAL"
             ? "Premium Annual"
-            : "Premium"
-      : "No Plan";
+            : "Premium Monthly"
+        : "No Plan";
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -135,8 +135,44 @@ export default function ParentDashboardPage() {
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
 
-        {/* Payment Failed / Subscription Blocked - Show Update Payment Prompt */}
-        {subscriptionBlocked ? (
+        {/* Show loading state while fetching subscription data */}
+        {isLoading ? (
+          <div className="animate-pulse space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Card key={i} className="border-0 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+                        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-24" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-32" />
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="h-24 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="space-y-4">
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="h-32 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        ) : subscriptionBlocked ? (
+          /* Payment Failed / Subscription Blocked - Show Update Payment Prompt */
           <div className="space-y-6">
             <Card className={`border-2 shadow-lg ${
               accessStatus?.status === "past_due" || accessStatus?.status === "unpaid"

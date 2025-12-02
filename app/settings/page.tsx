@@ -264,7 +264,7 @@ export default function SettingsPage() {
                 }`} />
                 <div>
                   <p className="font-medium text-slate-800 dark:text-slate-200">
-                    {subscription?.planType === "FREE_TRIAL" || subscription?.planType === "free_trial"
+                    {accessStatus.status === "trialing"
                       ? "Free Trial"
                       : subscription?.planType === "MONTHLY" || subscription?.planType === "monthly"
                         ? "Premium Monthly"
