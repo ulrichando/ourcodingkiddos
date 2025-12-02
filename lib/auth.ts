@@ -63,7 +63,8 @@ const providers: NextAuthOptions["providers"] = [
 ].filter(Boolean) as NextAuthOptions["providers"];
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prismaBase),
+  // Using type assertion because our custom Prisma output path creates type incompatibility
+  adapter: PrismaAdapter(prismaBase as any),
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   providers,
