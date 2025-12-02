@@ -50,7 +50,7 @@ const testimonials = [
 ];
 
 const stats = [
-  { value: "10,000+", label: "Happy Students" },
+  { value: "100+", label: "Happy Students" },
   { value: "500+", label: "Courses Completed" },
   { value: "50+", label: "Expert Instructors" },
   { value: "4.9", label: "Star Rating" },
