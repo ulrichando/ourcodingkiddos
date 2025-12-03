@@ -52,18 +52,28 @@ export async function GET(req: Request) {
       }
     });
 
-    // Get list of contacts (instructors, admins)
+    // Get list of contacts based on user role
+    // Instructors can message students/parents, everyone can message instructors/admins
+    let contactRoles: string[] = ['INSTRUCTOR', 'ADMIN'];
+    if (userRole === 'INSTRUCTOR' || userRole === 'ADMIN') {
+      contactRoles = ['STUDENT', 'PARENT', 'INSTRUCTOR', 'ADMIN'];
+    }
+
     const contacts = await prisma.user.findMany({
       where: {
         role: {
-          in: ['INSTRUCTOR', 'ADMIN']
+          in: contactRoles as any
+        },
+        email: {
+          not: userEmail // Don't show self
         }
       },
       select: {
         name: true,
         email: true,
         role: true
-      }
+      },
+      take: 100 // Limit for performance
     });
 
     // Transform to frontend format
