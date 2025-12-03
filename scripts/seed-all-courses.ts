@@ -2576,18 +2576,21 @@ async function main() {
           where: { lessonId: lesson.id },
         });
 
-        // Create new quizzes
-        const quizzes = quizGenerator(lesson.title);
-        for (const quiz of quizzes) {
-          await prisma.quiz.create({
-            data: {
-              lessonId: lesson.id,
-              question: quiz.question,
-              options: quiz.options,
-              correctAnswer: quiz.correctAnswer,
+        // Create new quiz with questions
+        const quizQuestions = quizGenerator(lesson.title);
+        await prisma.quiz.create({
+          data: {
+            lessonId: lesson.id,
+            questions: {
+              create: quizQuestions.map((q) => ({
+                question: q.question,
+                questionType: "MULTIPLE_CHOICE",
+                options: q.options,
+                correctAnswer: String(q.correctAnswer),
+              })),
             },
-          });
-        }
+          },
+        });
 
         console.log(`   ✅ Updated: ${lesson.title}`);
       }
@@ -2626,19 +2629,22 @@ async function main() {
 
       console.log(`   ✅ Created course with ${course.lessons.length} lessons`);
 
-      // Add quizzes to each lesson
+      // Add quiz with questions to each lesson
       for (const lesson of course.lessons) {
-        const quizzes = quizGenerator(lesson.title);
-        for (const quiz of quizzes) {
-          await prisma.quiz.create({
-            data: {
-              lessonId: lesson.id,
-              question: quiz.question,
-              options: quiz.options,
-              correctAnswer: quiz.correctAnswer,
+        const quizQuestions = quizGenerator(lesson.title);
+        await prisma.quiz.create({
+          data: {
+            lessonId: lesson.id,
+            questions: {
+              create: quizQuestions.map((q) => ({
+                question: q.question,
+                questionType: "MULTIPLE_CHOICE",
+                options: q.options,
+                correctAnswer: String(q.correctAnswer),
+              })),
             },
-          });
-        }
+          },
+        });
       }
       console.log(`   ✅ Added quizzes to all lessons`);
     }
