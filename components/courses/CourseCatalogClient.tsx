@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
 import {
   Search,
   Clock,
@@ -18,7 +19,11 @@ import {
   Award,
   Grid3X3,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+
+const COURSES_PER_PAGE = 9;
 import LanguageIcon from "../ui/LanguageIcon";
 
 export type CatalogCourse = {
@@ -57,20 +62,57 @@ const levelColors: Record<string, string> = {
   master: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
 };
 
+// Language display names for filter tags
+const languageLabels: Record<string, string> = {
+  html: "HTML",
+  css: "CSS",
+  javascript: "JavaScript",
+  python: "Python",
+  roblox: "Roblox",
+  engineering: "Engineering",
+  ai_ml: "AI & ML",
+  robotics: "Robotics",
+  web_development: "Web Development",
+  mobile_development: "Mobile Development",
+  game_development: "Game Development",
+  career_prep: "Career Prep",
+};
+
 export default function CourseCatalogClient({ courses }: { courses: CatalogCourse[] }) {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [age, setAge] = useState("All Ages");
   const [level, setLevel] = useState("All Levels");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const activeFiltersCount = (age !== "All Ages" ? 1 : 0) + (level !== "All Levels" ? 1 : 0) + (selectedCategory !== "all" ? 1 : 0);
+  // Read URL language parameter and filter by specific language
+  useEffect(() => {
+    const languageParam = searchParams.get("language");
+    if (languageParam) {
+      const lang = languageParam.toLowerCase();
+      setSelectedLanguage(lang);
+      // Also select the matching category for visual feedback
+      const matchingCategory = categoryConfig.find(cat =>
+        cat.languages.includes(lang)
+      );
+      if (matchingCategory) {
+        setSelectedCategory(matchingCategory.id);
+      }
+    }
+  }, [searchParams]);
+
+  const activeFiltersCount = (age !== "All Ages" ? 1 : 0) + (level !== "All Levels" ? 1 : 0) + (selectedCategory !== "all" ? 1 : 0) + (selectedLanguage ? 1 : 0);
 
   const clearAllFilters = () => {
     setQuery("");
     setAge("All Ages");
     setLevel("All Levels");
     setSelectedCategory("all");
+    setSelectedLanguage(null);
+    setCurrentPage(1);
   };
 
   const filtered = useMemo(() => {
@@ -79,11 +121,47 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
         c.description.toLowerCase().includes(query.toLowerCase());
       const matchesAge = age === "All Ages" || c.age.toLowerCase().includes(age.split(" ")[0]);
       const matchesLevel = level === "All Levels" || c.level.toLowerCase() === level.toLowerCase();
+
+      // If specific language is selected (from URL), filter by exact language
+      if (selectedLanguage) {
+        const matchesLanguage = c.language.toLowerCase() === selectedLanguage;
+        return matchesQuery && matchesAge && matchesLevel && matchesLanguage;
+      }
+
+      // Otherwise filter by category
       const categoryLangs = categoryConfig.find(cat => cat.id === selectedCategory)?.languages || [];
       const matchesCategory = selectedCategory === "all" || categoryLangs.includes(c.language.toLowerCase());
       return matchesQuery && matchesAge && matchesLevel && matchesCategory;
     });
-  }, [query, age, level, selectedCategory, courses]);
+  }, [query, age, level, selectedCategory, selectedLanguage, courses]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, age, level, selectedCategory, selectedLanguage]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filtered.length / COURSES_PER_PAGE);
+  const startIndex = (currentPage - 1) * COURSES_PER_PAGE;
+  const endIndex = startIndex + COURSES_PER_PAGE;
+  const paginatedCourses = filtered.slice(startIndex, endIndex);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, "...", totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+      }
+    }
+    return pages;
+  };
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
@@ -108,7 +186,10 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    setSelectedLanguage(null); // Clear language filter when selecting category
+                  }}
                   className={`group flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${
                     isSelected
                       ? "bg-white dark:bg-slate-800 shadow-lg ring-2 ring-purple-500 dark:ring-purple-400 scale-105"
@@ -225,6 +306,14 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                     </button>
                   </span>
                 )}
+                {selectedLanguage && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 text-xs font-medium">
+                    {languageLabels[selectedLanguage] || selectedLanguage.toUpperCase()}
+                    <button onClick={() => setSelectedLanguage(null)} className="hover:text-orange-900 dark:hover:text-orange-200">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -232,8 +321,21 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
           {/* Results Count */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">{filtered.length}</span> courses found
+              {filtered.length === 0 ? (
+                <span className="font-semibold text-slate-900 dark:text-slate-100">0</span>
+              ) : (
+                <>
+                  Showing <span className="font-semibold text-slate-900 dark:text-slate-100">{startIndex + 1}-{Math.min(endIndex, filtered.length)}</span> of{" "}
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{filtered.length}</span>
+                </>
+              )}{" "}
+              courses
             </p>
+            {totalPages > 1 && (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Page {currentPage} of {totalPages}
+              </p>
+            )}
           </div>
 
           {/* Course Grid */}
@@ -253,7 +355,7 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((course) => (
+              {paginatedCourses.map((course) => (
                 <Link key={course.id} href={`/courses/${course.slug}`}>
                   <div className="group rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 bg-white dark:bg-slate-800 h-full flex flex-col">
                     <div className="h-32 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center relative overflow-hidden">
@@ -294,6 +396,58 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                 </Link>
               ))}
             </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <nav className="flex items-center justify-center gap-1 pt-8" aria-label="Pagination">
+              {/* Previous Button */}
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800"
+                aria-label="Go to previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Previous</span>
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {getPageNumbers().map((page, idx) =>
+                  page === "..." ? (
+                    <span key={`ellipsis-${idx}`} className="px-3 py-2 text-slate-400">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page as number)}
+                      className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition ${
+                        currentPage === page
+                          ? "bg-purple-600 text-white shadow-md"
+                          : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                      }`}
+                      aria-label={`Go to page ${page}`}
+                      aria-current={currentPage === page ? "page" : undefined}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800"
+                aria-label="Go to next page"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </nav>
           )}
         </div>
       </section>

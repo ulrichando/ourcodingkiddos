@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import AppHeader from "../components/navigation/AppHeader";
-import ChatBot from "../components/chat/ChatBot";
-import CookieConsent from "../components/ui/CookieConsent";
 import AuthProvider from "../components/providers/AuthProvider";
 import ThemeHydrator from "../components/providers/ThemeHydrator";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import StructuredData from "../components/seo/StructuredData";
+import LazyComponents from "../components/providers/LazyComponents";
+import NewsletterForm from "../components/footer/NewsletterForm";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Optimize font loading - prevents layout shift
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -54,8 +59,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-slate-50 dark:bg-[#050812]" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-slate-50 dark:bg-[#050812]`} suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -71,95 +76,111 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
-        <style>{`
-          :root {
-            --color-primary: #8B5CF6;
-            --color-primary-dark: #7C3AED;
-            --color-secondary: #EC4899;
-            --color-accent: #F59E0B;
-          }
-          body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-          ::-webkit-scrollbar { width: 8px; height: 8px; }
-          ::-webkit-scrollbar-track { background: #f1f5f9; }
-          ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-          ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-          @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-          .animate-gradient { background-size: 200% 200%; animation: gradient-shift 3s ease infinite; }
-        `}</style>
-
         <StructuredData />
         <AuthProvider>
           <ThemeHydrator />
           <ErrorBoundary>
             <div className="min-h-screen flex flex-col">
               <AppHeader />
-              <main className="flex-1">{children}</main>
-            <footer className="site-footer bg-slate-900 text-slate-200">
-              <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-4 gap-6">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2">
-                    <span className="h-10 w-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                      CK
-                    </span>
-                    <div className="text-lg font-semibold">Coding Kiddos</div>
+              <main className="flex-1" role="main">{children}</main>
+            <footer className="site-footer bg-slate-900 text-slate-300" role="contentinfo">
+              {/* Newsletter */}
+              <div className="border-b border-slate-800">
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">Subscribe to our newsletter</p>
+                        <p className="text-sm text-slate-400">Weekly coding tips & updates</p>
+                      </div>
+                    </div>
+                    <NewsletterForm />
                   </div>
-                  <p className="text-sm text-slate-400">Empowering the next generation of coders, one lesson at a time.</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Courses</h4>
-                  <ul className="text-sm space-y-1 text-slate-400">
-                    <li>
-                      <a href="/courses?language=html" className="hover:text-white">HTML & CSS</a>
-                    </li>
-                    <li>
-                      <a href="/courses?language=javascript" className="hover:text-white">JavaScript</a>
-                    </li>
-                    <li>
-                      <a href="/courses?language=python" className="hover:text-white">Python</a>
-                    </li>
-                    <li>
-                      <a href="/courses?language=roblox" className="hover:text-white">Roblox Studio</a>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Resources</h4>
-                  <ul className="text-sm space-y-1 text-slate-400">
-                    <li>
-                      <a href="/courses" className="hover:text-white">All Courses</a>
-                    </li>
-                    <li>
-                      <a href="/playground" className="hover:text-white">Code Playground</a>
-                    </li>
-                    <li>
-                      <a href="/schedule" className="hover:text-white">Live Classes</a>
-                    </li>
-                    <li>
-                      <a href="/contact" className="hover:text-white">Contact</a>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Legal</h4>
-                  <ul className="text-sm space-y-1 text-slate-400">
-                    <li>
-                      <a href="/privacy" className="hover:text-white">Privacy Policy</a>
-                    </li>
-                    <li>
-                      <a href="/terms" className="hover:text-white">Terms of Service</a>
-                    </li>
-                    <li>
-                      <a href="/cookies" className="hover:text-white">Cookie Policy</a>
-                    </li>
-                  </ul>
                 </div>
               </div>
-              <div className="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-                © {new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+
+              {/* Main Footer */}
+              <div className="max-w-7xl mx-auto px-4 py-12">
+                <div className="grid grid-cols-2 md:grid-cols-12 gap-8 lg:gap-12">
+                  {/* Brand */}
+                  <div className="col-span-2 md:col-span-4 lg:col-span-3">
+                    <a href="/" className="inline-flex items-center gap-3 mb-4">
+                      <span className="h-11 w-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/25">
+                        CK
+                      </span>
+                      <span className="text-xl font-bold text-white">Coding Kiddos</span>
+                    </a>
+                    <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                      Empowering young minds with coding skills through fun, interactive lessons designed for kids ages 7-18.
+                    </p>
+                    <div className="flex gap-3">
+                      <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-purple-600 flex items-center justify-center transition-all hover:scale-110">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                      </a>
+                      <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-600 flex items-center justify-center transition-all hover:scale-110">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Courses */}
+                  <div className="col-span-1 md:col-span-2">
+                    <h4 className="text-white font-semibold mb-4">Courses</h4>
+                    <ul className="space-y-3 text-sm">
+                      <li><a href="/courses?language=html" className="text-slate-400 hover:text-white transition-colors">HTML & CSS</a></li>
+                      <li><a href="/courses?language=javascript" className="text-slate-400 hover:text-white transition-colors">JavaScript</a></li>
+                      <li><a href="/courses?language=python" className="text-slate-400 hover:text-white transition-colors">Python</a></li>
+                      <li><a href="/courses?language=roblox" className="text-slate-400 hover:text-white transition-colors">Roblox Studio</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Resources */}
+                  <div className="col-span-1 md:col-span-2">
+                    <h4 className="text-white font-semibold mb-4">Resources</h4>
+                    <ul className="space-y-3 text-sm">
+                      <li><a href="/courses" className="text-slate-400 hover:text-white transition-colors">All Courses</a></li>
+                      <li><a href="/playground" className="text-slate-400 hover:text-white transition-colors">Code Playground</a></li>
+                      <li><a href="/schedule" className="text-slate-400 hover:text-white transition-colors">Live Classes</a></li>
+                      <li><a href="/pricing" className="text-slate-400 hover:text-white transition-colors">Pricing</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Company */}
+                  <div className="col-span-1 md:col-span-2">
+                    <h4 className="text-white font-semibold mb-4">Company</h4>
+                    <ul className="space-y-3 text-sm">
+                      <li><a href="/about" className="text-slate-400 hover:text-white transition-colors">About Us</a></li>
+                      <li><a href="/contact" className="text-slate-400 hover:text-white transition-colors">Contact</a></li>
+                      <li><a href="/faq" className="text-slate-400 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Legal */}
+                  <div className="col-span-1 md:col-span-2">
+                    <h4 className="text-white font-semibold mb-4">Legal</h4>
+                    <ul className="space-y-3 text-sm">
+                      <li><a href="/privacy" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                      <li><a href="/terms" className="text-slate-400 hover:text-white transition-colors">Terms of Service</a></li>
+                      <li><a href="/cookies" className="text-slate-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Bar */}
+              <div className="border-t border-slate-800">
+                <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <p className="text-sm text-slate-500">© {new Date().getFullYear()} Our Coding Kiddos. All rights reserved.</p>
+                  <p className="text-sm text-slate-500">Made for young coders everywhere</p>
+                </div>
               </div>
             </footer>
-            <ChatBot />
-            <CookieConsent />
+            <LazyComponents />
             </div>
           </ErrorBoundary>
         </AuthProvider>

@@ -198,11 +198,12 @@ export default function AuditLogsPage() {
           aVal = a.status;
           bVal = b.status;
           break;
-        case "severity":
-          const severityOrder = { INFO: 1, WARNING: 2, ERROR: 3, CRITICAL: 4 };
+        case "severity": {
+          const severityOrder: Record<string, number> = { INFO: 1, WARNING: 2, ERROR: 3, CRITICAL: 4 };
           aVal = severityOrder[a.severity];
           bVal = severityOrder[b.severity];
           break;
+        }
         default:
           aVal = a.timestamp;
           bVal = b.timestamp;

@@ -32,37 +32,40 @@ let pyodideInstance: any = null;
 let pyodideLoading = false;
 let pyodideLoadPromise: Promise<any> | null = null;
 
+async function loadPyodideInternal(): Promise<any> {
+  // Load Pyodide script if not already loaded
+  if (!(window as any).loadPyodide) {
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+    script.async = true;
+    await new Promise<void>((res, rej) => {
+      script.onload = () => res();
+      script.onerror = () => rej(new Error("Failed to load Pyodide"));
+      document.head.appendChild(script);
+    });
+  }
+
+  // Initialize Pyodide
+  return (window as any).loadPyodide({
+    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+  });
+}
+
 async function loadPyodide() {
   if (pyodideInstance) return pyodideInstance;
   if (pyodideLoadPromise) return pyodideLoadPromise;
 
   pyodideLoading = true;
-  pyodideLoadPromise = new Promise(async (resolve, reject) => {
-    try {
-      // Load Pyodide script
-      if (!(window as any).loadPyodide) {
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
-        script.async = true;
-        await new Promise<void>((res, rej) => {
-          script.onload = () => res();
-          script.onerror = () => rej(new Error("Failed to load Pyodide"));
-          document.head.appendChild(script);
-        });
-      }
-
-      // Initialize Pyodide
-      pyodideInstance = await (window as any).loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
-      });
-
+  pyodideLoadPromise = loadPyodideInternal()
+    .then((instance) => {
+      pyodideInstance = instance;
       pyodideLoading = false;
-      resolve(pyodideInstance);
-    } catch (error) {
+      return instance;
+    })
+    .catch((error) => {
       pyodideLoading = false;
-      reject(error);
-    }
-  });
+      throw error;
+    });
 
   return pyodideLoadPromise;
 }

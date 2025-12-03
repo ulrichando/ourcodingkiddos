@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar, ArrowRight, Target as Aim } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar, ArrowRight, Target as Aim, Loader2 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import LanguageIcon from "@/components/ui/LanguageIcon";
@@ -47,6 +48,8 @@ type RecommendedCourse = {
 };
 
 export default function StudentDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [classes, setClasses] = React.useState<ClassItem[]>([]);
   const [student, setStudent] = React.useState<{
@@ -161,12 +164,36 @@ export default function StudentDashboard() {
     }
   }, [searchParams]);
 
+  // Authentication check
+  React.useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
+    }
+  }, [status, router]);
+
   const streakDays = student.streakDays || 0;
   const totalXp = student.totalXp || 0;
   const currentLevel = student.currentLevel || 1;
   const levelXP = currentLevel * 500;
   const currentLevelProgress = totalXp % levelXP;
   const nextIn = Math.max(0, levelXP - currentLevelProgress);
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <main className="min-h-screen bg-[#3d0f68] text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-purple-400" />
+          <p className="text-white/80">Loading your dashboard...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Redirect handled by useEffect, show nothing while redirecting
+  if (status === "unauthenticated") {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-[#3d0f68] text-white">

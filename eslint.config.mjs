@@ -8,7 +8,7 @@ import globals from "globals";
 
 export default [
   {
-    ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/public/**"]
+    ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**", "**/public/**", "**/generated/**"]
   },
   js.configs.recommended,
   {

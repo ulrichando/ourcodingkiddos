@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { createNotification } from "../../notifications/route";
 
 export async function POST(request: Request) {
+  // Authentication check
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ status: "error", message: "Unauthorized" }, { status: 401 });
+  }
+
+  const userRole = (session.user as any).role;
+  const userEmail = session.user.email;
+  const userId = (session.user as any).id;
+
   const body = await request.json().catch(() => null);
   const lessonId = String(body?.lessonId || "").trim();
   const courseId = String(body?.courseId || "").trim();
@@ -14,6 +26,40 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Verify authorization - user must be:
+    // 1. Admin or Instructor (can update any student)
+    // 2. The student themselves
+    // 3. The parent of the student
+    if (userRole !== "ADMIN" && userRole !== "INSTRUCTOR") {
+      const studentProfile = await prisma.studentProfile.findUnique({
+        where: { id: studentId },
+        select: { userId: true, parentEmail: true, guardianId: true },
+      });
+
+      if (!studentProfile) {
+        return NextResponse.json({ status: "error", message: "Student not found" }, { status: 404 });
+      }
+
+      // Check if user is the student
+      const isStudent = studentProfile.userId === userId;
+
+      // Check if user is the parent
+      let isParent = false;
+      if (userRole === "PARENT") {
+        const parentProfile = await prisma.parentProfile.findFirst({
+          where: { user: { email: userEmail } },
+          select: { id: true },
+        });
+
+        isParent = studentProfile.parentEmail === userEmail ||
+                   (parentProfile && studentProfile.guardianId === parentProfile.id);
+      }
+
+      if (!isStudent && !isParent) {
+        return NextResponse.json({ status: "error", message: "Forbidden - you cannot update this student's progress" }, { status: 403 });
+      }
+    }
+
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
       select: { xpReward: true, courseId: true },
