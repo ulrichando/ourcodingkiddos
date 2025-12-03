@@ -10,9 +10,16 @@ export async function POST(request: Request) {
   const name = body?.name?.trim();
   const email = body?.email?.toLowerCase().trim();
   const password = body?.password;
-  const roleInput = String(body?.role || "").toUpperCase() as Role | string;
-  const allowedRoles: Role[] = ["PARENT", "INSTRUCTOR"];
-  const role: Role = allowedRoles.includes(roleInput as Role) ? (roleInput as Role) : "PARENT";
+  const roleInput = String(body?.role || "").toUpperCase();
+
+  // Only parents can self-register. Instructors must be created by an admin.
+  if (roleInput === "INSTRUCTOR" || roleInput === "ADMIN") {
+    return NextResponse.json(
+      { status: "error", message: "Only parents can register. Instructors are added by administrators." },
+      { status: 403 }
+    );
+  }
+  const role: Role = "PARENT";
 
   if (!name || !email || !password || password.length < 6) {
     return NextResponse.json({ status: "error", message: "Invalid input" }, { status: 400 });
@@ -46,26 +53,15 @@ export async function POST(request: Request) {
   // Log user registration
   logCreate(email, "User", user.id, `New ${role.toLowerCase()} registered: ${name}`, user.id, { role }).catch(() => {});
 
-  // Send welcome notification
-  if (role === "PARENT") {
-    createNotification(
-      email,
-      `Welcome to Our Coding Kiddos, ${name}! 👋`,
-      "Get started by adding your first student and exploring our interactive coding courses!",
-      "welcome",
-      "/dashboard/parent/add-student",
-      { userName: name, userRole: role }
-    );
-  } else if (role === "INSTRUCTOR") {
-    createNotification(
-      email,
-      `Welcome Instructor ${name}! 🎓`,
-      "You can now create classes, manage students, and share your coding expertise!",
-      "welcome",
-      "/dashboard/instructor",
-      { userName: name, userRole: role }
-    );
-  }
+  // Send welcome notification to new parent
+  createNotification(
+    email,
+    `Welcome to Our Coding Kiddos, ${name}!`,
+    "Get started by adding your first student and exploring our interactive coding courses!",
+    "welcome",
+    "/dashboard/parent/add-student",
+    { userName: name, userRole: role }
+  );
 
   return NextResponse.json({ status: "ok", user: { id: user.id, email: user.email } }, { status: 201 });
 }
