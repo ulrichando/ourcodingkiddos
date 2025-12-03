@@ -38,8 +38,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Only parents can add students" }, { status: 403 });
   }
 
-  // Check subscription status for parents (admins bypass this check)
-  if (sessionRole === "PARENT") {
+  // Check if this is an official demo account (only specific demo accounts bypass subscription checks)
+  const DEMO_ACCOUNTS = ["demo.parent@example.com", "demo.instructor@example.com", "demo.student@example.com"];
+  const isDemoAccount = DEMO_ACCOUNTS.includes(effectiveParentEmail?.toLowerCase() || "");
+
+  // Check subscription status for parents (admins and demo accounts bypass this check)
+  if (sessionRole === "PARENT" && !isDemoAccount) {
     const subscription = await prisma.subscription.findFirst({
       where: {
         OR: [

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AppHeader from "../components/navigation/AppHeader";
 import ChatBot from "../components/chat/ChatBot";
+import CookieConsent from "../components/ui/CookieConsent";
 import AuthProvider from "../components/providers/AuthProvider";
 import ThemeHydrator from "../components/providers/ThemeHydrator";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -158,6 +159,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </footer>
             <ChatBot />
+            <CookieConsent />
             </div>
           </ErrorBoundary>
         </AuthProvider>

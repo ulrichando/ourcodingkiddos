@@ -113,30 +113,49 @@ export default function ParentDashboardPage() {
   const totalXP = useMemo(() => students.reduce((sum, s) => sum + (s.totalXp || s.total_xp || 0), 0), [students]);
   const totalBadges = useMemo(() => students.reduce((sum, s) => sum + (s.badges?.length || 0), 0), [students]);
 
+  // Check if this is an official demo account - only specific demo accounts have full access for testing
+  const DEMO_ACCOUNTS = ["demo.parent@example.com", "demo.instructor@example.com", "demo.student@example.com"];
+  const isDemoAccount = DEMO_ACCOUNTS.includes(session?.user?.email?.toLowerCase() || "");
+
   // Determine access state - only evaluate after loading is complete
   const isLoading = sessionLoading || loadingSubscription;
-  const hasAccess = isAdmin || accessStatus?.hasAccess === true;
+  const hasAccess = isAdmin || isDemoAccount || accessStatus?.hasAccess === true;
 
-  // Only show blocking states after loading is complete
-  const subscriptionBlocked = !isLoading && !hasAccess && accessStatus !== null && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
-  const noSubscription = !isLoading && !hasAccess && accessStatus !== null && accessStatus.status === "none";
+  // Only show blocking states after loading is complete (demo accounts never blocked)
+  const subscriptionBlocked = !isLoading && !hasAccess && !isDemoAccount && accessStatus !== null && ["past_due", "unpaid", "canceled", "expired"].includes(accessStatus.status);
+  const noSubscription = !isLoading && !hasAccess && !isDemoAccount && accessStatus !== null && accessStatus.status === "none";
 
-  // Plan label for display - show "Free Trial" if status is trialing
-  const planLabel = isAdmin
-    ? "Admin Access"
-    : accessStatus?.status === "trialing"
-      ? "Free Trial"
-      : subscription?.planType
-        ? subscription.planType.toUpperCase() === "FAMILY"
-          ? "Premium Family"
-          : subscription.planType.toUpperCase() === "ANNUAL"
-            ? "Premium Annual"
-            : "Premium Monthly"
-        : "No Plan";
+  // Plan label for display - show "Demo Access" for demo accounts
+  const planLabel = isDemoAccount
+    ? "Demo Access"
+    : isAdmin
+      ? "Admin Access"
+      : accessStatus?.status === "trialing"
+        ? "Free Trial"
+        : subscription?.planType
+          ? subscription.planType.toUpperCase() === "FAMILY"
+            ? "Premium Family"
+            : subscription.planType.toUpperCase() === "ANNUAL"
+              ? "Premium Annual"
+              : "Premium Monthly"
+          : "No Plan";
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+        {/* Demo Account Banner */}
+        {isDemoAccount && (
+          <div className="mb-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-800 dark:text-amber-200">Demo Account</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                You&apos;re logged in as <span className="font-mono">{session?.user?.email}</span>. This is a demo account for testing purposes.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Welcome Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -575,13 +594,8 @@ export default function ParentDashboardPage() {
               </CardHeader>
               <CardContent>
                 {upcoming.length === 0 ? (
-                  <div className="text-center py-6 space-y-2">
+                  <div className="text-center py-6">
                     <p className="text-slate-500 dark:text-slate-400">No upcoming classes</p>
-                    <Link href="/schedule">
-                      <Button variant="outline" size="sm">
-                        Book a Class
-                      </Button>
-                    </Link>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -614,7 +628,7 @@ export default function ParentDashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { label: "Book a Class", icon: Calendar, href: "/schedule" },
+                  { label: "Request 1-on-1 Class", icon: Users, href: "/dashboard/parent/class-requests" },
                   { label: "Browse Courses", icon: BookOpen, href: "/courses" },
                   { label: "View Certificates", icon: Award, href: "/certificates" },
                   { label: "View Progress Reports", icon: TrendingUp, href: "/dashboard/parent/reports" },
@@ -624,13 +638,16 @@ export default function ParentDashboardPage() {
                     icon: MessageSquare,
                     href: "/messages",
                   },
-                ].map((action) => (
+                ].map((action: any) => (
                   <Link key={action.label} href={action.href}>
                     <Button
-                      variant="ghost"
-                      className="w-full justify-start font-semibold text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-3 px-0"
+                      variant={action.highlight ? "default" : "ghost"}
+                      className={action.highlight
+                        ? "w-full justify-start font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-3"
+                        : "w-full justify-start font-semibold text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-3 px-0"
+                      }
                     >
-                      <action.icon className="w-4 h-4 text-slate-700 dark:text-slate-400 flex-shrink-0" />
+                      <action.icon className={`w-4 h-4 flex-shrink-0 ${action.highlight ? "text-white" : "text-slate-700 dark:text-slate-400"}`} />
                       <span className="text-sm">{action.label}</span>
                     </Button>
                   </Link>

@@ -66,11 +66,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
   }
 
-  // Check subscription status for students and parents (admins and instructors bypass this check)
+  // Check subscription status for students and parents (admins, instructors, and demo accounts bypass this check)
   const role = (session.user as any).role;
   const userEmail = session.user.email;
 
-  if (role === "STUDENT" || role === "PARENT") {
+  // Check if this is an official demo account
+  const DEMO_ACCOUNTS = ["demo.parent@example.com", "demo.instructor@example.com", "demo.student@example.com"];
+  const isDemoAccount = DEMO_ACCOUNTS.includes(userEmail?.toLowerCase() || "");
+
+  if ((role === "STUDENT" || role === "PARENT") && !isDemoAccount) {
     // For students, check their parent's subscription via parentEmail in studentProfile
     // For parents, check their own subscription
     let checkEmail = userEmail;

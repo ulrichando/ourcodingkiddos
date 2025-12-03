@@ -76,6 +76,23 @@ export async function POST(req: NextRequest) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId || session.client_reference_id;
 
+  // Check if this is a 1-on-1 class payment
+  if (session.metadata?.type === 'one-on-one-class') {
+    const classRequestId = session.metadata.classRequestId;
+    if (classRequestId) {
+      await prisma.classRequest.update({
+        where: { id: classRequestId },
+        data: {
+          paymentStatus: 'PAID',
+          paidAt: new Date(),
+          stripePaymentId: session.id,
+        },
+      });
+      console.log(`1-on-1 class payment completed for request ${classRequestId}`);
+    }
+    return;
+  }
+
   if (!userId) {
     console.error('No userId in checkout session metadata');
     return;

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Home, BookOpen, Calendar, MessageSquare, ChevronDown, Settings, Award, LogOut, Moon, Sun, Code2, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { signOut } from "next-auth/react";
+import { logout } from "../../lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
 
 export default function AppHeader() {
@@ -192,7 +192,7 @@ export default function AppHeader() {
                 <button
                   onClick={async () => {
                     setMenuOpen(false);
-                    await signOut({ callbackUrl: "/auth/login" });
+                    await logout();
                   }}
                   className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
@@ -414,7 +414,7 @@ export default function AppHeader() {
                   <button
                     onClick={async () => {
                       setMobileOpen(false);
-                      await signOut({ callbackUrl: "/auth/login" });
+                      await logout();
                     }}
                     className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200"
                   >

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useMemo, useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   Calendar,
   Users,
@@ -24,10 +25,14 @@ async function fetchSessions() {
 }
 
 export default function InstructorDashboard() {
-  const userName = "Instructor";
+  const { data: session } = useSession();
+  const userName = session?.user?.name || "Instructor";
   const [sessions, setSessions] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
+
+  // Check if this is a demo account
+  const isDemoAccount = session?.user?.email?.includes("demo") || session?.user?.email?.endsWith("@example.com");
   const [checkingAttendance, setCheckingAttendance] = useState<string | null>(null);
   const [attendanceResult, setAttendanceResult] = useState<{
     classId: string;
@@ -115,6 +120,19 @@ export default function InstructorDashboard() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Demo Account Banner */}
+        {isDemoAccount && (
+          <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-800 dark:text-amber-200">Demo Account</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                You&apos;re logged in as <span className="font-mono">{session?.user?.email}</span>. This is a demo account for testing purposes.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Instructor Dashboard</h1>
@@ -263,7 +281,6 @@ export default function InstructorDashboard() {
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">Quick Actions</h3>
               {[
                 { label: "View Students", href: "/dashboard/instructor/students", icon: Users },
-                { label: "Manage Content", href: "/dashboard/instructor/content", icon: BookOpen },
                 { label: "Messages", href: "/messages", icon: MessageSquare },
                 { label: "Availability", href: "/dashboard/instructor/availability", icon: Calendar },
               ].map((action) => (

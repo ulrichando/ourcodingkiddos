@@ -25,14 +25,35 @@ export interface SubscriptionData {
   trialEndsAt?: Date | string;
 }
 
+// Official demo account emails that get full access for testing
+const DEMO_ACCOUNTS = [
+  "demo.parent@example.com",
+  "demo.instructor@example.com",
+  "demo.student@example.com",
+];
+
+/**
+ * Check if a user is using an official demo account
+ * Only specific demo accounts have full access for testing purposes
+ */
+export function isDemoAccount(session: Session | null): boolean {
+  if (!session?.user?.email) return false;
+  const email = session.user.email.toLowerCase();
+  return DEMO_ACCOUNTS.includes(email);
+}
+
 /**
  * Check if a user should bypass subscription restrictions
- * Admin users always have unlimited access
+ * Admin users and demo accounts always have unlimited access
  */
 export function bypassesSubscription(session: Session | null): boolean {
   if (!session?.user) return false;
   const userRole = (session.user as any).role;
-  return userRole === "ADMIN";
+  // Admins always bypass
+  if (userRole === "ADMIN") return true;
+  // Demo accounts bypass for testing
+  if (isDemoAccount(session)) return true;
+  return false;
 }
 
 /**
@@ -261,6 +282,11 @@ export function getSubscriptionLabel(
   session: Session | null,
   subscription: { plan_type?: string; planType?: string } | null
 ): string {
+  // Check demo account first
+  if (isDemoAccount(session)) {
+    return "Demo Access";
+  }
+
   if (bypassesSubscription(session)) {
     return "Admin Access";
   }

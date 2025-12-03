@@ -7,7 +7,7 @@ import { Card, CardContent } from "../ui/card";
 import Button from "../ui/button";
 import Input from "../ui/input";
 import Badge from "../ui/badge";
-import { signOut } from "next-auth/react";
+import { logout } from "../../lib/logout";
 import { Modal } from "../ui/modal";
 
 type UserRow = { id: string; name: string; email: string; type: string; joined: string };
@@ -315,7 +315,7 @@ export default function AdminDashboardShell({
             <div className="flex items-center gap-4 text-slate-700 dark:text-slate-300 text-sm">
               <span>{userEmail}</span>
               <button
-                onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                onClick={() => logout()}
                 className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
               >
                 <LogOut className="w-4 h-4" />

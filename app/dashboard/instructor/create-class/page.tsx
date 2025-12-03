@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Clock, Video, Users, CalendarDays, Link2, Loader2, CheckCircle2 } from "lucide-react";
+import { Clock, Video, Users, CalendarDays, Link2, Loader2, CheckCircle2, Repeat, UserCircle } from "lucide-react";
 import Button from "../../../../components/ui/button";
 
 export default function CreateClassPage() {
@@ -20,11 +20,45 @@ export default function CreateClassPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Recurring class state
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrencePattern, setRecurrencePattern] = useState("WEEKLY");
+  const [numberOfWeeks, setNumberOfWeeks] = useState(4);
+
   // Google Meet state
   const [hasGoogleAccount, setHasGoogleAccount] = useState(false);
   const [checkingGoogle, setCheckingGoogle] = useState(true);
   const [generatingMeet, setGeneratingMeet] = useState(false);
   const [meetGenerated, setMeetGenerated] = useState(false);
+
+  // Auto-set maxStudents to 1 for 1:1 sessions
+  useEffect(() => {
+    if (sessionType === "ONE_ON_ONE") {
+      setMaxStudents(1);
+    }
+  }, [sessionType]);
+
+  // Calculate preview dates for recurring classes
+  const previewDates = useMemo(() => {
+    if (!startTime || !isRecurring) return [];
+
+    const dates: Date[] = [];
+    const baseDate = new Date(startTime);
+
+    for (let i = 0; i < numberOfWeeks; i++) {
+      const newDate = new Date(baseDate);
+      if (recurrencePattern === "WEEKLY") {
+        newDate.setDate(baseDate.getDate() + (i * 7));
+      } else if (recurrencePattern === "BIWEEKLY") {
+        newDate.setDate(baseDate.getDate() + (i * 14));
+      } else if (recurrencePattern === "MONTHLY") {
+        newDate.setMonth(baseDate.getMonth() + i);
+      }
+      dates.push(newDate);
+    }
+
+    return dates;
+  }, [startTime, isRecurring, recurrencePattern, numberOfWeeks]);
 
   // Check if Google account is connected on mount
   useEffect(() => {
@@ -108,6 +142,9 @@ export default function CreateClassPage() {
       durationMinutes,
       maxStudents,
       meetingUrl,
+      isRecurring,
+      recurrencePattern: isRecurring ? recurrencePattern : null,
+      numberOfWeeks: isRecurring ? numberOfWeeks : 1,
     };
 
     const res = await fetch("/api/instructor/classes", {
@@ -166,10 +203,15 @@ export default function CreateClassPage() {
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
               >
                 <option value="GROUP">Group</option>
-                <option value="ONE_ON_ONE">1:1</option>
+                <option value="ONE_ON_ONE">1:1 Private</option>
                 <option value="WORKSHOP">Workshop</option>
                 <option value="CAMP">Camp</option>
               </select>
+              {sessionType === "ONE_ON_ONE" && (
+                <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1 mt-1">
+                  <UserCircle className="h-3 w-3" /> Private 1-on-1 session (max 1 student)
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -238,8 +280,88 @@ export default function CreateClassPage() {
                 value={maxStudents}
                 onChange={(e) => setMaxStudents(parseInt(e.target.value) || 1)}
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                disabled={sessionType === "ONE_ON_ONE"}
               />
             </div>
+          </div>
+
+          {/* Recurring Schedule Section */}
+          <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <Repeat className="h-4 w-4 text-blue-500" />
+                Schedule for Multiple Weeks
+              </label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isRecurring}
+                  onChange={(e) => setIsRecurring(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {isRecurring && (
+              <div className="space-y-4 pt-2">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Repeat</label>
+                    <select
+                      value={recurrencePattern}
+                      onChange={(e) => setRecurrencePattern(e.target.value)}
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      <option value="WEEKLY">Weekly</option>
+                      <option value="BIWEEKLY">Every 2 Weeks</option>
+                      <option value="MONTHLY">Monthly</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Number of Sessions</label>
+                    <select
+                      value={numberOfWeeks}
+                      onChange={(e) => setNumberOfWeeks(parseInt(e.target.value))}
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    >
+                      {[2, 3, 4, 5, 6, 7, 8, 10, 12].map((n) => (
+                        <option key={n} value={n}>{n} sessions</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Preview of scheduled dates */}
+                {previewDates.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Scheduled Dates Preview:</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                      {previewDates.map((date, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg px-3 py-2 text-sm border border-slate-200 dark:border-slate-600"
+                        >
+                          <CalendarDays className="h-4 w-4 text-blue-500" />
+                          <span className="text-slate-700 dark:text-slate-300">
+                            {date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      {previewDates.length} classes will be created at {startTime ? new Date(startTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "the selected time"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isRecurring && (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Enable this to schedule the same class for multiple weeks in advance.
+              </p>
+            )}
           </div>
 
           {/* Google Meet Section */}
@@ -340,7 +462,7 @@ export default function CreateClassPage() {
 
           <div className="flex gap-3">
             <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white" disabled={loading}>
-              {loading ? "Creating..." : "Create Class"}
+              {loading ? "Creating..." : isRecurring ? `Create ${numberOfWeeks} Classes` : "Create Class"}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.push("/dashboard/instructor")}>
               Cancel

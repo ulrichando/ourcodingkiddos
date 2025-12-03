@@ -61,7 +61,6 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
     { name: "Dashboard", href: "/dashboard/instructor", icon: LayoutDashboard },
     { name: "My Classes", href: "/dashboard/instructor", icon: Calendar },
     { name: "Students", href: "/dashboard/instructor", icon: Users },
-    { name: "Content", href: "/dashboard/instructor/content", icon: BookOpen },
   ];
 
   const links = userType === "instructor" ? instructorLinks : userType === "student" ? studentLinks : parentLinks;

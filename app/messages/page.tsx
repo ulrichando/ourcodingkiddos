@@ -136,17 +136,19 @@ export default function MessagesPage() {
       .catch(() => {});
   }, [userRole]);
 
-  // Prefill "new message" when arriving with ?to=&subject=
+  // Prefill "new message" when arriving with ?to=&name=&subject=
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const to = params.get("to");
+    const name = params.get("name");
     const subject = params.get("subject");
-    if (to || subject) {
+    if (to || name || subject) {
       setShowNew(true);
-      if (to) setNewTo(to);
+      // Use name if provided, otherwise fall back to email
+      if (name) setNewTo(name);
+      else if (to) setNewTo(to);
       if (subject) setNewGroupName(subject);
-      // focus the composer; we rely on user to type a message before send
     }
   }, []);
 
@@ -577,7 +579,7 @@ export default function MessagesPage() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={window.innerWidth < 640 ? "Type a message..." : "Type a message... (Enter to send)"}
+                    placeholder="Type a message..."
                     className="flex-1 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 sm:px-4 py-2.5 sm:py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     maxLength={5000}
                   />

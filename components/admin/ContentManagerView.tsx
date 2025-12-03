@@ -79,16 +79,25 @@ type Coupon = {
   isActive: boolean;
 };
 
+type Student = {
+  id: string;
+  name: string;
+  totalXp?: number;
+  avatar?: string;
+};
+
 type Props = {
   courses: ContentCourse[];
   homePath: string;
   dbError?: boolean;
+  students?: Student[];
 };
 
-export default function ContentManagerView({ courses, homePath, dbError = false }: Props) {
+export default function ContentManagerView({ courses, homePath, dbError = false, students: initialStudents = [] }: Props) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(courses[0]?.id ?? null);
   const [courseList, setCourseList] = useState<ContentCourse[]>(courses);
+  const [students, setStudents] = useState<Student[]>(initialStudents);
   const [lessons, setLessons] = useState<LessonItem[]>([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lessonError, setLessonError] = useState<string | null>(null);
@@ -130,15 +139,28 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
   const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestionForm[]>([]);
-  const [activeTab, setActiveTab] = useState<"courses" | "classes" | "certificates" | "coupons">("courses");
-  const demoStudents = useMemo(
-    () => [
-      { id: "stu1", name: "Demo Student", xp: 0 },
-      { id: "stu2", name: "Artan", xp: 0 },
-    ],
-    []
-  );
+  const [activeTab, setActiveTab] = useState<"courses" | "certificates" | "coupons">("courses");
   const [certificateModal, setCertificateModal] = useState(false);
+  const [issuingCertificate, setIssuingCertificate] = useState(false);
+
+  // Fetch students from API if not provided
+  useEffect(() => {
+    if (initialStudents.length === 0) {
+      fetch("/api/students")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.students) {
+            setStudents(data.students.map((s: any) => ({
+              id: s.id,
+              name: s.name,
+              totalXp: s.totalXp || 0,
+              avatar: s.avatar,
+            })));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [initialStudents.length]);
   const [certForm, setCertForm] = useState({ student: "", course: "", achievement: "course_completion" });
 
   const [courseForm, setCourseForm] = useState({
@@ -861,7 +883,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Content Manager</h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">Create and manage courses, lessons, live classes, and certificates</p>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Create and manage courses, lessons, and certificates</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -888,23 +910,12 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               </Button>
             )}
           </div>
-          {activeTab === "classes" && (
-            <Button
-              type="button"
-              className="bg-gradient-to-r from-purple-500 to-pink-500"
-              onClick={() => alert("Class scheduling is demo-only in this build.")}
-              disabled={dbError}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Schedule Class
-            </Button>
-          )}
           {activeTab === "certificates" && (
             <Button
               type="button"
               className="bg-gradient-to-r from-amber-500 to-orange-500"
               onClick={() => setCertificateModal(true)}
-              disabled={demoStudents.length === 0}
+              disabled={students.length === 0}
             >
               <AwardIcon className="w-4 h-4 mr-2" />
               Issue Certificate
@@ -916,7 +927,6 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
         <div className="flex gap-2 flex-wrap">
           {[
             { id: "courses", label: "Courses & Lessons" },
-            { id: "classes", label: "Live Classes" },
             { id: "certificates", label: "Certificates" },
             { id: "coupons", label: "Coupons" },
           ].map((tab) => (
@@ -1448,16 +1458,6 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
           </div>
         )}
 
-        {activeTab === "classes" && (
-          <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
-            <CardContent className="p-8 text-center space-y-2">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Live Classes</h3>
-              <p className="text-slate-600 dark:text-slate-400 text-sm">
-                Scheduling is demo-only in this local build. Use the instructor dashboard to create classes.
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
         {activeTab === "certificates" && (
           <Card className="border border-slate-100 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
@@ -1471,13 +1471,13 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
               <p className="text-slate-600 dark:text-slate-400 mb-6">
                 Award certificates to students who have completed courses or achieved milestones.
               </p>
-              {demoStudents.length === 0 ? (
+              {students.length === 0 ? (
                 <div className="text-center text-slate-500 dark:text-slate-400 py-8 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
                   No students available yet. Add students to issue certificates.
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {demoStudents.map((stu) => (
+                  {students.map((stu) => (
                     <Card key={stu.id} className="bg-slate-50 dark:bg-slate-700">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-center gap-3">
@@ -1486,7 +1486,7 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                           </div>
                           <div>
                             <div className="font-semibold text-slate-900 dark:text-slate-100">{stu.name}</div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400">{stu.xp} XP</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">{stu.totalXp || 0} XP</div>
                           </div>
                         </div>
                         <Button
@@ -1946,11 +1946,32 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
             </button>
             <form
               className="px-6 py-5 space-y-4"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                alert("Certificate issued (demo).");
-                setCertForm({ student: "", course: "", achievement: "course_completion" });
-                setCertificateModal(false);
+                setIssuingCertificate(true);
+                try {
+                  const res = await fetch("/api/certificates", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      studentId: certForm.student,
+                      courseId: certForm.course,
+                      achievementType: certForm.achievement,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setToast({ message: data.message || "Certificate issued successfully!", type: "success" });
+                    setCertForm({ student: "", course: "", achievement: "course_completion" });
+                    setCertificateModal(false);
+                  } else {
+                    setToast({ message: data.error || "Failed to issue certificate", type: "error" });
+                  }
+                } catch (error) {
+                  setToast({ message: "Failed to issue certificate", type: "error" });
+                } finally {
+                  setIssuingCertificate(false);
+                }
               }}
             >
               <div>
@@ -1967,10 +1988,10 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                     onChange={(e) => setCertForm({ ...certForm, student: e.target.value })}
                     className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
                     required
-                    disabled={demoStudents.length === 0}
+                    disabled={students.length === 0}
                   >
                     <option value="">Select student</option>
-                    {demoStudents.map((stu) => (
+                    {students.map((stu) => (
                       <option key={stu.id} value={stu.id}>
                         {stu.name}
                       </option>
@@ -2007,11 +2028,18 @@ export default function ContentManagerView({ courses, homePath, dbError = false 
                 </div>
               </div>
               <div className="flex items-center justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => setCertificateModal(false)}>
+                <Button type="button" variant="outline" onClick={() => setCertificateModal(false)} disabled={issuingCertificate}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500">
-                  Issue Certificate
+                <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500" disabled={issuingCertificate}>
+                  {issuingCertificate ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Issuing...
+                    </>
+                  ) : (
+                    "Issue Certificate"
+                  )}
                 </Button>
               </div>
             </form>

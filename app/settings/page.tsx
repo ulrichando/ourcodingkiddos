@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Button from "../../components/ui/button";
+import { logout } from "../../lib/logout";
 
 interface SubscriptionData {
   planType: string;
@@ -270,7 +271,7 @@ export default function SettingsPage() {
 
       if (response.ok) {
         // Sign out and redirect to home page after account deletion
-        signOut({ callbackUrl: "/" });
+        await logout();
       } else {
         const data = await response.json();
         setDeleteStatus("error");
@@ -615,7 +616,7 @@ export default function SettingsPage() {
             <Button
               variant="outline"
               className="text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 w-fit"
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
+              onClick={() => logout()}
             >
               Log Out
             </Button>

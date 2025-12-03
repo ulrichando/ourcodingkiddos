@@ -416,18 +416,24 @@ model ClassSession {
 }
 
 model InstructorAvailability {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   instructorId    String?
   instructorEmail String?
-  dayOfWeek       Int
+  // For recurring weekly availability
+  dayOfWeek       Int?
+  // For specific date availability
+  specificDate    DateTime?
+  isRecurring     Boolean   @default(true)
   startTime       String
   endTime         String
-  isActive        Boolean  @default(true)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
 
   instructor User? @relation("InstructorAvailabilityInstructor", fields: [instructorId], references: [id])
 
   @@index([instructorId])
   @@index([dayOfWeek])
+  @@index([specificDate])
 }
 
 model Payment {
@@ -633,6 +639,8 @@ model ClassRequest {
   preferredTimes   Json?              // Array of preferred time ranges
   duration         Int?               // Duration in minutes, default 60
   status           ClassRequestStatus @default(PENDING)
+  preferredInstructorId   String?     // Parent's preferred instructor (optional)
+  preferredInstructorName String?     // Parent's preferred instructor name
   instructorEmail  String?            // Assigned instructor
   instructorName   String?
   scheduledDate    DateTime?
@@ -646,9 +654,21 @@ model ClassRequest {
   reviewedAt       DateTime?
   scheduledAt      DateTime?
 
+  // Payment fields
+  numberOfSessions  Int?              // Total sessions purchased (daysPerWeek × numberOfWeeks)
+  daysPerWeek       Int?              // Sessions per week
+  numberOfWeeks     Int?              // Number of weeks
+  pricePerSession   Int?              // Price per session in cents
+  totalPrice        Int?              // Total price in cents
+  discountApplied   Int?              // Discount amount in cents
+  paymentStatus     String?           @default("UNPAID") // UNPAID, PENDING, PAID, REFUNDED
+  stripePaymentId   String?           // Stripe payment intent or checkout session ID
+  paidAt            DateTime?
+
   @@index([parentEmail])
   @@index([status])
   @@index([instructorEmail])
+  @@index([paymentStatus])
 }
 
 model Achievement {

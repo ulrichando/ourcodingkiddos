@@ -1,0 +1,280 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Cookie, X, Settings, Check } from "lucide-react";
+import Button from "./button";
+
+type CookiePreferences = {
+  necessary: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  preferences: boolean;
+};
+
+const defaultPreferences: CookiePreferences = {
+  necessary: true, // Always required
+  analytics: false,
+  marketing: false,
+  preferences: false,
+};
+
+export default function CookieConsent() {
+  const [showBanner, setShowBanner] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [preferences, setPreferences] = useState<CookiePreferences>(defaultPreferences);
+
+  useEffect(() => {
+    // Check if user has already made a choice
+    const consent = localStorage.getItem("cookie-consent");
+    if (!consent) {
+      // Small delay to avoid layout shift on page load
+      const timer = setTimeout(() => setShowBanner(true), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      try {
+        const savedPrefs = JSON.parse(consent);
+        setPreferences(savedPrefs);
+      } catch {
+        setShowBanner(true);
+      }
+    }
+  }, []);
+
+  const savePreferences = (prefs: CookiePreferences) => {
+    localStorage.setItem("cookie-consent", JSON.stringify(prefs));
+    localStorage.setItem("cookie-consent-date", new Date().toISOString());
+    setPreferences(prefs);
+    setShowBanner(false);
+    setShowSettings(false);
+
+    // Dispatch event so other parts of app can react
+    window.dispatchEvent(new CustomEvent("cookie-consent-updated", { detail: prefs }));
+  };
+
+  const acceptAll = () => {
+    savePreferences({
+      necessary: true,
+      analytics: true,
+      marketing: true,
+      preferences: true,
+    });
+  };
+
+  const acceptSelected = () => {
+    savePreferences(preferences);
+  };
+
+  const rejectAll = () => {
+    savePreferences({
+      necessary: true,
+      analytics: false,
+      marketing: false,
+      preferences: false,
+    });
+  };
+
+  if (!showBanner) return null;
+
+  return (
+    <>
+      {/* Cookie Banner */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-in slide-in-from-bottom duration-500">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          {!showSettings ? (
+            // Main Banner View
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Cookie className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                      We value your privacy
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                      We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic.
+                      By clicking &quot;Accept All&quot;, you consent to our use of cookies.{" "}
+                      <Link href="/cookies" className="text-purple-600 dark:text-purple-400 hover:underline">
+                        Learn more
+                      </Link>
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      onClick={acceptAll}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Accept All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={rejectAll}
+                    >
+                      Reject All
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowSettings(true)}
+                      className="text-slate-600 dark:text-slate-400"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Customize
+                    </Button>
+                  </div>
+                </div>
+                <button
+                  onClick={rejectAll}
+                  className="absolute top-4 right-4 sm:relative sm:top-0 sm:right-0 p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            // Settings View
+            <div className="p-4 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Cookie Preferences
+                </h3>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition"
+                >
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {/* Necessary Cookies - Always On */}
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Necessary Cookies</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Essential for the website to function properly. Cannot be disabled.
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      disabled
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-purple-600 rounded-full cursor-not-allowed opacity-70">
+                      <div className="absolute top-[2px] right-[2px] bg-white rounded-full h-5 w-5 transition-all"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Analytics Cookies */}
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Analytics Cookies</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Help us understand how visitors interact with our website.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.analytics}
+                      onChange={(e) => setPreferences(prev => ({ ...prev, analytics: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
+
+                {/* Marketing Cookies */}
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Marketing Cookies</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Used to deliver personalized advertisements relevant to you.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.marketing}
+                      onChange={(e) => setPreferences(prev => ({ ...prev, marketing: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
+
+                {/* Preference Cookies */}
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Preference Cookies</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Remember your settings and preferences for a better experience.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.preferences}
+                      onChange={(e) => setPreferences(prev => ({ ...prev, preferences: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                <Button
+                  onClick={acceptSelected}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Save Preferences
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={acceptAll}
+                >
+                  Accept All
+                </Button>
+                <Link href="/cookies" className="text-sm text-purple-600 dark:text-purple-400 hover:underline self-center ml-auto">
+                  Cookie Policy
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Export a hook to check cookie consent status
+export function useCookieConsent() {
+  const [consent, setConsent] = useState<CookiePreferences | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("cookie-consent");
+    if (stored) {
+      try {
+        setConsent(JSON.parse(stored));
+      } catch {
+        setConsent(null);
+      }
+    }
+
+    const handleUpdate = (e: CustomEvent<CookiePreferences>) => {
+      setConsent(e.detail);
+    };
+
+    window.addEventListener("cookie-consent-updated", handleUpdate as EventListener);
+    return () => window.removeEventListener("cookie-consent-updated", handleUpdate as EventListener);
+  }, []);
+
+  return consent;
+}

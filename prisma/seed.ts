@@ -11,7 +11,7 @@ async function main() {
   // Create demo instructor
   const instructor = await prisma.user.upsert({
     where: { email: "demo.instructor@example.com" },
-    update: {},
+    update: { name: "Demo Instructor" },
     create: {
       email: "demo.instructor@example.com",
       name: "Demo Instructor",
@@ -24,7 +24,7 @@ async function main() {
   // Create demo parent
   const parent = await prisma.user.upsert({
     where: { email: "demo.parent@example.com" },
-    update: {},
+    update: { name: "Demo Parent" },
     create: {
       email: "demo.parent@example.com",
       name: "Demo Parent",
@@ -43,7 +43,7 @@ async function main() {
   // Create demo student (linked to demo parent)
   const student = await prisma.user.upsert({
     where: { email: "demo.student@example.com" },
-    update: {},
+    update: { name: "Demo Student" },
     create: {
       email: "demo.student@example.com",
       name: "Demo Student",
@@ -51,11 +51,23 @@ async function main() {
       role: "STUDENT",
       studentProfile: {
         create: {
+          name: "Demo Student",
           age: 12,
           ageGroup: "AGES_11_14",
           guardianId: parent.parentProfile?.id,
+          parentEmail: "demo.parent@example.com",
         },
       },
+    },
+  });
+
+  // Ensure the student profile has the correct name and parent link
+  await prisma.studentProfile.updateMany({
+    where: { userId: student.id },
+    data: {
+      name: "Demo Student",
+      parentEmail: "demo.parent@example.com",
+      guardianId: parent.parentProfile?.id,
     },
   });
   console.log("✅ Demo student created:", student.email);
