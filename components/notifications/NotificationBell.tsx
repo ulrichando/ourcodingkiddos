@@ -3,14 +3,14 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Button from "../ui/button";
-import { Bell, Trophy, Flame, Calendar, TrendingUp, Info, CheckCheck, Users, BookOpen, Award } from "lucide-react";
+import { Bell, Trophy, Flame, Calendar, TrendingUp, Info, CheckCheck, Users, BookOpen, Award, UserX, Video, UserPlus, AlertTriangle } from "lucide-react";
 
 type Notification = {
   id: string;
   userEmail: string;
   title: string;
   message: string;
-  type: "achievement" | "streak" | "class_reminder" | "progress" | "system" | "student_added" | "course_started" | "course_completed" | "welcome";
+  type: "achievement" | "streak" | "class_reminder" | "progress" | "system" | "student_added" | "course_started" | "course_completed" | "welcome" | "student_offline" | "class_starting" | "enrollment_new" | "attendance_alert";
   isRead: boolean;
   link?: string;
   createdAt: string;
@@ -27,6 +27,11 @@ const typeIcons = {
   course_started: { icon: BookOpen, color: "text-indigo-500", bg: "bg-indigo-100 dark:bg-indigo-900/30" },
   course_completed: { icon: Award, color: "text-emerald-500", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
   welcome: { icon: Info, color: "text-pink-500", bg: "bg-pink-100 dark:bg-pink-900/30" },
+  // Instructor-specific notification types
+  student_offline: { icon: UserX, color: "text-red-500", bg: "bg-red-100 dark:bg-red-900/30" },
+  class_starting: { icon: Video, color: "text-green-500", bg: "bg-green-100 dark:bg-green-900/30" },
+  enrollment_new: { icon: UserPlus, color: "text-blue-500", bg: "bg-blue-100 dark:bg-blue-900/30" },
+  attendance_alert: { icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-100 dark:bg-amber-900/30" },
 } as const;
 
 export default function NotificationBell({ userEmail }: { userEmail?: string }) {

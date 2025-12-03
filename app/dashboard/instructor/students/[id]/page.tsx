@@ -2,9 +2,18 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, User, Award, BookOpen, Star, MessageSquare } from "lucide-react";
+import { ArrowLeft, Mail, User, Award, BookOpen, Star, MessageSquare, Phone, UserCircle, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Button from "@/components/ui/button";
+
+type Guardian = {
+  id: string;
+  user: {
+    name: string;
+    email: string;
+  };
+  phone?: string;
+};
 
 type StudentDetail = {
   id: string;
@@ -16,8 +25,19 @@ type StudentDetail = {
   currentLevel?: number;
   streakDays?: number;
   parentEmail?: string;
+  guardianId?: string;
+  guardian?: Guardian;
   lastActiveDate?: string;
+  userId?: string;
 };
+
+// Check if student is online (active in last 5 minutes)
+function isOnline(lastActiveDate?: string): boolean {
+  if (!lastActiveDate) return false;
+  const lastActive = new Date(lastActiveDate);
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  return lastActive > fiveMinutesAgo;
+}
 
 async function fetchStudent(id: string) {
   const res = await fetch(`/api/students?id=${id}`, { cache: "no-store" });
@@ -60,6 +80,10 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
     );
   }
 
+  const online = isOnline(student.lastActiveDate);
+  const parentName = student.guardian?.user?.name || "Parent";
+  const parentEmail = student.guardian?.user?.email || student.parentEmail;
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
@@ -69,16 +93,76 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
               <ArrowLeft className="h-4 w-4" />
               Back to students
             </Link>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-2">{student.name}</h1>
-            <p className="text-slate-600 dark:text-slate-400">Parent: {student.parentEmail || "N/A"}</p>
+            <div className="flex items-center gap-3 mt-2">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{student.name}</h1>
+              {/* Online/Offline Status Badge */}
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                online
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${online ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+                {online ? "Online" : "Offline"}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Offline Alert - Contact Parent Section */}
+        {!online && (
+          <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-800 dark:text-amber-300">Student is currently offline</h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                    {student.name} is not currently online. You can contact their parent to follow up.
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300">
+                      <UserCircle className="h-4 w-4" />
+                      <span className="font-medium">{parentName}</span>
+                    </div>
+                    {parentEmail && (
+                      <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
+                        <Mail className="h-4 w-4" />
+                        <span>{parentEmail}</span>
+                      </div>
+                    )}
+                    {student.guardian?.phone && (
+                      <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
+                        <Phone className="h-4 w-4" />
+                        <span>{student.guardian.phone}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <Link href={`/messages?to=${encodeURIComponent(parentEmail || "")}&subject=${encodeURIComponent(
+                      `Regarding ${student.name} - Class Attendance`
+                    )}`}>
+                      <Button className="bg-amber-600 hover:bg-amber-700 text-white inline-flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" /> Contact Parent Now
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-2xl">
-                {student.avatar || <User className="h-6 w-6" />}
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 flex items-center justify-center text-2xl">
+                  {student.avatar || <User className="h-6 w-6" />}
+                </div>
+                {/* Online indicator on avatar */}
+                <span className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white dark:border-slate-800 ${
+                  online ? "bg-emerald-500" : "bg-slate-400"
+                }`} />
               </div>
               <div>
                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
@@ -106,16 +190,40 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="text-sm text-slate-500 dark:text-slate-400">
-              Last active: {student.lastActiveDate ? new Date(student.lastActiveDate).toLocaleString() : "Unknown"}
+              Last active: {student.lastActiveDate ? new Date(student.lastActiveDate).toLocaleString() : "Never"}
             </div>
 
-            <div className="flex gap-3">
+            {/* Parent Information Section */}
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                <UserCircle className="h-4 w-4" /> Parent/Guardian Information
+              </h3>
+              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                  <span className="font-medium">{parentName}</span>
+                </div>
+                {parentEmail && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <Mail className="h-4 w-4" />
+                    <span>{parentEmail}</span>
+                  </div>
+                )}
+                {student.guardian?.phone && (
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <Phone className="h-4 w-4" />
+                    <span>{student.guardian.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-2">
               <Link href={`/messages?to=${encodeURIComponent(student.email || "")}&subject=Hello ${encodeURIComponent(student.name)}`}>
                 <Button variant="outline" className="inline-flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" /> Message Student
                 </Button>
               </Link>
-              <Link href={`/messages?to=${encodeURIComponent(student.parentEmail || "")}&subject=${encodeURIComponent(
+              <Link href={`/messages?to=${encodeURIComponent(parentEmail || "")}&subject=${encodeURIComponent(
                 "Regarding " + student.name
               )}`}>
                 <Button variant="outline" className="inline-flex items-center gap-2">

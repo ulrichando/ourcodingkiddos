@@ -11,6 +11,9 @@ import {
   ChevronRight,
   MessageSquare,
   Video,
+  UserCheck,
+  AlertTriangle,
+  Bell,
 } from "lucide-react";
 
 async function fetchSessions() {
@@ -25,6 +28,44 @@ export default function InstructorDashboard() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [checkingAttendance, setCheckingAttendance] = useState<string | null>(null);
+  const [attendanceResult, setAttendanceResult] = useState<{
+    classId: string;
+    online: number;
+    offline: number;
+    offlineStudents: string[];
+  } | null>(null);
+
+  // Check attendance for a class
+  const checkAttendance = async (classId: string, notifyParents = false) => {
+    setCheckingAttendance(classId);
+    setAttendanceResult(null);
+    try {
+      const res = await fetch(`/api/instructor/attendance?classId=${classId}`);
+      if (!res.ok) throw new Error("Failed to check attendance");
+      const data = await res.json();
+
+      setAttendanceResult({
+        classId,
+        online: data.summary.online,
+        offline: data.summary.offline,
+        offlineStudents: data.attendance.filter((a: any) => !a.online).map((a: any) => a.studentName),
+      });
+
+      // If there are offline students, notify instructor and optionally parents
+      if (data.summary.offline > 0) {
+        await fetch("/api/instructor/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classId, notifyParents }),
+        });
+      }
+    } catch (error) {
+      console.error("Error checking attendance:", error);
+    } finally {
+      setCheckingAttendance(null);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -124,48 +165,92 @@ export default function InstructorDashboard() {
             ) : (
               <div className="space-y-3">
                 {upcoming.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition"
-                  >
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex flex-col items-center justify-center">
-                      <span className="text-xs font-medium">
-                        {session.start ? session.start.toLocaleDateString(undefined, { weekday: "short" }) : ""}
-                      </span>
-                      <span className="text-lg font-bold">{session.start ? session.start.getDate() : ""}</span>
-                    </div>
-                    <div className="flex-1">
+                  <div key={session.id} className="space-y-2">
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex flex-col items-center justify-center">
+                        <span className="text-xs font-medium">
+                          {session.start ? session.start.toLocaleDateString(undefined, { weekday: "short" }) : ""}
+                        </span>
+                        <span className="text-lg font-bold">{session.start ? session.start.getDate() : ""}</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-800 dark:text-slate-200">{session.title}</h3>
+                          {session.start && new Date().toDateString() === session.start.toDateString() && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Today</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mt-1">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {session.start
+                              ? session.start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+                              : "--"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {session.bookings}/{session.maxStudents ?? "∞"}
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded-full border border-slate-200 dark:border-slate-600 capitalize text-slate-700 dark:text-slate-300">
+                            {(session.sessionType || session.type || "").toLowerCase()}
+                          </span>
+                        </div>
+                      </div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-slate-800 dark:text-slate-200">{session.title}</h3>
-                        {session.start && new Date().toDateString() === session.start.toDateString() && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Today</span>
+                        {/* Check Attendance Button */}
+                        <button
+                          onClick={() => checkAttendance(session.id, true)}
+                          disabled={checkingAttendance === session.id}
+                          className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white px-3 py-2 rounded-md text-sm"
+                          title="Check student attendance and notify parents of offline students"
+                        >
+                          {checkingAttendance === session.id ? (
+                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                          ) : (
+                            <>
+                              <UserCheck className="h-4 w-4" /> Attendance
+                            </>
+                          )}
+                        </button>
+                        {session.meetingUrl && (
+                          <Link
+                            href={session.meetingUrl}
+                            className="inline-flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Video className="h-4 w-4" /> Join
+                          </Link>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mt-1">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {session.start
-                            ? session.start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
-                            : "--"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          {session.bookings}/{session.maxStudents ?? "∞"}
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded-full border border-slate-200 dark:border-slate-600 capitalize text-slate-700 dark:text-slate-300">
-                          {(session.sessionType || session.type || "").toLowerCase()}
-                        </span>
-                      </div>
                     </div>
-                    {session.meetingUrl && (
-                      <Link
-                        href={session.meetingUrl}
-                        className="inline-flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Video className="h-4 w-4" /> Join
-                      </Link>
+                    {/* Attendance Result */}
+                    {attendanceResult?.classId === session.id && (
+                      <div className={`p-3 rounded-lg text-sm ${
+                        attendanceResult.offline > 0
+                          ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
+                          : "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          {attendanceResult.offline > 0 ? (
+                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                          ) : (
+                            <UserCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          )}
+                          <span className={attendanceResult.offline > 0 ? "text-amber-800 dark:text-amber-300" : "text-green-800 dark:text-green-300"}>
+                            {attendanceResult.online} online, {attendanceResult.offline} offline
+                          </span>
+                        </div>
+                        {attendanceResult.offline > 0 && (
+                          <div className="mt-2 text-amber-700 dark:text-amber-400">
+                            <div className="flex items-center gap-1 mb-1">
+                              <Bell className="h-3 w-3" />
+                              <span className="text-xs">Parents notified about:</span>
+                            </div>
+                            <span className="text-xs">{attendanceResult.offlineStudents.join(", ")}</span>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}

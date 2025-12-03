@@ -2,7 +2,21 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 
-export type NotificationType = "achievement" | "streak" | "class_reminder" | "progress" | "system" | "student_added" | "course_started" | "course_completed" | "welcome";
+export type NotificationType =
+  | "achievement"
+  | "streak"
+  | "class_reminder"
+  | "progress"
+  | "system"
+  | "student_added"
+  | "course_started"
+  | "course_completed"
+  | "welcome"
+  // Instructor-specific notifications
+  | "student_offline"
+  | "class_starting"
+  | "enrollment_new"
+  | "attendance_alert";
 
 export type Notification = {
   id: string;

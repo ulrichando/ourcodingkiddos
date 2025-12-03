@@ -20,7 +20,7 @@ export default function AppHeader() {
   const [mobileAnimating, setMobileAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const showBell = userRole === "PARENT" || userRole === "STUDENT";
+  const showBell = userRole === "PARENT" || userRole === "STUDENT" || userRole === "INSTRUCTOR" || userRole === "ADMIN";
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {

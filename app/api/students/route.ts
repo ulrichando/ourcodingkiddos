@@ -101,6 +101,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "This email is already registered" }, { status: 400 });
     }
 
+    // Find the parent's profile to properly link the student
+    const parentUser = await prisma.user.findUnique({
+      where: { email: parentEmail },
+      include: { parentProfile: true },
+    });
+
+    if (!parentUser?.parentProfile) {
+      return NextResponse.json({ error: "Parent profile not found" }, { status: 400 });
+    }
+
     if (!password) {
       password = Math.random().toString(36).slice(-10);
     }
@@ -117,6 +127,7 @@ export async function POST(request: NextRequest) {
         studentProfile: {
           create: {
             parentEmail,
+            guardianId: parentUser.parentProfile.id, // Properly link to parent profile
             name,
             avatar: profileImage || avatar, // Use uploaded image if available, otherwise use avatar
             age,
@@ -194,9 +205,29 @@ export async function GET(request: NextRequest) {
   }
   const isElevated = role === "INSTRUCTOR" || role === "ADMIN";
   const allowDemo = role === "ADMIN" && process.env.NEXT_PUBLIC_USE_DEMO_DATA !== "false";
-  const whereClause = isElevated
-    ? { ...(studentId ? { id: studentId } : {}) }
-    : { parentEmail: parentEmail ?? undefined, ...(studentId ? { id: studentId } : {}) };
+
+  // Build where clause - use guardian relationship OR parentEmail for backwards compatibility
+  let whereClause: any = {};
+  if (studentId) {
+    whereClause.id = studentId;
+  }
+  if (!isElevated && parentEmail) {
+    // Find parent's profile to get students linked via guardianId
+    const parentUser = await prisma.user.findUnique({
+      where: { email: parentEmail },
+      include: { parentProfile: true },
+    });
+    if (parentUser?.parentProfile) {
+      // Get students by guardian relationship OR legacy parentEmail
+      whereClause.OR = [
+        { guardianId: parentUser.parentProfile.id },
+        { parentEmail: parentEmail },
+      ];
+    } else {
+      // Fallback to parentEmail only
+      whereClause.parentEmail = parentEmail;
+    }
+  }
 
   const students = (await prisma.studentProfile.findMany({
     where: whereClause as any,
@@ -209,9 +240,22 @@ export async function GET(request: NextRequest) {
       currentLevel: true,
       streakDays: true,
       parentEmail: true,
+      guardianId: true,
       lastActiveDate: true,
       archivedAt: true,
       userId: true,
+      guardian: {
+        select: {
+          id: true,
+          phone: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
     } as any,
   })) as any[];
 

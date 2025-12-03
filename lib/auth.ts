@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import prisma, { prismaBase } from "./prisma";
+import { prismaBase } from "./prisma";
 import type { UserRole } from "../types/next-auth";
 import { checkRateLimit, resetRateLimit } from "./validation";
 import { logLogin, logFailedLogin } from "./audit";
@@ -187,8 +187,38 @@ export const authOptions: NextAuthOptions = {
           user.id = existingUser.id;
           user.role = existingUser.role as UserRole;
         } else {
-          // New Google user - will be created by the adapter
-          console.log('[Auth] New Google OAuth user:', user.email);
+          // New Google user - create as PARENT with parent profile
+          console.log('[Auth] Creating new Google OAuth user as PARENT:', user.email);
+          const newUser = await prismaBase.user.create({
+            data: {
+              email: user.email,
+              name: user.name || profile?.name || "Google User",
+              image: user.image || (profile as any)?.picture,
+              role: "PARENT",
+              parentProfile: {
+                create: {
+                  phone: null,
+                },
+              },
+              accounts: {
+                create: {
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  refresh_token: account.refresh_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+              },
+            },
+          });
+          user.id = newUser.id;
+          user.role = "PARENT" as UserRole;
+          // Prevent the adapter from creating a duplicate user
+          return true;
         }
       }
       return true;
