@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Play, Clock, Star, BookOpen, CheckCircle2, Code2, LogIn, UserPlus } from "lucide-react";
+import { ArrowLeft, Play, Clock, Star, BookOpen, CheckCircle2, Code2, LogIn, UserPlus, Sparkles, Target, Rocket, Trophy, Zap, GraduationCap, Award, TrendingUp } from "lucide-react";
 import LanguageIcon from "../../../components/ui/LanguageIcon";
 import Badge from "../../../components/ui/badge";
 import { Card, CardContent } from "../../../components/ui/card";
@@ -12,9 +12,11 @@ import { authOptions } from "../../../lib/auth";
 export const dynamic = "force-dynamic";
 
 const levelColor: Record<string, string> = {
-  BEGINNER: "bg-emerald-100 text-emerald-700",
-  INTERMEDIATE: "bg-blue-100 text-blue-700",
-  ADVANCED: "bg-purple-100 text-purple-700",
+  BEGINNER: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400",
+  INTERMEDIATE: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400",
+  ADVANCED: "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400",
+  EXPERT: "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400",
+  MASTER: "bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 dark:from-amber-900/50 dark:to-orange-900/50 dark:text-amber-400",
 };
 
 const ageLabel: Record<string, string> = {
@@ -332,13 +334,156 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           </div>
         </div>
 
+        {/* What You'll Learn Section */}
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+              <Target className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">What You'll Learn</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Skills and knowledge you'll gain from this course</p>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                    <Code2 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">Hands-On Coding</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Write real code and see it work instantly in your browser!</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">Creative Projects</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Build fun projects that you can share with friends and family!</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1">Earn Rewards</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Collect XP points and badges as you complete lessons!</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Learning Journey Section */}
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <Rocket className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">Your Learning Journey</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Follow these steps to become a coding superstar!</p>
+            </div>
+          </div>
+
+          <div className="relative">
+            {/* Journey Path Line */}
+            <div className="absolute left-6 sm:left-7 top-10 bottom-10 w-1 bg-gradient-to-b from-green-400 via-purple-400 to-orange-400 rounded-full hidden md:block" />
+
+            <div className="grid gap-4">
+              <Card className="relative border-2 border-green-200 dark:border-green-800 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+                <CardContent className="p-4 sm:p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg flex-shrink-0 z-10">
+                    <span className="text-xl sm:text-2xl font-black text-white">1</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Start Here!</h3>
+                      <Badge className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400 text-xs">Begin</Badge>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Learn the basics and get comfortable with coding concepts</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="relative border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30">
+                <CardContent className="p-4 sm:p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg flex-shrink-0 z-10">
+                    <span className="text-xl sm:text-2xl font-black text-white">2</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Practice & Build</h3>
+                      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400 text-xs">Learn</Badge>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Apply what you learn by completing fun coding exercises</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="relative border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+                <CardContent className="p-4 sm:p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg flex-shrink-0 z-10">
+                    <span className="text-xl sm:text-2xl font-black text-white">3</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Complete Challenges</h3>
+                      <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400 text-xs">Challenge</Badge>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Test your skills with quizzes and mini-projects</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="relative border-2 border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30">
+                <CardContent className="p-4 sm:p-5 flex items-center gap-4">
+                  <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg flex-shrink-0 z-10">
+                    <GraduationCap className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Earn Your Certificate!</h3>
+                      <Badge className="bg-gradient-to-r from-amber-400 to-orange-400 text-white border-0 text-xs">Complete</Badge>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Finish all lessons to get your course completion certificate!</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Course Content Section */}
         <div className="space-y-4 sm:space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 mb-1 sm:mb-2">Course Content</h2>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
-                {sortedLessons.length} {sortedLessons.length === 1 ? "lesson" : "lessons"} to master {languageKey.toUpperCase()}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-lg">
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">Course Content</h2>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+                  {sortedLessons.length} {sortedLessons.length === 1 ? "lesson" : "lessons"} to master {languageKey.toUpperCase()}
+                </p>
+              </div>
             </div>
             {sortedLessons.length > 0 && (
               <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-3 sm:px-4 py-1.5 sm:py-2 text-sm font-bold shadow-lg shadow-purple-500/30 self-start sm:self-auto">

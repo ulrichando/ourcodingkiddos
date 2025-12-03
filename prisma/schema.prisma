@@ -1,12 +1,589 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("POSTGRES_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma-client"
+model User {
+  id                     String                   @id @default(cuid())
+  name                   String?
+  email                  String                   @unique
+  hashedPassword         String?
+  image                  String?
+  role                   Role                     @default(STUDENT)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  classReminders         Boolean                  @default(true)
+  emailUpdates           Boolean                  @default(false)
+  progressReports        Boolean                  @default(true)
+  stripeCustomerId       String?                  @unique
+  lastSeen               DateTime?
+  accounts               Account[]
+  achievements           Achievement[]
+  bookingsAsInstructor   Booking[]                @relation("BookingInstructor")
+  bookingsAsStudent      Booking[]                @relation("BookingStudent")
+  classSessions          ClassSession[]           @relation("ClassSessionInstructor")
+  enrollments            Enrollment[]
+  instructorAvailability InstructorAvailability[] @relation("InstructorAvailabilityInstructor")
+  parentProfile          ParentProfile?
+  payments               Payment[]
+  portfolio              PortfolioItem[]
+  sessions               Session[]
+  studentProfile         StudentProfile?
+  subscriptions          Subscription[]
+  badges                 UserBadge[]
+}
+
+model StudentProfile {
+  id                    String           @id @default(cuid())
+  userId                String           @unique
+  dob                   DateTime?
+  guardianId            String?
+  parentEmail           String?
+  name                  String?
+  avatar                String?
+  age                   Int?
+  ageGroup              AgeGroup?
+  totalXp               Int              @default(0)
+  currentLevel          Int              @default(1)
+  streakDays            Int              @default(0)
+  lastActiveDate        DateTime?
+  badges                Json?
+  themePreference       ThemePreference?
+  accessibilitySettings Json?
+  archivedAt            DateTime?
+  projects              Project[]        @relation("StudentProjects")
+  guardian              ParentProfile?   @relation("ParentGuardian", fields: [guardianId], references: [id])
+  user                  User             @relation(fields: [userId], references: [id])
+}
+
+model ParentProfile {
+  id       String           @id @default(cuid())
+  userId   String           @unique
+  phone    String?
+  address  String?
+  user     User             @relation(fields: [userId], references: [id])
+  children StudentProfile[] @relation("ParentGuardian")
+}
+
+model Course {
+  id             String       @id @default(cuid())
+  title          String
+  slug           String       @unique
+  description    String
+  language       Language
+  level          CourseLevel
+  ageGroup       AgeGroup
+  thumbnailUrl   String?
+  totalXp        Int?
+  estimatedHours Int?
+  isPublished    Boolean      @default(false)
+  orderIndex     Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  bookings       Booking[]
+  enrollments    Enrollment[]
+  lessons        Lesson[]
+}
+
+model Lesson {
+  id                   String     @id @default(cuid())
+  courseId             String
+  title                String
+  slug                 String
+  description          String?
+  content              String?
+  videoUrl             String?
+  exampleCode          String?
+  exerciseInstructions String?
+  exerciseStarterCode  String?
+  exerciseSolution     String?
+  xpReward             Int?
+  orderIndex           Int?
+  isPublished          Boolean    @default(false)
+  course               Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress             Progress[]
+  project              Project?
+  quiz                 Quiz?
+
+  @@unique([courseId, slug])
+}
+
+model Quiz {
+  id        String     @id @default(cuid())
+  lessonId  String     @unique
+  questions Question[]
+  lesson    Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id            String       @id @default(cuid())
+  quizId        String
+  question      String
+  questionType  QuestionType
+  options       Json?
+  correctAnswer String
+  explanation   String?
+  xpReward      Int?
+  orderIndex    Int?
+  answers       Answer[]
+  quiz          Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  questionId  String
+  text        String
+  isCorrect   Boolean  @default(false)
+  explanation String?
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Enrollment {
+  id           String           @id @default(cuid())
+  userId       String
+  courseId     String
+  status       EnrollmentStatus @default(ACTIVE)
+  startedAt    DateTime         @default(now())
+  completedAt  DateTime?
+  certificates Certificate[]
+  course       Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id])
+  progress     Progress[]
+
+  @@unique([userId, courseId])
+}
+
+model Certificate {
+  id               String     @id @default(cuid())
+  enrollmentId     String
+  issuedAt         DateTime   @default(now())
+  url              String
+  studentName      String?
+  courseTitle      String?
+  achievementType  String?
+  verificationCode String?
+  studentId        String?
+  courseId         String?
+  enrollment       Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+}
+
+model Progress {
+  id               String         @id @default(cuid())
+  enrollmentId     String
+  lessonId         String
+  status           ProgressStatus @default(NOT_STARTED)
+  score            Int?
+  completedAt      DateTime?
+  xpEarned         Int?
+  quizScore        Int?
+  timeSpentMinutes Int?
+  codeSubmission   String?
+  enrollment       Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson           Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, lessonId])
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  studentId          String
+  instructorId       String
+  courseId           String?
+  startsAt           DateTime
+  endsAt             DateTime
+  type               BookingType
+  status             BookingStatus @default(SCHEDULED)
+  notes              String?
+  sessionId          String?
+  parentEmail        String?
+  attended           Boolean       @default(false)
+  instructorNotes    String?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  course             Course?       @relation(fields: [courseId], references: [id])
+  instructor         User          @relation("BookingInstructor", fields: [instructorId], references: [id])
+  session            ClassSession? @relation(fields: [sessionId], references: [id])
+  student            User          @relation("BookingStudent", fields: [studentId], references: [id])
+  schedule           Schedule?
+
+  @@index([studentId])
+  @@index([instructorId])
+  @@index([sessionId])
+}
+
+model Schedule {
+  id         String  @id @default(cuid())
+  bookingId  String  @unique
+  timezone   String
+  recurrence Json?
+  reminders  Json?
+  booking    Booking @relation(fields: [bookingId], references: [id])
+}
+
+model ClassSession {
+  id                String             @id @default(cuid())
+  instructorId      String?
+  instructorEmail   String
+  title             String
+  description       String?
+  sessionType       SessionType
+  language          Language
+  ageGroup          AgeGroup
+  startTime         DateTime
+  durationMinutes   Int
+  maxStudents       Int?
+  enrolledCount     Int?               @default(0)
+  priceCents        Int?               @default(0)
+  meetingUrl        String?
+  status            SessionStatus      @default(SCHEDULED)
+  isRecurring       Boolean            @default(false)
+  recurrencePattern RecurrencePattern?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  bookings          Booking[]
+  instructor        User?              @relation("ClassSessionInstructor", fields: [instructorId], references: [id])
+
+  @@index([instructorId])
+  @@index([startTime])
+}
+
+model InstructorAvailability {
+  id              String    @id @default(cuid())
+  instructorId    String?
+  instructorEmail String?
+  dayOfWeek       Int?
+  startTime       String
+  endTime         String
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  isRecurring     Boolean   @default(true)
+  specificDate    DateTime?
+  instructor      User?     @relation("InstructorAvailabilityInstructor", fields: [instructorId], references: [id])
+
+  @@index([instructorId])
+  @@index([dayOfWeek])
+  @@index([specificDate])
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  userId                String
+  amount                Int
+  currency              String        @default("usd")
+  status                PaymentStatus
+  stripePaymentIntentId String        @unique
+  stripeCustomerId      String?
+  subscriptionId        String?
+  createdAt             DateTime      @default(now())
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id])
+  user                  User          @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String
+  status               SubscriptionStatus
+  priceId              String
+  stripeCustomerId     String?
+  stripeSubscriptionId String             @unique
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  trialEndsAt          DateTime?
+  planType             PlanType?
+  maxStudents          Int?
+  priceCents           Int?
+  startDate            DateTime?
+  endDate              DateTime?
+  parentEmail          String?
+  features             Json?
+  payments             Payment[]
+  user                 User               @relation(fields: [userId], references: [id])
+}
+
+model Badge {
+  id               String           @id @default(cuid())
+  key              String           @unique
+  name             String
+  description      String
+  icon             String?
+  category         BadgeCategory?
+  requirementType  RequirementType?
+  requirementValue Int?
+  rarity           BadgeRarity?
+  criteria         Json?
+  users            UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, badgeId])
+}
+
+model Conversation {
+  id            String                    @id @default(cuid())
+  title         String?
+  type          String                    @default("direct")
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  lastMessageAt DateTime?
+  participants  ConversationParticipant[]
+  messages      Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userEmail      String
+  userRole       Role
+  userName       String?
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userEmail])
+  @@index([userEmail])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  fromEmail      String
+  content        String
+  isRead         Boolean      @default(false)
+  messageType    MessageType  @default(GENERAL)
+  createdAt      DateTime     @default(now())
+  attachmentName String?
+  attachmentUrl  String?
+  conversationId String
+  fromName       String?
+  fromRole       Role
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([fromEmail])
+}
+
+model SupportTicket {
+  id              String         @id @default(cuid())
+  ticketNumber    String         @unique
+  userEmail       String
+  userRole        Role
+  userName        String?
+  subject         String
+  description     String
+  category        TicketCategory @default(GENERAL)
+  priority        TicketPriority @default(MEDIUM)
+  status          TicketStatus   @default(OPEN)
+  assignedToEmail String?
+  assignedToName  String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  replies         TicketReply[]
+
+  @@index([userEmail])
+  @@index([status])
+  @@index([assignedToEmail])
+}
+
+model TicketReply {
+  id             String        @id @default(cuid())
+  ticketId       String
+  fromEmail      String
+  fromRole       Role
+  fromName       String?
+  message        String
+  attachmentName String?
+  attachmentUrl  String?
+  isInternal     Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  ticket         SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model ClassRequest {
+  id                      String             @id @default(cuid())
+  parentEmail             String
+  parentName              String?
+  studentId               String?
+  studentName             String?
+  studentAge              Int?
+  requestedTopic          String
+  description             String?
+  preferredDays           Json?
+  preferredTimes          Json?
+  duration                Int?
+  status                  ClassRequestStatus @default(PENDING)
+  instructorEmail         String?
+  instructorName          String?
+  scheduledDate           DateTime?
+  scheduledTime           String?
+  bookingId               String?
+  adminNotes              String?
+  parentNotes             String?
+  rejectionReason         String?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  reviewedAt              DateTime?
+  scheduledAt             DateTime?
+  discountApplied         Int?
+  numberOfSessions        Int?
+  paidAt                  DateTime?
+  paymentStatus           String?            @default("UNPAID")
+  pricePerSession         Int?
+  stripePaymentId         String?
+  totalPrice              Int?
+  daysPerWeek             Int?
+  numberOfWeeks           Int?
+  preferredInstructorId   String?
+  preferredInstructorName String?
+
+  @@index([parentEmail])
+  @@index([status])
+  @@index([instructorEmail])
+  @@index([paymentStatus])
+}
+
+model Achievement {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  detail    String?
+  icon      String?
+  xpAwarded Int      @default(0)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Project {
+  id           String          @id @default(cuid())
+  lessonId     String          @unique
+  studentId    String?
+  title        String
+  brief        String
+  rubric       Json?
+  language     Language?
+  code         String?
+  thumbnailUrl String?
+  isPublic     Boolean         @default(false)
+  isFeatured   Boolean         @default(false)
+  shareToken   String?         @unique
+  submissions  PortfolioItem[]
+  lesson       Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  student      StudentProfile? @relation("StudentProjects", fields: [studentId], references: [id])
+
+  @@index([studentId])
+}
+
+model PortfolioItem {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String
+  title       String
+  description String?
+  repoUrl     String?
+  demoUrl     String?
+  assets      Json?
+  score       Int?
+  feedback    String?
+  submittedAt DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, projectId])
+}
+
+/// NextAuth models for email (magic link) sign-in and OAuth account storage
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PlatformSettings {
+  id                       String   @id @default("default")
+  siteName                 String   @default("Our Coding Kiddos")
+  maintenanceMode          Boolean  @default(false)
+  allowRegistration        Boolean  @default(true)
+  requireEmailVerification Boolean  @default(false)
+  defaultXpPerLesson       Int      @default(50)
+  xpPerLevel               Int      @default(500)
+  maxStudentsPerParent     Int      @default(5)
+  sessionDurationMinutes   Int      @default(60)
+  enableNotifications      Boolean  @default(true)
+  enableMessaging          Boolean  @default(true)
+  enableCertificates       Boolean  @default(true)
+  enableBadges             Boolean  @default(true)
+  stripeEnabled            Boolean  @default(false)
+  demoMode                 Boolean  @default(false)
+  updatedAt                DateTime @updatedAt
+  createdAt                DateTime @default(now())
+}
+
+model AuditLog {
+  id         String        @id @default(cuid())
+  timestamp  DateTime      @default(now())
+  userId     String?
+  userEmail  String
+  action     AuditAction
+  resource   String
+  resourceId String?
+  details    String
+  ipAddress  String?
+  userAgent  String?
+  status     String        @default("success")
+  severity   AuditSeverity @default(INFO)
+  metadata   Json?
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([timestamp])
+  @@index([action])
+  @@index([resource])
+  @@index([severity])
 }
 
 enum Role {
@@ -20,6 +597,8 @@ enum CourseLevel {
   BEGINNER
   INTERMEDIATE
   ADVANCED
+  EXPERT
+  MASTER
 }
 
 enum Language {
@@ -28,6 +607,13 @@ enum Language {
   JAVASCRIPT
   PYTHON
   ROBLOX
+  ENGINEERING
+  AI_ML
+  ROBOTICS
+  WEB_DEVELOPMENT
+  MOBILE_DEVELOPMENT
+  GAME_DEVELOPMENT
+  CAREER_PREP
 }
 
 enum AgeGroup {
@@ -85,132 +671,6 @@ enum SubscriptionStatus {
   INCOMPLETE
   INCOMPLETE_EXPIRED
   UNPAID
-}
-
-model User {
-  id             String   @id @default(cuid())
-  name           String?
-  email          String   @unique
-  hashedPassword String?
-  image          String?
-  role           Role     @default(STUDENT)
-
-  // Stripe integration
-  stripeCustomerId String? @unique
-
-  // Notification preferences
-  emailUpdates     Boolean @default(false)
-  classReminders   Boolean @default(true)
-  progressReports  Boolean @default(true)
-
-  // Online status tracking
-  lastSeen         DateTime?
-
-  studentProfile     StudentProfile?
-  parentProfile      ParentProfile?
-  enrollments        Enrollment[]
-  bookingsAsStudent  Booking[]      @relation("BookingStudent")
-  bookingsAsInstructor Booking[]    @relation("BookingInstructor")
-  classSessions      ClassSession[] @relation("ClassSessionInstructor")
-  instructorAvailability InstructorAvailability[] @relation("InstructorAvailabilityInstructor")
-  payments           Payment[]
-  subscriptions      Subscription[]
-  badges             UserBadge[]
-  achievements       Achievement[]
-  portfolio          PortfolioItem[]
-  accounts           Account[]
-  sessions           Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model StudentProfile {
-  id         String  @id @default(cuid())
-  userId     String  @unique
-  dob        DateTime?
-  guardianId String? // links to parent profile
-  parentEmail String?
-  name       String?
-  avatar     String?
-  age        Int?
-  ageGroup   AgeGroup?
-  totalXp    Int      @default(0)
-  currentLevel Int    @default(1)
-  streakDays Int      @default(0)
-  lastActiveDate DateTime?
-  badges     Json?
-  themePreference ThemePreference?
-  accessibilitySettings Json?
-  archivedAt DateTime? // Soft delete: when student is archived
-
-  user     User @relation(fields: [userId], references: [id])
-  guardian ParentProfile? @relation("ParentGuardian", fields: [guardianId], references: [id])
-  projects Project[] @relation("StudentProjects")
-}
-
-model ParentProfile {
-  id      String  @id @default(cuid())
-  userId  String  @unique
-  phone   String?
-  address String?
-
-  user     User              @relation(fields: [userId], references: [id])
-  children StudentProfile[]  @relation("ParentGuardian")
-}
-
-model Course {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String
-  language    Language
-  level       CourseLevel
-  ageGroup    AgeGroup
-  thumbnailUrl String?
-  totalXp     Int?
-  estimatedHours Int?
-  isPublished Boolean  @default(false)
-  orderIndex  Int?
-
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  bookings    Booking[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Lesson {
-  id          String   @id @default(cuid())
-  courseId    String
-  title       String
-  slug        String
-  description String?
-  content     String? // markdown content
-  videoUrl    String?
-  exampleCode String?
-  exerciseInstructions String?
-  exerciseStarterCode String?
-  exerciseSolution String?
-  xpReward    Int?
-  orderIndex  Int?
-  isPublished Boolean @default(false)
-
-  course   Course   @relation(fields: [courseId], references: [id])
-  quiz     Quiz?
-  project  Project?
-  progress Progress[]
-
-  @@unique([courseId, slug])
-}
-
-model Quiz {
-  id       String   @id @default(cuid())
-  lessonId String   @unique
-
-  lesson    Lesson     @relation(fields: [lessonId], references: [id])
-  questions Question[]
 }
 
 enum QuestionType {
@@ -275,281 +735,6 @@ enum BadgeRarity {
   LEGENDARY
 }
 
-model Question {
-  id       String   @id @default(cuid())
-  quizId   String
-  question String
-  questionType QuestionType
-  options  Json?
-  correctAnswer String
-  explanation String?
-  xpReward Int?
-  orderIndex Int?
-
-  quiz    Quiz     @relation(fields: [quizId], references: [id])
-  answers Answer[]
-}
-
-model Answer {
-  id          String   @id @default(cuid())
-  questionId  String
-  text        String
-  isCorrect   Boolean  @default(false)
-  explanation String?
-
-  question Question @relation(fields: [questionId], references: [id])
-}
-
-model Enrollment {
-  id          String   @id @default(cuid())
-  userId      String
-  courseId    String
-  status      EnrollmentStatus @default(ACTIVE)
-  startedAt   DateTime @default(now())
-  completedAt DateTime?
-
-  user        User        @relation(fields: [userId], references: [id])
-  course      Course      @relation(fields: [courseId], references: [id])
-  progress    Progress[]
-  certificates Certificate[]
-
-  @@unique([userId, courseId])
-}
-
-model Certificate {
-  id            String   @id @default(cuid())
-  enrollmentId  String
-  issuedAt      DateTime @default(now())
-  url           String
-  studentName   String?
-  courseTitle   String?
-  achievementType String?
-  verificationCode String?
-  studentId     String?
-  courseId      String?
-
-  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
-}
-
-model Progress {
-  id           String   @id @default(cuid())
-  enrollmentId String
-  lessonId     String
-  status       ProgressStatus @default(NOT_STARTED)
-  score        Int?
-  completedAt  DateTime?
-  xpEarned     Int?
-  quizScore    Int?
-  timeSpentMinutes Int?
-  codeSubmission String?
-
-  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
-  lesson     Lesson     @relation(fields: [lessonId], references: [id])
-
-  @@unique([enrollmentId, lessonId])
-}
-
-model Booking {
-  id           String   @id @default(cuid())
-  studentId    String
-  instructorId String
-  courseId     String?
-  startsAt     DateTime
-  endsAt       DateTime
-  type         BookingType
-  status       BookingStatus @default(SCHEDULED)
-  notes        String?
-  sessionId    String?
-  parentEmail  String?
-  attended     Boolean @default(false)
-  instructorNotes String?
-  cancelledAt  DateTime?
-  cancellationReason String?
-
-  student    User   @relation("BookingStudent", fields: [studentId], references: [id])
-  instructor User   @relation("BookingInstructor", fields: [instructorId], references: [id])
-  course     Course? @relation(fields: [courseId], references: [id])
-  schedule   Schedule?
-  session    ClassSession? @relation(fields: [sessionId], references: [id])
-
-  @@index([studentId])
-  @@index([instructorId])
-  @@index([sessionId])
-}
-
-model Schedule {
-  id         String   @id @default(cuid())
-  bookingId  String   @unique
-  timezone   String
-  recurrence Json?    // e.g., RRULE or custom pattern
-  reminders  Json?
-
-  booking Booking @relation(fields: [bookingId], references: [id])
-}
-
-model ClassSession {
-  id                String   @id @default(cuid())
-  instructorId      String?
-  instructorEmail   String
-  title             String
-  description       String?
-  sessionType       SessionType
-  language          Language
-  ageGroup          AgeGroup
-  startTime         DateTime
-  durationMinutes   Int
-  maxStudents       Int?
-  enrolledCount     Int?      @default(0)
-  priceCents        Int?      @default(0)
-  meetingUrl        String?
-  status            SessionStatus @default(SCHEDULED)
-  isRecurring       Boolean   @default(false)
-  recurrencePattern RecurrencePattern?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  instructor User? @relation("ClassSessionInstructor", fields: [instructorId], references: [id])
-  bookings   Booking[]
-
-  @@index([instructorId])
-  @@index([startTime])
-}
-
-model InstructorAvailability {
-  id              String    @id @default(cuid())
-  instructorId    String?
-  instructorEmail String?
-  // For recurring weekly availability
-  dayOfWeek       Int?
-  // For specific date availability
-  specificDate    DateTime?
-  isRecurring     Boolean   @default(true)
-  startTime       String
-  endTime         String
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-
-  instructor User? @relation("InstructorAvailabilityInstructor", fields: [instructorId], references: [id])
-
-  @@index([instructorId])
-  @@index([dayOfWeek])
-  @@index([specificDate])
-}
-
-model Payment {
-  id                     String   @id @default(cuid())
-  userId                 String
-  amount                 Int
-  currency               String   @default("usd")
-  status                 PaymentStatus
-  stripePaymentIntentId  String   @unique
-  stripeCustomerId       String?
-  subscriptionId         String?
-  createdAt              DateTime @default(now())
-
-  user         User         @relation(fields: [userId], references: [id])
-  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
-}
-
-model Subscription {
-  id                   String   @id @default(cuid())
-  userId               String
-  status               SubscriptionStatus
-  priceId              String   // Stripe price ID
-  stripeCustomerId     String?
-  stripeSubscriptionId String @unique
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean @default(false)
-  canceledAt           DateTime?
-  trialEndsAt          DateTime?
-  planType             PlanType?
-  maxStudents          Int?
-  priceCents           Int?
-  startDate            DateTime?
-  endDate              DateTime?
-  parentEmail          String?
-  features             Json?
-
-  user     User      @relation(fields: [userId], references: [id])
-  payments Payment[]
-}
-
-model Badge {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  name        String
-  description String
-  icon        String?
-  category    BadgeCategory?
-  requirementType RequirementType?
-  requirementValue Int?
-  rarity      BadgeRarity?
-  criteria    Json?
-
-  users UserBadge[]
-}
-
-model UserBadge {
-  id        String   @id @default(cuid())
-  userId    String
-  badgeId   String
-  awardedAt DateTime @default(now())
-
-  user  User  @relation(fields: [userId], references: [id])
-  badge Badge @relation(fields: [badgeId], references: [id])
-
-  @@unique([userId, badgeId])
-}
-
-// Conversations for messaging system
-model Conversation {
-  id          String   @id @default(cuid())
-  title       String?  // Optional group name
-  type        String   @default("direct") // direct, group, support
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  lastMessageAt DateTime?
-
-  participants ConversationParticipant[]
-  messages     Message[]
-}
-
-model ConversationParticipant {
-  id             String   @id @default(cuid())
-  conversationId String
-  userEmail      String
-  userRole       Role     // Using existing Role enum
-  userName       String?
-  joinedAt       DateTime @default(now())
-  lastReadAt     DateTime?
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@unique([conversationId, userEmail])
-  @@index([userEmail])
-}
-
-model Message {
-  id                 String      @id @default(cuid())
-  conversationId     String
-  fromEmail          String
-  fromRole           Role
-  fromName           String?
-  content            String
-  attachmentName     String?
-  attachmentUrl      String?
-  isRead             Boolean     @default(false)
-  messageType        MessageType @default(GENERAL)
-  createdAt          DateTime    @default(now())
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId])
-  @@index([fromEmail])
-}
-
-// Support ticket system
 enum TicketStatus {
   OPEN
   IN_PROGRESS
@@ -574,49 +759,6 @@ enum TicketCategory {
   GENERAL
 }
 
-model SupportTicket {
-  id             String         @id @default(cuid())
-  ticketNumber   String         @unique // e.g., TKT-001234
-  userEmail      String
-  userRole       Role
-  userName       String?
-  subject        String
-  description    String
-  category       TicketCategory @default(GENERAL)
-  priority       TicketPriority @default(MEDIUM)
-  status         TicketStatus   @default(OPEN)
-  assignedToEmail String?       // Admin/support email
-  assignedToName  String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  resolvedAt     DateTime?
-  closedAt       DateTime?
-
-  replies TicketReply[]
-
-  @@index([userEmail])
-  @@index([status])
-  @@index([assignedToEmail])
-}
-
-model TicketReply {
-  id         String   @id @default(cuid())
-  ticketId   String
-  fromEmail  String
-  fromRole   Role
-  fromName   String?
-  message    String
-  attachmentName String?
-  attachmentUrl  String?
-  isInternal Boolean  @default(false) // Internal notes visible only to admins
-  createdAt  DateTime @default(now())
-
-  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
-  @@index([ticketId])
-}
-
-// 1-on-1 Class Request system
 enum ClassRequestStatus {
   PENDING
   APPROVED
@@ -626,161 +768,6 @@ enum ClassRequestStatus {
   CANCELLED
 }
 
-model ClassRequest {
-  id               String             @id @default(cuid())
-  parentEmail      String
-  parentName       String?
-  studentId        String?
-  studentName      String?
-  studentAge       Int?
-  requestedTopic   String             // e.g., "Python basics", "JavaScript help"
-  description      String?            // Additional details
-  preferredDays    Json?              // Array of preferred days
-  preferredTimes   Json?              // Array of preferred time ranges
-  duration         Int?               // Duration in minutes, default 60
-  status           ClassRequestStatus @default(PENDING)
-  preferredInstructorId   String?     // Parent's preferred instructor (optional)
-  preferredInstructorName String?     // Parent's preferred instructor name
-  instructorEmail  String?            // Assigned instructor
-  instructorName   String?
-  scheduledDate    DateTime?
-  scheduledTime    String?
-  bookingId        String?            // Link to Booking once scheduled
-  adminNotes       String?
-  parentNotes      String?
-  rejectionReason  String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  reviewedAt       DateTime?
-  scheduledAt      DateTime?
-
-  // Payment fields
-  numberOfSessions  Int?              // Total sessions purchased (daysPerWeek × numberOfWeeks)
-  daysPerWeek       Int?              // Sessions per week
-  numberOfWeeks     Int?              // Number of weeks
-  pricePerSession   Int?              // Price per session in cents
-  totalPrice        Int?              // Total price in cents
-  discountApplied   Int?              // Discount amount in cents
-  paymentStatus     String?           @default("UNPAID") // UNPAID, PENDING, PAID, REFUNDED
-  stripePaymentId   String?           // Stripe payment intent or checkout session ID
-  paidAt            DateTime?
-
-  @@index([parentEmail])
-  @@index([status])
-  @@index([instructorEmail])
-  @@index([paymentStatus])
-}
-
-model Achievement {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  detail    String?
-  icon      String?
-  xpAwarded Int      @default(0)
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-model Project {
-  id         String   @id @default(cuid())
-  lessonId   String   @unique
-  studentId  String?
-  title      String
-  brief      String
-  rubric     Json?
-  language   Language?
-  code       String?
-  thumbnailUrl String?
-  isPublic   Boolean  @default(false)
-  isFeatured Boolean  @default(false)
-  shareToken String?  @unique
-
-  lesson      Lesson        @relation(fields: [lessonId], references: [id])
-  student     StudentProfile? @relation("StudentProjects", fields: [studentId], references: [id])
-  submissions PortfolioItem[]
-
-  @@index([studentId])
-}
-
-model PortfolioItem {
-  id          String   @id @default(cuid())
-  userId      String
-  projectId   String
-  title       String
-  description String?
-  repoUrl     String?
-  demoUrl     String?
-  assets      Json?
-  score       Int?
-  feedback    String?
-  submittedAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id])
-  project Project @relation(fields: [projectId], references: [id])
-
-  @@unique([userId, projectId])
-}
-
-/// NextAuth models for email (magic link) sign-in and OAuth account storage
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
-model PlatformSettings {
-  id                        String   @id @default("default")
-  siteName                  String   @default("Our Coding Kiddos")
-  maintenanceMode           Boolean  @default(false)
-  allowRegistration         Boolean  @default(true)
-  requireEmailVerification  Boolean  @default(false)
-  defaultXpPerLesson        Int      @default(50)
-  xpPerLevel                Int      @default(500)
-  maxStudentsPerParent      Int      @default(5)
-  sessionDurationMinutes    Int      @default(60)
-  enableNotifications       Boolean  @default(true)
-  enableMessaging           Boolean  @default(true)
-  enableCertificates        Boolean  @default(true)
-  enableBadges              Boolean  @default(true)
-  stripeEnabled             Boolean  @default(false)
-  demoMode                  Boolean  @default(false)
-  updatedAt                 DateTime @updatedAt
-  createdAt                 DateTime @default(now())
-}
-
-// Audit logging for tracking system activities
 enum AuditAction {
   CREATE
   UPDATE
@@ -797,27 +784,4 @@ enum AuditSeverity {
   WARNING
   ERROR
   CRITICAL
-}
-
-model AuditLog {
-  id          String        @id @default(cuid())
-  timestamp   DateTime      @default(now())
-  userId      String?
-  userEmail   String
-  action      AuditAction
-  resource    String        // e.g., "User", "Course", "Session"
-  resourceId  String?       // ID of the affected resource
-  details     String        // Human-readable description
-  ipAddress   String?
-  userAgent   String?
-  status      String        @default("success") // "success" or "failed"
-  severity    AuditSeverity @default(INFO)
-  metadata    Json?         // Additional context (error codes, old/new values, etc.)
-
-  @@index([userId])
-  @@index([userEmail])
-  @@index([timestamp])
-  @@index([action])
-  @@index([resource])
-  @@index([severity])
 }

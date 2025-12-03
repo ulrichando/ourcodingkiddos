@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     // Check if student has an enrollment, create one if not
     let enrollment = await prisma.enrollment.findFirst({
       where: {
-        studentId: student.userId || studentId,
+        userId: student.userId || studentId,
         courseId: courseId,
       },
     });
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
       // Create an enrollment for the certificate
       enrollment = await prisma.enrollment.create({
         data: {
-          studentId: student.userId || studentId,
+          userId: student.userId || studentId,
           courseId: courseId,
           status: "COMPLETED",
         },

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public paths that should always be accessible
@@ -42,8 +42,8 @@ export async function middleware(request: NextRequest) {
     }
 
     // For non-admin users, check maintenance mode via environment variable
-    // Note: Middleware runs in Edge Runtime and cannot use PrismaClient
-    // To enable maintenance mode, set MAINTENANCE_MODE=true in .env
+    // Note: Proxy runs on Node.js runtime, so we can potentially use PrismaClient here
+    // For now, using environment variable for simplicity
     const maintenanceMode = process.env.MAINTENANCE_MODE === "true";
 
     if (maintenanceMode && !pathname.startsWith("/maintenance")) {

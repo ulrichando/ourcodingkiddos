@@ -4,7 +4,7 @@ import { Play, RotateCcw, Copy, Check, Loader2 } from "lucide-react";
 
 type Props = {
   initialCode?: string;
-  language?: "html" | "css" | "javascript" | "python" | "roblox";
+  language?: "html" | "css" | "javascript" | "python" | "roblox" | "engineering" | "ai_ml" | "robotics" | "web_development" | "mobile_development" | "game_development" | "career_prep";
   onRun?: (code: string) => void;
   onCodeChange?: (code: string) => void;
   readOnly?: boolean;
@@ -18,6 +18,13 @@ const languageColors: Record<NonNullable<Props["language"]>, string> = {
   javascript: "from-yellow-500 to-amber-500",
   python: "from-green-500 to-emerald-500",
   roblox: "from-red-500 to-pink-500",
+  engineering: "from-slate-500 to-zinc-600",
+  ai_ml: "from-purple-500 to-fuchsia-600",
+  robotics: "from-cyan-500 to-teal-600",
+  web_development: "from-indigo-500 to-blue-600",
+  mobile_development: "from-pink-500 to-rose-600",
+  game_development: "from-emerald-500 to-green-600",
+  career_prep: "from-amber-500 to-orange-600",
 };
 
 // Pyodide instance cache

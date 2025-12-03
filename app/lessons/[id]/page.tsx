@@ -213,16 +213,22 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
       (active as any).example ||
       (active as any).example_code ||
       (active as any).exampleCode ||
-      `<!DOCTYPE html>
-<html>
-  <head><title>My First Page</title></head>
-  <body>
-    <h1>Hello, World!</h1>
-    <p>Welcome to coding!</p>
-  </body>
-</html>`
+      ""
     );
   }, [active]);
+
+  const exerciseCode = useMemo(() => {
+    if (!active) return "";
+    return (active as any).exercise_starter_code || "";
+  }, [active]);
+
+  // Courses that don't need code editors (non-coding courses)
+  const nonCodingLanguages = ["career_prep", "engineering", "robotics", "ai_ml"];
+  const isCodingCourse = course && !nonCodingLanguages.includes(course.language);
+
+  // Only show code sections for coding courses that have actual content
+  const hasExampleCode = isCodingCourse && exampleCode.trim().length > 0;
+  const hasExerciseCode = isCodingCourse && (exerciseCode.trim().length > 0 || (active as any)?.exercise_instructions);
 
   const handleMarkComplete = async () => {
     if (!active || completed.has(current)) return;
@@ -566,112 +572,138 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
                   <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">{active.description}</p>
                 </div>
 
+                {/* How This Lesson Works - Now appears first */}
                 <Card className="lesson-overview relative overflow-hidden bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-950/30 dark:via-[#0c1326] dark:to-pink-950/30 border-2 border-purple-200/50 dark:border-purple-800/50 shadow-xl">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl" />
                   <CardContent className="relative p-8 space-y-4">
                     <div className="flex items-center gap-2">
                       <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      <h3 className="text-lg font-bold text-purple-700 dark:text-purple-300">Lesson Overview</h3>
+                      <h3 className="text-lg font-bold text-purple-700 dark:text-purple-300">How This Lesson Works</h3>
                     </div>
                     <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
-                      Learn why this lesson matters and practice with the example and "Your Turn" editor below. Complete the lesson to earn XP and level up your coding skills!
+                      Follow these steps to master this lesson and earn your XP!
                     </p>
-                    <div className="grid sm:grid-cols-3 gap-4 pt-2">
+                    <div className={`grid gap-4 pt-2 ${hasExampleCode || hasExerciseCode ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/40 border border-purple-200/30 dark:border-purple-700/30">
                         <div className="h-8 w-8 rounded-lg bg-purple-500 flex items-center justify-center flex-shrink-0">
                           <span className="text-white text-lg font-bold">1</span>
                         </div>
-                        <p className="text-sm text-slate-700 dark:text-slate-300">Learn the concept with examples</p>
+                        <p className="text-sm text-slate-700 dark:text-slate-300">Read the lesson below</p>
                       </div>
-                      <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/40 border border-purple-200/30 dark:border-purple-700/30">
-                        <div className="h-8 w-8 rounded-lg bg-pink-500 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-lg font-bold">2</span>
+                      {(hasExampleCode || hasExerciseCode) && (
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/40 border border-purple-200/30 dark:border-purple-700/30">
+                          <div className="h-8 w-8 rounded-lg bg-pink-500 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-lg font-bold">2</span>
+                          </div>
+                          <p className="text-sm text-slate-700 dark:text-slate-300">Try the code yourself</p>
                         </div>
-                        <p className="text-sm text-slate-700 dark:text-slate-300">Practice in the code editor</p>
-                      </div>
+                      )}
                       <div className="flex items-start gap-3 p-3 rounded-lg bg-white/60 dark:bg-slate-800/40 border border-purple-200/30 dark:border-purple-700/30">
                         <div className="h-8 w-8 rounded-lg bg-orange-500 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-lg font-bold">3</span>
+                          <span className="text-white text-lg font-bold">{hasExampleCode || hasExerciseCode ? '3' : '2'}</span>
                         </div>
-                        <p className="text-sm text-slate-700 dark:text-slate-300">Mark complete and earn XP</p>
+                        <p className="text-sm text-slate-700 dark:text-slate-300">Take the quiz & complete!</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <div className="space-y-8">
-                  <div className="group">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-900 dark:text-white">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                          <Code2 className="h-5 w-5 text-white" />
+                {/* Learning Content Section - Let's Learn! */}
+                {(active as any).content && (
+                  <Card className="lesson-content relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-blue-950/30 dark:via-[#0c1326] dark:to-cyan-950/30 border-2 border-blue-200/50 dark:border-blue-800/50 shadow-xl">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl" />
+                    <CardContent className="relative p-6 sm:p-8 space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                          <BookOpen className="h-5 w-5 text-white" />
                         </div>
-                        Example Code
-                      </h3>
-                      <Badge variant="outline" className="text-xs">Read-only</Badge>
-                    </div>
-                    <Card className="relative overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-                      <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center px-4 gap-2">
-                        <div className="flex gap-1.5">
-                          <div className="h-3 w-3 rounded-full bg-red-500" />
-                          <div className="h-3 w-3 rounded-full bg-amber-500" />
-                          <div className="h-3 w-3 rounded-full bg-green-500" />
-                        </div>
-                        <span className="text-xs text-slate-600 dark:text-slate-400 font-mono ml-2">example.{course.language}</span>
+                        <h3 className="text-xl font-bold text-blue-700 dark:text-blue-300">Let's Learn!</h3>
                       </div>
-                      <CardContent className="pt-12 p-0">
-                        <CodeEditor
-                          key={`example-${course.id}-${current}`}
-                          initialCode={exampleCode}
-                          language={course.language}
-                          showPreview={course.language !== "python"}
-                        />
-                      </CardContent>
-                    </Card>
-                  </div>
+                      <div
+                        className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-slate-900 dark:prose-headings:text-slate-100 prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-strong:text-purple-700 dark:prose-strong:text-purple-400 prose-code:bg-purple-100 dark:prose-code:bg-purple-900/50 prose-code:text-purple-700 dark:prose-code:text-purple-300 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-pre:bg-slate-900 prose-pre:border-2 prose-pre:border-slate-700 prose-ul:space-y-2 prose-li:text-slate-700 dark:prose-li:text-slate-300"
+                        dangerouslySetInnerHTML={{ __html: (active as any).content.replace(/\n/g, '<br />') }}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
 
-                  <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl opacity-20 blur group-hover:opacity-30 transition-opacity" />
-                    <div className="relative">
+                <div className="space-y-8">
+                  {hasExampleCode && (
+                    <div className="group">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-900 dark:text-white">
-                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 animate-pulse">
-                            <Star className="h-5 w-5 text-white fill-white" />
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                            <Code2 className="h-5 w-5 text-white" />
                           </div>
-                          Your Turn!
+                          Example Code
                         </h3>
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">Interactive</Badge>
+                        <Badge variant="outline" className="text-xs">Read-only</Badge>
                       </div>
-                      <Card className="relative overflow-hidden border-2 border-purple-300 dark:border-purple-700 shadow-2xl bg-gradient-to-br from-purple-50/50 via-white to-pink-50/50 dark:from-purple-950/20 dark:via-[#0c1326] dark:to-pink-950/20">
-                        <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-br from-purple-100 via-pink-50 to-orange-50 dark:from-purple-900/40 dark:via-pink-900/30 dark:to-orange-900/20 border-b-2 border-purple-200 dark:border-purple-800">
-                          <div className="flex items-center justify-between px-4 h-full">
-                            <div className="flex items-center gap-2">
-                              <div className="flex gap-1.5">
-                                <div className="h-3 w-3 rounded-full bg-red-500 shadow-sm" />
-                                <div className="h-3 w-3 rounded-full bg-amber-500 shadow-sm" />
-                                <div className="h-3 w-3 rounded-full bg-green-500 shadow-sm" />
-                              </div>
-                              <span className="text-xs text-purple-700 dark:text-purple-300 font-mono ml-2 font-semibold">your-code.{course.language}</span>
-                            </div>
-                            <Play className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      <Card className="relative overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                        <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center px-4 gap-2">
+                          <div className="flex gap-1.5">
+                            <div className="h-3 w-3 rounded-full bg-red-500" />
+                            <div className="h-3 w-3 rounded-full bg-amber-500" />
+                            <div className="h-3 w-3 rounded-full bg-green-500" />
                           </div>
+                          <span className="text-xs text-slate-600 dark:text-slate-400 font-mono ml-2">example.{course.language}</span>
                         </div>
-                        <CardContent className="pt-20 pb-6 px-6">
-                          <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-purple-100/80 to-pink-100/80 dark:from-purple-900/40 dark:to-pink-900/40 border border-purple-200 dark:border-purple-800">
-                            <p className="text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
-                              {(active as any).exercise_instructions || 'Try it yourself below and hit "Run" to see your code in action!'}
-                            </p>
-                          </div>
+                        <CardContent className="pt-12 p-0">
                           <CodeEditor
-                            key={`exercise-${course.id}-${current}`}
-                            initialCode={(active as any).exercise_starter_code || "// Write your code here\n"}
+                            key={`example-${course.id}-${current}`}
+                            initialCode={exampleCode}
                             language={course.language}
                             showPreview={course.language !== "python"}
                           />
                         </CardContent>
                       </Card>
                     </div>
-                  </div>
+                  )}
+
+                  {hasExerciseCode && (
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl opacity-20 blur group-hover:opacity-30 transition-opacity" />
+                      <div className="relative">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-900 dark:text-white">
+                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30 animate-pulse">
+                              <Star className="h-5 w-5 text-white fill-white" />
+                            </div>
+                            Your Turn!
+                          </h3>
+                          <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">Interactive</Badge>
+                        </div>
+                        <Card className="relative overflow-hidden border-2 border-purple-300 dark:border-purple-700 shadow-2xl bg-gradient-to-br from-purple-50/50 via-white to-pink-50/50 dark:from-purple-950/20 dark:via-[#0c1326] dark:to-pink-950/20">
+                          <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-br from-purple-100 via-pink-50 to-orange-50 dark:from-purple-900/40 dark:via-pink-900/30 dark:to-orange-900/20 border-b-2 border-purple-200 dark:border-purple-800">
+                            <div className="flex items-center justify-between px-4 h-full">
+                              <div className="flex items-center gap-2">
+                                <div className="flex gap-1.5">
+                                  <div className="h-3 w-3 rounded-full bg-red-500 shadow-sm" />
+                                  <div className="h-3 w-3 rounded-full bg-amber-500 shadow-sm" />
+                                  <div className="h-3 w-3 rounded-full bg-green-500 shadow-sm" />
+                                </div>
+                                <span className="text-xs text-purple-700 dark:text-purple-300 font-mono ml-2 font-semibold">your-code.{course.language}</span>
+                              </div>
+                              <Play className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            </div>
+                          </div>
+                          <CardContent className="pt-20 pb-6 px-6">
+                            <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-purple-100/80 to-pink-100/80 dark:from-purple-900/40 dark:to-pink-900/40 border border-purple-200 dark:border-purple-800">
+                              <p className="text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
+                                {(active as any).exercise_instructions || 'Try it yourself below and hit "Run" to see your code in action!'}
+                              </p>
+                            </div>
+                            <CodeEditor
+                              key={`exercise-${course.id}-${current}`}
+                              initialCode={exerciseCode || "// Write your code here\n"}
+                              language={course.language}
+                              showPreview={course.language !== "python"}
+                            />
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-5">
                     <div className="flex items-center gap-3">
