@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
 import {
   Code2,
-  FileCode,
-  Terminal,
   Play,
   Star,
   Users,
@@ -16,134 +16,268 @@ import {
   Clock,
   Globe,
   Smartphone,
-  Joystick,
   Brain,
-  Wrench,
-  Bot,
-  Briefcase,
-  FileText,
+  Rocket,
+  Heart,
+  Trophy,
+  Target,
+  Lightbulb,
+  Gamepad2,
+  Palette,
   GraduationCap,
   BookOpen,
   Calendar,
 } from "lucide-react";
+import UpcomingClassesSection from "../components/home/UpcomingClassesSection";
 
-export const metadata: Metadata = {
-  title: "Learn to Code - Interactive Online Coding Classes for Kids",
-  description: "Fun, interactive coding courses for ages 7-18. Web development, mobile apps, game design, AI & machine learning, engineering, and robotics. Live classes with expert instructors. Get started for free!",
-  keywords: ["coding for kids", "programming classes", "learn to code", "kids coding courses", "online coding school", "HTML for kids", "Python for kids", "JavaScript for kids", "Roblox coding", "AI for kids", "robotics for kids", "game development for kids", "mobile app development for kids"],
-  openGraph: {
-    title: "Our Coding Kiddos - Turn Your Child Into a Future Coder",
-    description: "Fun, interactive coding courses for ages 7-18. From building games in Roblox to creating real websites. Get started for free!",
-    url: "https://ourcodingkiddos.com",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Our Coding Kiddos - Turn Your Child Into a Future Coder",
-    description: "Fun, interactive coding courses for ages 7-18. Get started for free!",
-  },
-};
-
-const categories = [
-  { name: "Web Development", icon: Globe, color: "from-indigo-400 to-blue-500", description: "Build websites with HTML, CSS & JavaScript" },
-  { name: "Mobile Development", icon: Smartphone, color: "from-pink-400 to-rose-500", description: "Create apps for phones & tablets" },
-  { name: "Game Development", icon: Joystick, color: "from-emerald-400 to-green-500", description: "Design and code your own games" },
-  { name: "AI & Machine Learning", icon: Brain, color: "from-purple-400 to-violet-500", description: "Explore artificial intelligence" },
-  { name: "Engineering", icon: Wrench, color: "from-slate-400 to-gray-500", description: "Learn problem-solving skills" },
-  { name: "Robotics", icon: Bot, color: "from-cyan-400 to-teal-500", description: "Program robots and automation" },
+const journeySteps = [
+  { level: 1, title: "Explorer", xp: "0-500 XP", desc: "First lines of code", icon: Rocket, color: "from-emerald-400 to-green-500" },
+  { level: 2, title: "Builder", xp: "500-2K XP", desc: "Creating projects", icon: Target, color: "from-blue-400 to-cyan-500" },
+  { level: 3, title: "Innovator", xp: "2K-5K XP", desc: "Solving problems", icon: Lightbulb, color: "from-violet-400 to-purple-500" },
+  { level: 4, title: "Creator", xp: "5K-10K XP", desc: "Building apps", icon: Palette, color: "from-pink-400 to-rose-500" },
+  { level: 5, title: "Master", xp: "10K+ XP", desc: "Teaching others", icon: Trophy, color: "from-amber-400 to-orange-500" },
 ];
 
-// Technologies vary based on market demand - these are current in-demand skills
-const technologies = [
-  { name: "React", icon: Code2, color: "from-cyan-400 to-blue-500", description: "Build modern web apps" },
-  { name: "Next.js", icon: Globe, color: "from-slate-600 to-slate-800", description: "Full-stack React framework" },
-  { name: "TypeScript", icon: FileCode, color: "from-blue-500 to-indigo-600", description: "Type-safe JavaScript" },
-  { name: "Python", icon: Terminal, color: "from-green-400 to-emerald-500", description: "AI & data science" },
-  { name: "Node.js", icon: Terminal, color: "from-lime-400 to-green-500", description: "Server-side JavaScript" },
+const projectShowcase = [
+  { title: "Space Shooter", type: "Game", tech: "Python", student: "Alex, 12", color: "from-violet-500 to-purple-600", emoji: "🚀" },
+  { title: "Weather App", type: "Web App", tech: "JavaScript", student: "Emma, 14", color: "from-cyan-500 to-blue-600", emoji: "🌤️" },
+  { title: "Pet Care Bot", type: "AI Project", tech: "Python", student: "Mia, 11", color: "from-pink-500 to-rose-600", emoji: "🤖" },
+  { title: "Music Mixer", type: "Creative", tech: "Scratch", student: "Jake, 9", color: "from-amber-500 to-orange-600", emoji: "🎵" },
 ];
 
-const testimonials = [
-  { name: "Emma's Mom", text: "My daughter went from playing games to creating them! The instructors are amazing.", rating: 5 },
-  { name: "Jake's Dad", text: "Best investment in my son's education. He now wants to be a software engineer!", rating: 5 },
-  { name: "Sophie, age 14", text: "I built my first website and it's actually live! So cool!", rating: 5 },
+const learningPaths = [
+  {
+    name: "Game Creator",
+    icon: Gamepad2,
+    color: "from-violet-500 to-purple-600",
+    bgLight: "bg-violet-50",
+    skills: ["Scratch", "Python", "Unity"],
+    outcome: "Build your own video games",
+    duration: "6 months"
+  },
+  {
+    name: "Web Developer",
+    icon: Globe,
+    color: "from-blue-500 to-cyan-600",
+    bgLight: "bg-blue-50",
+    skills: ["HTML", "CSS", "JavaScript"],
+    outcome: "Create real websites",
+    duration: "4 months"
+  },
+  {
+    name: "App Inventor",
+    icon: Smartphone,
+    color: "from-emerald-500 to-green-600",
+    bgLight: "bg-emerald-50",
+    skills: ["React Native", "Firebase"],
+    outcome: "Launch mobile apps",
+    duration: "5 months"
+  },
+  {
+    name: "AI Explorer",
+    icon: Brain,
+    color: "from-pink-500 to-rose-600",
+    bgLight: "bg-pink-50",
+    skills: ["Python", "ML Basics", "ChatGPT"],
+    outcome: "Build smart projects",
+    duration: "6 months"
+  },
 ];
 
 const stats = [
-  { value: "100+", label: "Happy Students" },
-  { value: "500+", label: "Courses Completed" },
-  { value: "50+", label: "Expert Instructors" },
-  { value: "4.9", label: "Star Rating" },
+  { value: "2,500+", label: "Lines of Code Written Daily", icon: Code2 },
+  { value: "847", label: "Projects Completed", icon: Rocket },
+  { value: "98%", label: "Parent Satisfaction", icon: Heart },
+  { value: "4.9", label: "Star Rating", icon: Star },
+];
+
+const features = [
+  {
+    icon: Gamepad2,
+    title: "Learn by Playing",
+    desc: "Every lesson feels like a game. Points, badges, and rewards keep kids engaged.",
+    color: "from-violet-500 to-purple-600",
+    bgLight: "bg-violet-100 dark:bg-violet-900/30"
+  },
+  {
+    icon: Users,
+    title: "Real Mentors",
+    desc: "Not just videos. Live instructors who know each student by name.",
+    color: "from-blue-500 to-cyan-600",
+    bgLight: "bg-blue-100 dark:bg-blue-900/30"
+  },
+  {
+    icon: Rocket,
+    title: "Build Real Things",
+    desc: "Projects that actually work. Share with friends and family.",
+    color: "from-amber-500 to-orange-600",
+    bgLight: "bg-amber-100 dark:bg-amber-900/30"
+  },
+  {
+    icon: Shield,
+    title: "Safe & Supportive",
+    desc: "Kid-friendly environment with parent dashboards and progress tracking.",
+    color: "from-emerald-500 to-green-600",
+    bgLight: "bg-emerald-100 dark:bg-emerald-900/30"
+  },
 ];
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-      {/* Hero */}
-      <section className="pt-20 md:pt-24 pb-14 px-4 overflow-hidden">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-            <div className="text-center lg:text-left">
-              <span className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold mb-5">
-                <Sparkles className="w-3 h-3" /> #1 Online Coding School for Kids
-              </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight mb-5">
-                Turn Your Child Into a{" "}
-                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
-                  Future Coder
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-950 dark:to-violet-950/20 pt-8 pb-20 px-4">
+        {/* Background decorations */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-violet-200/40 dark:bg-violet-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-pink-200/40 dark:bg-pink-500/10 rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="text-center lg:text-left space-y-6">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-sm font-medium text-violet-700 dark:text-violet-300">Now Enrolling for 2025</span>
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-slate-900 dark:text-white">
+                Where Kids Learn to{" "}
+                <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Code & Create
                 </span>
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                Fun, interactive coding courses for ages 7-18. From building games in Roblox to creating real websites
-                with HTML, CSS & JavaScript.
+
+              <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-xl">
+                Transform screen time into <span className="text-violet-600 dark:text-violet-400 font-semibold">dream time</span>.
+                Your child will go from playing games to <span className="text-pink-600 dark:text-pink-400 font-semibold">making them</span>.
               </p>
-              <div className="flex flex-wrap gap-4 mb-6 justify-center lg:justify-start">
+
+              {/* Quick Stats */}
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center">
+                    <Code2 className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-slate-900 dark:text-white">500+</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Active Students</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                    <Star className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-slate-900 dark:text-white">4.9/5</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Parent Rating</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Link
                   href="/auth/register"
-                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 shadow-lg"
+                  className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold shadow-lg shadow-violet-500/25 transition-all hover:shadow-xl hover:shadow-violet-500/30"
                 >
-                  Get Started Free <Play className="w-5 h-5" />
+                  Start Free Today
+                  <Rocket className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
                 <Link
                   href="/programs"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 px-6 py-3 text-slate-800 dark:text-slate-200 font-semibold hover:border-purple-200 dark:hover:border-purple-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
-                  Browse Programs
+                  <Play className="w-5 h-5" />
+                  Explore Programs
                 </Link>
               </div>
-              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-sm text-slate-600 dark:text-slate-400 justify-center lg:justify-start">
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> Free account access
+
+              {/* Trust Indicators */}
+              <div className="flex items-center gap-4 justify-center lg:justify-start text-sm text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-emerald-500" />
+                  Free to start
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> Pay per program
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-emerald-500" />
+                  No credit card needed
                 </span>
               </div>
             </div>
-            <div className="relative max-w-lg w-full mx-auto lg:mx-0">
-              <div className="absolute -z-10 w-72 sm:w-96 h-72 sm:h-96 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              {/* Kid coding image with code overlay */}
-              <div className="relative">
-                <img
-                  src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop"
-                  alt="Kids learning to code"
-                  className="rounded-2xl shadow-2xl w-full object-cover"
-                />
-                {/* Floating code card */}
-                <div className="absolute -bottom-4 -left-4 bg-slate-900 rounded-xl p-4 shadow-xl transform hover:scale-105 transition duration-300">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="h-2 w-2 rounded-full bg-red-400" />
-                    <span className="h-2 w-2 rounded-full bg-yellow-400" />
-                    <span className="h-2 w-2 rounded-full bg-green-400" />
+
+            {/* Right Side - Hero Image / Illustration */}
+            <div className="relative">
+              {/* Floating badges */}
+              <div className="absolute -top-4 -left-4 z-10 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                    <Globe className="w-4 h-4 text-white" />
                   </div>
-                  <pre className="text-xs font-mono text-green-400">
-{`function sayHello() {
-  console.log("Hi! 🚀");
-}`}
-                  </pre>
+                  <div className="text-sm">
+                    <div className="font-semibold text-slate-900 dark:text-white">Web Dev</div>
+                    <div className="text-xs text-slate-500">Popular Course</div>
+                  </div>
                 </div>
-                {/* Fun badge */}
-                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transform rotate-12">
-                  Fun! 🎮
+              </div>
+
+              <div className="absolute -bottom-4 -right-4 z-10 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center">
+                    <Gamepad2 className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-semibold text-slate-900 dark:text-white">Game Design</div>
+                    <div className="text-xs text-slate-500">Kids Love It!</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Card - Code Preview */}
+              <div className="relative bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-400"></span>
+                    <span className="w-3 h-3 rounded-full bg-amber-400"></span>
+                    <span className="w-3 h-3 rounded-full bg-emerald-400"></span>
+                  </div>
+                  <span className="text-xs text-slate-500 font-mono">my_first_game.py</span>
+                  <div className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Running
+                  </div>
+                </div>
+
+                {/* Code */}
+                <div className="p-6 font-mono text-sm">
+                  <div className="space-y-2">
+                    <div><span className="text-violet-600 dark:text-violet-400">class</span> <span className="text-amber-600 dark:text-amber-400">SpaceShip</span><span className="text-slate-700 dark:text-slate-300">:</span></div>
+                    <div className="pl-4"><span className="text-violet-600 dark:text-violet-400">def</span> <span className="text-blue-600 dark:text-cyan-400">__init__</span><span className="text-slate-700 dark:text-slate-300">(self):</span></div>
+                    <div className="pl-8"><span className="text-slate-700 dark:text-slate-300">self.</span><span className="text-orange-600 dark:text-orange-400">speed</span> <span className="text-slate-700 dark:text-slate-300">=</span> <span className="text-emerald-600 dark:text-emerald-400">10</span></div>
+                    <div className="pl-8"><span className="text-slate-700 dark:text-slate-300">self.</span><span className="text-orange-600 dark:text-orange-400">power</span> <span className="text-slate-700 dark:text-slate-300">=</span> <span className="text-emerald-600 dark:text-emerald-400">100</span></div>
+                    <div className="mt-4"><span className="text-violet-600 dark:text-violet-400">def</span> <span className="text-blue-600 dark:text-cyan-400">launch</span><span className="text-slate-700 dark:text-slate-300">(self):</span></div>
+                    <div className="pl-4"><span className="text-blue-600 dark:text-cyan-400">print</span><span className="text-slate-700 dark:text-slate-300">(</span><span className="text-emerald-600 dark:text-emerald-400">&quot;Blast off!&quot;</span><span className="text-slate-700 dark:text-slate-300">)</span></div>
+                  </div>
+
+                  {/* Output */}
+                  <div className="mt-6 p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <div className="text-xs text-slate-500 mb-2">Output:</div>
+                    <div className="text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                      <span>Blast off!</span>
+                      <span className="text-2xl">🚀</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Student Badge */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 border border-violet-200 dark:border-violet-800">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">M</div>
+                  <span className="text-xs text-violet-700 dark:text-violet-300">Maya, age 11</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Level 3</span>
                 </div>
               </div>
             </div>
@@ -151,387 +285,290 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-10 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-white">
-          {stats.map((stat) => (
-            <div key={stat.label}>
-              <div className="text-3xl font-bold">{stat.value}</div>
-              <div className="text-white/85">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section id="courses" className="py-16 px-4">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="text-center mb-12 px-2">
-            <span className="inline-block bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              What We Teach
+      {/* Learning Journey Path */}
+      <section className="py-20 px-4 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-semibold mb-4">
+              <Trophy className="w-4 h-4" /> The Coder&apos;s Journey
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Explore Our Course Categories</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">From web development to robotics - discover your passion in tech</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+              Level Up Your Skills
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Every coder starts at Level 1. Watch your child climb the ranks and unlock new abilities.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mb-16">
-            {categories.map((cat) => (
-              <Link key={cat.name} href="/courses">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-slate-100 dark:border-slate-700">
-                  <div className="p-6 text-center">
-                    <div
-                      className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}
-                    >
-                      <cat.icon className="w-8 h-8 text-white" />
+
+          {/* Journey Steps */}
+          <div className="relative">
+            {/* Connection line */}
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 via-violet-500 to-amber-500 -translate-y-1/2 rounded-full" />
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
+              {journeySteps.map((step, idx) => (
+                <div key={step.level} className="relative group">
+                  <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all hover:-translate-y-1">
+                    {/* Level Badge */}
+                    <div className={`w-14 h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg`}>
+                      <step.icon className="w-7 h-7 text-white" />
                     </div>
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 mb-2">{cat.name}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{cat.description}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* In-Demand Technologies */}
-          <div className="text-center mb-10 px-2">
-            <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              In-Demand Technologies
-            </span>
-            <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Learn What the Market Demands</h2>
-            <p className="text-slate-600 dark:text-slate-400">Stay ahead with the most sought-after programming skills in the industry</p>
-          </div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {technologies.map((tech) => (
-              <Link key={tech.name} href="/courses">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-slate-100 dark:border-slate-700">
-                  <div className="p-6 text-center">
-                    <div
-                      className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${tech.color} flex items-center justify-center`}
-                    >
-                      <tech.icon className="w-8 h-8 text-white" />
+                    <div className="text-center">
+                      <div className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Level {step.level}</div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{step.title}</h3>
+                      <div className="text-sm text-violet-600 dark:text-violet-400 font-medium mb-1">{step.xp}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">{step.desc}</div>
                     </div>
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 mb-2">{tech.name}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{tech.description}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Age Groups */}
-      <section className="py-16 px-4 bg-slate-50 dark:bg-slate-900">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="text-center mb-12 px-2">
-            <span className="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              For Every Age
-            </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Courses Designed for Your Child</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[
-              { age: "7-10", title: "Young Explorers", desc: "Fun visual coding with games and animations. Big buttons, colorful interface, lots of encouragement!", emoji: "🎨" },
-              { age: "11-14", title: "Junior Developers", desc: "Build real websites and games. Learn HTML, CSS, JavaScript with hands-on projects.", emoji: "🚀" },
-              { age: "15-18", title: "Future Engineers", desc: "Advanced programming, portfolio building, and preparing for tech careers.", emoji: "💻" },
-            ].map((group) => (
-              <div key={group.title} className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition border border-slate-100 dark:border-slate-700">
-                <div className="h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400" />
-                <div className="p-8 space-y-3">
-                  <div className="text-5xl">{group.emoji}</div>
-                  <span className="inline-block text-xs font-semibold border border-slate-200 dark:border-slate-600 rounded-full px-3 py-1 text-slate-700 dark:text-slate-300">
-                    Ages {group.age}
-                  </span>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{group.title}</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">{group.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-          <div className="text-center lg:text-left">
-            <span className="inline-block bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              Why Choose Us
-            </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-6">The Best Way for Kids to Learn Coding</h2>
-            <div className="space-y-5">
-              {[
-                { icon: Zap, title: "Interactive Lessons", desc: "Learn by doing with our in-browser code editor" },
-                { icon: Award, title: "Gamified Experience", desc: "Earn XP, badges, and level up as you learn" },
-                { icon: Users, title: "Expert Instructors", desc: "Live classes with passionate teachers" },
-                { icon: Shield, title: "Safe Environment", desc: "Kid-friendly platform with parental controls" },
-                { icon: Clock, title: "Flexible Learning", desc: "Self-paced courses + scheduled live classes" },
-              ].map((feat) => (
-                <div key={feat.title} className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
-                    <feat.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">{feat.title}</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">{feat.desc}</p>
+                    {/* Start Here badge */}
+                    {idx === 0 && (
+                      <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow-sm">
+                        Start Here!
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="relative">
-            {/* Main image - kid with laptop */}
-            <img
-              src="https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?w=600&h=450&fit=crop"
-              alt="Happy child learning to code on laptop"
-              className="rounded-2xl shadow-2xl w-full object-cover"
-            />
-            {/* Rating card */}
-            <div className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 p-4 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <Star className="w-6 h-6 text-green-600 dark:text-green-400 fill-green-600 dark:fill-green-400" />
-              </div>
-              <div>
-                <div className="font-bold text-lg text-slate-900 dark:text-slate-100">4.9/5 Rating</div>
-                <div className="text-sm text-slate-500 dark:text-slate-400">From 2,000+ parents</div>
-              </div>
-            </div>
-            {/* Fun sticker */}
-            <div className="absolute -top-4 -right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg transform -rotate-6">
-              100% Fun! ✨
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Career Prep */}
-      <section className="py-16 px-4 bg-gradient-to-b from-amber-50 to-orange-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="text-center mb-12 px-2">
-            <span className="inline-block bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              Career Ready
+      {/* Learning Paths */}
+      <section className="py-20 px-4 bg-slate-50 dark:bg-slate-950">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-sm font-semibold mb-4">
+              <Target className="w-4 h-4" /> Choose Your Path
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Prepare for Your Future</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">We don't just teach coding - we prepare students for real careers in tech</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+              What Will You Create?
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Every path leads to real-world skills. Pick what excites you most.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <Link href="/courses">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-slate-100 dark:border-slate-700 h-full">
-                <div className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                    <FileText className="w-8 h-8 text-white" />
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {learningPaths.map((path) => (
+              <Link key={path.name} href="/programs" className="group">
+                <div className={`relative h-full ${path.bgLight} dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-xl hover:border-violet-300 dark:hover:border-violet-700 transition-all overflow-hidden`}>
+                  {/* Icon */}
+                  <div className={`w-14 h-14 mb-5 rounded-xl bg-gradient-to-br ${path.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                    <path.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 mb-2">Resume Building</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Learn to write professional tech resumes that get noticed by recruiters</p>
-                </div>
-              </div>
-            </Link>
-            <Link href="/courses">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-slate-100 dark:border-slate-700 h-full">
-                <div className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-                    <Briefcase className="w-8 h-8 text-white" />
+
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{path.name}</h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{path.outcome}</p>
+
+                  {/* Skills */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {path.skills.map((skill) => (
+                      <span key={skill} className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs text-slate-600 dark:text-slate-300">
+                        {skill}
+                      </span>
+                    ))}
                   </div>
-                  <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 mb-2">Portfolio Development</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Build an impressive portfolio to showcase your coding projects</p>
-                </div>
-              </div>
-            </Link>
-            <Link href="/courses">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-slate-100 dark:border-slate-700 h-full">
-                <div className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center">
-                    <GraduationCap className="w-8 h-8 text-white" />
+
+                  {/* Duration */}
+                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <Clock className="w-4 h-4" />
+                    {path.duration}
                   </div>
-                  <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 mb-2">Interview Skills</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Practice technical interviews and prepare for your first tech role</p>
+
+                  {/* Arrow */}
+                  <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center shadow group-hover:bg-violet-100 dark:group-hover:bg-violet-900/30 transition-colors">
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all" />
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works - Programs */}
-      <section id="how-it-works" className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="text-center mb-12 px-2">
-            <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              How It Works
+      {/* Upcoming Classes Section */}
+      <UpcomingClassesSection />
+
+      {/* Student Showcase */}
+      <section className="py-20 px-4 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 text-sm font-semibold mb-4">
+              <Sparkles className="w-4 h-4" /> Student Showcase
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Simple & Flexible</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">Create a free account and pay only for the programs you want</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+              Made by Kids Like Yours
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Real projects built by our students. Your child could be next.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <div className="relative overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-              <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
-              <div className="p-7 space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <Users className="w-7 h-7 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">1. Create Free Account</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">Sign up for free and get access to your parent dashboard. Add your students and explore our courses.</p>
-                </div>
-              </div>
-            </div>
-            <div className="relative overflow-hidden rounded-2xl shadow-lg border border-purple-500 shadow-purple-100 dark:shadow-purple-900/20 bg-white dark:bg-slate-800">
-              <div className="h-2 bg-gradient-to-r from-pink-500 to-orange-500" />
-              <div className="p-7 space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                  <BookOpen className="w-7 h-7 text-pink-600 dark:text-pink-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">2. Choose a Program</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">Browse our structured programs (6, 12, 18, or 24 sessions). Each program includes live classes and project-based learning.</p>
-                </div>
-              </div>
-            </div>
-            <div className="relative overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-              <div className="h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
-              <div className="p-7 space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <Calendar className="w-7 h-7 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">3. Start Learning</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">Schedule classes, track progress, and watch your child build real coding skills with expert instructors.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="text-center mt-10">
-            <Link
-              href="/programs"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 shadow-lg"
-            >
-              View All Programs <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* One-on-One Classes */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 md:p-12 text-white shadow-2xl">
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <span className="inline-block bg-white/20 px-3 py-1 rounded-full text-xs font-semibold mb-4">
-                  Personalized Learning
-                </span>
-                <h2 className="text-3xl lg:text-4xl font-bold mb-4">1-on-1 Private Classes</h2>
-                <p className="text-white/90 text-lg mb-6">
-                  Want personalized attention for your child? Book private sessions with our expert instructors for customized learning at your own pace.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    "Customized curriculum based on your child's interests",
-                    "Flexible scheduling to fit your family's routine",
-                    "Direct feedback and mentorship from instructors",
-                    "Accelerated learning with undivided attention",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" />
-                      <span className="text-white/90">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/dashboard/parent/class-requests"
-                  className="inline-flex items-center gap-2 bg-white text-purple-600 hover:bg-slate-100 font-semibold px-6 py-3 rounded-full"
-                >
-                  Request 1-on-1 Class <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="hidden lg:flex justify-center">
-                <div className="w-64 h-64 rounded-full bg-white/10 flex items-center justify-center">
-                  <div className="w-48 h-48 rounded-full bg-white/10 flex items-center justify-center">
-                    <Users className="w-24 h-24 text-white/80" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {projectShowcase.map((project) => (
+              <div key={project.title} className="group">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-xl hover:border-violet-300 dark:hover:border-violet-700 transition-all">
+                  {/* Project Preview */}
+                  <div className={`h-36 bg-gradient-to-br ${project.color} flex items-center justify-center`}>
+                    <span className="text-5xl">{project.emoji}</span>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Kids Love Coding Gallery */}
-      <section className="py-16 px-4 bg-gradient-to-b from-purple-50 to-pink-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-6xl lg:max-w-7xl mx-auto">
-          <div className="text-center mb-12 px-2">
-            <span className="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              Kids Love It! 💖
-            </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Watch Them Code & Create</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">Our students building amazing projects every day</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { src: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400&h=300&fit=crop", alt: "Kids coding together", label: "Teamwork!" },
-              { src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop", alt: "Child excited about coding", label: "I did it!" },
-              { src: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=300&fit=crop", alt: "Student learning programming", label: "Learning" },
-              { src: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop", alt: "Young coder at computer", label: "Creating" },
-            ].map((img, i) => (
-              <div key={i} className="relative group overflow-hidden rounded-2xl shadow-lg">
-                <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
-                <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-slate-800/90 px-3 py-1 rounded-full text-sm font-semibold text-slate-800 dark:text-slate-200 opacity-0 group-hover:opacity-100 transition duration-300 transform translate-y-2 group-hover:translate-y-0">
-                  {img.label} ✨
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-300">{project.type}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-300">{project.tech}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{project.title}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">by {project.student}</p>
+                  </div>
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <Link
+              href="/showcase"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              View All Projects <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Why We're Different */}
+      <section className="py-20 px-4 bg-gradient-to-br from-violet-50 via-white to-pink-50 dark:from-slate-900 dark:via-slate-950 dark:to-violet-950/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 text-sm font-semibold mb-4">
+                <Zap className="w-4 h-4" /> The Difference
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+                Not Just Lessons.
+                <span className="block text-violet-600 dark:text-violet-400">Adventures.</span>
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
+                Traditional coding classes are boring. We built something different -
+                a place where kids actually <em>want</em> to learn.
+              </p>
+
+              <div className="space-y-5">
+                {features.map((feature) => (
+                  <div key={feature.title} className="flex gap-4 items-start group">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center flex-shrink-0 shadow group-hover:scale-110 transition-transform`}>
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{feature.title}</h3>
+                      <p className="text-slate-600 dark:text-slate-400">{feature.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              {stats.map((stat) => (
+                <div key={stat.label} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all group">
+                  <stat.icon className="w-8 h-8 text-slate-400 dark:text-slate-500 mb-4 group-hover:text-violet-500 transition-colors" />
+                  <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">{stat.value}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 px-4">
+      <section className="py-20 px-4 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="inline-block bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              Happy Families
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-semibold mb-4">
+              <Heart className="w-4 h-4" /> Happy Families
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">What Parents & Kids Say</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+              From Our Community
+            </h2>
           </div>
+
           <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.name} className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 p-6 space-y-3">
-                <div className="flex gap-1 text-amber-400">
-                  {Array.from({ length: t.rating }).map((_, idx) => (
-                    <Star key={idx} className="h-5 w-5 fill-amber-400" />
+            {[
+              {
+                quote: "My son went from playing Fortnite all day to building his own games. The transformation is incredible!",
+                name: "Sarah M.",
+                role: "Parent of Marcus, 12",
+                avatar: "S"
+              },
+              {
+                quote: "I built a website for my mom's bakery! She was so proud. Now I want to make apps too.",
+                name: "Emma T.",
+                role: "Student, Age 14",
+                avatar: "E"
+              },
+              {
+                quote: "The instructors are patient and make coding fun. My daughter actually looks forward to her lessons.",
+                name: "David K.",
+                role: "Parent of Lily, 9",
+                avatar: "D"
+              },
+            ].map((testimonial) => (
+              <div key={testimonial.name} className="bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-all">
+                {/* Stars */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 italic">&quot;{t.text}&quot;</p>
-                <p className="font-semibold text-slate-900 dark:text-slate-100">{t.name}</p>
+                <p className="text-slate-700 dark:text-slate-300 mb-5 italic">&quot;{testimonial.quote}&quot;</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 dark:text-white">{testimonial.name}</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400">{testimonial.role}</div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 rounded-3xl p-12 text-white shadow-2xl space-y-4">
-            <h2 className="text-3xl lg:text-4xl font-bold">Ready to Start Your Child's Coding Journey?</h2>
-            <p className="text-white/90 text-lg">Join thousands of happy families. Create your free account today!</p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link
-                href="/auth/register"
-                className="inline-flex items-center gap-2 bg-white text-purple-600 hover:bg-slate-100 font-semibold px-6 py-3 rounded-full"
-              >
-                Get Started Free <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/programs"
-                className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-full border border-white/30"
-              >
-                Browse Programs
-              </Link>
+      {/* Final CTA */}
+      <section className="py-20 px-4 bg-slate-50 dark:bg-slate-950">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 p-px">
+            <div className="relative bg-white dark:bg-slate-900 rounded-[23px] p-10 lg:p-14 text-center">
+              <div className="text-5xl mb-5">🚀</div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+                Ready to Launch?
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-xl mx-auto">
+                Your child&apos;s coding journey starts with a single click. Join hundreds of families who made the leap.
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Link
+                  href="/auth/register"
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-bold text-lg shadow-lg shadow-violet-500/25 transition-all hover:shadow-xl"
+                >
+                  Start Free Today
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+                <Link
+                  href="/schedule"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-bold text-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <Calendar className="w-5 h-5" />
+                  Book a Tour
+                </Link>
+              </div>
+              <p className="mt-6 text-slate-500 dark:text-slate-400 text-sm">
+                Free forever plan available. No credit card required.
+              </p>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { stripe } from "../../../../lib/stripe";
 /**
  * DELETE /api/account/delete - Permanently delete user account and all associated data
  * This action is irreversible and will:
- * 1. Cancel any active Stripe subscriptions
+ * 1. Delete Stripe customer if exists
  * 2. Delete all user data from the database
  */
 export async function DELETE() {
@@ -36,7 +36,6 @@ export async function DELETE() {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        subscriptions: true,
         studentProfile: true,
         parentProfile: {
           include: {
@@ -50,22 +49,7 @@ export async function DELETE() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Step 1: Cancel all Stripe subscriptions
-    for (const subscription of user.subscriptions) {
-      if (subscription.stripeSubscriptionId) {
-        try {
-          console.log("[Delete Account] Canceling Stripe subscription:", subscription.stripeSubscriptionId);
-          await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
-        } catch (stripeError: any) {
-          // Continue even if Stripe subscription doesn't exist
-          if (stripeError.code !== "resource_missing") {
-            console.error("[Delete Account] Stripe cancellation error:", stripeError.message);
-          }
-        }
-      }
-    }
-
-    // Step 2: Delete Stripe customer if exists
+    // Step 1: Delete Stripe customer if exists
     if (user.stripeCustomerId) {
       try {
         console.log("[Delete Account] Deleting Stripe customer:", user.stripeCustomerId);
@@ -77,7 +61,7 @@ export async function DELETE() {
       }
     }
 
-    // Step 3: Delete all related data using a transaction
+    // Step 2: Delete all related data using a transaction
     await prisma.$transaction(async (tx) => {
       // Delete achievements
       await tx.achievement.deleteMany({ where: { userId } });
@@ -95,9 +79,11 @@ export async function DELETE() {
       await tx.payment.deleteMany({ where: { userId } });
       console.log("[Delete Account] Deleted payments");
 
-      // Delete subscriptions
-      await tx.subscription.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted subscriptions");
+      // Delete program enrollments (if user has a student profile)
+      if (user.studentProfile) {
+        await tx.programEnrollment.deleteMany({ where: { studentProfileId: user.studentProfile.id } });
+        console.log("[Delete Account] Deleted program enrollments");
+      }
 
       // Delete progress records through enrollments
       const enrollments = await tx.enrollment.findMany({
