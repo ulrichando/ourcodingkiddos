@@ -8,13 +8,11 @@ import {
   Play,
   Star,
   Users,
-  Award,
   Sparkles,
   CheckCircle,
   ArrowRight,
   Zap,
   Shield,
-  Clock,
   Globe,
   Smartphone,
   Brain,
@@ -25,9 +23,6 @@ import {
   GraduationCap,
   Calendar,
   LogIn,
-  UserPlus,
-  Monitor,
-  BookOpen,
   BadgeCheck,
   Target,
   MousePointerClick,
@@ -184,6 +179,29 @@ const trustBadges = [
   { name: "Live 1:1 Classes", icon: Users },
   { name: "Safe & Secure", icon: Shield },
 ];
+
+// Section navigation items
+const sectionNavItems = [
+  { id: "courses", label: "Courses", icon: Target },
+  { id: "programs", label: "Programs", icon: Code2 },
+  { id: "levels", label: "Levels", icon: Trophy },
+  { id: "showcase", label: "Showcase", icon: Rocket },
+  { id: "testimonials", label: "Reviews", icon: Heart },
+];
+
+// Smooth scroll to section
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    const offset = 80; // Account for sticky header
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - offset;
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth",
+    });
+  }
+};
 
 export default function HomePage() {
   const [selectedAge, setSelectedAge] = useState("kids");
@@ -374,16 +392,25 @@ export default function HomePage() {
           </div>
         </div>
 
-        <style jsx>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-          }
-          .animate-float {
-            animation: float 4s ease-in-out infinite;
-          }
-        `}</style>
       </section>
+
+      {/* Section Navigation Bar */}
+      <nav className="sticky top-14 z-30 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4">
+          <div className="flex items-center justify-between sm:justify-center gap-1 py-2 sm:py-3 overflow-x-auto scrollbar-hide">
+            {sectionNavItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className="group flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-full text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all whitespace-nowrap flex-1 sm:flex-none min-w-0"
+              >
+                <item.icon className="w-4 h-4 sm:w-4 sm:h-4" />
+                <span className="text-[10px] sm:text-sm truncate">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
 
       {/* Stats Section */}
       <section className="py-12 px-4 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
@@ -407,7 +434,7 @@ export default function HomePage() {
       </section>
 
       {/* Age-Based Course Selector - Like Tynker */}
-      <section className="py-16 px-4 bg-gradient-to-b from-white to-violet-50 dark:from-slate-950 dark:to-slate-900">
+      <section id="courses" className="py-16 px-4 bg-gradient-to-b from-white to-violet-50 dark:from-slate-950 dark:to-slate-900">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-sm font-semibold mb-4">
@@ -544,7 +571,7 @@ export default function HomePage() {
       </section>
 
       {/* Gamification Preview - Like CodeMonkey */}
-      <section className="py-16 px-4 bg-white dark:bg-slate-950">
+      <section id="levels" className="py-16 px-4 bg-white dark:bg-slate-950">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-semibold mb-4">
@@ -561,7 +588,7 @@ export default function HomePage() {
           {/* Level Progress Bar */}
           <div className="relative mb-8">
             <div className="flex justify-between items-center">
-              {levels.map((level, idx) => (
+              {levels.map((level) => (
                 <div key={level.level} className="flex flex-col items-center relative z-10">
                   <div className={`w-14 h-14 rounded-full ${level.color} flex items-center justify-center text-2xl shadow-lg border-4 border-white dark:border-slate-900`}>
                     {level.badge}
@@ -733,7 +760,7 @@ export default function HomePage() {
       <UpcomingClassesSection />
 
       {/* Programs */}
-      <section className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
+      <section id="programs" className="py-20 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-sm font-semibold mb-4">
@@ -786,7 +813,7 @@ export default function HomePage() {
       </section>
 
       {/* Student Projects Showcase */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-950">
+      <section id="showcase" className="py-20 px-4 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 text-sm font-semibold mb-4">
@@ -840,7 +867,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 bg-white dark:bg-slate-950">
+      <section id="testimonials" className="py-20 px-4 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-sm font-semibold mb-4">
