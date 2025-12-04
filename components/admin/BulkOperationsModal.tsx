@@ -43,7 +43,7 @@ export default function BulkOperationsModal({
   const [userIds, setUserIds] = useState<string>("");
 
   // Bulk status state
-  const [statusAction, setStatusAction] = useState<"activate" | "deactivate">("activate");
+  const [statusAction, setStatusAction] = useState<"promote_instructor" | "demote_student" | "delete">("promote_instructor");
   const [targetUserIds, setTargetUserIds] = useState<string>("");
 
   const operations = [
@@ -363,35 +363,55 @@ export default function BulkOperationsModal({
           {activeOperation === "bulk_status" && (
             <div className="space-y-4">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Activate or deactivate multiple user accounts at once.
+                Update roles or delete multiple user accounts at once.
               </p>
 
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="status"
-                    checked={statusAction === "activate"}
-                    onChange={() => setStatusAction("activate")}
+                    checked={statusAction === "promote_instructor"}
+                    onChange={() => setStatusAction("promote_instructor")}
                     className="w-4 h-4 text-purple-600"
                   />
                   <span className="text-sm text-slate-700 dark:text-slate-300">
-                    Activate Accounts
+                    Promote to Instructor
                   </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="status"
-                    checked={statusAction === "deactivate"}
-                    onChange={() => setStatusAction("deactivate")}
+                    checked={statusAction === "demote_student"}
+                    onChange={() => setStatusAction("demote_student")}
                     className="w-4 h-4 text-purple-600"
                   />
                   <span className="text-sm text-slate-700 dark:text-slate-300">
-                    Deactivate Accounts
+                    Demote to Student
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    checked={statusAction === "delete"}
+                    onChange={() => setStatusAction("delete")}
+                    className="w-4 h-4 text-red-600"
+                  />
+                  <span className="text-sm text-red-600 dark:text-red-400">
+                    Delete Users
                   </span>
                 </label>
               </div>
+
+              {statusAction === "delete" && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    Warning: Deleting users is permanent and cannot be undone. All associated data will be removed.
+                  </p>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">

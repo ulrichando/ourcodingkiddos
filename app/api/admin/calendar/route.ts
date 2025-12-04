@@ -49,31 +49,31 @@ export async function GET(request: Request) {
       },
     });
 
-    for (const session of sessions) {
+    for (const sess of sessions) {
       events.push({
-        id: session.id,
-        title: session.title,
+        id: sess.id,
+        title: sess.title,
         type: "session",
-        start: session.startTime.toISOString(),
+        start: sess.startTime.toISOString(),
         end: new Date(
-          session.startTime.getTime() + (session.duration || 60) * 60 * 1000
+          sess.startTime.getTime() + (sess.durationMinutes || 60) * 60 * 1000
         ).toISOString(),
-        instructor: session.instructor?.name,
-        instructorId: session.instructor?.id,
-        studentCount: session.bookings.length,
-        status: session.status,
+        instructor: sess.instructor?.name,
+        instructorId: sess.instructor?.id,
+        studentCount: sess.bookings.length,
+        status: sess.status,
         color: "blue",
       });
     }
 
-    // Get instructor availability
+    // Get instructor availability (for specific dates)
     const availability = await prisma.instructorAvailability.findMany({
       where: {
-        startTime: {
+        isActive: true,
+        specificDate: {
           gte: start,
           lte: end,
         },
-        isAvailable: true,
       },
       include: {
         instructor: {
@@ -86,16 +86,19 @@ export async function GET(request: Request) {
     });
 
     for (const slot of availability) {
-      events.push({
-        id: `avail-${slot.id}`,
-        title: `${slot.instructor?.name || "Instructor"} Available`,
-        type: "availability",
-        start: slot.startTime.toISOString(),
-        end: slot.endTime.toISOString(),
-        instructor: slot.instructor?.name,
-        instructorId: slot.instructor?.id,
-        color: "green",
-      });
+      if (slot.specificDate) {
+        events.push({
+          id: `avail-${slot.id}`,
+          title: `${slot.instructor?.name || slot.instructorEmail || "Instructor"} Available`,
+          type: "availability",
+          start: slot.specificDate.toISOString(),
+          end: slot.specificDate.toISOString(),
+          instructor: slot.instructor?.name,
+          instructorId: slot.instructor?.id,
+          details: `${slot.startTime} - ${slot.endTime}`,
+          color: "green",
+        });
+      }
     }
 
     // Get pending class requests
@@ -107,30 +110,19 @@ export async function GET(request: Request) {
           lte: end,
         },
       },
-      include: {
-        parent: {
-          include: {
-            user: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
     });
 
-    for (const request of requests) {
+    for (const req of requests) {
       // Use creation date as placeholder since requests don't have scheduled times yet
-      const requestDate = request.createdAt;
+      const requestDate = req.createdAt;
       events.push({
-        id: `req-${request.id}`,
-        title: `Request: ${request.topic}`,
+        id: `req-${req.id}`,
+        title: `Request: ${req.requestedTopic}`,
         type: "request",
         start: requestDate.toISOString(),
         end: new Date(requestDate.getTime() + 60 * 60 * 1000).toISOString(),
         instructor: null,
-        status: request.status,
+        status: req.status,
         color: "amber",
       });
     }

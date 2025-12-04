@@ -15,7 +15,7 @@ export async function GET() {
   }
 
   try {
-    // Get all instructors
+    // Get all instructors with their sessions
     const instructorUsers = await prisma.user.findMany({
       where: {
         role: "INSTRUCTOR",
@@ -26,10 +26,20 @@ export async function GET() {
         email: true,
         image: true,
         createdAt: true,
-        classSessions: {
+      },
+    });
+
+    // Get sessions for each instructor separately
+    const instructors = await Promise.all(
+      instructorUsers.map(async (user) => {
+        // Get class sessions for this instructor
+        const classSessions = await prisma.classSession.findMany({
+          where: {
+            instructorId: user.id,
+          },
           select: {
             id: true,
-            duration: true,
+            durationMinutes: true,
             status: true,
             bookings: {
               select: {
@@ -37,96 +47,89 @@ export async function GET() {
               },
             },
           },
-        },
-        bookings: {
+        });
+
+        // Get bookings where this user is instructor
+        const bookings = await prisma.booking.findMany({
           where: {
-            instructorId: { not: null },
+            instructorId: user.id,
           },
           select: {
             id: true,
-            amountPaid: true,
             status: true,
           },
-        },
-        instructorAvailability: {
+        });
+
+        // Get availability
+        const availability = await prisma.instructorAvailability.findMany({
           where: {
-            isAvailable: true,
-            startTime: {
-              gte: new Date(),
-            },
+            instructorId: user.id,
+            isActive: true,
           },
           orderBy: {
-            startTime: "asc",
+            createdAt: "desc",
           },
           take: 1,
-        },
-      },
-    });
+        });
 
-    const instructors = instructorUsers.map((user) => {
-      // Calculate session stats
-      const totalSessions = user.classSessions.length;
-      const completedSessions = user.classSessions.filter(
-        (s) => s.status === "COMPLETED"
-      ).length;
+        // Calculate session stats
+        const totalSessions = classSessions.length;
+        const completedSessions = classSessions.filter(
+          (s) => s.status === "COMPLETED"
+        ).length;
 
-      // Calculate total hours (sum of session durations)
-      const totalMinutes = user.classSessions.reduce(
-        (sum, s) => sum + (s.duration || 60),
-        0
-      );
-      const totalHours = Math.round(totalMinutes / 60);
+        // Calculate total hours (sum of session durations)
+        const totalMinutes = classSessions.reduce(
+          (sum, s) => sum + (s.durationMinutes || 60),
+          0
+        );
+        const totalHours = Math.round(totalMinutes / 60);
 
-      // Calculate unique students
-      const uniqueStudents = new Set(
-        user.classSessions.flatMap((s) => s.bookings.map((b) => b.studentId))
-      );
-      const totalStudents = uniqueStudents.size;
+        // Calculate unique students
+        const uniqueStudents = new Set(
+          classSessions.flatMap((s) => s.bookings.map((b) => b.studentId))
+        );
+        const totalStudents = uniqueStudents.size;
 
-      // Calculate revenue from bookings
-      const revenue = user.bookings
-        .filter((b) => b.status === "CONFIRMED" || b.status === "COMPLETED")
-        .reduce((sum, b) => sum + (b.amountPaid || 0), 0);
+        // Count attended bookings as revenue indicator
+        const attendedCount = bookings.filter((b) => b.status === "ATTENDED").length;
 
-      // Mock rating data (would need a reviews table)
-      const avgRating = 4.5 + Math.random() * 0.5;
-      const reviewCount = Math.floor(Math.random() * 20) + 5;
+        // Mock rating data (would need a reviews table)
+        const avgRating = 4.5 + Math.random() * 0.5;
+        const reviewCount = Math.floor(Math.random() * 20) + 5;
 
-      // Check availability
-      const hasAvailability = user.instructorAvailability.length > 0;
-      const nextSlot = hasAvailability
-        ? user.instructorAvailability[0].startTime.toISOString()
-        : undefined;
+        // Check availability
+        const hasAvailability = availability.length > 0;
 
-      // Mock specialties (would need instructor profile table)
-      const specialties = ["Python", "JavaScript", "Scratch"].slice(
-        0,
-        Math.floor(Math.random() * 3) + 1
-      );
+        // Mock specialties (would need instructor profile table)
+        const specialties = ["Python", "JavaScript", "Scratch"].slice(
+          0,
+          Math.floor(Math.random() * 3) + 1
+        );
 
-      return {
-        id: user.id,
-        userId: user.id,
-        name: user.name || "Unknown Instructor",
-        email: user.email,
-        avatar: user.image,
-        joinedAt: user.createdAt.toISOString(),
-        stats: {
-          totalSessions,
-          completedSessions,
-          totalStudents,
-          totalHours,
-          revenue,
-          avgRating: Math.round(avgRating * 10) / 10,
-          reviewCount,
-        },
-        specialties,
-        availability: {
-          available: hasAvailability,
-          nextSlot,
-        },
-      };
-    });
+        return {
+          id: user.id,
+          userId: user.id,
+          name: user.name || "Unknown Instructor",
+          email: user.email,
+          avatar: user.image,
+          joinedAt: user.createdAt.toISOString(),
+          stats: {
+            totalSessions,
+            completedSessions,
+            totalStudents,
+            totalHours,
+            revenue: attendedCount * 50, // Mock revenue based on sessions
+            avgRating: Math.round(avgRating * 10) / 10,
+            reviewCount,
+          },
+          specialties,
+          availability: {
+            available: hasAvailability,
+          },
+        };
+      })
+    );
 
     return NextResponse.json({
       instructors,

@@ -140,7 +140,7 @@ export async function GET(
     // Transform enrollments with progress calculation
     const enrollments = studentProfile.user.enrollments.map((enrollment) => {
       const totalLessons = enrollment.course.lessons.length;
-      const completedLessons = enrollment.progress.filter((p) => p.completed).length;
+      const completedLessons = enrollment.progress.filter((p) => p.status === "COMPLETED").length;
       const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
       // Get last activity
@@ -151,7 +151,7 @@ export async function GET(
       return {
         id: enrollment.id,
         courseTitle: enrollment.course.title,
-        enrolledAt: enrollment.enrolledAt.toISOString(),
+        enrolledAt: enrollment.startedAt.toISOString(),
         progress,
         lessonsCompleted: completedLessons,
         totalLessons,
@@ -180,7 +180,7 @@ export async function GET(
 
     for (const enrollment of studentProfile.user.enrollments) {
       for (const progress of enrollment.progress) {
-        if (progress.completed && progress.completedAt) {
+        if (progress.status === "COMPLETED" && progress.completedAt) {
           activityLog.push({
             action: "Completed Lesson",
             details: `In course: ${enrollment.course.title}`,

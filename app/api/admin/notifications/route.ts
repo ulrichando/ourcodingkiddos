@@ -58,13 +58,6 @@ export async function GET() {
       },
       orderBy: { createdAt: "desc" },
       take: 5,
-      include: {
-        parent: {
-          include: {
-            user: { select: { name: true, email: true } },
-          },
-        },
-      },
     });
 
     for (const request of pendingRequests) {
@@ -72,7 +65,7 @@ export async function GET() {
         id: `request-${request.id}`,
         type: "request",
         title: "Class Request Pending",
-        message: `${request.parent?.user?.name || "A parent"} requested a ${request.topic} session`,
+        message: `${request.parentName || request.parentEmail} requested a ${request.requestedTopic} session`,
         timestamp: request.createdAt.toISOString(),
         read: false,
         link: `/dashboard/admin/class-requests?id=${request.id}`,
@@ -83,9 +76,9 @@ export async function GET() {
     // 3. Get recent enrollments (last 24 hours)
     const recentEnrollments = await prisma.enrollment.findMany({
       where: {
-        enrolledAt: { gte: oneDayAgo },
+        startedAt: { gte: oneDayAgo },
       },
-      orderBy: { enrolledAt: "desc" },
+      orderBy: { startedAt: "desc" },
       take: 5,
       include: {
         user: { select: { name: true, email: true } },
@@ -99,7 +92,7 @@ export async function GET() {
         type: "enrollment",
         title: "New Enrollment",
         message: `${enrollment.user.name || enrollment.user.email} enrolled in ${enrollment.course.title}`,
-        timestamp: enrollment.enrolledAt.toISOString(),
+        timestamp: enrollment.startedAt.toISOString(),
         read: true, // Mark enrollments as read by default
         link: `/dashboard/admin/users`,
         priority: "low",
@@ -110,7 +103,7 @@ export async function GET() {
     const recentPayments = await prisma.payment.findMany({
       where: {
         createdAt: { gte: sevenDaysAgo },
-        status: "COMPLETED",
+        status: "SUCCEEDED",
       },
       orderBy: { createdAt: "desc" },
       take: 3,
@@ -124,7 +117,7 @@ export async function GET() {
         id: `payment-${payment.id}`,
         type: "payment",
         title: "Payment Received",
-        message: `$${(payment.amountCents / 100).toFixed(2)} from ${payment.user.name || payment.user.email}`,
+        message: `$${(payment.amount / 100).toFixed(2)} from ${payment.user.name || payment.user.email}`,
         timestamp: payment.createdAt.toISOString(),
         read: true,
         link: `/dashboard/admin/finance`,

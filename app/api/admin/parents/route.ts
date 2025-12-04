@@ -23,13 +23,12 @@ export async function GET() {
             id: true,
             name: true,
             email: true,
-            phone: true,
             image: true,
             createdAt: true,
             lastSeen: true,
           },
         },
-        students: {
+        children: {
           include: {
             user: {
               select: {
@@ -45,32 +44,25 @@ export async function GET() {
       },
     });
 
-    // Get payment data for parents
-    const bookings = await prisma.booking.findMany({
+    // Get payments for summary calculation
+    const payments = await prisma.payment.findMany({
       where: {
-        user: {
-          role: "PARENT",
-        },
+        status: "SUCCEEDED",
       },
       select: {
         userId: true,
-        amountPaid: true,
-        status: true,
+        amount: true,
       },
     });
 
     // Group payments by user
-    const paymentsByUser = bookings.reduce((acc, booking) => {
-      if (!acc[booking.userId]) {
-        acc[booking.userId] = { paid: 0, pending: 0 };
+    const paymentsByUser = payments.reduce((acc, payment) => {
+      if (!acc[payment.userId]) {
+        acc[payment.userId] = 0;
       }
-      if (booking.status === "CONFIRMED" || booking.status === "COMPLETED") {
-        acc[booking.userId].paid += booking.amountPaid || 0;
-      } else if (booking.status === "PENDING") {
-        acc[booking.userId].pending += booking.amountPaid || 0;
-      }
+      acc[payment.userId] += payment.amount || 0;
       return acc;
-    }, {} as Record<string, { paid: number; pending: number }>);
+    }, {} as Record<string, number>);
 
     // Transform parent data
     const thirtyDaysAgo = new Date();
@@ -79,15 +71,13 @@ export async function GET() {
     let activeCount = 0;
     let totalChildren = 0;
     let totalRevenue = 0;
-    let totalPending = 0;
 
     const parents = parentProfiles.map((profile) => {
-      const payments = paymentsByUser[profile.user.id] || { paid: 0, pending: 0 };
-      const childCount = profile.students.length;
+      const userPayments = paymentsByUser[profile.user.id] || 0;
+      const childCount = profile.children.length;
 
       totalChildren += childCount;
-      totalRevenue += payments.paid;
-      totalPending += payments.pending;
+      totalRevenue += userPayments;
 
       // Check if active in last 30 days
       if (profile.user.lastSeen && new Date(profile.user.lastSeen) > thirtyDaysAgo) {
@@ -95,13 +85,10 @@ export async function GET() {
       }
 
       // Determine payment status
-      let paymentStatus: "current" | "pending" | "overdue" = "current";
-      if (payments.pending > 0) {
-        paymentStatus = "pending";
-      }
+      const paymentStatus: "current" | "pending" | "overdue" = "current";
 
       // Get children info
-      const children = profile.students.map((student) => ({
+      const children = profile.children.map((student) => ({
         id: student.id,
         name: student.name || "Unnamed Student",
         age: student.age || undefined,
@@ -111,22 +98,22 @@ export async function GET() {
       }));
 
       // Calculate total enrollments
-      const totalEnrollments = children.reduce((sum, c) => sum + c.enrollments, 0);
+      const totalEnrollments = children.reduce((sum: number, c) => sum + c.enrollments, 0);
 
       return {
         id: profile.id,
         userId: profile.user.id,
         name: profile.user.name || "Unknown Parent",
         email: profile.user.email,
-        phone: profile.user.phone,
+        phone: profile.phone,
         avatar: profile.user.image,
         joinedAt: profile.user.createdAt.toISOString(),
         children,
         stats: {
           totalChildren: childCount,
           totalEnrollments,
-          totalPayments: payments.paid,
-          pendingPayments: payments.pending,
+          totalPayments: Math.round(userPayments / 100), // Convert cents to dollars
+          pendingPayments: 0,
           lastActive: profile.user.lastSeen?.toISOString(),
         },
         paymentStatus,
@@ -138,8 +125,8 @@ export async function GET() {
       activeParents: activeCount,
       totalChildren,
       avgChildrenPerParent: parents.length > 0 ? totalChildren / parents.length : 0,
-      totalRevenue,
-      pendingPayments: totalPending,
+      totalRevenue: Math.round(totalRevenue / 100), // Convert cents to dollars
+      pendingPayments: 0,
     };
 
     return NextResponse.json({

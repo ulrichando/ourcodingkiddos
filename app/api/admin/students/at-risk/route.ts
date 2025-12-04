@@ -17,7 +17,6 @@ export async function GET() {
   try {
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     // Get all students with their progress data
     const students = await prisma.studentProfile.findMany({
@@ -47,21 +46,20 @@ export async function GET() {
     const atRiskStudents: any[] = [];
 
     for (const student of students) {
-      // Check for inactive students (no login in 14+ days)
-      // Using enrollment activity as proxy since we don't have lastLogin
+      // Check for inactive students (no recent activity)
       const hasRecentActivity = student.user.enrollments.some((enrollment) =>
         enrollment.progress.some(
-          (p) => new Date(p.completedAt || p.startedAt || 0) > sevenDaysAgo
+          (p) => p.completedAt && new Date(p.completedAt) > sevenDaysAgo
         )
       );
 
-      // Calculate completion rate
+      // Calculate completion rate using status field
       let totalLessons = 0;
       let completedLessons = 0;
 
       for (const enrollment of student.user.enrollments) {
         totalLessons += enrollment.course.lessons.length;
-        completedLessons += enrollment.progress.filter((p) => p.completed).length;
+        completedLessons += enrollment.progress.filter((p) => p.status === "COMPLETED").length;
       }
 
       const completionRate = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
@@ -76,7 +74,7 @@ export async function GET() {
       if (hasEnrollments && !hasAnyProgress) {
         // Enrolled but no progress at all
         const daysSinceEnrollment = Math.floor(
-          (now.getTime() - new Date(student.user.enrollments[0].enrolledAt).getTime()) /
+          (now.getTime() - new Date(student.user.enrollments[0].startedAt).getTime()) /
             (24 * 60 * 60 * 1000)
         );
 
@@ -97,7 +95,8 @@ export async function GET() {
         // Has started but inactive for 7+ days
         const lastActivity = student.user.enrollments
           .flatMap((e) => e.progress)
-          .map((p) => new Date(p.completedAt || p.startedAt || 0))
+          .filter((p) => p.completedAt)
+          .map((p) => new Date(p.completedAt!))
           .sort((a, b) => b.getTime() - a.getTime())[0];
 
         const daysInactive = lastActivity
