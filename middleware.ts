@@ -111,11 +111,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except:
+     * - api/auth (NextAuth handles its own auth)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - files with extensions (public folder assets)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\..*|api/auth).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.[\\w]+$).*)",
   ],
 };
