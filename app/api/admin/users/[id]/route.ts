@@ -200,8 +200,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       // Delete enrollments
       await tx.enrollment.deleteMany({ where: { userId: id } });
 
-      // Delete subscriptions
-      await tx.subscription.deleteMany({ where: { userId: id } });
+      // Delete program enrollments (if user has a student profile)
+      if (studentProfile) {
+        await tx.programEnrollment.deleteMany({ where: { studentProfileId: studentProfile.id } });
+      }
 
       // Delete payments
       await tx.payment.deleteMany({ where: { userId: id } });

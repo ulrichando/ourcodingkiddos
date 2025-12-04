@@ -21,32 +21,28 @@ export async function GET(request: Request) {
   const courseId = searchParams.get("courseId") ?? undefined;
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
-  const userEmail = session.user.email;
 
-  // Check subscription for students and parents
+  // Check for active program enrollment for students and parents
   if (role === "STUDENT" || role === "PARENT") {
-    let checkEmail = userEmail;
-
-    if (role === "STUDENT") {
-      const studentProfile = await prisma.studentProfile.findFirst({
-        where: { userId },
-        select: { parentEmail: true },
-      });
-      checkEmail = studentProfile?.parentEmail || userEmail;
-    }
-
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        user: { email: checkEmail },
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
+    const studentProfile = await prisma.studentProfile.findFirst({
+      where: { userId },
+      select: { id: true },
     });
 
-    if (!subscription) {
-      return NextResponse.json(
-        { status: "error", message: "Active subscription required to access course progress." },
-        { status: 403 }
-      );
+    if (studentProfile) {
+      const programEnrollment = await prisma.programEnrollment.findFirst({
+        where: {
+          studentProfileId: studentProfile.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!programEnrollment) {
+        return NextResponse.json(
+          { status: "error", message: "Active program enrollment required to access course progress." },
+          { status: 403 }
+        );
+      }
     }
   }
 
@@ -84,32 +80,28 @@ export async function PATCH(request: Request) {
 
   const userId = (session.user as any).id;
   const role = (session.user as any).role;
-  const userEmail = session.user.email;
 
-  // Check subscription for students and parents
+  // Check for active program enrollment for students and parents
   if (role === "STUDENT" || role === "PARENT") {
-    let checkEmail = userEmail;
-
-    if (role === "STUDENT") {
-      const studentProfile = await prisma.studentProfile.findFirst({
-        where: { userId },
-        select: { parentEmail: true },
-      });
-      checkEmail = studentProfile?.parentEmail || userEmail;
-    }
-
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        user: { email: checkEmail },
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
+    const studentProfile = await prisma.studentProfile.findFirst({
+      where: { userId },
+      select: { id: true },
     });
 
-    if (!subscription) {
-      return NextResponse.json(
-        { status: "error", message: "Active subscription required to update course progress." },
-        { status: 403 }
-      );
+    if (studentProfile) {
+      const programEnrollment = await prisma.programEnrollment.findFirst({
+        where: {
+          studentProfileId: studentProfile.id,
+          status: "ACTIVE",
+        },
+      });
+
+      if (!programEnrollment) {
+        return NextResponse.json(
+          { status: "error", message: "Active program enrollment required to update course progress." },
+          { status: 403 }
+        );
+      }
     }
   }
 
@@ -117,9 +109,6 @@ export async function PATCH(request: Request) {
   try {
     const enrollment = await prisma.enrollment.findUnique({ where: { id: payload.enrollmentId } });
     if (!enrollment) return NextResponse.json({ status: "not-found" }, { status: 404 });
-
-    const userId = (session.user as any).id;
-    const role = (session.user as any).role;
     if (role !== "ADMIN" && role !== "INSTRUCTOR" && enrollment.userId !== userId) {
       return NextResponse.json({ status: "forbidden" }, { status: 403 });
     }
