@@ -142,20 +142,89 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       });
 
       if (studentProfile) {
+        // Delete showcase project likes first
+        await tx.like.deleteMany({
+          where: {
+            studentProject: {
+              studentProfileId: studentProfile.id
+            }
+          }
+        });
+
+        // Delete showcase project comments
+        await tx.comment.deleteMany({
+          where: {
+            studentProject: {
+              studentProfileId: studentProfile.id
+            }
+          }
+        });
+
+        // Delete showcase projects (StudentProject model)
+        await tx.studentProject.deleteMany({
+          where: { studentProfileId: studentProfile.id }
+        });
+
         // Delete projects associated with this student
         await tx.project.deleteMany({
           where: { studentId: studentProfile.id }
         });
       }
 
-      // Delete parent profile related records
-      await tx.studentProfile.deleteMany({
-        where: {
-          guardian: {
-            userId: id
-          }
-        }
+      // Get parent profile to find children
+      const parentProfile = await tx.parentProfile.findUnique({
+        where: { userId: id },
+        select: { id: true }
       });
+
+      // If this is a parent, we need to delete children's data first
+      if (parentProfile) {
+        // Find all children (students) of this parent
+        const childrenProfiles = await tx.studentProfile.findMany({
+          where: { guardianId: parentProfile.id },
+          select: { id: true }
+        });
+
+        for (const child of childrenProfiles) {
+          // Delete child's showcase project likes
+          await tx.like.deleteMany({
+            where: {
+              studentProject: {
+                studentProfileId: child.id
+              }
+            }
+          });
+
+          // Delete child's showcase project comments
+          await tx.comment.deleteMany({
+            where: {
+              studentProject: {
+                studentProfileId: child.id
+              }
+            }
+          });
+
+          // Delete child's showcase projects
+          await tx.studentProject.deleteMany({
+            where: { studentProfileId: child.id }
+          });
+
+          // Delete child's projects
+          await tx.project.deleteMany({
+            where: { studentId: child.id }
+          });
+
+          // Delete child's program enrollments
+          await tx.programEnrollment.deleteMany({
+            where: { studentProfileId: child.id }
+          });
+        }
+
+        // Now delete all children profiles linked to this parent
+        await tx.studentProfile.deleteMany({
+          where: { guardianId: parentProfile.id }
+        });
+      }
 
       // Delete user badges
       await tx.userBadge.deleteMany({ where: { userId: id } });

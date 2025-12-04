@@ -61,12 +61,26 @@ export default function AdminUsersClient({
   }, [users, activeRole]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
+    const userToDelete = users.find(u => u.id === id);
+    const warningMessage = userToDelete?.role === "PARENT"
+      ? "Delete this parent? WARNING: This will also delete all linked student accounts and their data (projects, progress, etc.). This cannot be undone!"
+      : "Delete this user? This will remove all their data and cannot be undone.";
+
+    if (!confirm(warningMessage)) return;
+
     const prev = users;
     setUsers((u) => u.filter((x) => x.id !== id));
-    const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      alert("Delete failed");
+
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const errorMsg = data.error || "Delete failed";
+        alert(`Delete failed: ${errorMsg}`);
+        setUsers(prev);
+      }
+    } catch (error) {
+      alert("Delete failed: Network error");
       setUsers(prev);
     }
   };
