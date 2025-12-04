@@ -21,6 +21,11 @@ import { Search } from "lucide-react";
 import { Command } from "lucide-react";
 import { Zap } from "lucide-react";
 import { Menu } from "lucide-react";
+import { Brain } from "lucide-react";
+import { HelpCircle } from "lucide-react";
+import { Mail } from "lucide-react";
+import { Users } from "lucide-react";
+import { Heart } from "lucide-react";
 import { logout } from "../../lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
 
@@ -30,10 +35,15 @@ const navItems = [
   { href: "/curriculum", label: "Curriculum", icon: BookMarked, keywords: ["learn", "lessons", "syllabus"], shortcut: "C", description: "Structured learning paths", badge: "New" },
   { href: "/courses", label: "Courses", icon: BookOpen, keywords: ["learn", "classes", "study"], shortcut: "O", description: "Browse all courses" },
   { href: "/playground", label: "Playground", icon: Code2, keywords: ["code", "practice", "sandbox", "editor"], shortcut: "P", description: "Write and run code", badge: "Popular" },
+  { href: "/placement-exam", label: "Placement Exam", icon: Brain, keywords: ["test", "quiz", "level", "assessment", "skill", "evaluate"], shortcut: "T", description: "Find your coding level", badge: "New" },
   { href: "/programs", label: "Programs", icon: GraduationCap, keywords: ["enroll", "join", "classes"], shortcut: "R", description: "Enroll in programs" },
   { href: "/showcase", label: "Showcase", icon: Rocket, keywords: ["projects", "students", "work", "gallery"], shortcut: "S", description: "Student projects gallery" },
   { href: "/blog", label: "Blog", icon: Newspaper, keywords: ["news", "articles", "posts"], shortcut: "B", description: "News and articles" },
   { href: "/schedule", label: "Schedule", icon: Calendar, keywords: ["calendar", "events", "dates", "sessions"], shortcut: "E", description: "View upcoming sessions" },
+  { href: "/faq", label: "FAQ", icon: HelpCircle, keywords: ["help", "questions", "support", "answers"], shortcut: "F", description: "Frequently asked questions" },
+  { href: "/contact", label: "Contact", icon: Mail, keywords: ["email", "support", "reach", "message", "help"], shortcut: "M", description: "Get in touch with us" },
+  { href: "/about", label: "About Us", icon: Users, keywords: ["team", "company", "mission", "who", "story"], shortcut: "A", description: "Learn about our mission" },
+  { href: "/our-story", label: "Our Story", icon: Heart, keywords: ["founder", "ceo", "ulrich", "google", "history", "journey"], shortcut: "U", description: "Meet our founder Ulrich Ando" },
   { href: "/settings", label: "Settings", icon: Settings, keywords: ["account", "profile", "preferences"], shortcut: ",", description: "Manage your account" },
 ];
 
@@ -53,9 +63,7 @@ export default function AppHeader() {
 
   const userName = session?.user?.name || "Guest";
   const userInitial = userName.charAt(0).toUpperCase();
-  const userRole = typeof (session?.user as any)?.role === "string"
-    ? ((session?.user as any)?.role as string).toUpperCase()
-    : "PARENT";
+  const userRole = session?.user?.role?.toUpperCase() ?? "PARENT";
   const showBell = ["PARENT", "STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole);
 
   const dashboardHref = userRole === "STUDENT" ? "/dashboard/student"

@@ -37,17 +37,17 @@ export default [
       ...jsxA11y.configs.recommended.rules,
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
-      "jsx-a11y/label-has-associated-control": "off",
-      "jsx-a11y/no-static-element-interactions": "off",
-      "jsx-a11y/click-events-have-key-events": "off",
-      "jsx-a11y/heading-has-content": "off",
+      "jsx-a11y/label-has-associated-control": "warn",
+      "jsx-a11y/no-static-element-interactions": "warn",
+      "jsx-a11y/click-events-have-key-events": "warn",
+      "jsx-a11y/heading-has-content": "warn",
       "@next/next/no-html-link-for-pages": "off",
-      "@next/next/no-img-element": "off",
+      "@next/next/no-img-element": "warn",
       "react/no-unescaped-entities": "off",
-      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/exhaustive-deps": "warn",
       "no-undef": "off",
-      "no-unused-vars": "off",
-      "no-constant-condition": "off"
+      "no-unused-vars": "warn",
+      "no-constant-condition": "warn"
     },
     settings: {
       react: {

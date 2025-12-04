@@ -70,18 +70,14 @@ export default function NotFound() {
           </div>
         </div>
 
-        {/* Back Link */}
-        <Link
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            window.history.back();
-          }}
+        {/* Back Button */}
+        <button
+          onClick={() => window.history.back()}
           className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Go back to previous page
-        </Link>
+        </button>
       </div>
     </main>
   );

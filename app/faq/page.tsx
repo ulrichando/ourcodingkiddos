@@ -314,13 +314,24 @@ export default function FAQPage() {
             filteredFaqs.map((faq, index) => {
               const isOpen = openItems.includes(index);
               const CategoryIcon = getCategoryIcon(faq.category);
+              const faqId = `faq-${index}`;
+              const answerId = `faq-answer-${index}`;
               return (
                 <div
                   key={index}
                   className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden transition hover:border-purple-300 dark:hover:border-purple-500/30"
                 >
                   <button
+                    id={faqId}
                     onClick={() => toggleItem(index)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleItem(index);
+                      }
+                    }}
+                    aria-expanded={isOpen}
+                    aria-controls={answerId}
                     className="w-full flex items-start gap-4 p-5 text-left"
                   >
                     <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${
@@ -332,7 +343,7 @@ export default function FAQPage() {
                         isOpen
                           ? "text-purple-600 dark:text-purple-400"
                           : "text-slate-500 dark:text-slate-400"
-                      }`} />
+                      }`} aria-hidden="true" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-slate-900 dark:text-white pr-8">
@@ -344,12 +355,20 @@ export default function FAQPage() {
                         </p>
                       )}
                     </div>
-                    <ChevronDown className={`w-5 h-5 flex-shrink-0 text-slate-400 transition-transform ${
-                      isOpen ? "rotate-180" : ""
-                    }`} />
+                    <ChevronDown
+                      className={`w-5 h-5 flex-shrink-0 text-slate-400 transition-transform ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                      aria-hidden="true"
+                    />
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5 pl-[76px]">
+                    <div
+                      id={answerId}
+                      role="region"
+                      aria-labelledby={faqId}
+                      className="px-5 pb-5 pl-[76px]"
+                    >
                       <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                         {faq.answer}
                       </p>

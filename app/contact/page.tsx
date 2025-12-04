@@ -14,11 +14,13 @@ import {
   Zap,
   Clock,
   ArrowUpRight,
-  HelpCircle
+  HelpCircle,
+  AlertCircle
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Textarea from "@/components/ui/textarea";
+import { checkRateLimit, formatTimeRemaining } from "@/lib/rate-limit";
 
 const subjects = [
   { value: "general", label: "General Inquiry" },
@@ -32,9 +34,19 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "general", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setRateLimitError(null);
+
+    // Check rate limit (3 submissions per minute)
+    const rateLimit = checkRateLimit("contact-form", { maxRequests: 3, windowMs: 60000 });
+    if (!rateLimit.allowed) {
+      setRateLimitError(`Too many submissions. Please try again in ${formatTimeRemaining(rateLimit.resetIn)}.`);
+      return;
+    }
+
     setIsSubmitting(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsSubmitting(false);
@@ -132,12 +144,20 @@ export default function ContactPage() {
                 <Textarea name="message" value={formData.message} onChange={handleChange} placeholder="How can we help?" required className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 min-h-[140px] rounded-xl resize-none focus:ring-purple-500 focus:border-purple-500" />
               </div>
 
+              {/* Rate limit error message */}
+              {rateLimitError && (
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <p className="text-sm">{rateLimitError}</p>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4">
                 <div className="flex items-center gap-2 text-sm text-slate-500">
                   <Clock className="w-4 h-4" />
                   Avg. response: 24h
                 </div>
-                <Button type="submit" disabled={isSubmitting} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 h-12 rounded-xl font-semibold">
+                <Button type="submit" disabled={isSubmitting || !!rateLimitError} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 h-12 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
                       <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
