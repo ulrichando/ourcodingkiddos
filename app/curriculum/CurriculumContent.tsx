@@ -469,7 +469,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
               <div className="md:hidden absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-500 via-purple-500 to-rose-500" />
 
               {/* Timeline Cards */}
-              <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-5 md:gap-4">
+              <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-5 md:gap-4 md:items-stretch">
                 {[
                   {
                     level: 1,
@@ -481,7 +481,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
                     shadowColor: "shadow-green-500/20",
                     skills: ["Block-based coding", "Computational thinking", "Basic algorithms", "Problem solving"],
                     projects: ["Scratch games", "Animated stories", "Interactive art"],
-                    tools: ["Scratch", "Python Basics"],
+                    tools: ["Scratch", "Code.org", "Python Basics"],
                     outcome: "Think like a programmer",
                     description: "Start the coding journey with visual, block-based programming. Perfect for beginners who have never coded before.",
                   },
@@ -495,7 +495,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
                     shadowColor: "shadow-blue-500/20",
                     skills: ["HTML structure", "CSS styling", "Basic JavaScript", "Responsive design"],
                     projects: ["Personal website", "Landing pages", "Roblox games"],
-                    tools: ["VS Code", "Chrome DevTools"],
+                    tools: ["VS Code", "DevTools", "GitHub"],
                     outcome: "Build real websites",
                     description: "Learn the languages of the web. Create real websites that can be shared with friends and family.",
                   },
@@ -542,14 +542,14 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
                     description: "Advanced specializations including AI/ML, cloud architecture, and professional software engineering.",
                   },
                 ].map((stage, index) => (
-                  <div key={stage.level} className="relative pl-16 md:pl-0">
+                  <div key={stage.level} className="relative pl-16 md:pl-0 h-full">
                     {/* Mobile Level Indicator */}
                     <div className={`md:hidden absolute left-5 top-6 w-6 h-6 rounded-full bg-gradient-to-br ${stage.color} flex items-center justify-center text-white text-xs font-bold shadow-lg ${stage.shadowColor} z-10`}>
                       {stage.level}
                     </div>
 
                     {/* Card */}
-                    <div className={`relative group`}>
+                    <div className={`relative group h-full`}>
                       {/* Desktop Connection Arrow */}
                       {index < 4 && (
                         <div className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 z-20">
@@ -557,7 +557,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
                         </div>
                       )}
 
-                      <div className={`relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-700/50 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/70 h-full`}>
+                      <div className={`relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-700/50 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/70 h-full flex flex-col`}>
                         {/* Level Badge - Desktop */}
                         <div className={`hidden md:flex absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-br ${stage.color} items-center justify-center text-white text-sm font-bold shadow-lg ${stage.shadowColor}`}>
                           {stage.level}
@@ -607,7 +607,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
                         </div>
 
                         {/* Tools */}
-                        <div className="mb-4">
+                        <div className="mb-4 flex-1">
                           <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2 font-semibold">Technologies</p>
                           <div className="flex flex-wrap gap-1">
                             {stage.tools.map((tool, i) => (
@@ -619,7 +619,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
                         </div>
 
                         {/* Outcome */}
-                        <div className={`pt-3 border-t border-slate-700/50`}>
+                        <div className={`pt-3 border-t border-slate-700/50 mt-auto`}>
                           <div className="flex items-center gap-2">
                             <Award className={`w-4 h-4 text-yellow-400`} />
                             <p className="text-xs font-medium text-white">{stage.outcome}</p>

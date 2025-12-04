@@ -401,6 +401,7 @@ export default function ParentDashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
+                  { label: "Add Another Student", icon: Plus, href: "/dashboard/parent/add-student" },
                   { label: "Request 1-on-1 Class", icon: Users, href: "/dashboard/parent/class-requests" },
                   { label: "Browse Courses", icon: BookOpen, href: "/courses" },
                   { label: "View Certificates", icon: Award, href: "/certificates" },
