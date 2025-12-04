@@ -209,3 +209,73 @@ export async function logExport(
     severity: "INFO",
   });
 }
+
+/**
+ * Log a resource view (for sensitive data access)
+ */
+export async function logView(
+  userEmail: string,
+  resource: string,
+  resourceId: string,
+  details: string,
+  userId?: string,
+  metadata?: Record<string, any>
+): Promise<void> {
+  await createAuditLog({
+    userId,
+    userEmail,
+    action: "VIEW",
+    resource,
+    resourceId,
+    details,
+    severity: "INFO",
+    metadata,
+  });
+}
+
+/**
+ * Log a security event (failed attempts, suspicious activity)
+ */
+export async function logSecurityEvent(
+  userEmail: string,
+  details: string,
+  severity: AuditSeverity = "WARNING",
+  ipAddress?: string,
+  userAgent?: string,
+  metadata?: Record<string, any>
+): Promise<void> {
+  await createAuditLog({
+    userEmail,
+    action: "VIEW", // Using VIEW as a generic action for security events
+    resource: "Security",
+    details,
+    ipAddress,
+    userAgent,
+    status: "failed",
+    severity,
+    metadata,
+  });
+}
+
+/**
+ * Log a critical security event (brute force, unauthorized access attempts)
+ */
+export async function logCriticalSecurityEvent(
+  userEmail: string,
+  details: string,
+  ipAddress?: string,
+  userAgent?: string,
+  metadata?: Record<string, any>
+): Promise<void> {
+  await createAuditLog({
+    userEmail,
+    action: "VIEW",
+    resource: "Security",
+    details,
+    ipAddress,
+    userAgent,
+    status: "failed",
+    severity: "CRITICAL",
+    metadata,
+  });
+}

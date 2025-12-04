@@ -289,6 +289,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       // Delete sessions
       await tx.session.deleteMany({ where: { userId: id } });
 
+      // Delete subscriptions (legacy model now added to schema)
+      await tx.subscription.deleteMany({ where: { userId: id } });
+
       // Finally delete the user
       await tx.user.delete({ where: { id } });
     });

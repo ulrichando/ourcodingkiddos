@@ -36,6 +36,55 @@ model User {
   sessions               Session[]
   studentProfile         StudentProfile?
   badges                 UserBadge[]
+  subscriptions          Subscription[]
+}
+
+// Legacy Subscription model (matches existing DB structure)
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String
+  status               SubscriptionStatus
+  priceId              String
+  stripeCustomerId     String?
+  stripeSubscriptionId String             @unique
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  trialEndsAt          DateTime?
+  planType             PlanType?
+  maxStudents          Int?
+  priceCents           Int?
+  startDate            DateTime?
+  endDate              DateTime?
+  parentEmail          String?
+  features             Json?
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  CANCELED
+  PAST_DUE
+  TRIALING
+  PAUSED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  UNPAID
+}
+
+enum PlanType {
+  BASIC
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+  FREE_TRIAL
+  MONTHLY
+  ANNUAL
+  FAMILY
 }
 
 model StudentProfile {

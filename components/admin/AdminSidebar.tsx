@@ -22,6 +22,10 @@ import {
   Video,
   Newspaper,
   Rocket,
+  Mail,
+  CalendarDays,
+  Award,
+  UserCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -37,6 +41,8 @@ const navigationGroups = [
     title: "Users & Access",
     items: [
       { href: "/dashboard/admin/users", label: "Users", icon: Users },
+      { href: "/dashboard/admin/instructors", label: "Instructors", icon: Award },
+      { href: "/dashboard/admin/parents", label: "Parent Stats", icon: UserCircle },
     ]
   },
   {

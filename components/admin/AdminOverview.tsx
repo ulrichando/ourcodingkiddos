@@ -2,6 +2,9 @@
 
 import { Users, GraduationCap, UserCircle, Award, BookOpen, CreditCard, TrendingUp, Activity, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import QuickActionsWidget from "./QuickActionsWidget";
+import AtRiskStudentsWidget from "./AtRiskStudentsWidget";
+import NotificationCenter from "./NotificationCenter";
 
 type AdminOverviewProps = {
   stats: {
@@ -127,13 +130,16 @@ export default function AdminOverview({ stats, recentUsers, totalUsers, totalCou
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <p className="text-sm text-slate-500 dark:text-slate-400">Admin Dashboard</p>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Overview</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-          Welcome back! Here's what's happening with your platform today.
-        </p>
+      {/* Header with Notification Center */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin Dashboard</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Overview</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            Welcome back! Here's what's happening with your platform today.
+          </p>
+        </div>
+        <NotificationCenter />
       </div>
 
       {/* Warning Banner */}
@@ -173,32 +179,11 @@ export default function AdminOverview({ stats, recentUsers, totalUsers, totalCou
         })}
       </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link
-                key={action.title}
-                href={action.link}
-                className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-all duration-200"
-              >
-                <div className={`bg-gradient-to-br ${action.color} p-3 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                  {action.title}
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  {action.description}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+      {/* Quick Actions Widget */}
+      <QuickActionsWidget />
+
+      {/* At-Risk Students Alert */}
+      <AtRiskStudentsWidget />
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

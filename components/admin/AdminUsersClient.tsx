@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import AdminTable from "./AdminTable";
 import EditUserModal from "./EditUserModal";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import BulkOperationsModal from "./BulkOperationsModal";
+import { Plus, Trash2, Pencil, Upload } from "lucide-react";
 
 type UserRow = {
   id: string;
@@ -54,6 +55,7 @@ export default function AdminUsersClient({
   const [activeRole, setActiveRole] = useState<(typeof roleOrder)[number]>(defaultRole);
   const [isCreating, setIsCreating] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
+  const [showBulkOps, setShowBulkOps] = useState(false);
 
   const filtered = useMemo(() => {
     if (activeRole === "ALL") return users;
@@ -146,6 +148,13 @@ export default function AdminUsersClient({
             {r === "ALL" ? "All" : r.charAt(0) + r.slice(1).toLowerCase()}
           </button>
         ))}
+        <button
+          onClick={() => setShowBulkOps(true)}
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20"
+        >
+          <Upload className="w-4 h-4" />
+          Bulk Operations
+        </button>
         <button
           onClick={handleCreate}
           disabled={isCreating}
@@ -259,6 +268,12 @@ export default function AdminUsersClient({
           onSave={handleSaveUser}
         />
       )}
+
+      {/* Bulk Operations Modal */}
+      <BulkOperationsModal
+        isOpen={showBulkOps}
+        onClose={() => setShowBulkOps(false)}
+      />
     </div>
   );
 }

@@ -26,6 +26,8 @@ import {
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
+  MoreVertical,
+  Eraser,
 } from "lucide-react";
 
 type AuditLog = {
@@ -67,6 +69,12 @@ export default function AuditLogsPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [quickFilter, setQuickFilter] = useState<string>("all");
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [clearOption, setClearOption] = useState<"all" | "older" | "keep">("older");
+  const [clearDays, setClearDays] = useState(30);
+  const [keepCount, setKeepCount] = useState(1000);
+  const [isClearing, setIsClearing] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const logsPerPage = 50;
 
   const loadLogs = async () => {
@@ -108,14 +116,51 @@ export default function AuditLogsPage() {
     }
   }, [autoRefresh, autoRefreshLoaded]);
 
+  // Auto-refresh with visibility awareness - pauses when tab is inactive
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(() => {
-      loadLogs();
-    }, 30000); // Refresh every 30 seconds
+    let interval: NodeJS.Timeout | null = null;
 
-    return () => clearInterval(interval);
+    const startPolling = () => {
+      // Clear any existing interval
+      if (interval) clearInterval(interval);
+      // Start new interval
+      interval = setInterval(() => {
+        loadLogs();
+      }, 30000); // Refresh every 30 seconds
+    };
+
+    const stopPolling = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Tab became visible - reload data immediately and restart polling
+        loadLogs();
+        startPolling();
+      } else {
+        // Tab became hidden - stop polling to save resources
+        stopPolling();
+      }
+    };
+
+    // Only start polling if tab is currently visible
+    if (document.visibilityState === "visible") {
+      startPolling();
+    }
+
+    // Listen for visibility changes
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      stopPolling();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [autoRefresh, page]);
 
   // Quick filter handler
@@ -353,6 +398,35 @@ export default function AuditLogsPage() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleClearLogs = async () => {
+    setIsClearing(true);
+    try {
+      let url = "/api/admin/audit";
+      if (clearOption === "older") {
+        url += `?olderThan=${clearDays}`;
+      } else if (clearOption === "keep") {
+        url += `?keepRecent=${keepCount}`;
+      }
+
+      const res = await fetch(url, { method: "DELETE" });
+      const data = await res.json();
+
+      if (res.ok) {
+        setShowClearModal(false);
+        setPage(1);
+        loadLogs();
+        alert(`Successfully deleted ${data.deletedCount} log entries`);
+      } else {
+        alert(data.error || "Failed to clear logs");
+      }
+    } catch (error) {
+      console.error("Error clearing logs:", error);
+      alert("Failed to clear logs");
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const totalPages = Math.ceil(total / logsPerPage);
 
   return (
@@ -390,6 +464,37 @@ export default function AuditLogsPage() {
               <RefreshCw className="w-4 h-4" />
               Auto-refresh {autoRefresh ? "ON" : "OFF"}
             </button>
+
+            {/* More Options Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+
+              {showMoreMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowMoreMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg z-20">
+                    <button
+                      onClick={() => {
+                        setShowMoreMenu(false);
+                        setShowClearModal(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <Eraser className="w-4 h-4" />
+                      Clear Logs...
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -866,6 +971,151 @@ export default function AuditLogsPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Logs Modal */}
+      {showClearModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowClearModal(false)}>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Clear Audit Logs</h3>
+              </div>
+              <button
+                onClick={() => setShowClearModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Choose how you want to clear the audit logs. This action cannot be undone.
+              </p>
+
+              <div className="space-y-3">
+                <label className="flex items-start gap-3 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                  <input
+                    type="radio"
+                    name="clearOption"
+                    value="older"
+                    checked={clearOption === "older"}
+                    onChange={() => setClearOption("older")}
+                    className="mt-1 w-4 h-4 text-purple-600 focus:ring-purple-500"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Clear logs older than</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Remove logs older than a specified number of days</p>
+                    {clearOption === "older" && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={clearDays}
+                          onChange={(e) => setClearDays(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-24 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        <span className="text-sm text-slate-600 dark:text-slate-400">days</span>
+                      </div>
+                    )}
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                  <input
+                    type="radio"
+                    name="clearOption"
+                    value="keep"
+                    checked={clearOption === "keep"}
+                    onChange={() => setClearOption("keep")}
+                    className="mt-1 w-4 h-4 text-purple-600 focus:ring-purple-500"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Keep only recent logs</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Keep the most recent entries and delete the rest</p>
+                    {clearOption === "keep" && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <span className="text-sm text-slate-600 dark:text-slate-400">Keep</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10000"
+                          value={keepCount}
+                          onChange={(e) => setKeepCount(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-28 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        <span className="text-sm text-slate-600 dark:text-slate-400">most recent logs</span>
+                      </div>
+                    )}
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-4 rounded-lg border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer transition-colors">
+                  <input
+                    type="radio"
+                    name="clearOption"
+                    value="all"
+                    checked={clearOption === "all"}
+                    onChange={() => setClearOption("all")}
+                    className="mt-1 w-4 h-4 text-red-600 focus:ring-red-500"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-red-600 dark:text-red-400">Delete all logs</p>
+                    <p className="text-sm text-red-500 dark:text-red-400/70">Permanently delete all audit log entries</p>
+                  </div>
+                </label>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">Warning</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      {clearOption === "all"
+                        ? "This will permanently delete ALL audit logs. This action cannot be undone."
+                        : clearOption === "older"
+                        ? `This will delete all logs older than ${clearDays} day${clearDays > 1 ? "s" : ""}.`
+                        : `This will keep only the ${keepCount.toLocaleString()} most recent logs and delete the rest.`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setShowClearModal(false)}
+                disabled={isClearing}
+                className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleClearLogs}
+                disabled={isClearing}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {isClearing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Clearing...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Clear Logs
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

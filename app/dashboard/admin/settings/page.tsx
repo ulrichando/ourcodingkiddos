@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
-import { Save, Settings as SettingsIcon } from "lucide-react";
+import {
+  Save,
+  Settings as SettingsIcon,
+  Bell,
+  Mail,
+  Clock,
+  Users,
+  Shield,
+  Palette,
+} from "lucide-react";
 
 type Settings = {
   siteName: string;
@@ -20,6 +29,24 @@ type Settings = {
   enableBadges: boolean;
   stripeEnabled: boolean;
   demoMode: boolean;
+  // Email notification settings
+  emailNewEnrollment: boolean;
+  emailPaymentReceived: boolean;
+  emailCourseCompletion: boolean;
+  emailWeeklyDigest: boolean;
+  emailSystemAlerts: boolean;
+  // Session defaults
+  defaultSessionDuration: number;
+  minSessionDuration: number;
+  maxSessionDuration: number;
+  sessionBufferMinutes: number;
+  // Age group definitions
+  ageGroupYoung: { min: number; max: number };
+  ageGroupMiddle: { min: number; max: number };
+  ageGroupTeen: { min: number; max: number };
+  // Appearance
+  primaryColor: string;
+  accentColor: string;
 };
 
 export default function SettingsPage() {
@@ -28,6 +55,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"general" | "email" | "sessions" | "age" | "appearance">("general");
 
   useEffect(() => {
     async function fetchSettings() {
@@ -124,122 +152,434 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">System Settings</h1>
         </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
-        {/* General Settings */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <SettingsIcon className="w-5 h-5" />
-            General Settings
-          </h2>
+      {/* Tabs */}
+        <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
+          {[
+            { id: "general", label: "General", icon: SettingsIcon },
+            { id: "email", label: "Email Notifications", icon: Mail },
+            { id: "sessions", label: "Sessions", icon: Clock },
+            { id: "age", label: "Age Groups", icon: Users },
+            { id: "appearance", label: "Appearance", icon: Palette },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 ${
+                  activeTab === tab.id
+                    ? "border-purple-500 text-purple-600 dark:text-purple-400"
+                    : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
-          <div className="grid gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Site Name
-              </label>
-              <input
-                type="text"
-                value={settings.siteName}
-                onChange={(e) => updateSetting("siteName", e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-              />
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+        {/* General Settings Tab */}
+        {activeTab === "general" && (
+          <>
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <SettingsIcon className="w-5 h-5" />
+                General Settings
+              </h2>
+
+              <div className="grid gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Site Name
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.siteName}
+                    onChange={(e) => updateSetting("siteName", e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Default XP per Lesson
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.defaultXpPerLesson}
+                      onChange={(e) => updateSetting("defaultXpPerLesson", parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      XP per Level
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.xpPerLevel}
+                      onChange={(e) => updateSetting("xpPerLevel", parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Max Students per Parent
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.maxStudentsPerParent}
+                      onChange={(e) => updateSetting("maxStudentsPerParent", parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Session Duration (minutes)
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.sessionDurationMinutes}
+                      onChange={(e) => updateSetting("sessionDurationMinutes", parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Feature Toggles */}
+            <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Feature Toggles
+              </h2>
+
+              <div className="space-y-3">
+                {[
+                  { key: "maintenanceMode", label: "Maintenance Mode", desc: "Disable access to the platform for non-admins" },
+                  { key: "allowRegistration", label: "Allow Registration", desc: "Enable new user signups" },
+                  { key: "requireEmailVerification", label: "Require Email Verification", desc: "Users must verify email before accessing platform" },
+                  { key: "enableNotifications", label: "Enable Notifications", desc: "Allow platform notifications" },
+                  { key: "enableMessaging", label: "Enable Messaging", desc: "Allow user-to-user messaging" },
+                  { key: "enableCertificates", label: "Enable Certificates", desc: "Issue certificates for course completion" },
+                  { key: "enableBadges", label: "Enable Badges", desc: "Award badges for achievements" },
+                  { key: "stripeEnabled", label: "Stripe Payments", desc: "Enable Stripe payment processing" },
+                  { key: "demoMode", label: "Demo Mode", desc: "Show demo data for testing" },
+                ].map((setting) => {
+                  const isEnabled = settings[setting.key as keyof Settings] as boolean;
+                  return (
+                    <div key={setting.key} className="flex items-center justify-between py-3 border-b last:border-b-0 border-slate-100 dark:border-slate-700">
+                      <div>
+                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{setting.label}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{setting.desc}</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={isEnabled}
+                          onChange={() => toggleSetting(setting.key as keyof Settings)}
+                        />
+                        <div className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                          isEnabled ? "bg-gradient-to-r from-purple-500 to-pink-500" : "bg-slate-200 dark:bg-slate-600"
+                        }`}>
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                            isEnabled ? "translate-x-5" : "translate-x-0"
+                          }`} />
+                        </div>
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Email Notifications Tab */}
+        {activeTab === "email" && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Mail className="w-5 h-5" />
+              Email Notification Preferences
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Configure which email notifications are sent to administrators.
+            </p>
+
+            <div className="space-y-3">
+              {[
+                { key: "emailNewEnrollment", label: "New Enrollment", desc: "Notify when a student enrolls in a course" },
+                { key: "emailPaymentReceived", label: "Payment Received", desc: "Notify when a payment is successfully processed" },
+                { key: "emailCourseCompletion", label: "Course Completion", desc: "Notify when a student completes a course" },
+                { key: "emailWeeklyDigest", label: "Weekly Digest", desc: "Send weekly summary of platform activity" },
+                { key: "emailSystemAlerts", label: "System Alerts", desc: "Critical system alerts and errors" },
+              ].map((setting) => {
+                const isEnabled = settings[setting.key as keyof Settings] as boolean ?? false;
+                return (
+                  <div key={setting.key} className="flex items-center justify-between py-3 border-b last:border-b-0 border-slate-100 dark:border-slate-700">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{setting.label}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{setting.desc}</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={isEnabled}
+                        onChange={() => toggleSetting(setting.key as keyof Settings)}
+                      />
+                      <div className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out ${
+                        isEnabled ? "bg-gradient-to-r from-purple-500 to-pink-500" : "bg-slate-200 dark:bg-slate-600"
+                      }`}>
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                          isEnabled ? "translate-x-5" : "translate-x-0"
+                        }`} />
+                      </div>
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Sessions Tab */}
+        {activeTab === "sessions" && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Session Duration Settings
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Configure default durations and limits for class sessions.
+            </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Default XP per Lesson
+                  Default Session Duration (minutes)
                 </label>
                 <input
                   type="number"
-                  value={settings.defaultXpPerLesson}
-                  onChange={(e) => updateSetting("defaultXpPerLesson", parseInt(e.target.value))}
+                  value={settings.defaultSessionDuration ?? 60}
+                  onChange={(e) => updateSetting("defaultSessionDuration", parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  XP per Level
+                  Minimum Session Duration (minutes)
                 </label>
                 <input
                   type="number"
-                  value={settings.xpPerLevel}
-                  onChange={(e) => updateSetting("xpPerLevel", parseInt(e.target.value))}
+                  value={settings.minSessionDuration ?? 30}
+                  onChange={(e) => updateSetting("minSessionDuration", parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Max Students per Parent
+                  Maximum Session Duration (minutes)
                 </label>
                 <input
                   type="number"
-                  value={settings.maxStudentsPerParent}
-                  onChange={(e) => updateSetting("maxStudentsPerParent", parseInt(e.target.value))}
+                  value={settings.maxSessionDuration ?? 120}
+                  onChange={(e) => updateSetting("maxSessionDuration", parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Session Duration (minutes)
+                  Buffer Between Sessions (minutes)
                 </label>
                 <input
                   type="number"
-                  value={settings.sessionDurationMinutes}
-                  onChange={(e) => updateSetting("sessionDurationMinutes", parseInt(e.target.value))}
+                  value={settings.sessionBufferMinutes ?? 15}
+                  onChange={(e) => updateSetting("sessionBufferMinutes", parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Time gap required between consecutive sessions
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Feature Toggles */}
-        <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Feature Toggles</h2>
+        {/* Age Groups Tab */}
+        {activeTab === "age" && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Age Group Definitions
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Define age ranges for different student categories.
+            </p>
 
-          <div className="space-y-3">
-            {[
-              { key: "maintenanceMode", label: "Maintenance Mode", desc: "Disable access to the platform for non-admins" },
-              { key: "allowRegistration", label: "Allow Registration", desc: "Enable new user signups" },
-              { key: "requireEmailVerification", label: "Require Email Verification", desc: "Users must verify email before accessing platform" },
-              { key: "enableNotifications", label: "Enable Notifications", desc: "Allow platform notifications" },
-              { key: "enableMessaging", label: "Enable Messaging", desc: "Allow user-to-user messaging" },
-              { key: "enableCertificates", label: "Enable Certificates", desc: "Issue certificates for course completion" },
-              { key: "enableBadges", label: "Enable Badges", desc: "Award badges for achievements" },
-              { key: "stripeEnabled", label: "Stripe Payments", desc: "Enable Stripe payment processing" },
-              { key: "demoMode", label: "Demo Mode", desc: "Show demo data for testing" },
-            ].map((setting) => {
-              const isEnabled = settings[setting.key as keyof Settings] as boolean;
-              return (
-                <div key={setting.key} className="flex items-center justify-between py-3 border-b last:border-b-0 border-slate-100 dark:border-slate-700">
+            <div className="space-y-6">
+              {/* Young Coders */}
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-3">Young Coders</h3>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{setting.label}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{setting.desc}</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="block text-sm text-blue-700 dark:text-blue-300 mb-1">Min Age</label>
                     <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={isEnabled}
-                      onChange={() => toggleSetting(setting.key as keyof Settings)}
+                      type="number"
+                      value={settings.ageGroupYoung?.min ?? 5}
+                      onChange={(e) => setSettings({ ...settings, ageGroupYoung: { ...settings.ageGroupYoung, min: parseInt(e.target.value) } })}
+                      className="w-full px-3 py-2 border border-blue-200 dark:border-blue-700 rounded-lg bg-white dark:bg-slate-800"
                     />
-                    <div className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out ${
-                      isEnabled ? "bg-gradient-to-r from-purple-500 to-pink-500" : "bg-slate-200 dark:bg-slate-600"
-                    }`}>
-                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                        isEnabled ? "translate-x-5" : "translate-x-0"
-                      }`} />
-                    </div>
-                  </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-blue-700 dark:text-blue-300 mb-1">Max Age</label>
+                    <input
+                      type="number"
+                      value={settings.ageGroupYoung?.max ?? 8}
+                      onChange={(e) => setSettings({ ...settings, ageGroupYoung: { ...settings.ageGroupYoung, max: parseInt(e.target.value) } })}
+                      className="w-full px-3 py-2 border border-blue-200 dark:border-blue-700 rounded-lg bg-white dark:bg-slate-800"
+                    />
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* Middle School */}
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-3">Middle School</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-purple-700 dark:text-purple-300 mb-1">Min Age</label>
+                    <input
+                      type="number"
+                      value={settings.ageGroupMiddle?.min ?? 9}
+                      onChange={(e) => setSettings({ ...settings, ageGroupMiddle: { ...settings.ageGroupMiddle, min: parseInt(e.target.value) } })}
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-purple-700 dark:text-purple-300 mb-1">Max Age</label>
+                    <input
+                      type="number"
+                      value={settings.ageGroupMiddle?.max ?? 12}
+                      onChange={(e) => setSettings({ ...settings, ageGroupMiddle: { ...settings.ageGroupMiddle, max: parseInt(e.target.value) } })}
+                      className="w-full px-3 py-2 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Teens */}
+              <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                <h3 className="font-medium text-pink-900 dark:text-pink-100 mb-3">Teens</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-pink-700 dark:text-pink-300 mb-1">Min Age</label>
+                    <input
+                      type="number"
+                      value={settings.ageGroupTeen?.min ?? 13}
+                      onChange={(e) => setSettings({ ...settings, ageGroupTeen: { ...settings.ageGroupTeen, min: parseInt(e.target.value) } })}
+                      className="w-full px-3 py-2 border border-pink-200 dark:border-pink-700 rounded-lg bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-pink-700 dark:text-pink-300 mb-1">Max Age</label>
+                    <input
+                      type="number"
+                      value={settings.ageGroupTeen?.max ?? 18}
+                      onChange={(e) => setSettings({ ...settings, ageGroupTeen: { ...settings.ageGroupTeen, max: parseInt(e.target.value) } })}
+                      className="w-full px-3 py-2 border border-pink-200 dark:border-pink-700 rounded-lg bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Appearance Tab */}
+        {activeTab === "appearance" && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Palette className="w-5 h-5" />
+              Appearance Settings
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Customize the platform's visual appearance.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Primary Color
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={settings.primaryColor ?? "#8B5CF6"}
+                    onChange={(e) => updateSetting("primaryColor", e.target.value)}
+                    className="w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={settings.primaryColor ?? "#8B5CF6"}
+                    onChange={(e) => updateSetting("primaryColor", e.target.value)}
+                    className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Accent Color
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={settings.accentColor ?? "#EC4899"}
+                    onChange={(e) => updateSetting("accentColor", e.target.value)}
+                    className="w-12 h-12 rounded-lg border border-slate-200 dark:border-slate-600 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={settings.accentColor ?? "#EC4899"}
+                    onChange={(e) => updateSetting("accentColor", e.target.value)}
+                    className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="mt-6 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Preview</h4>
+              <div className="flex gap-4">
+                <button
+                  style={{ background: `linear-gradient(to right, ${settings.primaryColor ?? "#8B5CF6"}, ${settings.accentColor ?? "#EC4899"})` }}
+                  className="px-4 py-2 text-white rounded-lg font-medium"
+                >
+                  Primary Button
+                </button>
+                <button
+                  style={{ borderColor: settings.primaryColor ?? "#8B5CF6", color: settings.primaryColor ?? "#8B5CF6" }}
+                  className="px-4 py-2 border-2 rounded-lg font-medium bg-transparent"
+                >
+                  Outline Button
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Save Button */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
