@@ -42,7 +42,7 @@ export default function ParentDashboardPage() {
         }))
         .sort((a: any, b: any) => a.start.getTime() - b.start.getTime());
       const buffer = new Date(Date.now() - 60 * 60 * 1000);
-      const futureOnly = normalized.filter((cls) => cls.start >= buffer);
+      const futureOnly = normalized.filter((cls: { start: Date }) => cls.start >= buffer);
       setUpcoming(futureOnly);
     });
 

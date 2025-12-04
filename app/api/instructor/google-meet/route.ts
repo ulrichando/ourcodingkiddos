@@ -79,7 +79,7 @@ export async function POST(req: Request) {
       ? googleAccount.expires_at * 1000
       : 0;
     if (Date.now() > tokenExpiry && googleAccount.refresh_token) {
-      accessToken = await refreshAccessToken(googleAccount.refresh_token);
+      accessToken = await refreshAccessToken(googleAccount.refresh_token) ?? null;
 
       if (accessToken) {
         // Update the stored access token

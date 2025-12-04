@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
 
-    if (userRole !== "ADMIN") {
+    if (!session?.user || userRole !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -128,8 +128,8 @@ export async function POST(request: NextRequest) {
         excerpt,
         content,
         featuredImage,
-        authorEmail: session.user!.email!,
-        authorName: session.user!.name || "Admin",
+        authorEmail: session.user.email!,
+        authorName: session.user.name || "Admin",
         authorRole: userRole,
         category: category || "NEWS",
         tags: tags || [],

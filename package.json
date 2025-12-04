@@ -36,9 +36,11 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.4",
     "@types/react": "^19.2.7",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.22",
     "baseline-browser-mapping": "^2.8.32",
     "eslint": "^9.6.0",

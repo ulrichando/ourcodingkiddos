@@ -5,8 +5,16 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import CertificateCard from "../../components/certificates/CertificateCard";
 
+type Certificate = {
+  id: string;
+  course_title: string;
+  student_name: string;
+  issued_date: string;
+  achievement_type: "course_completion" | "track_completion" | "special_achievement";
+};
+
 export default function CertificatesPage() {
-  const certificates = useMemo(() => [], []);
+  const certificates = useMemo<Certificate[]>(() => [], []); // TODO: Fetch certificates
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">

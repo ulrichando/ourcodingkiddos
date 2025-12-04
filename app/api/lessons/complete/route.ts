@@ -47,12 +47,12 @@ export async function POST(request: Request) {
       let isParent = false;
       if (userRole === "PARENT") {
         const parentProfile = await prisma.parentProfile.findFirst({
-          where: { user: { email: userEmail } },
+          where: { user: { email: userEmail ?? undefined } },
           select: { id: true },
         });
 
-        isParent = studentProfile.parentEmail === userEmail ||
-                   (parentProfile && studentProfile.guardianId === parentProfile.id);
+        isParent = !!(studentProfile.parentEmail === userEmail ||
+                   (parentProfile && studentProfile.guardianId === parentProfile.id));
       }
 
       if (!isStudent && !isParent) {

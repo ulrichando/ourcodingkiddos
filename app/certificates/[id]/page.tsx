@@ -1,13 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import { ArrowLeft, Calendar, Download } from "lucide-react";
 import Button from "../../../components/ui/button";
 
+type Certificate = {
+  id: string;
+  student: string;
+  course: string;
+  issued: string;
+  code: string;
+  type: string;
+};
+
 export default function CertificateDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const cert = null;
+  const [cert, setCert] = useState<Certificate | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // TODO: Fetch certificate data from API
+    // For now, just set loading to false with no cert
+    setLoading(false);
+  }, [id]);
 
   const handleDownload = () => {
     if (!cert) return;
@@ -59,6 +75,18 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
       URL.revokeObjectURL(url);
     }
   };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-slate-600 dark:text-slate-400">
+            Loading certificate...
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (!cert) {
     return (

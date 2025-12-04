@@ -33,7 +33,7 @@ export async function createAuditLog(input: AuditLogInput): Promise<void> {
         userAgent: input.userAgent || null,
         status: input.status || "success",
         severity: input.severity || "INFO",
-        metadata: input.metadata || null,
+        metadata: input.metadata ?? undefined,
       },
     });
   } catch (error) {

@@ -243,7 +243,7 @@ export default function InstructorDashboard() {
                       </div>
                     </div>
                     {/* Attendance Result */}
-                    {attendanceResult?.classId === session.id && (
+                    {attendanceResult && attendanceResult.classId === session.id && (
                       <div className={`p-3 rounded-lg text-sm ${
                         attendanceResult.offline > 0
                           ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"

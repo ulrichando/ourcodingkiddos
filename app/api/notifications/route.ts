@@ -106,9 +106,11 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { action, notificationId, notificationIds } = body;
 
+  const userEmail = session.user.email?.toLowerCase() ?? "";
+
   // Mark single notification as read
   if (action === "markRead" && notificationId) {
-    const notification = notifications.find(n => n.id === notificationId && n.userEmail === session.user.email.toLowerCase());
+    const notification = notifications.find(n => n.id === notificationId && n.userEmail === userEmail);
     if (notification) {
       notification.isRead = true;
     }
@@ -118,7 +120,7 @@ export async function POST(req: Request) {
   // Mark all notifications as read
   if (action === "markAllRead") {
     notifications.forEach(n => {
-      if (n.userEmail === session.user.email.toLowerCase()) {
+      if (n.userEmail === userEmail) {
         n.isRead = true;
       }
     });
@@ -128,7 +130,7 @@ export async function POST(req: Request) {
   // Mark multiple as read
   if (action === "markMultipleRead" && Array.isArray(notificationIds)) {
     notifications.forEach(n => {
-      if (n.userEmail === session.user.email.toLowerCase() && notificationIds.includes(n.id)) {
+      if (n.userEmail === userEmail && notificationIds.includes(n.id)) {
         n.isRead = true;
       }
     });

@@ -17,7 +17,7 @@ export default async function AdminContentPage() {
     return redirect("/auth/login");
   }
 
-  let courses = [];
+  let courses: { id: string; title: string; description: string | null; language: string; level: string; ageGroup: string; isPublished: boolean; totalXp: number | null }[] = [];
   let dbError = false;
   try {
     courses = await prisma.course.findMany({
