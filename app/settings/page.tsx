@@ -2,33 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import Button from "../../components/ui/button";
 import { logout } from "../../lib/logout";
-
-interface SubscriptionData {
-  planType: string;
-  status: string;
-  currentPeriodEnd?: string;
-  trialEndsAt?: string;
-  cancelAtPeriodEnd?: boolean;
-}
-
-interface AccessStatus {
-  hasAccess: boolean;
-  status: "active" | "trialing" | "expired" | "past_due" | "canceled" | "unpaid" | "none";
-  daysRemaining: number | null;
-  message: string;
-}
-
-interface PaymentMethod {
-  id: string;
-  brand: string;
-  last4: string;
-  expMonth: number;
-  expYear: number;
-  isDefault: boolean;
-}
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
@@ -41,15 +16,6 @@ export default function SettingsPage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [prefStatus, setPrefStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [prefMessage, setPrefMessage] = useState("");
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
-  const [accessStatus, setAccessStatus] = useState<AccessStatus | null>(null);
-  const [loadingSubscription, setLoadingSubscription] = useState(true);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [cancelStatus, setCancelStatus] = useState<"idle" | "canceling" | "success" | "error">("idle");
-  const [cancelMessage, setCancelMessage] = useState("");
-  const [resumeStatus, setResumeStatus] = useState<"idle" | "resuming" | "success" | "error">("idle");
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState<"idle" | "deleting" | "error">("idle");
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -60,28 +26,8 @@ export default function SettingsPage() {
       setEmail(session.user.email ?? "");
       // Load user preferences
       loadPreferences();
-      // Load subscription data
-      loadSubscription();
-      // Load payment methods
-      loadPaymentMethods();
     }
   }, [session]);
-
-  const loadSubscription = async () => {
-    setLoadingSubscription(true);
-    try {
-      const response = await fetch("/api/subscriptions", { cache: "no-store" });
-      if (response.ok) {
-        const data = await response.json();
-        setSubscription(data.subscription || null);
-        setAccessStatus(data.accessStatus || null);
-      }
-    } catch (error) {
-      console.error("Failed to load subscription:", error);
-    } finally {
-      setLoadingSubscription(false);
-    }
-  };
 
   const loadPreferences = async () => {
     try {
@@ -95,34 +41,6 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Failed to load preferences:", error);
     }
-  };
-
-  const loadPaymentMethods = async () => {
-    setLoadingPaymentMethods(true);
-    try {
-      const response = await fetch("/api/payment-methods");
-      if (response.ok) {
-        const data = await response.json();
-        setPaymentMethods(data.paymentMethods || []);
-      }
-    } catch (error) {
-      console.error("Failed to load payment methods:", error);
-    } finally {
-      setLoadingPaymentMethods(false);
-    }
-  };
-
-  const getCardBrandIcon = (brand: string) => {
-    const brands: Record<string, string> = {
-      visa: "💳 Visa",
-      mastercard: "💳 Mastercard",
-      amex: "💳 Amex",
-      discover: "💳 Discover",
-      diners: "💳 Diners",
-      jcb: "💳 JCB",
-      unionpay: "💳 UnionPay",
-    };
-    return brands[brand.toLowerCase()] || `💳 ${brand}`;
   };
 
   if (status === "loading") {
@@ -192,68 +110,6 @@ export default function SettingsPage() {
       setPrefStatus("error");
       setPrefMessage("An error occurred. Please try again.");
       setTimeout(() => setPrefStatus("idle"), 3000);
-    }
-  };
-
-  const handleCancelSubscription = async () => {
-    setCancelStatus("canceling");
-    setCancelMessage("");
-    try {
-      const response = await fetch("/api/subscriptions/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.ok) {
-        setCancelStatus("success");
-        setCancelMessage("Your subscription has been set to cancel at the end of the current billing period.");
-        setShowCancelModal(false);
-        // Reload subscription data to reflect the change
-        loadSubscription();
-        setTimeout(() => {
-          setCancelStatus("idle");
-          setCancelMessage("");
-        }, 5000);
-      } else {
-        const data = await response.json();
-        setCancelStatus("error");
-        setCancelMessage(data.error || "Failed to cancel subscription. Please try again.");
-        setTimeout(() => setCancelStatus("idle"), 3000);
-      }
-    } catch (error) {
-      setCancelStatus("error");
-      setCancelMessage("An error occurred. Please try again.");
-      setTimeout(() => setCancelStatus("idle"), 3000);
-    }
-  };
-
-  const handleResumeSubscription = async () => {
-    setResumeStatus("resuming");
-    setCancelMessage("");
-    try {
-      const response = await fetch("/api/subscriptions/resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.ok) {
-        setResumeStatus("success");
-        setCancelMessage("Your subscription has been resumed!");
-        loadSubscription();
-        setTimeout(() => {
-          setResumeStatus("idle");
-          setCancelMessage("");
-        }, 3000);
-      } else {
-        const data = await response.json();
-        setResumeStatus("error");
-        setCancelMessage(data.error || "Failed to resume subscription. Please try again.");
-        setTimeout(() => setResumeStatus("idle"), 3000);
-      }
-    } catch (error) {
-      setResumeStatus("error");
-      setCancelMessage("An error occurred. Please try again.");
-      setTimeout(() => setResumeStatus("idle"), 3000);
     }
   };
 
@@ -332,8 +188,6 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Appearance settings removed; use the header toggle next to the bell */}
-
         <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
             <span className="text-lg">🔔</span>
@@ -381,234 +235,6 @@ export default function SettingsPage() {
 
         <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
           <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
-            <span className="text-lg">💳</span>
-            Subscription
-          </div>
-
-          {loadingSubscription ? (
-            <div className="animate-pulse space-y-3">
-              <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-32" />
-              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-48" />
-            </div>
-          ) : accessStatus ? (
-            <div className="space-y-4">
-              {/* Subscription Status */}
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  accessStatus.status === "active" || accessStatus.status === "trialing"
-                    ? "bg-green-500"
-                    : accessStatus.status === "past_due" || accessStatus.status === "unpaid"
-                      ? "bg-red-500"
-                      : "bg-amber-500"
-                }`} />
-                <div>
-                  <p className="font-medium text-slate-800 dark:text-slate-200">
-                    {accessStatus.status === "trialing"
-                      ? "Free Trial"
-                      : subscription?.planType === "MONTHLY" || subscription?.planType === "monthly"
-                        ? "Premium Monthly"
-                        : subscription?.planType === "ANNUAL" || subscription?.planType === "annual"
-                          ? "Premium Annual"
-                          : subscription?.planType === "FAMILY" || subscription?.planType === "family"
-                            ? "Premium Family"
-                            : subscription?.planType === "unlimited"
-                              ? "Admin Access"
-                              : subscription?.planType === "instructor"
-                                ? "Instructor Access"
-                                : "No Plan"}
-                  </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {accessStatus.message}
-                  </p>
-                </div>
-              </div>
-
-              {/* Days Remaining */}
-              {accessStatus.daysRemaining !== null && accessStatus.hasAccess && (
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
-                    <span className="font-medium">{accessStatus.daysRemaining}</span> days remaining
-                    {subscription?.currentPeriodEnd && (
-                      <span className="text-slate-500 dark:text-slate-400">
-                        {" "}(renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()})
-                      </span>
-                    )}
-                    {subscription?.trialEndsAt && accessStatus.status === "trialing" && (
-                      <span className="text-slate-500 dark:text-slate-400">
-                        {" "}(trial ends {new Date(subscription.trialEndsAt).toLocaleDateString()})
-                      </span>
-                    )}
-                  </p>
-                </div>
-              )}
-
-              {/* Cancel pending notice with Resume button */}
-              {subscription?.cancelAtPeriodEnd && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <p className="text-sm text-amber-800 dark:text-amber-300">
-                      Your subscription is set to cancel at the end of the current period.
-                    </p>
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white w-fit"
-                      onClick={handleResumeSubscription}
-                      disabled={resumeStatus === "resuming"}
-                    >
-                      {resumeStatus === "resuming" ? "Resuming..." : "Resume Subscription"}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
-                {/* Upgrade button - show for trial users or active subscribers who can upgrade */}
-                {accessStatus.hasAccess && subscription?.planType !== "unlimited" && subscription?.planType !== "instructor" && (
-                  <Link href="/pricing">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                      {accessStatus.status === "trialing" ? "Upgrade Now" : "Change Plan"}
-                    </Button>
-                  </Link>
-                )}
-
-                {/* Cancel button - show for active/trialing users (not for canceled or admin/instructor) */}
-                {accessStatus.hasAccess &&
-                 !subscription?.cancelAtPeriodEnd &&
-                 subscription?.planType !== "unlimited" &&
-                 subscription?.planType !== "instructor" && (
-                  <Button
-                    variant="outline"
-                    className="text-red-600 dark:text-red-400 border-red-200 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    onClick={() => setShowCancelModal(true)}
-                  >
-                    Cancel Subscription
-                  </Button>
-                )}
-
-                {/* Update Payment - show for past_due or unpaid */}
-                {!accessStatus.hasAccess && (accessStatus.status === "past_due" || accessStatus.status === "unpaid") && (
-                  <Link href="/api/stripe/portal">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                      Update Payment Method
-                    </Button>
-                  </Link>
-                )}
-
-                {/* Resubscribe - show for expired or canceled */}
-                {!accessStatus.hasAccess && (accessStatus.status === "expired" || accessStatus.status === "canceled") && (
-                  <Link href="/pricing">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                      Resubscribe
-                    </Button>
-                  </Link>
-                )}
-
-                {/* Start trial - show for users with no subscription */}
-                {accessStatus.status === "none" && (
-                  <Link href="/checkout?plan=free-trial">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                      Start Free Trial
-                    </Button>
-                  </Link>
-                )}
-              </div>
-
-              {/* Cancel status message */}
-              {cancelMessage && (
-                <div className={`p-3 rounded-lg ${
-                  cancelStatus === "success"
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300"
-                    : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300"
-                }`}>
-                  <p className="text-sm">{cancelMessage}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-slate-600 dark:text-slate-400">No subscription information available.</p>
-              <Link href="/pricing">
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                  View Plans
-                </Button>
-              </Link>
-            </div>
-          )}
-        </section>
-
-        {/* Payment Methods Section */}
-        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
-            <span className="text-lg">💳</span>
-            Payment Methods
-          </div>
-
-          {loadingPaymentMethods ? (
-            <div className="animate-pulse space-y-3">
-              <div className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-            </div>
-          ) : paymentMethods.length > 0 ? (
-            <div className="space-y-3">
-              {paymentMethods.map((card) => (
-                <div
-                  key={card.id}
-                  className={`flex items-center justify-between p-4 rounded-lg border ${
-                    card.isDefault
-                      ? "border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20"
-                      : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">
-                      {card.brand.toLowerCase() === "visa" && "💳"}
-                      {card.brand.toLowerCase() === "mastercard" && "💳"}
-                      {card.brand.toLowerCase() === "amex" && "💳"}
-                      {!["visa", "mastercard", "amex"].includes(card.brand.toLowerCase()) && "💳"}
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-800 dark:text-slate-200">
-                        {card.brand.charAt(0).toUpperCase() + card.brand.slice(1)} •••• {card.last4}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Expires {card.expMonth.toString().padStart(2, "0")}/{card.expYear}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {card.isDefault && (
-                      <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-full">
-                        Default
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <Link href="/api/stripe/portal">
-                <Button variant="outline" className="w-full mt-2 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700">
-                  Manage Payment Methods
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="text-center py-6 space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                <span className="text-2xl">💳</span>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400">No payment methods on file</p>
-              {accessStatus?.hasAccess && (
-                <Link href="/api/stripe/portal">
-                  <Button variant="outline" className="dark:border-slate-600 dark:text-slate-200">
-                    Add Payment Method
-                  </Button>
-                </Link>
-              )}
-            </div>
-          )}
-        </section>
-
-        <section className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-semibold">
             <span className="text-lg">🛡️</span>
             Account
           </div>
@@ -633,69 +259,6 @@ export default function SettingsPage() {
           </p>
         </section>
       </div>
-
-      {/* Cancel Subscription Confirmation Modal */}
-      {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowCancelModal(false)}
-          />
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-md w-full mx-4 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <span className="text-2xl">⚠️</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  Cancel Subscription?
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  This action cannot be undone
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-slate-600 dark:text-slate-300">
-                Are you sure you want to cancel your subscription? You will:
-              </p>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">✕</span>
-                  <span>Lose access to all premium courses and live classes</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">✕</span>
-                  <span>No longer be able to book 1-on-1 sessions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-0.5">✓</span>
-                  <span>Keep access until the end of your current billing period</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1 dark:border-slate-600 dark:text-slate-200"
-                onClick={() => setShowCancelModal(false)}
-                disabled={cancelStatus === "canceling"}
-              >
-                Keep Subscription
-              </Button>
-              <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                onClick={handleCancelSubscription}
-                disabled={cancelStatus === "canceling"}
-              >
-                {cancelStatus === "canceling" ? "Canceling..." : "Yes, Cancel"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Account Confirmation Modal */}
       {showDeleteModal && (
@@ -728,10 +291,6 @@ export default function SettingsPage() {
                 Are you sure you want to permanently delete your account? This will:
               </p>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">✕</span>
-                  <span>Cancel any active subscriptions</span>
-                </li>
                 <li className="flex items-start gap-2">
                   <span className="text-red-500 mt-0.5">✕</span>
                   <span>Delete all your progress and certificates</span>

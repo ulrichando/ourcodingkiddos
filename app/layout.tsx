@@ -143,10 +143,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <div className="col-span-1 md:col-span-2">
                     <h4 className="text-white font-semibold mb-4">Resources</h4>
                     <ul className="space-y-3 text-sm">
+                      <li><a href="/programs" className="text-slate-400 hover:text-white transition-colors">Learning Programs</a></li>
                       <li><a href="/courses" className="text-slate-400 hover:text-white transition-colors">All Courses</a></li>
                       <li><a href="/playground" className="text-slate-400 hover:text-white transition-colors">Code Playground</a></li>
-                      <li><a href="/schedule" className="text-slate-400 hover:text-white transition-colors">Live Classes</a></li>
-                      <li><a href="/pricing" className="text-slate-400 hover:text-white transition-colors">Pricing</a></li>
+                      <li><a href="/blog" className="text-slate-400 hover:text-white transition-colors">Blog</a></li>
+                      <li><a href="/showcase" className="text-slate-400 hover:text-white transition-colors">Student Showcase</a></li>
                     </ul>
                   </div>
 

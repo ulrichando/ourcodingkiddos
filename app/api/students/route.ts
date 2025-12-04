@@ -6,7 +6,6 @@ import { authOptions } from "../../../lib/auth";
 import { getToken } from "next-auth/jwt";
 import { createNotification } from "../notifications/route";
 import { logCreate } from "../../../lib/audit";
-import { isSubscriptionValid } from "../../../lib/subscription";
 
 
 export async function POST(request: NextRequest) {
@@ -36,43 +35,6 @@ export async function POST(request: NextRequest) {
   }
   if (sessionRole && !["PARENT", "ADMIN"].includes(sessionRole)) {
     return NextResponse.json({ error: "Only parents can add students" }, { status: 403 });
-  }
-
-  // Check if this is an official demo account (only specific demo accounts bypass subscription checks)
-  const DEMO_ACCOUNTS = ["demo.parent@example.com", "demo.instructor@example.com", "demo.student@example.com"];
-  const isDemoAccount = DEMO_ACCOUNTS.includes(effectiveParentEmail?.toLowerCase() || "");
-
-  // Check subscription status for parents (admins and demo accounts bypass this check)
-  if (sessionRole === "PARENT" && !isDemoAccount) {
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        OR: [
-          { user: { email: effectiveParentEmail } },
-          { parentEmail: effectiveParentEmail },
-        ],
-      },
-      orderBy: { currentPeriodEnd: "desc" },
-      select: {
-        status: true,
-        planType: true,
-        endDate: true,
-        currentPeriodEnd: true,
-        trialEndsAt: true,
-      },
-    });
-
-    if (!isSubscriptionValid(subscription)) {
-      const status = subscription?.status?.toUpperCase();
-      let errorMessage = "Active subscription required. Please start your free trial or upgrade your plan to add students.";
-
-      if (status === "PAST_DUE" || status === "UNPAID") {
-        errorMessage = "Your payment has failed. Please update your payment method to continue adding students.";
-      } else if (status === "CANCELED") {
-        errorMessage = "Your subscription has been canceled. Please resubscribe to add students.";
-      }
-
-      return NextResponse.json({ error: errorMessage }, { status: 403 });
-    }
   }
 
   const name = String(body?.name || "").trim();

@@ -19,7 +19,9 @@ import {
   X,
   HelpCircle,
   UserPlus,
-  Video
+  Video,
+  Newspaper,
+  Rocket,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -40,8 +42,11 @@ const navigationGroups = [
   {
     title: "Content Management",
     items: [
+      { href: "/dashboard/admin/programs", label: "Programs", icon: GraduationCap },
       { href: "/dashboard/admin/courses", label: "Courses", icon: BookOpen },
       { href: "/dashboard/admin/content", label: "Course Builder", icon: FileText },
+      { href: "/dashboard/admin/blog", label: "Blog", icon: Newspaper },
+      { href: "/dashboard/admin/showcase", label: "Student Showcase", icon: Rocket },
     ]
   },
   {

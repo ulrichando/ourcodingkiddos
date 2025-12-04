@@ -8,7 +8,7 @@ type AdminOverviewProps = {
     totalParents: number;
     totalStudents: number;
     instructors: number;
-    activeSubs: number;
+    programs?: number;
   };
   recentUsers: Array<{
     id: string;
@@ -83,14 +83,14 @@ export default function AdminOverview({ stats, recentUsers, totalUsers, totalCou
       link: "/dashboard/admin/courses",
     },
     {
-      label: "Active Subscriptions",
-      value: stats.activeSubs,
+      label: "Programs",
+      value: stats.programs || 0,
       icon: CreditCard,
       color: "from-indigo-500 to-purple-500",
       bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
       iconColor: "text-indigo-600 dark:text-indigo-400",
-      growth: growthMetrics.revenue,
-      link: "/dashboard/admin/finance",
+      growth: 0,
+      link: "/dashboard/admin/programs",
     },
   ];
 

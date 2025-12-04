@@ -35,13 +35,12 @@ model User {
   portfolio              PortfolioItem[]
   sessions               Session[]
   studentProfile         StudentProfile?
-  subscriptions          Subscription[]
   badges                 UserBadge[]
 }
 
 model StudentProfile {
-  id                    String           @id @default(cuid())
-  userId                String           @unique
+  id                    String              @id @default(cuid())
+  userId                String              @unique
   dob                   DateTime?
   guardianId            String?
   parentEmail           String?
@@ -49,17 +48,19 @@ model StudentProfile {
   avatar                String?
   age                   Int?
   ageGroup              AgeGroup?
-  totalXp               Int              @default(0)
-  currentLevel          Int              @default(1)
-  streakDays            Int              @default(0)
+  totalXp               Int                 @default(0)
+  currentLevel          Int                 @default(1)
+  streakDays            Int                 @default(0)
   lastActiveDate        DateTime?
   badges                Json?
   themePreference       ThemePreference?
   accessibilitySettings Json?
   archivedAt            DateTime?
-  projects              Project[]        @relation("StudentProjects")
-  guardian              ParentProfile?   @relation("ParentGuardian", fields: [guardianId], references: [id])
-  user                  User             @relation(fields: [userId], references: [id])
+  projects              Project[]           @relation("StudentProjects")
+  guardian              ParentProfile?      @relation("ParentGuardian", fields: [guardianId], references: [id])
+  user                  User                @relation(fields: [userId], references: [id])
+  programEnrollments    ProgramEnrollment[] // programs the student is enrolled in
+  studentProjects       StudentProject[]    // showcase projects
 }
 
 model ParentProfile {
@@ -72,9 +73,9 @@ model ParentProfile {
 }
 
 model Course {
-  id             String       @id @default(cuid())
+  id             String          @id @default(cuid())
   title          String
-  slug           String       @unique
+  slug           String          @unique
   description    String
   language       Language
   level          CourseLevel
@@ -82,13 +83,14 @@ model Course {
   thumbnailUrl   String?
   totalXp        Int?
   estimatedHours Int?
-  isPublished    Boolean      @default(false)
+  isPublished    Boolean         @default(false)
   orderIndex     Int?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   bookings       Booking[]
   enrollments    Enrollment[]
   lessons        Lesson[]
+  programs       ProgramCourse[] // programs that include this course
 }
 
 model Lesson {
@@ -279,33 +281,8 @@ model Payment {
   status                PaymentStatus
   stripePaymentIntentId String        @unique
   stripeCustomerId      String?
-  subscriptionId        String?
   createdAt             DateTime      @default(now())
-  subscription          Subscription? @relation(fields: [subscriptionId], references: [id])
   user                  User          @relation(fields: [userId], references: [id])
-}
-
-model Subscription {
-  id                   String             @id @default(cuid())
-  userId               String
-  status               SubscriptionStatus
-  priceId              String
-  stripeCustomerId     String?
-  stripeSubscriptionId String             @unique
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean            @default(false)
-  canceledAt           DateTime?
-  trialEndsAt          DateTime?
-  planType             PlanType?
-  maxStudents          Int?
-  priceCents           Int?
-  startDate            DateTime?
-  endDate              DateTime?
-  parentEmail          String?
-  features             Json?
-  payments             Payment[]
-  user                 User               @relation(fields: [userId], references: [id])
 }
 
 model Badge {
@@ -663,15 +640,6 @@ enum PaymentStatus {
   CANCELED
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  TRIALING
-  PAST_DUE
-  CANCELED
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  UNPAID
-}
 
 enum QuestionType {
   MULTIPLE_CHOICE
@@ -699,12 +667,6 @@ enum RecurrencePattern {
   MONTHLY
 }
 
-enum PlanType {
-  FREE_TRIAL
-  MONTHLY
-  ANNUAL
-  FAMILY
-}
 
 enum MessageType {
   GENERAL
@@ -784,4 +746,191 @@ enum AuditSeverity {
   WARNING
   ERROR
   CRITICAL
+}
+
+// =====================================================
+// PROGRAM-BASED PAYMENT MODELS (replacing subscriptions)
+// =====================================================
+
+model Program {
+  id                String              @id @default(cuid())
+  title             String
+  slug              String              @unique
+  description       String
+  shortDescription  String?
+  thumbnailUrl      String?
+  language          Language
+  ageGroup          AgeGroup
+  level             CourseLevel         @default(BEGINNER)
+  sessionCount      Int                 // 6, 12, 18, 24 sessions
+  sessionDuration   Int                 @default(60) // minutes per session
+  priceCents        Int                 // one-time payment in cents
+  originalPriceCents Int?               // for showing discounts
+  features          Json?               // array of feature strings
+  curriculum        Json?               // outline of what's covered
+  isFeatured        Boolean             @default(false)
+  isPublished       Boolean             @default(false)
+  orderIndex        Int?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  enrollments       ProgramEnrollment[]
+  courses           ProgramCourse[]     // courses included in this program
+}
+
+model ProgramCourse {
+  id        String  @id @default(cuid())
+  programId String
+  courseId  String
+  orderIndex Int?
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, courseId])
+}
+
+model ProgramEnrollment {
+  id                    String                  @id @default(cuid())
+  programId             String
+  studentProfileId      String
+  parentEmail           String
+  status                ProgramEnrollmentStatus @default(ACTIVE)
+  sessionsCompleted     Int                     @default(0)
+  paidAmountCents       Int
+  stripePaymentIntentId String?                 @unique
+  paymentStatus         PaymentStatus           @default(PENDING)
+  startDate             DateTime?
+  completedAt           DateTime?
+  notes                 String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  program               Program                 @relation(fields: [programId], references: [id])
+  studentProfile        StudentProfile          @relation(fields: [studentProfileId], references: [id])
+
+  @@index([parentEmail])
+  @@index([studentProfileId])
+  @@index([programId])
+}
+
+enum ProgramEnrollmentStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+// =====================================================
+// BLOG SYSTEM
+// =====================================================
+
+model BlogPost {
+  id            String        @id @default(cuid())
+  title         String
+  slug          String        @unique
+  excerpt       String?       // short description for cards
+  content       String        // markdown or rich text content
+  featuredImage String?
+  authorEmail   String
+  authorName    String?
+  authorRole    Role          @default(ADMIN)
+  category      BlogCategory  @default(NEWS)
+  tags          Json?         // array of tag strings
+  isPublished   Boolean       @default(false)
+  isFeatured    Boolean       @default(false)
+  viewCount     Int           @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  comments      Comment[]
+  likes         Like[]
+
+  @@index([authorEmail])
+  @@index([isPublished])
+  @@index([category])
+}
+
+enum BlogCategory {
+  NEWS
+  TUTORIAL
+  STUDENT_SPOTLIGHT
+  PARENT_RESOURCES
+  CODING_TIPS
+  EVENTS
+  ANNOUNCEMENTS
+}
+
+// =====================================================
+// STUDENT PROJECT SHOWCASE
+// =====================================================
+
+model StudentProject {
+  id              String               @id @default(cuid())
+  studentProfileId String
+  title           String
+  description     String
+  githubUrl       String?
+  demoUrl         String?
+  thumbnailUrl    String?
+  videoUrl        String?
+  language        Language?
+  tags            Json?                // array of tag strings
+  isPublished     Boolean              @default(false)
+  isApproved      Boolean              @default(false) // admin approval for public display
+  isFeatured      Boolean              @default(false)
+  viewCount       Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  studentProfile  StudentProfile       @relation(fields: [studentProfileId], references: [id])
+  comments        Comment[]
+  likes           Like[]
+
+  @@index([studentProfileId])
+  @@index([isApproved])
+  @@index([isFeatured])
+}
+
+// =====================================================
+// SOCIAL FEATURES (Comments & Likes)
+// =====================================================
+
+model Comment {
+  id               String          @id @default(cuid())
+  content          String
+  authorEmail      String
+  authorName       String?
+  authorRole       Role
+  blogPostId       String?
+  studentProjectId String?
+  parentCommentId  String?         // for nested replies
+  isApproved       Boolean         @default(true) // moderation
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  blogPost         BlogPost?       @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  studentProject   StudentProject? @relation(fields: [studentProjectId], references: [id], onDelete: Cascade)
+  parentComment    Comment?        @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies          Comment[]       @relation("CommentReplies")
+  likes            Like[]
+
+  @@index([blogPostId])
+  @@index([studentProjectId])
+  @@index([authorEmail])
+  @@index([parentCommentId])
+}
+
+model Like {
+  id               String          @id @default(cuid())
+  userEmail        String
+  blogPostId       String?
+  studentProjectId String?
+  commentId        String?
+  createdAt        DateTime        @default(now())
+  blogPost         BlogPost?       @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  studentProject   StudentProject? @relation(fields: [studentProjectId], references: [id], onDelete: Cascade)
+  comment          Comment?        @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userEmail, blogPostId])
+  @@unique([userEmail, studentProjectId])
+  @@unique([userEmail, commentId])
+  @@index([userEmail])
 }

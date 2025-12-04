@@ -55,8 +55,8 @@ export default function NotFound() {
             {[
               { label: "HTML Course", href: "/courses?language=html" },
               { label: "Python Course", href: "/courses?language=python" },
-              { label: "Playground", href: "/playground" },
-              { label: "Pricing", href: "/pricing" },
+              { label: "Programs", href: "/programs" },
+              { label: "Showcase", href: "/showcase" },
               { label: "Contact Us", href: "/contact" },
             ].map((link) => (
               <Link

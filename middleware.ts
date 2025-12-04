@@ -49,13 +49,6 @@ export default withAuth(
       }
     }
 
-    // Checkout and subscription pages - any authenticated user
-    if (path.startsWith("/checkout") || path.startsWith("/subscription")) {
-      if (!token) {
-        return NextResponse.redirect(new URL("/auth/login", req.url));
-      }
-    }
-
     return NextResponse.next();
   },
   {
@@ -72,7 +65,10 @@ export default withAuth(
           "/auth/forgot-password",
           "/auth/reset-password",
           "/courses",
-          "/pricing",
+          "/programs",
+          "/curriculum",
+          "/blog",
+          "/showcase",
           "/contact",
           "/about",
           "/faq",

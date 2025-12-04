@@ -100,35 +100,6 @@ export const demoCoursesRaw = [
   },
 ];
 
-export const demoSubscriptionsRaw = [
-  {
-    id: "demo-sub-1",
-    parentEmail: "jane.parent@ourcodingkiddos.com",
-    planType: "MONTHLY",
-    status: "ACTIVE",
-    priceCents: 2900,
-    currentPeriodStart: new Date("2024-01-01"),
-    currentPeriodEnd: new Date("2024-12-31"),
-    endDate: null,
-    user: {
-      email: "jane.parent@ourcodingkiddos.com",
-    },
-  },
-  {
-    id: "demo-sub-2",
-    parentEmail: "parent2@ourcodingkiddos.com",
-    planType: "ANNUAL",
-    status: "ACTIVE",
-    priceCents: 29900,
-    currentPeriodStart: new Date("2024-01-01"),
-    currentPeriodEnd: new Date("2025-01-01"),
-    endDate: null,
-    user: {
-      email: "parent2@ourcodingkiddos.com",
-    },
-  },
-];
-
 export const demoParentsRaw = [
   {
     id: "demo-parent-profile-1",

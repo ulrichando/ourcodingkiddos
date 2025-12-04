@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Code2,
-  Palette,
   FileCode,
   Terminal,
-  Gamepad2,
   Play,
   Star,
   Users,
@@ -25,22 +23,24 @@ import {
   Briefcase,
   FileText,
   GraduationCap,
+  BookOpen,
+  Calendar,
 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Learn to Code - Interactive Online Coding Classes for Kids",
-  description: "Fun, interactive coding courses for ages 7-18. Web development, mobile apps, game design, AI & machine learning, engineering, and robotics. Live classes with expert instructors. Start your free trial today!",
+  description: "Fun, interactive coding courses for ages 7-18. Web development, mobile apps, game design, AI & machine learning, engineering, and robotics. Live classes with expert instructors. Get started for free!",
   keywords: ["coding for kids", "programming classes", "learn to code", "kids coding courses", "online coding school", "HTML for kids", "Python for kids", "JavaScript for kids", "Roblox coding", "AI for kids", "robotics for kids", "game development for kids", "mobile app development for kids"],
   openGraph: {
     title: "Our Coding Kiddos - Turn Your Child Into a Future Coder",
-    description: "Fun, interactive coding courses for ages 7-18. From building games in Roblox to creating real websites. Start free trial!",
+    description: "Fun, interactive coding courses for ages 7-18. From building games in Roblox to creating real websites. Get started for free!",
     url: "https://ourcodingkiddos.com",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Our Coding Kiddos - Turn Your Child Into a Future Coder",
-    description: "Fun, interactive coding courses for ages 7-18. Start your free trial today!",
+    description: "Fun, interactive coding courses for ages 7-18. Get started for free!",
   },
 };
 
@@ -98,40 +98,53 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-wrap gap-4 mb-6 justify-center lg:justify-start">
                 <Link
-                  href="/auth/login"
+                  href="/auth/register"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 shadow-lg"
                 >
-                  Start Free Trial <Play className="w-5 h-5" />
+                  Get Started Free <Play className="w-5 h-5" />
                 </Link>
                 <Link
-                  href="/playground"
+                  href="/programs"
                   className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 px-6 py-3 text-slate-800 dark:text-slate-200 font-semibold hover:border-purple-200 dark:hover:border-purple-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
-                  Try Playground
+                  Browse Programs
                 </Link>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-sm text-slate-600 dark:text-slate-400 justify-center lg:justify-start">
                 <span className="inline-flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> No credit card required
+                  <CheckCircle className="w-4 h-4 text-green-500" /> Free account access
                 </span>
                 <span className="inline-flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" /> Cancel anytime
+                  <CheckCircle className="w-4 h-4 text-green-500" /> Pay per program
                 </span>
               </div>
             </div>
-            <div className="relative max-w-md w-full mx-auto lg:mx-0">
+            <div className="relative max-w-lg w-full mx-auto lg:mx-0">
               <div className="absolute -z-10 w-72 sm:w-96 h-72 sm:h-96 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl opacity-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              <div className="relative bg-slate-900 rounded-2xl p-5 sm:p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="h-3 w-3 rounded-full bg-red-400" />
-                  <span className="h-3 w-3 rounded-full bg-yellow-400" />
-                  <span className="h-3 w-3 rounded-full bg-green-400" />
-                </div>
-                <pre className="text-xs sm:text-sm font-mono leading-7 text-white">
+              {/* Kid coding image with code overlay */}
+              <div className="relative">
+                <img
+                  src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop"
+                  alt="Kids learning to code"
+                  className="rounded-2xl shadow-2xl w-full object-cover"
+                />
+                {/* Floating code card */}
+                <div className="absolute -bottom-4 -left-4 bg-slate-900 rounded-xl p-4 shadow-xl transform hover:scale-105 transition duration-300">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="h-2 w-2 rounded-full bg-red-400" />
+                    <span className="h-2 w-2 rounded-full bg-yellow-400" />
+                    <span className="h-2 w-2 rounded-full bg-green-400" />
+                  </div>
+                  <pre className="text-xs font-mono text-green-400">
 {`function sayHello() {
-  console.log("Hello, Coder! 🚀");
+  console.log("Hi! 🚀");
 }`}
-                </pre>
+                  </pre>
+                </div>
+                {/* Fun badge */}
+                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transform rotate-12">
+                  Fun! 🎮
+                </div>
               </div>
             </div>
           </div>
@@ -266,11 +279,13 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="relative">
+            {/* Main image - kid with laptop */}
             <img
-              src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800"
-              alt="Kids coding"
+              src="https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?w=600&h=450&fit=crop"
+              alt="Happy child learning to code on laptop"
               className="rounded-2xl shadow-2xl w-full object-cover"
             />
+            {/* Rating card */}
             <div className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 p-4 flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <Star className="w-6 h-6 text-green-600 dark:text-green-400 fill-green-600 dark:fill-green-400" />
@@ -279,6 +294,10 @@ export default function LandingPage() {
                 <div className="font-bold text-lg text-slate-900 dark:text-slate-100">4.9/5 Rating</div>
                 <div className="text-sm text-slate-500 dark:text-slate-400">From 2,000+ parents</div>
               </div>
+            </div>
+            {/* Fun sticker */}
+            <div className="absolute -top-4 -right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg transform -rotate-6">
+              100% Fun! ✨
             </div>
           </div>
         </div>
@@ -332,79 +351,136 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+      {/* How It Works - Programs */}
+      <section id="how-it-works" className="py-16 px-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
         <div className="max-w-6xl lg:max-w-7xl mx-auto">
           <div className="text-center mb-12 px-2">
             <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
-              Simple Pricing
+              How It Works
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Invest in Your Child's Future</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400">Start with a free trial, upgrade when you're ready</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Simple & Flexible</h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400">Create a free account and pay only for the programs you want</p>
           </div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="relative overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
+              <div className="p-7 space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Users className="w-7 h-7 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">1. Create Free Account</h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">Sign up for free and get access to your parent dashboard. Add your students and explore our courses.</p>
+                </div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl shadow-lg border border-purple-500 shadow-purple-100 dark:shadow-purple-900/20 bg-white dark:bg-slate-800">
+              <div className="h-2 bg-gradient-to-r from-pink-500 to-orange-500" />
+              <div className="p-7 space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                  <BookOpen className="w-7 h-7 text-pink-600 dark:text-pink-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">2. Choose a Program</h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">Browse our structured programs (6, 12, 18, or 24 sessions). Each program includes live classes and project-based learning.</p>
+                </div>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <div className="h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
+              <div className="p-7 space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <Calendar className="w-7 h-7 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">3. Start Learning</h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">Schedule classes, track progress, and watch your child build real coding skills with expert instructors.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-10">
+            <Link
+              href="/programs"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 shadow-lg"
+            >
+              View All Programs <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* One-on-One Classes */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 md:p-12 text-white shadow-2xl">
+            <div className="grid lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <span className="inline-block bg-white/20 px-3 py-1 rounded-full text-xs font-semibold mb-4">
+                  Personalized Learning
+                </span>
+                <h2 className="text-3xl lg:text-4xl font-bold mb-4">1-on-1 Private Classes</h2>
+                <p className="text-white/90 text-lg mb-6">
+                  Want personalized attention for your child? Book private sessions with our expert instructors for customized learning at your own pace.
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Customized curriculum based on your child's interests",
+                    "Flexible scheduling to fit your family's routine",
+                    "Direct feedback and mentorship from instructors",
+                    "Accelerated learning with undivided attention",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-300 flex-shrink-0 mt-0.5" />
+                      <span className="text-white/90">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/dashboard/parent/class-requests"
+                  className="inline-flex items-center gap-2 bg-white text-purple-600 hover:bg-slate-100 font-semibold px-6 py-3 rounded-full"
+                >
+                  Request 1-on-1 Class <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="hidden lg:flex justify-center">
+                <div className="w-64 h-64 rounded-full bg-white/10 flex items-center justify-center">
+                  <div className="w-48 h-48 rounded-full bg-white/10 flex items-center justify-center">
+                    <Users className="w-24 h-24 text-white/80" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Kids Love Coding Gallery */}
+      <section className="py-16 px-4 bg-gradient-to-b from-purple-50 to-pink-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="max-w-6xl lg:max-w-7xl mx-auto">
+          <div className="text-center mb-12 px-2">
+            <span className="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+              Kids Love It! 💖
+            </span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">Watch Them Code & Create</h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400">Our students building amazing projects every day</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              {
-                name: "Free Trial",
-                price: "$0",
-                period: "/7 days",
-                features: ["3 sample lessons", "Code playground access", "Basic support"],
-                cta: "Start Free",
-                popular: false,
-              },
-              {
-                name: "Monthly",
-                price: "$29",
-                period: "/per month",
-                features: ["Unlimited courses", "Live classes included", "Progress tracking", "Certificates", "Priority support"],
-                cta: "Get Started",
-                popular: true,
-              },
-              {
-                name: "Family Plan",
-                price: "$49",
-                period: "/per month",
-                features: ["Up to 3 students", "Everything in Monthly", "Family dashboard", "Sibling discounts"],
-                cta: "Best Value",
-                popular: false,
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative overflow-hidden rounded-2xl shadow-lg border ${
-                  plan.popular ? "border-purple-500 shadow-purple-100 dark:shadow-purple-900/20 scale-[1.02]" : "border-slate-200 dark:border-slate-700"
-                } bg-white dark:bg-slate-800`}
-              >
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-4 py-1 rounded-bl-lg">
-                    MOST POPULAR
-                  </div>
-                )}
-                <div className="p-7 space-y-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{plan.name}</h3>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-slate-900 dark:text-slate-100">{plan.price}</span>
-                      <span className="text-slate-500 dark:text-slate-400">{plan.period}</span>
-                    </div>
-                  </div>
-                  <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-emerald-500" /> {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="/auth/login"
-                    className={`w-full inline-flex justify-center items-center rounded-md px-3 py-2 text-sm font-semibold ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
-                        : "border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
+              { src: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400&h=300&fit=crop", alt: "Kids coding together", label: "Teamwork!" },
+              { src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop", alt: "Child excited about coding", label: "I did it!" },
+              { src: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=300&fit=crop", alt: "Student learning programming", label: "Learning" },
+              { src: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=300&fit=crop", alt: "Young coder at computer", label: "Creating" },
+            ].map((img, i) => (
+              <div key={i} className="relative group overflow-hidden rounded-2xl shadow-lg">
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className="w-full h-48 object-cover group-hover:scale-110 transition duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
+                <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-slate-800/90 px-3 py-1 rounded-full text-sm font-semibold text-slate-800 dark:text-slate-200 opacity-0 group-hover:opacity-100 transition duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  {img.label} ✨
                 </div>
               </div>
             ))}
@@ -429,7 +505,7 @@ export default function LandingPage() {
                     <Star key={idx} className="h-5 w-5 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 italic">"{t.text}"</p>
+                <p className="text-slate-600 dark:text-slate-400 italic">&quot;{t.text}&quot;</p>
                 <p className="font-semibold text-slate-900 dark:text-slate-100">{t.name}</p>
               </div>
             ))}
@@ -442,13 +518,21 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 rounded-3xl p-12 text-white shadow-2xl space-y-4">
             <h2 className="text-3xl lg:text-4xl font-bold">Ready to Start Your Child's Coding Journey?</h2>
-            <p className="text-white/90 text-lg">Join thousands of happy families. No credit card required.</p>
-            <Link
-              href="/auth/login"
-              className="inline-flex items-center gap-2 bg-white text-purple-600 hover:bg-slate-100 font-semibold px-6 py-3 rounded-full"
-            >
-              Start Free Trial <ArrowRight className="w-4 h-4" />
-            </Link>
+            <p className="text-white/90 text-lg">Join thousands of happy families. Create your free account today!</p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2 bg-white text-purple-600 hover:bg-slate-100 font-semibold px-6 py-3 rounded-full"
+              >
+                Get Started Free <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/programs"
+                className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-6 py-3 rounded-full border border-white/30"
+              >
+                Browse Programs
+              </Link>
+            </div>
           </div>
         </div>
       </section>

@@ -26,7 +26,7 @@ type AnalyticsData = {
     totalCourses: number;
     totalLessons: number;
     totalEnrollments: number;
-    activeSubscriptions: number;
+    totalPrograms: number;
     totalRevenue: number;
     totalBadgesAwarded: number;
     totalXpEarned: number;
@@ -34,7 +34,6 @@ type AnalyticsData = {
     completionRate: number;
     avgQuizScore: number;
     totalCertificates: number;
-    churnRate: number;
   };
   activity: {
     newUsers: number;
@@ -127,7 +126,7 @@ export default function AdminReportsPage() {
         {
           title: "Total Revenue",
           value: formatCurrency(analytics.overview.totalRevenue),
-          change: `${analytics.overview.activeSubscriptions} active subs`,
+          change: `${analytics.overview.totalPrograms} programs`,
           trend: analytics.overview.totalRevenue > 0 ? "up" : "neutral",
           icon: DollarSign,
           color: "from-green-500 to-emerald-500",
@@ -185,8 +184,7 @@ export default function AdminReportsPage() {
           category: "Revenue Analytics",
           metrics: [
             { label: "Total Revenue", value: formatCurrency(analytics.overview.totalRevenue), change: "--" },
-            { label: "Active Subscriptions", value: formatNumber(analytics.overview.activeSubscriptions), change: "--" },
-            { label: "Churn Rate", value: `${analytics.overview.churnRate}%`, change: "--" },
+            { label: "Total Programs", value: formatNumber(analytics.overview.totalPrograms), change: "--" },
             { label: "Certificates Issued", value: formatNumber(analytics.overview.totalCertificates), change: "--" },
             { label: "Avg Quiz Score", value: analytics.overview.avgQuizScore > 0 ? `${Math.round(analytics.overview.avgQuizScore)}%` : "N/A", change: "--" },
           ],

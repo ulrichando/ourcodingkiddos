@@ -8,7 +8,6 @@ import {
   demoUsersRaw,
   demoStudentsRaw,
   demoCoursesRaw,
-  demoSubscriptionsRaw,
   demoParentsRaw,
 } from "../../../lib/demo-data";
 
@@ -53,12 +52,12 @@ export default async function AdminDashboardPage() {
   let usersRaw: any[] = [];
   let studentsRaw: any[] = [];
   let coursesRaw: any[] = [];
-  let subscriptionsRaw: any[] = [];
   let parentsRaw: any[] = [];
+  let programsCount = 0;
 
   if (hasDbUrl) {
     try {
-      [usersRaw, studentsRaw, coursesRaw, subscriptionsRaw, parentsRaw] = await Promise.all([
+      [usersRaw, studentsRaw, coursesRaw, parentsRaw, programsCount] = await Promise.all([
         prisma.user.findMany({
           orderBy: { createdAt: "desc" },
           select: { id: true, name: true, email: true, role: true, createdAt: true },
@@ -81,10 +80,6 @@ export default async function AdminDashboardPage() {
           orderBy: { title: "asc" },
           select: { id: true, title: true, language: true, level: true, ageGroup: true, isPublished: true },
         }),
-        prisma.subscription.findMany({
-          orderBy: { currentPeriodStart: "desc" },
-          include: { user: { select: { email: true } } },
-        }),
         prisma.parentProfile.findMany({
           orderBy: { user: { createdAt: "desc" } },
           select: {
@@ -95,6 +90,7 @@ export default async function AdminDashboardPage() {
             _count: { select: { children: true } },
           },
         }),
+        prisma.program.count(),
       ]);
     } catch (error) {
       console.error("Admin dashboard data load failed; falling back to demo data", error);
@@ -103,8 +99,8 @@ export default async function AdminDashboardPage() {
       usersRaw = demoUsersRaw;
       studentsRaw = demoStudentsRaw;
       coursesRaw = demoCoursesRaw;
-      subscriptionsRaw = demoSubscriptionsRaw;
       parentsRaw = demoParentsRaw;
+      programsCount = 0;
     }
   } else {
     warning = "DATABASE_URL is not set. Showing demo admin data instead.";
@@ -142,15 +138,6 @@ export default async function AdminDashboardPage() {
     status: c.isPublished ? "Published" : "Draft",
   }));
 
-  const subscriptions = subscriptionsRaw.map((s) => ({
-    id: s.id,
-    parentEmail: s.parentEmail || s.user.email || "N/A",
-    plan: s.planType ? toTitle(s.planType) : "N/A",
-    status: s.status.toLowerCase(),
-    price: typeof s.priceCents === "number" ? `$${(s.priceCents / 100).toFixed(0)}/mo` : "$0/mo",
-    endDate: formatDate(s.endDate ?? s.currentPeriodEnd ?? null),
-  }));
-
   const parents = parentsRaw.map((p) => ({
     id: p.id,
     name: p.user?.name || "Parent",
@@ -161,13 +148,12 @@ export default async function AdminDashboardPage() {
   }));
 
   const studentCount = students.length > 0 ? students.length : users.filter((u) => u.type === "student").length;
-  const activeSubsCount = subscriptions.filter((s) => s.status === "active").length;
 
   const stats = {
     totalParents: users.filter((u) => u.type === "parent").length,
     totalStudents: studentCount,
     instructors: users.filter((u) => u.type === "instructor").length,
-    activeSubs: activeSubsCount,
+    programs: programsCount,
   };
 
   return (

@@ -400,12 +400,12 @@ export default function FAQPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400">Explore our full catalog</p>
           </Link>
           <Link
-            href="/pricing"
+            href="/programs"
             className="p-6 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl hover:border-purple-300 dark:hover:border-purple-500/30 transition group"
           >
             <CreditCard className="w-8 h-8 text-emerald-600 dark:text-emerald-400 mb-3" />
-            <h3 className="font-semibold mb-1">View Pricing</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">See plans & pricing</p>
+            <h3 className="font-semibold mb-1">View Programs</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">See our coding programs</p>
           </Link>
           <Link
             href="/about"

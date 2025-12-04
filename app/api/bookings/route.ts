@@ -4,7 +4,6 @@ import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
 import { logCreate } from "../../../lib/audit";
-import { isSubscriptionValid } from "../../../lib/subscription";
 
 const bookingSchema = z.object({
   instructorId: z.string(),
@@ -64,61 +63,6 @@ export async function POST(request: Request) {
   const parsed = bookingSchema.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json({ status: "error", errors: parsed.error.flatten() }, { status: 400 });
-  }
-
-  // Check subscription status for students and parents (admins, instructors, and demo accounts bypass this check)
-  const role = (session.user as any).role;
-  const userEmail = session.user.email;
-
-  // Check if this is an official demo account
-  const DEMO_ACCOUNTS = ["demo.parent@example.com", "demo.instructor@example.com", "demo.student@example.com"];
-  const isDemoAccount = DEMO_ACCOUNTS.includes(userEmail?.toLowerCase() || "");
-
-  if ((role === "STUDENT" || role === "PARENT") && !isDemoAccount) {
-    // For students, check their parent's subscription via parentEmail in studentProfile
-    // For parents, check their own subscription
-    let checkEmail = userEmail;
-
-    if (role === "STUDENT") {
-      const studentProfile = await prisma.studentProfile.findFirst({
-        where: { userId: (session.user as any).id },
-        select: { parentEmail: true },
-      });
-      checkEmail = studentProfile?.parentEmail || userEmail;
-    }
-
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        OR: [
-          { user: { email: checkEmail } },
-          { parentEmail: checkEmail },
-        ],
-      },
-      orderBy: { currentPeriodEnd: "desc" },
-      select: {
-        status: true,
-        planType: true,
-        endDate: true,
-        currentPeriodEnd: true,
-        trialEndsAt: true,
-      },
-    });
-
-    if (!isSubscriptionValid(subscription)) {
-      const status = subscription?.status?.toUpperCase();
-      let errorMessage = "Active subscription required. Please start your free trial or upgrade your plan to book classes.";
-
-      if (status === "PAST_DUE" || status === "UNPAID") {
-        errorMessage = "Your payment has failed. Please update your payment method to continue booking classes.";
-      } else if (status === "CANCELED") {
-        errorMessage = "Your subscription has been canceled. Please resubscribe to book classes.";
-      }
-
-      return NextResponse.json(
-        { status: "error", message: errorMessage },
-        { status: 403 }
-      );
-    }
   }
 
   const payload = parsed.data;

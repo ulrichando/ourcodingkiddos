@@ -34,28 +34,9 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdate(subscription);
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription);
-        break;
-      }
-
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice;
-        await handleInvoicePaymentSucceeded(invoice);
-        break;
-      }
-
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice;
-        await handleInvoicePaymentFailed(invoice);
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        await handlePaymentIntentSucceeded(paymentIntent);
         break;
       }
 
@@ -74,9 +55,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const userId = session.metadata?.userId || session.client_reference_id;
-
-  // Check if this is a 1-on-1 class payment
+  // Handle 1-on-1 class payment
   if (session.metadata?.type === 'one-on-one-class') {
     const classRequestId = session.metadata.classRequestId;
     if (classRequestId) {
@@ -93,176 +72,59 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  if (!userId) {
-    console.error('No userId in checkout session metadata');
-    return;
-  }
+  // Handle program enrollment payment
+  if (session.metadata?.type === 'program_enrollment') {
+    const programId = session.metadata.programId;
+    const studentProfileId = session.metadata.studentProfileId;
+    const paymentIntentId = session.payment_intent as string;
 
-  // Get the subscription from the session
-  if (session.subscription) {
-    const subscription = await stripe.subscriptions.retrieve(
-      session.subscription as string
-    );
-    await handleSubscriptionUpdate(subscription);
-  }
-}
-
-async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata.userId;
-
-  if (!userId) {
-    console.error('No userId in subscription metadata');
-    return;
-  }
-
-  const priceId = subscription.items.data[0]?.price.id;
-  const planId = subscription.metadata.planId;
-
-  // Determine subscription status
-  let status: 'ACTIVE' | 'TRIALING' | 'PAST_DUE' | 'CANCELED' | 'INCOMPLETE' | 'INCOMPLETE_EXPIRED' | 'UNPAID' = 'ACTIVE';
-
-  switch (subscription.status) {
-    case 'active':
-      status = 'ACTIVE';
-      break;
-    case 'trialing':
-      status = 'TRIALING';
-      break;
-    case 'past_due':
-      status = 'PAST_DUE';
-      break;
-    case 'canceled':
-      status = 'CANCELED';
-      break;
-    case 'incomplete':
-      status = 'INCOMPLETE';
-      break;
-    case 'incomplete_expired':
-      status = 'INCOMPLETE_EXPIRED';
-      break;
-    case 'unpaid':
-      status = 'UNPAID';
-      break;
-  }
-
-  // Get current period dates from the subscription
-  // Use type assertion as these properties exist on the Stripe API response
-  const stripeSubscription = subscription as Stripe.Subscription & {
-    current_period_start?: number;
-    current_period_end?: number;
-  };
-  const currentPeriodStart = stripeSubscription.current_period_start
-    ? new Date(stripeSubscription.current_period_start * 1000)
-    : new Date();
-  const currentPeriodEnd = stripeSubscription.current_period_end
-    ? new Date(stripeSubscription.current_period_end * 1000)
-    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days from now
-
-  // Get trial end date for free trial plans
-  const trialEndsAt = subscription.trial_end
-    ? new Date(subscription.trial_end * 1000)
-    : null;
-
-  // Determine planType from metadata or default
-  let planType: 'FREE_TRIAL' | 'MONTHLY' | 'ANNUAL' | 'FAMILY' = 'MONTHLY';
-  if (planId) {
-    const normalizedPlanId = planId.toUpperCase().replace('-', '_');
-    if (normalizedPlanId === 'FREE_TRIAL' || normalizedPlanId === 'FREE-TRIAL') {
-      planType = 'FREE_TRIAL';
-    } else if (normalizedPlanId === 'FAMILY') {
-      planType = 'FAMILY';
-    } else if (normalizedPlanId === 'ANNUAL') {
-      planType = 'ANNUAL';
-    } else {
-      planType = 'MONTHLY';
+    if (programId && studentProfileId) {
+      // Update the program enrollment payment status
+      await prisma.programEnrollment.updateMany({
+        where: {
+          programId,
+          studentProfileId,
+          paymentStatus: 'PENDING',
+        },
+        data: {
+          paymentStatus: 'SUCCEEDED',
+          stripePaymentIntentId: paymentIntentId,
+          status: 'ACTIVE',
+          startDate: new Date(),
+        },
+      });
+      console.log(`Program enrollment payment completed for program ${programId}, student ${studentProfileId}`);
     }
-  } else if (subscription.status === 'trialing') {
-    planType = 'FREE_TRIAL';
+    return;
   }
 
-  // Set startDate and endDate for subscription tracking
-  // - startDate: when the subscription started
-  // - endDate: when access should end (trial end for free trial, period end for paid)
-  const startDate = currentPeriodStart;
-  const endDate = planType === 'FREE_TRIAL' && trialEndsAt ? trialEndsAt : currentPeriodEnd;
-
-  // Get user's email for parentEmail field
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { email: true },
-  });
-
-  // Upsert subscription in database
-  await prisma.subscription.upsert({
-    where: {
-      stripeSubscriptionId: subscription.id,
-    },
-    update: {
-      status,
-      currentPeriodStart,
-      currentPeriodEnd,
-      startDate,
-      endDate,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      canceledAt: subscription.canceled_at
-        ? new Date(subscription.canceled_at * 1000)
-        : null,
-      trialEndsAt,
-    },
-    create: {
-      userId,
-      stripeSubscriptionId: subscription.id,
-      stripeCustomerId: subscription.customer as string,
-      priceId,
-      planType,
-      status,
-      currentPeriodStart,
-      currentPeriodEnd,
-      startDate,
-      endDate,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      trialEndsAt,
-      parentEmail: user?.email || null,
-    },
-  });
-
-  console.log(`Subscription ${subscription.id} updated for user ${userId} - Status: ${status}, Plan: ${planType}, Ends: ${endDate.toISOString()}`);
+  console.log('Checkout session completed:', session.id);
 }
 
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  await prisma.subscription.updateMany({
-    where: {
-      stripeSubscriptionId: subscription.id,
-    },
-    data: {
-      status: 'CANCELED',
-      canceledAt: new Date(),
-    },
-  });
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  // Handle program enrollment payment intent
+  if (paymentIntent.metadata?.type === 'program_enrollment') {
+    const programId = paymentIntent.metadata.programId;
+    const studentProfileId = paymentIntent.metadata.studentProfileId;
 
-  console.log(`Subscription ${subscription.id} deleted`);
-}
+    if (programId && studentProfileId) {
+      await prisma.programEnrollment.updateMany({
+        where: {
+          programId,
+          studentProfileId,
+          paymentStatus: 'PENDING',
+        },
+        data: {
+          paymentStatus: 'SUCCEEDED',
+          stripePaymentIntentId: paymentIntent.id,
+          status: 'ACTIVE',
+          startDate: new Date(),
+        },
+      });
+      console.log(`Program payment intent succeeded for program ${programId}, student ${studentProfileId}`);
+    }
+    return;
+  }
 
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  const subscriptionId = (invoice as any).subscription;
-  if (!subscriptionId) return;
-
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
-  await handleSubscriptionUpdate(subscription);
-}
-
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = (invoice as any).subscription;
-  if (!subscriptionId) return;
-
-  await prisma.subscription.updateMany({
-    where: {
-      stripeSubscriptionId: subscriptionId as string,
-    },
-    data: {
-      status: 'PAST_DUE',
-    },
-  });
-
-  console.log(`Payment failed for subscription ${subscriptionId}`);
+  console.log('Payment intent succeeded:', paymentIntent.id);
 }

@@ -7,13 +7,14 @@ import { Loader2, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
 
 type FinanceData = {
   stats: {
-    mrr: number;
+    totalRevenue: number;
     arpu: number;
     refunds: number;
-    churnRate: number;
-    activeSubscriptions: number;
+    totalProgramEnrollments: number;
+    payingUsers: number;
     monthlyRevenue: number;
     revenueGrowth: number;
+    totalPayments: number;
   };
   invoices: Array<{
     id: string;
@@ -21,10 +22,6 @@ type FinanceData = {
     amount: string;
     status: string;
     date: string;
-  }>;
-  subscriptionsByPlan: Array<{
-    planType: string;
-    count: number;
   }>;
   revenueTrend: Array<{
     month: string;
@@ -63,20 +60,12 @@ export default function AdminFinancePage() {
 
   const financeStats: { label: string; value: string; sublabel: string; accent: "purple" | "orange" | "green" | "blue" }[] = finance
     ? [
-        { label: "MRR", value: `$${finance.stats.mrr.toLocaleString()}`, sublabel: "Monthly recurring revenue", accent: "green" },
+        { label: "Total Revenue", value: `$${finance.stats.totalRevenue.toLocaleString()}`, sublabel: "All time", accent: "green" },
         { label: "ARPU", value: `$${finance.stats.arpu.toLocaleString()}`, sublabel: "Avg revenue per user", accent: "blue" },
         { label: "Refunds", value: `$${finance.stats.refunds.toLocaleString()}`, sublabel: "Last 30 days", accent: "orange" },
-        { label: "Churn", value: `${finance.stats.churnRate}%`, sublabel: "Rolling 30d", accent: "purple" },
+        { label: "Program Enrollments", value: `${finance.stats.totalProgramEnrollments}`, sublabel: "Total enrollments", accent: "purple" },
       ]
     : [];
-
-  const planTypeLabels: Record<string, string> = {
-    FREE_TRIAL: "Free Trial",
-    MONTHLY: "Monthly",
-    ANNUAL: "Annual",
-    FAMILY: "Family",
-    UNKNOWN: "Unknown",
-  };
 
   if (loading) {
     return (
@@ -99,7 +88,7 @@ export default function AdminFinancePage() {
             <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Finance</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Financial Overview</h1>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              Monitor revenue, subscriptions, and financial metrics
+              Monitor revenue from program enrollments and 1-on-1 classes
             </p>
           </div>
           <button
@@ -118,7 +107,7 @@ export default function AdminFinancePage() {
           ))}
         </div>
 
-        {/* Revenue Growth & Active Subscriptions */}
+        {/* Revenue Growth & Payments by Type */}
         {finance && (
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
@@ -154,27 +143,34 @@ export default function AdminFinancePage() {
 
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
-                Subscriptions by Plan
+                Payment Summary
               </h2>
-              {finance.subscriptionsByPlan.length > 0 ? (
-                <div className="space-y-2">
-                  {finance.subscriptionsByPlan.map((plan) => (
-                    <div
-                      key={plan.planType}
-                      className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
-                    >
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        {planTypeLabels[plan.planType] || plan.planType}
-                      </span>
-                      <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
-                        {plan.count}
-                      </span>
-                    </div>
-                  ))}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Total Successful Payments
+                  </span>
+                  <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                    {finance.stats.totalPayments}
+                  </span>
                 </div>
-              ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400">No active subscriptions</p>
-              )}
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Paying Users
+                  </span>
+                  <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                    {finance.stats.payingUsers}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Program Enrollments
+                  </span>
+                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {finance.stats.totalProgramEnrollments}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}

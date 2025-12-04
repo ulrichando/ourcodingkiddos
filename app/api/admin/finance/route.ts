@@ -19,30 +19,6 @@ export async function GET() {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    // Get active subscriptions for MRR calculation
-    const activeSubscriptions = await prisma.subscription.findMany({
-      where: {
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
-      select: {
-        priceCents: true,
-        planType: true,
-      },
-    });
-
-    // Calculate MRR (Monthly Recurring Revenue)
-    let mrr = 0;
-    activeSubscriptions.forEach((sub) => {
-      if (sub.priceCents) {
-        // If annual plan, divide by 12 for monthly
-        if (sub.planType === "ANNUAL") {
-          mrr += sub.priceCents / 12;
-        } else {
-          mrr += sub.priceCents;
-        }
-      }
-    });
-
     // Get total revenue this month
     const monthlyRevenue = await prisma.payment.aggregate({
       where: {
@@ -64,25 +40,25 @@ export async function GET() {
       _sum: { amount: true },
     });
 
-    // Get total paying users
-    const payingUsers = await prisma.subscription.findMany({
-      where: {
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
+    // Get total revenue all time
+    const totalRevenue = await prisma.payment.aggregate({
+      where: { status: "SUCCEEDED" },
+      _sum: { amount: true },
+    });
+
+    // Get total paying users (unique users with successful payments)
+    const payingUsers = await prisma.payment.findMany({
+      where: { status: "SUCCEEDED" },
       select: { userId: true },
       distinct: ["userId"],
     });
 
     // Calculate ARPU (Average Revenue Per User)
-    const totalRevenue = await prisma.payment.aggregate({
-      where: { status: "SUCCEEDED" },
-      _sum: { amount: true },
-    });
     const arpu = payingUsers.length > 0
       ? Math.round((totalRevenue._sum.amount || 0) / payingUsers.length)
       : 0;
 
-    // Get refunds (last 30 days) - check for failed/canceled payments
+    // Get refunds (last 30 days) - check for refunded payments
     const refundedPayments = await prisma.payment.aggregate({
       where: {
         status: "CANCELED",
@@ -91,30 +67,8 @@ export async function GET() {
       _sum: { amount: true },
     });
 
-    // Calculate churn rate
-    const canceledThisMonth = await prisma.subscription.count({
-      where: {
-        status: "CANCELED",
-        canceledAt: { gte: startOfMonth },
-      },
-    });
-
-    const totalSubsStartOfMonth = await prisma.subscription.count({
-      where: {
-        startDate: { lt: startOfMonth },
-        OR: [
-          { status: { in: ["ACTIVE", "TRIALING"] } },
-          {
-            status: "CANCELED",
-            canceledAt: { gte: startOfMonth },
-          },
-        ],
-      },
-    });
-
-    const churnRate = totalSubsStartOfMonth > 0
-      ? Math.round((canceledThisMonth / totalSubsStartOfMonth) * 100)
-      : 0;
+    // Get program enrollment count
+    const totalProgramEnrollments = await prisma.programEnrollment.count();
 
     // Get recent invoices from Stripe
     let recentInvoices: any[] = [];
@@ -153,13 +107,9 @@ export async function GET() {
       }));
     }
 
-    // Subscription breakdown by plan type
-    const subscriptionsByPlan = await prisma.subscription.groupBy({
-      by: ["planType"],
-      where: {
-        status: { in: ["ACTIVE", "TRIALING"] },
-      },
-      _count: true,
+    // Get payment count by status
+    const totalPayments = await prisma.payment.count({
+      where: { status: "SUCCEEDED" },
     });
 
     // Revenue trend (last 6 months)
@@ -185,19 +135,16 @@ export async function GET() {
 
     return NextResponse.json({
       stats: {
-        mrr: Math.round(mrr / 100), // Convert cents to dollars
+        totalRevenue: Math.round((totalRevenue._sum.amount || 0) / 100),
         arpu: Math.round(arpu / 100),
         refunds: Math.round((refundedPayments._sum.amount || 0) / 100),
-        churnRate,
-        activeSubscriptions: activeSubscriptions.length,
+        totalProgramEnrollments,
+        payingUsers: payingUsers.length,
         monthlyRevenue: Math.round(currentMonthRev / 100),
         revenueGrowth,
+        totalPayments,
       },
       invoices: recentInvoices,
-      subscriptionsByPlan: subscriptionsByPlan.map((p) => ({
-        planType: p.planType || "UNKNOWN",
-        count: p._count,
-      })),
       revenueTrend: revenueTrend.map((row) => ({
         month: row.month,
         revenue: Math.round(Number(row.revenue) / 100),

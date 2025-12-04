@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ChangeEvent } from "react";
 import Link from "next/link";
-import { Shield, Users, GraduationCap, BookOpen, DollarSign, Search, LogOut, Loader2 } from "lucide-react";
+import { Shield, Users, GraduationCap, BookOpen, Search, LogOut, Loader2 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import Button from "../ui/button";
 import Input from "../ui/input";
@@ -13,18 +13,16 @@ import { Modal } from "../ui/modal";
 type UserRow = { id: string; name: string; email: string; type: string; joined: string };
 type StudentRow = { id: string; name: string; username: string; age: string; parentEmail: string; xp: number; level: number };
 type CourseRow = { id: string; title: string; language: string; level: string; ageGroup: string; status: string };
-type SubscriptionRow = { id: string; parentEmail: string; plan: string; status: string; price: string; endDate: string };
 type ParentRow = { id: string; name: string; email: string; phone: string; address: string; childrenCount: number };
 
 type Props = {
   userEmail?: string | null;
   warning?: string | null;
-  stats: { totalParents: number; totalStudents: number; instructors: number; activeSubs: number };
+  stats: { totalParents: number; totalStudents: number; instructors: number };
   parents: ParentRow[];
   users: UserRow[];
   students: StudentRow[];
   courses: CourseRow[];
-  subscriptions: SubscriptionRow[];
 };
 
 const tabs = [
@@ -33,7 +31,6 @@ const tabs = [
   { key: "students", label: "Students", icon: GraduationCap },
   { key: "instructors", label: "Instructors", icon: Users },
   { key: "courses", label: "Courses", icon: BookOpen },
-  { key: "subscriptions", label: "Subscriptions", icon: DollarSign },
 ] as const;
 
 export default function AdminDashboardShell({
@@ -44,21 +41,16 @@ export default function AdminDashboardShell({
   users,
   students,
   courses,
-  subscriptions,
 }: Props) {
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]["key"]>("users");
   const [search, setSearch] = useState("");
   const [userRows, setUserRows] = useState(users);
-  const [subscriptionRows, setSubscriptionRows] = useState(subscriptions);
   const [editUserId, setEditUserId] = useState<string | null>(null);
   const [editUserName, setEditUserName] = useState("");
   const [editUserEmail, setEditUserEmail] = useState("");
   const [editUserRole, setEditUserRole] = useState("student");
   const [editUserPassword, setEditUserPassword] = useState("");
   const [userModalMode, setUserModalMode] = useState<"create" | "edit">("edit");
-  const [editSubId, setEditSubId] = useState<string | null>(null);
-  const [editSubPlan, setEditSubPlan] = useState("monthly");
-  const [editSubStatus, setEditSubStatus] = useState("active");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,20 +84,6 @@ export default function AdminDashboardShell({
             childrenCount: 0,
           }));
 
-  const displaySubscriptions: SubscriptionRow[] =
-    subscriptionRows.length > 0
-      ? subscriptionRows
-      : [
-          {
-            id: "demo-sub",
-            parentEmail: "demo.parent@ourcodingkiddos.com",
-            plan: "Monthly",
-            status: "active",
-            price: "$29/mo",
-            endDate: "—",
-          },
-        ];
-
   const derivedStats = useMemo(() => {
     const parentCount = Math.max(stats.totalParents ?? 0, displayParents.length);
     const studentCount = Math.max(stats.totalStudents ?? 0, displayStudents.length);
@@ -113,9 +91,8 @@ export default function AdminDashboardShell({
       stats.instructors ?? 0,
       userRows.filter((u) => u.type === "instructor").length
     );
-    const subsCount = Math.max(stats.activeSubs ?? 0, displaySubscriptions.length);
-    return { parentCount, studentCount, instructorCount, subsCount };
-  }, [stats, displayParents.length, displayStudents.length, displaySubscriptions.length, userRows]);
+    return { parentCount, studentCount, instructorCount };
+  }, [stats, displayParents.length, displayStudents.length, userRows]);
 
   const filteredUsers = useMemo(() => {
     const term = search.toLowerCase();
@@ -242,62 +219,6 @@ export default function AdminDashboardShell({
     }
   }
 
-  function openSubModal(id: string) {
-    const sub = subscriptionRows.find((s) => s.id === id);
-    if (!sub) return;
-    setEditSubId(id);
-    setEditSubPlan(sub.plan?.toLowerCase() ?? "monthly");
-    setEditSubStatus(sub.status ?? "active");
-    setError(null);
-  }
-
-  async function saveSub() {
-    if (!editSubId) return;
-    setIsLoading(true);
-    setError(null);
-    const prev = subscriptionRows;
-    setSubscriptionRows((rows) => rows.map((r) => (r.id === editSubId ? { ...r, plan: editSubPlan, status: editSubStatus } : r)));
-    try {
-      const res = await fetch(`/api/admin/subscriptions/${editSubId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: editSubPlan.toUpperCase(), status: editSubStatus.toUpperCase() }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setError(err.error || "Failed to update subscription");
-        setSubscriptionRows(prev);
-        return;
-      }
-      setEditSubId(null);
-    } catch (err) {
-      setError("An unexpected error occurred");
-      setSubscriptionRows(prev);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleSubCancel(id: string) {
-    if (!confirm("Cancel this subscription?")) return;
-    setIsLoading(true);
-    const prev = subscriptionRows;
-    setSubscriptionRows((rows) => rows.map((r) => (r.id === id ? { ...r, status: "cancelled" } : r)));
-    try {
-      const res = await fetch(`/api/admin/subscriptions/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setError(err.error || "Failed to cancel subscription");
-        setSubscriptionRows(prev);
-      }
-    } catch (err) {
-      setError("An unexpected error occurred");
-      setSubscriptionRows(prev);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
     <>
       <main className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
@@ -334,12 +255,11 @@ export default function AdminDashboardShell({
         )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { label: "Total Parents", value: derivedStats.parentCount, icon: Users, color: "from-sky-500 to-cyan-500" },
               { label: "Total Students", value: derivedStats.studentCount, icon: GraduationCap, color: "from-pink-500 to-purple-500" },
               { label: "Instructors", value: derivedStats.instructorCount, icon: Users, color: "from-emerald-500 to-green-600" },
-              { label: "Active Subs", value: derivedStats.subsCount, icon: DollarSign, color: "from-amber-500 to-orange-500" },
             ].map((stat) => (
               <Card key={stat.label} className="border-slate-200 dark:border-slate-700">
                 <CardContent className="p-5 flex items-center gap-4">
@@ -810,113 +730,6 @@ export default function AdminDashboardShell({
             </Card>
           )}
 
-          {activeTab === "subscriptions" && (
-            <Card className="border-slate-200 dark:border-slate-700">
-              <CardContent className="p-6 space-y-4">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">All Subscriptions</h2>
-
-                {/* Desktop table view */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="min-w-full text-sm" role="table">
-                    <thead>
-                      <tr className="text-slate-600 dark:text-slate-400 text-left border-b border-slate-200 dark:border-slate-700">
-                        <th scope="col" className="py-3 font-medium">Parent Email</th>
-                        <th scope="col" className="py-3 font-medium">Plan</th>
-                        <th scope="col" className="py-3 font-medium">Status</th>
-                        <th scope="col" className="py-3 font-medium">Price</th>
-                        <th scope="col" className="py-3 font-medium">End Date</th>
-                        <th className="py-3 font-medium text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {displaySubscriptions.map((s) => (
-                        <tr key={s.id} className="border-b border-slate-200 dark:border-slate-700">
-                          <td className="py-3 text-slate-700 dark:text-slate-300">{s.parentEmail}</td>
-                          <td className="py-3 text-slate-700 dark:text-slate-300">{s.plan}</td>
-                          <td className="py-3">
-                            <Badge className={s.status === "active" ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300"}>
-                              {s.status}
-                            </Badge>
-                          </td>
-                          <td className="py-3 text-slate-700 dark:text-slate-300">{s.price}</td>
-                          <td className="py-3 text-slate-700 dark:text-slate-300">{s.endDate}</td>
-                          <td className="py-3 text-right space-x-2">
-                            <button
-                              onClick={() => openSubModal(s.id)}
-                              className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 text-sm inline-flex items-center gap-1"
-                            >
-                              Change
-                            </button>
-                            <button
-                              onClick={() => handleSubCancel(s.id)}
-                              className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-200 text-sm inline-flex items-center gap-1"
-                            >
-                              Cancel
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                      {displaySubscriptions.length === 0 && (
-                        <tr>
-                          <td className="py-4 text-slate-500 dark:text-slate-400" colSpan={6}>
-                            No subscriptions found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile card view */}
-                <div className="md:hidden space-y-3">
-                  {displaySubscriptions.map((s) => (
-                    <div key={s.id} className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">Parent</div>
-                          <p className="font-medium text-slate-900 dark:text-slate-100 text-sm break-all">{s.parentEmail}</p>
-                        </div>
-                        <Badge className={s.status === "active" ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300"}>
-                          {s.status}
-                        </Badge>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">Plan</div>
-                          <div className="font-medium text-slate-900 dark:text-slate-100">{s.plan}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">Price</div>
-                          <div className="font-medium text-slate-900 dark:text-slate-100">{s.price}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">Ends</div>
-                          <div className="font-medium text-slate-900 dark:text-slate-100">{s.endDate}</div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <button
-                          onClick={() => openSubModal(s.id)}
-                          className="flex-1 px-4 py-2.5 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 font-medium text-sm transition-colors"
-                        >
-                          Change
-                        </button>
-                        <button
-                          onClick={() => handleSubCancel(s.id)}
-                          className="flex-1 px-4 py-2.5 rounded-lg bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-900/50 font-medium text-sm transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {displaySubscriptions.length === 0 && (
-                    <p className="py-8 text-center text-slate-500 dark:text-slate-400">No subscriptions found.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </main>
 
@@ -1007,71 +820,6 @@ export default function AdminDashboardShell({
         </div>
       </Modal>
 
-      {/* Edit Subscription Modal */}
-      <Modal
-        isOpen={!!editSubId}
-        onClose={() => setEditSubId(null)}
-        title="Edit Subscription"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setEditSubId(null)} className="text-slate-700 dark:text-slate-300" disabled={isLoading}>
-              Cancel
-            </Button>
-            <Button onClick={saveSub} className="bg-purple-600 hover:bg-purple-700 text-white" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-3">
-          {error && (
-            <div className="rounded-lg bg-red-100 dark:bg-red-500/10 border border-red-300 dark:border-red-500/30 text-red-900 dark:text-red-200 px-4 py-3 text-sm" role="alert">
-              {error}
-            </div>
-          )}
-          <div>
-            <label htmlFor="sub-plan" className="text-sm text-slate-700 dark:text-slate-300 block mb-1">
-              Plan
-            </label>
-            <select
-              id="sub-plan"
-              value={editSubPlan}
-              onChange={(e) => setEditSubPlan(e.target.value)}
-              className="w-full rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2"
-              disabled={isLoading}
-            >
-              <option value="free_trial">Free Trial</option>
-              <option value="monthly">Monthly</option>
-              <option value="annual">Annual</option>
-              <option value="family">Family</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="sub-status" className="text-sm text-slate-700 dark:text-slate-300 block mb-1">
-              Status
-            </label>
-            <select
-              id="sub-status"
-              value={editSubStatus}
-              onChange={(e) => setEditSubStatus(e.target.value)}
-              className="w-full rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 px-3 py-2"
-              disabled={isLoading}
-            >
-              <option value="active">Active</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="expired">Expired</option>
-              <option value="past_due">Past Due</option>
-            </select>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 }

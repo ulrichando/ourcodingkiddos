@@ -19,7 +19,7 @@ export async function GET() {
       totalCourses,
       totalLessons,
       totalEnrollments,
-      activeSubscriptions,
+      totalPrograms,
       totalRevenue,
     ] = await Promise.all([
       prisma.user.count(),
@@ -29,7 +29,7 @@ export async function GET() {
       prisma.course.count(),
       prisma.lesson.count(),
       prisma.enrollment.count(),
-      prisma.subscription.count({ where: { status: "ACTIVE" } }),
+      prisma.program.count(),
       prisma.payment.aggregate({
         where: { status: "SUCCEEDED" },
         _sum: { amount: true }
@@ -72,7 +72,6 @@ export async function GET() {
       completedLessons,
       avgQuizScoreResult,
       totalCertificates,
-      canceledSubscriptions,
     ] = await Promise.all([
       prisma.userBadge.count(),
       prisma.studentProfile.aggregate({
@@ -86,21 +85,12 @@ export async function GET() {
         _avg: { quizScore: true }
       }),
       prisma.certificate.count(),
-      prisma.subscription.count({
-        where: { status: "CANCELED" }
-      }),
     ]);
 
     // Calculate completion rate
     const totalProgressRecords = await prisma.progress.count();
     const completionRate = totalProgressRecords > 0
       ? Math.round((completedLessons / totalProgressRecords) * 100)
-      : 0;
-
-    // Calculate churn rate
-    const totalSubsEver = await prisma.subscription.count();
-    const churnRate = totalSubsEver > 0
-      ? Math.round((canceledSubscriptions / totalSubsEver) * 100)
       : 0;
 
     // Get top courses by enrollment
@@ -165,7 +155,7 @@ export async function GET() {
         totalCourses,
         totalLessons,
         totalEnrollments,
-        activeSubscriptions,
+        totalPrograms,
         totalRevenue: totalRevenue._sum.amount || 0,
         totalBadgesAwarded,
         totalXpEarned: totalXpEarned._sum.totalXp || 0,
@@ -173,7 +163,6 @@ export async function GET() {
         completionRate,
         avgQuizScore: avgQuizScoreResult._avg.quizScore || 0,
         totalCertificates,
-        churnRate,
       },
       activity: {
         newUsers,
