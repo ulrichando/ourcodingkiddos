@@ -907,27 +907,46 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
         </div>
       )}
 
-      {/* Interactive Hint - Fluid sizing with CSS clamp() for any screen */}
+      {/* Interactive Hint - Professional glass morphism design */}
       {showHint && !gameOver && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 z-30 bg-black/70 backdrop-blur-md rounded-full border border-white/40 flex items-center shadow-lg"
+          className="absolute left-1/2 -translate-x-1/2 z-30 flex items-center animate-fade-in-up"
           style={{
             bottom: 'clamp(4rem, 12vh, 7rem)',
-            padding: 'clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 0.75rem)',
-            gap: 'clamp(0.25rem, 0.8vw, 0.5rem)',
+            padding: 'clamp(0.5rem, 1.2vw, 0.75rem) clamp(0.75rem, 2.5vw, 1.25rem)',
+            gap: 'clamp(0.375rem, 1vw, 0.625rem)',
+            background: 'linear-gradient(135deg, rgba(15, 15, 35, 0.85) 0%, rgba(30, 20, 60, 0.8) 100%)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '9999px',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: `0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px ${gameInfo.color}20, inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
           }}
         >
-          <Gamepad2
-            className="flex-shrink-0"
+          <div
+            className="flex-shrink-0 flex items-center justify-center rounded-full"
             style={{
-              color: gameInfo.color,
-              width: 'clamp(0.75rem, 2vw, 1rem)',
-              height: 'clamp(0.75rem, 2vw, 1rem)',
+              width: 'clamp(1.25rem, 2.5vw, 1.75rem)',
+              height: 'clamp(1.25rem, 2.5vw, 1.75rem)',
+              background: `linear-gradient(135deg, ${gameInfo.color}30 0%, ${gameInfo.color}10 100%)`,
+              border: `1px solid ${gameInfo.color}40`,
             }}
-          />
+          >
+            <Gamepad2
+              style={{
+                color: gameInfo.color,
+                width: 'clamp(0.75rem, 1.5vw, 1rem)',
+                height: 'clamp(0.75rem, 1.5vw, 1rem)',
+                filter: `drop-shadow(0 0 4px ${gameInfo.color}60)`,
+              }}
+            />
+          </div>
           <span
-            className="text-white font-medium whitespace-nowrap"
-            style={{ fontSize: 'clamp(0.55rem, 1.5vw, 0.875rem)' }}
+            className="text-white/95 font-semibold whitespace-nowrap tracking-wide"
+            style={{
+              fontSize: 'clamp(0.65rem, 1.4vw, 0.875rem)',
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+            }}
           >
             {gameInfo.hint}
           </span>
@@ -1141,11 +1160,11 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
               </div>
               {/* Speech Bubble */}
               <div className="absolute -right-2 top-0 transform translate-x-full">
-                <div className="relative bg-white rounded-lg px-2 py-1 shadow-md">
-                  <span className="text-xs font-medium text-slate-700">
+                <div className="relative bg-white dark:bg-slate-800 rounded-lg px-2 py-1 shadow-md">
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
                     {isTyping ? 'Typing...' : showOutput ? 'It works!' : 'Watch this!'}
                   </span>
-                  <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-white transform rotate-45" />
+                  <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-white dark:bg-slate-800 transform rotate-45" />
                 </div>
               </div>
             </div>
@@ -1645,31 +1664,60 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Scroll Indicator - Fluid sizing with CSS clamp() for any screen */}
+          {/* Scroll Indicator - Professional minimal design */}
           <div
             className="flex justify-center pointer-events-auto"
-            style={{ padding: 'clamp(0.375rem, 2vh, 1rem) 0' }}
+            style={{ padding: 'clamp(0.5rem, 2vh, 1.25rem) 0' }}
           >
             <button
               onClick={() => scrollToSection('courses')}
               aria-label="Scroll down to explore courses"
-              className="flex flex-col items-center text-white/90 hover:text-white transition-colors group"
-              style={{ gap: 'clamp(0.125rem, 0.5vh, 0.25rem)' }}
+              className="group flex flex-col items-center transition-all duration-300 hover:scale-105"
+              style={{ gap: 'clamp(0.25rem, 0.75vh, 0.5rem)' }}
             >
               <span
-                className="font-semibold uppercase tracking-wider"
-                style={{ fontSize: 'clamp(0.45rem, 1.2vw, 0.75rem)' }}
+                className="font-medium uppercase tracking-[0.2em] text-white/70 group-hover:text-white transition-colors duration-300"
+                style={{
+                  fontSize: 'clamp(0.5rem, 1vw, 0.6875rem)',
+                  letterSpacing: '0.15em',
+                }}
               >
                 Explore
               </span>
-              <ChevronDown
-                className="animate-bounce group-hover:scale-110 transition-transform"
+              <div
+                className="relative flex items-center justify-center"
                 style={{
-                  width: 'clamp(0.875rem, 3vw, 1.5rem)',
-                  height: 'clamp(0.875rem, 3vw, 1.5rem)',
+                  width: 'clamp(2rem, 4vw, 2.5rem)',
+                  height: 'clamp(2rem, 4vw, 2.5rem)',
                 }}
-                aria-hidden="true"
-              />
+              >
+                {/* Outer ring with pulse */}
+                <div
+                  className="absolute inset-0 rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-300"
+                  style={{
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                    animation: 'pulse-ring 2s ease-out infinite',
+                  }}
+                />
+                {/* Inner circle */}
+                <div
+                  className="absolute rounded-full bg-white/10 group-hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
+                  style={{
+                    width: 'clamp(1.5rem, 3vw, 2rem)',
+                    height: 'clamp(1.5rem, 3vw, 2rem)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                  }}
+                />
+                <ChevronDown
+                  className="relative z-10 text-white/80 group-hover:text-white transition-all duration-300"
+                  style={{
+                    width: 'clamp(0.875rem, 2vw, 1.125rem)',
+                    height: 'clamp(0.875rem, 2vw, 1.125rem)',
+                    animation: 'float-down 1.5s ease-in-out infinite',
+                  }}
+                  aria-hidden="true"
+                />
+              </div>
             </button>
           </div>
         </div>
@@ -1686,6 +1734,22 @@ export default function HomePage() {
           }
           :global(.animate-gradient-x) {
             animation: gradient-x 3s ease infinite;
+          }
+          @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.15); opacity: 0.2; }
+            100% { transform: scale(1.3); opacity: 0; }
+          }
+          @keyframes float-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(3px); }
+          }
+          :global(.animate-fade-in-up) {
+            animation: fade-in-up 0.4s ease-out forwards;
+          }
+          @keyframes fade-in-up {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
           }
           @keyframes kidFloat {
             0%, 100% { transform: translateY(0) rotate(-2deg); }
