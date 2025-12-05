@@ -2,14 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Calendar, BookOpen, Award, Clock, Star, TrendingUp, MessageSquare, Users, Activity, Zap, Target, Settings, User, Sparkles, Tent } from "lucide-react";
+import { Plus, Calendar, BookOpen, Award, Clock, Star, TrendingUp, MessageSquare, Users, Activity, Zap, Target, Settings, User, Sparkles, Tent, CreditCard, CalendarPlus, Flag, Rocket } from "lucide-react";
 import StudentCard from "../../../components/dashboard/StudentCard";
 import Button from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { useSession } from "next-auth/react";
 
-async function fetchClasses() {
-  const res = await fetch("/api/classes", { cache: "no-store" });
+// Time-based greeting helper
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+};
+
+async function fetchParentClasses() {
+  const res = await fetch("/api/parent/classes", { cache: "no-store", credentials: "include" });
   if (!res.ok) return [];
   const data = await res.json();
   return data.sessions ?? [];
@@ -22,6 +30,9 @@ export default function ParentDashboardPage() {
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [newGoal, setNewGoal] = useState({ studentId: "", description: "", targetXp: 500 });
 
   // Session is still loading
   const isLoading = sessionStatus === "loading";
@@ -34,7 +45,7 @@ export default function ParentDashboardPage() {
       .then((data) => setStudents(data.students || []))
       .catch(() => setStudents([]))
       .finally(() => setLoadingStudents(false));
-    fetchClasses().then((data) => {
+    fetchParentClasses().then((data) => {
       const normalized = data
         .map((c: any) => ({
           ...c,
@@ -53,7 +64,43 @@ export default function ParentDashboardPage() {
       .then((data) => setActivities(data.activities || []))
       .catch(() => setActivities([]))
       .finally(() => setLoadingActivities(false));
+
+    // Fetch goals
+    fetch("/api/parent/goals", { credentials: "include" })
+      .then((r) => r.ok ? r.json() : { goals: [] })
+      .then((data) => setGoals(data.goals || []))
+      .catch(() => setGoals([]));
   }, [session?.user?.email]);
+
+  // Add new goal
+  const addGoal = async () => {
+    if (!newGoal.studentId || !newGoal.description) return;
+    try {
+      const res = await fetch("/api/parent/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(newGoal),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGoals(prev => [...prev, data.goal]);
+        setNewGoal({ studentId: "", description: "", targetXp: 500 });
+        setShowGoalModal(false);
+      }
+    } catch (e) {
+      console.error("Failed to add goal");
+    }
+  };
+
+  // Generate calendar link for a class
+  const generateCalendarLink = (cls: any) => {
+    const startDate = new Date(cls.start);
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour default
+    const formatDate = (d: Date) => d.toISOString().replace(/-|:|\.\d+/g, "").slice(0, 15) + "Z";
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cls.title)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent("Coding class at Our Coding Kiddos")}`;
+    window.open(googleUrl, "_blank");
+  };
 
   const totalXP = useMemo(() => students.reduce((sum, s) => sum + (s.totalXp || s.total_xp || 0), 0), [students]);
   const totalBadges = useMemo(() => students.reduce((sum, s) => sum + (s.badges?.length || 0), 0), [students]);
@@ -64,7 +111,7 @@ export default function ParentDashboardPage() {
         {/* Welcome Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}! 👋
+            {getGreeting()}{session?.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}! 👋
           </h1>
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Here&apos;s what&apos;s happening with your young coders today.</p>
         </div>
@@ -215,7 +262,23 @@ export default function ParentDashboardPage() {
                           );
                         })
                       ) : (
-                        <p className="text-center text-slate-500 dark:text-slate-400 py-8">No recent activity yet</p>
+                        <div className="text-center py-8 space-y-3">
+                          <div className="w-14 h-14 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                            <Rocket className="w-7 h-7 text-purple-500 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-700 dark:text-slate-300">No activity yet - but that&apos;s okay!</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                              Once your child starts learning, you&apos;ll see their achievements here.
+                            </p>
+                          </div>
+                          <Link href="/courses">
+                            <Button variant="outline" size="sm" className="mt-2">
+                              <BookOpen className="w-4 h-4 mr-2" />
+                              Browse Courses
+                            </Button>
+                          </Link>
+                        </div>
                       )}
                     </div>
                   </CardContent>
@@ -372,21 +435,104 @@ export default function ParentDashboardPage() {
                       const TypeIcon = style.icon;
 
                       return (
-                        <div key={cls.id} className={`flex items-center gap-2 p-2 rounded-lg border-l-4 ${style.border} ${style.bg}`}>
-                          <div className={`w-8 h-8 rounded-lg ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
-                            <TypeIcon className={`w-4 h-4 ${style.iconColor}`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">{cls.title}</p>
-                              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${style.labelBg} flex-shrink-0`}>
-                                {style.label}
-                              </span>
+                        <div key={cls.id} className={`p-2 rounded-lg border-l-4 ${style.border} ${style.bg}`}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-8 h-8 rounded-lg ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
+                              <TypeIcon className={`w-4 h-4 ${style.iconColor}`} />
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {cls.start.toLocaleDateString([], { month: 'short', day: 'numeric' })} at {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">{cls.title}</p>
+                                <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${style.labelBg} flex-shrink-0`}>
+                                  {style.label}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {cls.start.toLocaleDateString([], { month: 'short', day: 'numeric' })} at {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => generateCalendarLink(cls)}
+                              className="p-1.5 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50 transition-colors"
+                              title="Add to Google Calendar"
+                            >
+                              <CalendarPlus className="w-4 h-4 text-slate-400 hover:text-purple-500" />
+                            </button>
                           </div>
+                          {/* Show enrolled students */}
+                          {cls.enrolledStudents && cls.enrolledStudents.length > 0 && (
+                            <div className="mt-1.5 flex items-center gap-1 ml-10">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">Enrolled:</span>
+                              <div className="flex items-center gap-1">
+                                {cls.enrolledStudents.map((student: any, idx: number) => (
+                                  <span
+                                    key={student.id || idx}
+                                    className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-white/60 dark:bg-slate-700/60 rounded text-slate-700 dark:text-slate-300"
+                                  >
+                                    {student.avatar || "👤"} {student.name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Goals Card */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between text-base text-slate-900 dark:text-slate-100">
+                  <span className="flex items-center gap-2">
+                    <Flag className="w-4 h-4 text-green-500" />
+                    Learning Goals
+                  </span>
+                  <button
+                    onClick={() => setShowGoalModal(true)}
+                    className="text-xs text-purple-600 dark:text-purple-400 hover:underline font-normal"
+                  >
+                    + Add Goal
+                  </button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {goals.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Set goals for your children</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowGoalModal(true)}
+                      className="mt-2"
+                    >
+                      <Flag className="w-4 h-4 mr-2" />
+                      Create First Goal
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {goals.slice(0, 3).map((goal: any) => {
+                      const student = students.find(s => s.id === goal.studentId);
+                      const progress = Math.min(100, ((student?.totalXp || 0) / goal.targetXp) * 100);
+                      return (
+                        <div key={goal.id} className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">{student?.avatar || "👤"}</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{goal.description}</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            {Math.round(progress)}% complete
+                          </p>
                         </div>
                       );
                     })}
@@ -406,12 +552,9 @@ export default function ParentDashboardPage() {
                   { label: "Browse Courses", icon: BookOpen, href: "/courses" },
                   { label: "View Certificates", icon: Award, href: "/certificates" },
                   { label: "View Progress Reports", icon: TrendingUp, href: "/dashboard/parent/reports" },
+                  { label: "Billing & Payments", icon: CreditCard, href: "/dashboard/parent/billing" },
                   { label: "Manage Students", icon: Settings, href: "/dashboard/parent/students" },
-                  {
-                    label: "Contact Instructor",
-                    icon: MessageSquare,
-                    href: "/messages",
-                  },
+                  { label: "Contact Instructor", icon: MessageSquare, href: "/messages" },
                 ].map((action: any) => (
                   <Link key={action.label} href={action.href}>
                     <Button
@@ -434,6 +577,82 @@ export default function ParentDashboardPage() {
         )}
       </div>
 
+      {/* Goal Modal */}
+      {showGoalModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full border-0 shadow-2xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                <Flag className="w-5 h-5 text-green-500" />
+                Set a Learning Goal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Select Student</label>
+                <select
+                  value={newGoal.studentId}
+                  onChange={(e) => setNewGoal({ ...newGoal, studentId: e.target.value })}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                >
+                  <option value="">Choose a student...</option>
+                  {students.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.avatar || "👤"} {s.name || s.username}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Goal Description</label>
+                <input
+                  type="text"
+                  value={newGoal.description}
+                  onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
+                  placeholder="e.g., Complete Python basics course"
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Target XP</label>
+                <select
+                  value={newGoal.targetXp}
+                  onChange={(e) => setNewGoal({ ...newGoal, targetXp: parseInt(e.target.value) })}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                >
+                  <option value={250}>250 XP (Small goal)</option>
+                  <option value={500}>500 XP (Medium goal)</option>
+                  <option value={1000}>1,000 XP (Large goal)</option>
+                  <option value={2500}>2,500 XP (Major milestone)</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowGoalModal(false);
+                    setNewGoal({ studentId: "", description: "", targetXp: 500 });
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={addGoal}
+                  disabled={!newGoal.studentId || !newGoal.description}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Flag className="w-4 h-4 mr-2" />
+                  Set Goal
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </main>
   );
 }

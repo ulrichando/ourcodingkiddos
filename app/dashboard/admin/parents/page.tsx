@@ -16,6 +16,8 @@ import {
   ChevronDown,
   ChevronUp,
   GraduationCap,
+  Target,
+  Clock,
 } from "lucide-react";
 
 type ParentStats = {
@@ -53,6 +55,27 @@ type Summary = {
   pendingPayments: number;
 };
 
+type ParentGoal = {
+  id: string;
+  studentId: string;
+  description: string;
+  targetXp: number;
+  currentXp: number;
+  createdAt: string;
+  completed: boolean;
+  parentName: string;
+  parentEmail: string;
+  studentName: string;
+  progress: number;
+};
+
+type GoalsSummary = {
+  totalGoals: number;
+  completedGoals: number;
+  activeGoals: number;
+  parentsWithGoals: number;
+};
+
 export default function ParentStatsPage() {
   const [parents, setParents] = useState<ParentStats[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -60,6 +83,10 @@ export default function ParentStatsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "children" | "payments">("name");
   const [expandedParent, setExpandedParent] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"parents" | "goals">("parents");
+  const [goals, setGoals] = useState<ParentGoal[]>([]);
+  const [goalsSummary, setGoalsSummary] = useState<GoalsSummary | null>(null);
+  const [goalsLoading, setGoalsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchParents() {
@@ -78,6 +105,26 @@ export default function ParentStatsPage() {
     }
     fetchParents();
   }, []);
+
+  useEffect(() => {
+    async function fetchGoals() {
+      if (activeTab !== "goals") return;
+      setGoalsLoading(true);
+      try {
+        const res = await fetch("/api/admin/goals");
+        if (res.ok) {
+          const data = await res.json();
+          setGoals(data.goals || []);
+          setGoalsSummary(data.summary || null);
+        }
+      } catch (error) {
+        console.error("Error fetching goals:", error);
+      } finally {
+        setGoalsLoading(false);
+      }
+    }
+    fetchGoals();
+  }, [activeTab]);
 
   const filteredParents = parents.filter((parent) => {
     const query = searchQuery.toLowerCase();
@@ -137,10 +184,48 @@ export default function ParentStatsPage() {
             Parent Portal Statistics
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Overview of parent accounts, their children, and payment status
+            Overview of parent accounts, their children, and learning goals
           </p>
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
+          <button
+            onClick={() => setActiveTab("parents")}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition ${
+              activeTab === "parents"
+                ? "border-purple-500 text-purple-600 dark:text-purple-400"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Parent Accounts
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("goals")}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition ${
+              activeTab === "goals"
+                ? "border-purple-500 text-purple-600 dark:text-purple-400"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Learning Goals
+              {goalsSummary && goalsSummary.totalGoals > 0 && (
+                <span className="px-1.5 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full">
+                  {goalsSummary.totalGoals}
+                </span>
+              )}
+            </span>
+          </button>
+        </div>
+
+        {/* Parents Tab Content */}
+        {activeTab === "parents" && (
+          <>
         {/* Summary Cards */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -411,6 +496,184 @@ export default function ParentStatsPage() {
               </div>
             ))}
           </div>
+        )}
+          </>
+        )}
+
+        {/* Goals Tab Content */}
+        {activeTab === "goals" && (
+          <>
+            {/* Goals Summary Cards */}
+            {goalsSummary && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                        {goalsSummary.totalGoals}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Total Goals</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                        {goalsSummary.completedGoals}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Completed</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                        {goalsSummary.activeGoals}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">In Progress</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                      <Users className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                        {goalsSummary.parentsWithGoals}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Parents with Goals</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Goals List */}
+            {goalsLoading ? (
+              <div className="text-center py-12 text-slate-500 dark:text-slate-400">
+                Loading goals...
+              </div>
+            ) : goals.length === 0 ? (
+              <div className="text-center py-12">
+                <Target className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+                <p className="text-slate-500 dark:text-slate-400">No learning goals set yet</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
+                  Parents can set goals for their children from their dashboard
+                </p>
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 dark:bg-slate-700/50">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">
+                          Student
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">
+                          Goal
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">
+                          Parent
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">
+                          Progress
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">
+                          Created
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                      {goals.map((goal) => (
+                        <tr key={goal.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-semibold">
+                                {goal.studentName?.charAt(0) || "?"}
+                              </div>
+                              <span className="font-medium text-slate-900 dark:text-slate-100">
+                                {goal.studentName}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="text-sm text-slate-900 dark:text-slate-100">{goal.description}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Target: {goal.targetXp} XP
+                            </p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="text-sm text-slate-900 dark:text-slate-100">{goal.parentName}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{goal.parentEmail}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="w-32">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-slate-600 dark:text-slate-400">
+                                  {goal.currentXp} / {goal.targetXp} XP
+                                </span>
+                                <span className="font-medium text-slate-900 dark:text-slate-100">
+                                  {goal.progress}%
+                                </span>
+                              </div>
+                              <div className="h-2 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all ${
+                                    goal.progress >= 100
+                                      ? "bg-green-500"
+                                      : goal.progress >= 50
+                                      ? "bg-blue-500"
+                                      : "bg-amber-500"
+                                  }`}
+                                  style={{ width: `${Math.min(100, goal.progress)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+                            {new Date(goal.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-3">
+                            {goal.progress >= 100 ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">
+                                <CheckCircle className="w-3 h-3" />
+                                Complete
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                                <Clock className="w-3 h-3" />
+                                Active
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
     </AdminLayout>

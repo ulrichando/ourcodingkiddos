@@ -168,6 +168,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                       <li><a href="/privacy" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
                       <li><a href="/terms" className="text-slate-400 hover:text-white transition-colors">Terms of Service</a></li>
                       <li><a href="/cookies" className="text-slate-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                      <li><a href="/refund-policy" className="text-slate-400 hover:text-white transition-colors">Refund Policy</a></li>
+                      <li><a href="/acceptable-use" className="text-slate-400 hover:text-white transition-colors">Acceptable Use</a></li>
+                      <li><a href="/safety" className="text-slate-400 hover:text-white transition-colors">Child Safety</a></li>
                     </ul>
                   </div>
                 </div>

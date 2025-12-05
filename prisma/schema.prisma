@@ -983,3 +983,67 @@ model Like {
   @@unique([userEmail, commentId])
   @@index([userEmail])
 }
+
+// =====================================================
+// FREE TRIAL SYSTEM
+// =====================================================
+
+model FreeTrialBooking {
+  id                String            @id @default(cuid())
+  parentEmail       String
+  parentName        String?
+  childName         String
+  childAge          Int?
+  ageGroup          AgeGroup?
+  phone             String?
+
+  // Session selection
+  sessionId         String?           // Selected ClassSession for the trial
+  programId         String?           // Which program they're interested in
+  language          Language?         // Preferred coding language
+  preferredDate     DateTime?
+  preferredTime     String?
+  timezone          String?           @default("America/New_York")
+
+  // Status tracking
+  status            FreeTrialStatus   @default(PENDING)
+  scheduledAt       DateTime?         // Confirmed trial date/time
+  completedAt       DateTime?
+  convertedAt       DateTime?         // When they converted to paid
+
+  // Follow-up
+  reminderSent      Boolean           @default(false)
+  followUpSent      Boolean           @default(false)
+  feedback          String?
+  rating            Int?              // 1-5 rating after trial
+  conversionNotes   String?
+
+  // Instructor assignment
+  instructorEmail   String?
+  instructorName    String?
+  meetingUrl        String?
+
+  // Conversion tracking
+  convertedToProgramId String?        // Program they enrolled in after trial
+  discountCodeUsed  String?
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@unique([parentEmail, childName]) // One free trial per child per parent
+  @@index([parentEmail])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+enum FreeTrialStatus {
+  PENDING           // Just signed up, needs scheduling
+  SCHEDULED         // Trial class is scheduled
+  REMINDER_SENT     // 24hr reminder sent
+  IN_PROGRESS       // Trial happening now
+  COMPLETED         // Trial finished
+  NO_SHOW           // Didn't attend
+  CONVERTED         // Signed up for paid program
+  DECLINED          // Decided not to continue
+  EXPIRED           // Never scheduled within time limit
+}

@@ -8,7 +8,7 @@ import {
   Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar,
   ArrowRight, Target as Aim, Loader2, Sparkles, Gift, Rocket,
   CheckCircle, Lock, Play, ChevronRight, Medal, Crown, Code2,
-  Plus, X, Github, ExternalLink, Upload, Eye, Heart, Sun, Moon
+  Plus, X, Upload, Eye, Heart
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
@@ -103,6 +103,34 @@ const LEVEL_TITLES: Record<number, string> = {
   10: "Coding Legend",
 };
 
+// Fun coding facts and tips for kids
+const CODING_TIPS = [
+  { emoji: "🎮", tip: "The first video game ever made was created in 1958!" },
+  { emoji: "🐛", tip: "The first computer 'bug' was a real moth found in a computer in 1947!" },
+  { emoji: "🚀", tip: "The code that sent humans to the moon had only 72KB of memory!" },
+  { emoji: "🤖", tip: "Robots can be programmed using the same coding skills you're learning!" },
+  { emoji: "💡", tip: "A 12-year-old created one of the most popular apps ever - you can too!" },
+  { emoji: "🎨", tip: "Every website you see is made with code - just like painting with words!" },
+  { emoji: "🦖", tip: "Python is named after Monty Python, not the snake!" },
+  { emoji: "⭐", tip: "NASA uses the same coding language (Python) that you're learning!" },
+  { emoji: "🎯", tip: "Making mistakes in code is how all great programmers learn!" },
+  { emoji: "🌟", tip: "The youngest certified programmer was only 7 years old!" },
+  { emoji: "🎪", tip: "Minecraft was built using Java - another popular coding language!" },
+  { emoji: "🔮", tip: "AI assistants like me are built using millions of lines of code!" },
+];
+
+// Encouraging messages based on progress
+const MOTIVATIONAL_MESSAGES = [
+  "You're doing amazing! Keep coding! 🌟",
+  "Every line of code makes you stronger! 💪",
+  "Bugs are just puzzles waiting to be solved! 🧩",
+  "You're becoming a coding superstar! ⭐",
+  "Great coders never give up - and neither do you! 🚀",
+  "Your brain is growing with every lesson! 🧠",
+  "Coding is your superpower! 🦸",
+  "The more you practice, the better you get! 🎯",
+];
+
 export default function StudentDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -120,8 +148,6 @@ export default function StudentDashboard() {
   const [projectForm, setProjectForm] = useState({
     title: "",
     description: "",
-    githubUrl: "",
-    demoUrl: "",
     language: "JAVASCRIPT",
   });
   const [student, setStudent] = useState<{
@@ -154,6 +180,10 @@ export default function StudentDashboard() {
     { id: "2", title: "Practice Coding", description: "Spend 10 minutes coding", xpReward: 30, completed: false, icon: "💻" },
     { id: "3", title: "Try a Quiz", description: "Attempt any quiz", xpReward: 40, completed: false, icon: "🎯" },
   ]);
+
+  // Random tip and motivational message (changes on each visit)
+  const [randomTip] = useState(() => CODING_TIPS[Math.floor(Math.random() * CODING_TIPS.length)]);
+  const [motivationalMessage] = useState(() => MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]);
 
   // Celebration effect
   const triggerCelebration = useCallback((message: string) => {
@@ -201,8 +231,6 @@ export default function StudentDashboard() {
         body: JSON.stringify({
           title: projectForm.title.trim(),
           description: projectForm.description.trim(),
-          githubUrl: projectForm.githubUrl.trim() || undefined,
-          demoUrl: projectForm.demoUrl.trim() || undefined,
           language: projectForm.language,
         }),
       });
@@ -213,8 +241,6 @@ export default function StudentDashboard() {
         setProjectForm({
           title: "",
           description: "",
-          githubUrl: "",
-          demoUrl: "",
           language: "JAVASCRIPT",
         });
         loadMyProjects();
@@ -242,25 +268,13 @@ export default function StudentDashboard() {
     }
   }, []);
 
-  // Toggle theme using existing ok-theme system
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setThemeState(newTheme);
-    try {
-      localStorage.setItem("ok-theme", newTheme);
-      document.documentElement.classList.toggle("dark", newTheme === "dark");
-      document.documentElement.setAttribute("data-theme", newTheme);
-    } catch {
-      // ignore
-    }
-  };
-
   useEffect(() => {
     loadMyProjects();
   }, [loadMyProjects]);
 
   useEffect(() => {
-    fetch("/api/classes", { cache: "no-store" })
+    // Fetch only classes the student is enrolled in
+    fetch("/api/student/classes", { cache: "no-store", credentials: "include" })
       .then((res) => res.ok ? res.json() : { sessions: [] })
       .then((data) => {
         const normalized = (data.sessions || []).map((c: any) => ({
@@ -369,15 +383,68 @@ export default function StudentDashboard() {
 
   if (status === "loading" || !mounted) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-white dark:from-[#1a0a2e] dark:via-[#2d1052] dark:to-[#3d0f68] text-slate-900 dark:text-white flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-purple-500 to-pink-500 animate-pulse" />
-            <Rocket className="h-10 w-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white animate-bounce" />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* Hero Header skeleton */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
+              <div className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
+              <div className="flex-1 text-center md:text-left space-y-2">
+                <div className="h-4 w-24 mx-auto md:mx-0 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                <div className="h-8 w-48 mx-auto md:mx-0 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                <div className="h-4 w-40 mx-auto md:mx-0 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+              </div>
+              <div className="flex flex-row md:flex-col gap-3">
+                <div className="h-16 w-28 rounded-2xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="h-16 w-28 rounded-2xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+              </div>
+            </div>
           </div>
-          <p className="text-slate-600 dark:text-white/80 text-lg">Loading your adventure...</p>
+
+          {/* Level Progress skeleton */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 rounded-2xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="space-y-2">
+                  <div className="h-6 w-24 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                  <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+            <div className="h-6 w-full rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
+          </div>
+
+          {/* Daily Challenges skeleton */}
+          <div className="space-y-4">
+            <div className="h-6 w-40 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+            <div className="grid sm:grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                      <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats Grid skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 text-center">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-slate-200 dark:bg-slate-700 animate-pulse" />
+                <div className="h-10 w-12 mx-auto mb-2 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+                <div className="h-4 w-20 mx-auto bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -500,35 +567,11 @@ export default function StudentDashboard() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-slate-700 dark:text-white/90">
-                  <Github className="inline h-4 w-4 mr-1" />
-                  GitHub Link (optional)
-                </label>
-                <input
-                  type="url"
-                  value={projectForm.githubUrl}
-                  onChange={(e) => setProjectForm(prev => ({ ...prev, githubUrl: e.target.value }))}
-                  placeholder="https://github.com/you/project"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/20 bg-white dark:bg-white/5 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
+              <p className="text-xs text-slate-500 dark:text-white/50 bg-slate-100 dark:bg-white/5 rounded-lg p-3">
+                Your project will be reviewed by our team before it appears in the showcase. Keep creating awesome things!
+              </p>
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-slate-700 dark:text-white/90">
-                  <ExternalLink className="inline h-4 w-4 mr-1" />
-                  Demo Link (optional)
-                </label>
-                <input
-                  type="url"
-                  value={projectForm.demoUrl}
-                  onChange={(e) => setProjectForm(prev => ({ ...prev, demoUrl: e.target.value }))}
-                  placeholder="https://myproject.com"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/20 bg-white dark:bg-white/5 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-
-              <div className="pt-4 flex gap-3">
+              <div className="pt-2 flex gap-3">
                 <button
                   onClick={() => setShowProjectModal(false)}
                   className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 transition font-semibold text-slate-700 dark:text-white"
@@ -563,21 +606,6 @@ export default function StudentDashboard() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 relative z-10">
-        {/* Theme Toggle Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={toggleTheme}
-            className="p-3 rounded-2xl bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-white/20 border border-slate-200 dark:border-white/20 transition"
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <Sun className="h-5 w-5 text-yellow-400" />
-            ) : (
-              <Moon className="h-5 w-5 text-purple-600" />
-            )}
-          </button>
-        </div>
-
         {/* Hero Header */}
         <div className="relative bg-white dark:bg-gradient-to-r dark:from-purple-600/30 dark:to-pink-600/30 border border-slate-200 dark:border-white/20 rounded-3xl p-6 backdrop-blur-sm overflow-hidden shadow-lg dark:shadow-none">
           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full blur-3xl" />
@@ -668,6 +696,51 @@ export default function StudentDashboard() {
             <span>{currentLevelProgress.toLocaleString()} XP</span>
             <span>{levelXP.toLocaleString()} XP</span>
           </div>
+        </div>
+
+        {/* Fun Fact Card & Quick Actions */}
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Did You Know - Fun Coding Fact */}
+          <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 dark:from-cyan-500/20 dark:to-blue-500/20 rounded-3xl border border-cyan-200 dark:border-cyan-500/30 p-5">
+            <div className="flex items-start gap-3">
+              <div className="text-4xl">{randomTip.emoji}</div>
+              <div>
+                <h3 className="font-bold text-cyan-700 dark:text-cyan-300 mb-1">Did You Know?</h3>
+                <p className="text-slate-700 dark:text-white/80 text-sm leading-relaxed">{randomTip.tip}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 p-5">
+            <h3 className="font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-500" />
+              Quick Start
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/playground" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold hover:from-purple-600 hover:to-pink-600 transition shadow-md">
+                <Code2 className="h-4 w-4" />
+                Code Now
+              </Link>
+              <Link href="/courses" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md">
+                <BookOpen className="h-4 w-4" />
+                Learn
+              </Link>
+              <Link href="/schedule" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/20 transition">
+                <Calendar className="h-4 w-4" />
+                My Classes
+              </Link>
+              <Link href="/showcase" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/20 transition">
+                <Rocket className="h-4 w-4" />
+                Showcase
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Motivational Message */}
+        <div className="text-center py-2">
+          <p className="text-lg font-medium text-purple-600 dark:text-purple-400">{motivationalMessage}</p>
         </div>
 
         {/* Daily Challenges - New gamification feature */}
@@ -826,8 +899,6 @@ export default function StudentDashboard() {
                           <Heart className="h-3.5 w-3.5" />
                           {project._count.likes}
                         </span>
-                        {project.githubUrl && <Github className="h-3.5 w-3.5" />}
-                        {project.demoUrl && <ExternalLink className="h-3.5 w-3.5" />}
                       </div>
                     </div>
                   </div>

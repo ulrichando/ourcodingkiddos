@@ -194,7 +194,7 @@ export default function AppHeader() {
               onClick={() => {
                 const isDark = document.documentElement.classList.contains("dark");
                 document.documentElement.classList.toggle("dark", !isDark);
-                try { localStorage.setItem("ok-theme", isDark ? "light" : "dark"); } catch {}
+                try { localStorage.setItem("ok-theme", isDark ? "light" : "dark"); } catch { /* Ignore localStorage errors in SSR */ }
               }}
               className="h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Toggle theme"

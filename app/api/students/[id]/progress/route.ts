@@ -16,8 +16,26 @@ export async function GET(
   const role = (session as any).user.role;
   const { id: studentId } = await params;
 
+  // Get period filter from query params
+  const { searchParams } = new URL(request.url);
+  const period = searchParams.get("period") || "all";
+
+  // Calculate date range based on period
+  const now = new Date();
+  let dateFilter: Date | undefined;
+  switch (period) {
+    case "week":
+      dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case "month":
+      dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      dateFilter = undefined;
+  }
+
   try {
-    // Get student profile
+    // Get student profile with date-filtered data
     const student = await prisma.studentProfile.findFirst({
       where: {
         id: studentId,
@@ -30,11 +48,13 @@ export async function GET(
               include: {
                 badge: true,
               },
+              where: dateFilter ? { awardedAt: { gte: dateFilter } } : undefined,
               orderBy: {
                 awardedAt: "desc",
               },
             },
             achievements: {
+              where: dateFilter ? { createdAt: { gte: dateFilter } } : undefined,
               orderBy: {
                 createdAt: "desc",
               },
@@ -51,6 +71,7 @@ export async function GET(
                   },
                 },
                 progress: {
+                  where: dateFilter ? { completedAt: { gte: dateFilter } } : undefined,
                   include: {
                     lesson: {
                       select: {
@@ -160,6 +181,7 @@ export async function GET(
       badges,
       recentAchievements,
       courseProgress,
+      period,
     });
   } catch (error) {
     console.error("[students/[id]/progress] Error:", error);

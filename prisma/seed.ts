@@ -56,18 +56,20 @@ async function main() {
           ageGroup: "AGES_11_14",
           guardianId: parent.parentProfile?.id,
           parentEmail: "demo.parent@example.com",
+          avatar: "🦊",
         },
       },
     },
   });
 
-  // Ensure the student profile has the correct name and parent link
+  // Ensure the student profile has the correct name, parent link, and default avatar
   await prisma.studentProfile.updateMany({
     where: { userId: student.id },
     data: {
       name: "Demo Student",
       parentEmail: "demo.parent@example.com",
       guardianId: parent.parentProfile?.id,
+      avatar: "🦊",
     },
   });
   console.log("✅ Demo student created:", student.email);

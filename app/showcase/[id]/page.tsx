@@ -233,6 +233,7 @@ export default function ProjectDetailPage() {
               {project.videoUrl ? (
                 <iframe
                   src={project.videoUrl}
+                  title={`Video demo of ${project.title}`}
                   className="w-full h-full"
                   allowFullScreen
                 />

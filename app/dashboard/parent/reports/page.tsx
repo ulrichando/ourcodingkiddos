@@ -87,19 +87,19 @@ export default function ProgressReportsPage() {
       .then((data) => {
         const studentList = data.students || [];
         setStudents(studentList);
-        // Fetch progress for each student
+        // Fetch progress for each student with current period
         studentList.forEach((student: Student) => {
-          fetchStudentProgress(student.id);
+          fetchStudentProgress(student.id, selectedPeriod);
         });
       })
       .catch(() => setStudents([]))
       .finally(() => setLoading(false));
   }, [session?.user?.email]);
 
-  const fetchStudentProgress = async (studentId: string) => {
+  const fetchStudentProgress = async (studentId: string, period: string = "all") => {
     setLoadingProgress((prev) => ({ ...prev, [studentId]: true }));
     try {
-      const res = await fetch(`/api/students/${studentId}/progress`, { credentials: "include" });
+      const res = await fetch(`/api/students/${studentId}/progress?period=${period}`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setStudentProgress((prev) => ({ ...prev, [studentId]: data }));
@@ -110,6 +110,15 @@ export default function ProgressReportsPage() {
       setLoadingProgress((prev) => ({ ...prev, [studentId]: false }));
     }
   };
+
+  // Refetch when period changes
+  useEffect(() => {
+    if (students.length > 0) {
+      students.forEach((student) => {
+        fetchStudentProgress(student.id, selectedPeriod);
+      });
+    }
+  }, [selectedPeriod, students.length]);
 
   const downloadReport = (studentId: string) => {
     alert(`Generating PDF report for student... (Feature coming soon)`);

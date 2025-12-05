@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import { fixupPluginRules } from "@eslint/compat";
 import nextPlugin from "@next/eslint-plugin-next";
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -27,7 +28,8 @@ export default [
     plugins: {
       "@next/next": nextPlugin,
       react: reactPlugin,
-      "react-hooks": reactHooks,
+      // Use fixupPluginRules for ESLint 9 compatibility
+      "react-hooks": fixupPluginRules(reactHooks),
       "jsx-a11y": jsxA11y
     },
     rules: {
@@ -47,7 +49,9 @@ export default [
       "react-hooks/exhaustive-deps": "warn",
       "no-undef": "off",
       "no-unused-vars": "warn",
-      "no-constant-condition": "warn"
+      "no-constant-condition": "warn",
+      // Fix for styled-jsx: ignore 'jsx' and 'global' props on style tags
+      "react/no-unknown-property": ["error", { "ignore": ["jsx", "global"] }]
     },
     settings: {
       react: {

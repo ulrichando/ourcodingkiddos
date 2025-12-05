@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
-import { Clock, Users, BookOpen, Star, Sparkles } from "lucide-react";
+import { Clock, Users, BookOpen, Star, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PROGRAMS_PER_PAGE = 9;
 
 export const metadata: Metadata = {
   title: "Learning Programs - Structured Coding Courses for Kids",
@@ -59,94 +61,80 @@ function formatPrice(cents: number): string {
   }).format(cents / 100);
 }
 
-async function getPrograms() {
-  const programs = await prisma.program.findMany({
-    where: { isPublished: true },
-    include: {
-      _count: {
-        select: { enrollments: true },
+async function getPrograms(page: number = 1) {
+  const skip = (page - 1) * PROGRAMS_PER_PAGE;
+
+  const [programs, totalCount] = await Promise.all([
+    prisma.program.findMany({
+      where: { isPublished: true },
+      include: {
+        _count: {
+          select: { enrollments: true },
+        },
       },
-    },
-    orderBy: [{ isFeatured: "desc" }, { orderIndex: "asc" }, { createdAt: "desc" }],
-  });
-  return programs;
+      orderBy: [{ isFeatured: "desc" }, { orderIndex: "asc" }, { createdAt: "desc" }],
+      skip,
+      take: PROGRAMS_PER_PAGE,
+    }),
+    prisma.program.count({
+      where: { isPublished: true },
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / PROGRAMS_PER_PAGE);
+
+  return { programs, totalCount, totalPages, currentPage: page };
 }
 
-export default async function ProgramsPage() {
-  const programs = await getPrograms();
-
-  const featuredPrograms = programs.filter((p) => p.isFeatured);
-  const regularPrograms = programs.filter((p) => !p.isFeatured);
+export default async function ProgramsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const currentPage = Math.max(1, parseInt(params.page || "1", 10));
+  const { programs, totalCount, totalPages } = await getPrograms(currentPage);
 
   return (
     <main className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       {/* Hero Section */}
-      <section className="pt-16 pb-12 px-4 text-center bg-gradient-to-b from-purple-50 via-white to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-900">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-4 py-2 rounded-full text-sm font-semibold">
-            <Sparkles className="w-4 h-4" />
-            Structured Learning Programs
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-slate-100">
+      <section className="pt-12 pb-8 px-4 text-center bg-gradient-to-b from-purple-50 via-white to-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-900">
+        <div className="max-w-4xl mx-auto space-y-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
             Learn to Code with{" "}
             <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Expert Guidance
             </span>
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Choose from our structured programs designed for kids and teens. Each program includes
-            live instruction, hands-on projects, and a clear learning path. One-time payment, no subscriptions.
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Structured programs with live instruction, hands-on projects, and certificates. One-time payment.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
               <span>Live Instruction</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
               <span>One-Time Payment</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span>Certificate on Completion</span>
+            <div className="flex items-center gap-1.5">
+              <svg className="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Certificate</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Programs */}
-      {featuredPrograms.length > 0 && (
-        <section className="py-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
-              <Star className="w-6 h-6 text-yellow-500" />
-              Featured Programs
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredPrograms.map((program) => (
-                <ProgramCard key={program.id} program={program} featured />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* All Programs */}
-      <section className="py-12 px-4 bg-slate-50 dark:bg-slate-800/50">
+      <section className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8">All Programs</h2>
           {programs.length === 0 ? (
             <div className="text-center py-16">
               <BookOpen className="w-16 h-16 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
@@ -155,11 +143,23 @@ export default async function ProgramsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {regularPrograms.map((program) => (
-                <ProgramCard key={program.id} program={program} />
-              ))}
-            </div>
+            <>
+              {/* Results count */}
+              <div className="mb-6 text-sm text-slate-500 dark:text-slate-400">
+                Showing {(currentPage - 1) * PROGRAMS_PER_PAGE + 1}-{Math.min(currentPage * PROGRAMS_PER_PAGE, totalCount)} of {totalCount} programs
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {programs.map((program) => (
+                  <ProgramCard key={program.id} program={program} featured={program.isFeatured} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Pagination currentPage={currentPage} totalPages={totalPages} />
+              )}
+            </>
           )}
         </div>
       </section>
@@ -327,5 +327,97 @@ function ProgramCard({ program, featured }: ProgramCardProps) {
         </div>
       </div>
     </Link>
+  );
+}
+
+function Pagination({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
+  const getPageNumbers = () => {
+    const pages: (number | "...")[] = [];
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push("...");
+      }
+
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push("...");
+      }
+
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  const pages = getPageNumbers();
+
+  return (
+    <nav className="mt-12 flex items-center justify-center gap-2" aria-label="Pagination">
+      {/* Previous Button */}
+      <Link
+        href={currentPage > 1 ? `/programs?page=${currentPage - 1}` : "#"}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          currentPage > 1
+            ? "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            : "text-slate-300 dark:text-slate-600 pointer-events-none"
+        }`}
+        aria-disabled={currentPage <= 1}
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Previous
+      </Link>
+
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1">
+        {pages.map((page, index) =>
+          page === "..." ? (
+            <span
+              key={`ellipsis-${index}`}
+              className="px-3 py-2 text-slate-400 dark:text-slate-500"
+            >
+              ...
+            </span>
+          ) : (
+            <Link
+              key={page}
+              href={`/programs?page=${page}`}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                page === currentPage
+                  ? "bg-purple-600 text-white"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+              aria-current={page === currentPage ? "page" : undefined}
+            >
+              {page}
+            </Link>
+          )
+        )}
+      </div>
+
+      {/* Next Button */}
+      <Link
+        href={currentPage < totalPages ? `/programs?page=${currentPage + 1}` : "#"}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          currentPage < totalPages
+            ? "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            : "text-slate-300 dark:text-slate-600 pointer-events-none"
+        }`}
+        aria-disabled={currentPage >= totalPages}
+      >
+        Next
+        <ChevronRight className="w-4 h-4" />
+      </Link>
+    </nav>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -41,14 +41,7 @@ function VerificationContent() {
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
   const [error, setError] = useState("");
 
-  // Auto-verify if code is in URL
-  useEffect(() => {
-    if (codeFromUrl) {
-      handleVerify(codeFromUrl);
-    }
-  }, [codeFromUrl]);
-
-  const handleVerify = async (verificationCode?: string) => {
+  const handleVerify = useCallback(async (verificationCode?: string) => {
     const codeToVerify = verificationCode || code;
 
     if (!codeToVerify.trim()) {
@@ -74,13 +67,20 @@ function VerificationContent() {
         setVerified(false);
         setError(data.error || "Certificate not found");
       }
-    } catch (err) {
+    } catch {
       setVerified(false);
       setError("Failed to verify certificate");
     } finally {
       setLoading(false);
     }
-  };
+  }, [code]);
+
+  // Auto-verify if code is in URL
+  useEffect(() => {
+    if (codeFromUrl) {
+      handleVerify(codeFromUrl);
+    }
+  }, [codeFromUrl, handleVerify]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
