@@ -19,31 +19,75 @@ const defaultPreferences: CookiePreferences = {
   preferences: false,
 };
 
+const COOKIE_NAME = "cookie-consent";
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year in seconds
+
+// Helper functions to work with cookies
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(";").shift();
+    return cookieValue ? decodeURIComponent(cookieValue) : null;
+  }
+  return null;
+}
+
+function setCookie(name: string, value: string, maxAge: number): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+}
+
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>(defaultPreferences);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check if user has already made a choice
-    const consent = localStorage.getItem("cookie-consent");
+    // Mark as mounted to avoid hydration issues
+    setMounted(true);
+
+    // Check if user has already made a choice using cookies
+    const consent = getCookie(COOKIE_NAME);
+
     if (!consent) {
       // Small delay to avoid layout shift on page load
-      const timer = setTimeout(() => setShowBanner(true), 1000);
+      const timer = setTimeout(() => {
+        setShowBanner(true);
+      }, 1000);
       return () => clearTimeout(timer);
     } else {
       try {
         const savedPrefs = JSON.parse(consent);
-        setPreferences(savedPrefs);
+        // Validate the parsed object has required properties
+        if (savedPrefs && typeof savedPrefs.necessary === "boolean") {
+          setPreferences(savedPrefs);
+          // Don't show banner - user already consented
+        } else {
+          // Invalid data, show banner
+          setShowBanner(true);
+        }
       } catch {
+        // Invalid JSON, show banner
         setShowBanner(true);
       }
     }
   }, []);
 
   const savePreferences = (prefs: CookiePreferences) => {
-    localStorage.setItem("cookie-consent", JSON.stringify(prefs));
-    localStorage.setItem("cookie-consent-date", new Date().toISOString());
+    // Save to cookie (persists for 1 year)
+    setCookie(COOKIE_NAME, JSON.stringify(prefs), COOKIE_MAX_AGE);
+
+    // Also save to localStorage as backup
+    try {
+      localStorage.setItem(COOKIE_NAME, JSON.stringify(prefs));
+      localStorage.setItem("cookie-consent-date", new Date().toISOString());
+    } catch {
+      // localStorage might not be available
+    }
+
     setPreferences(prefs);
     setShowBanner(false);
     setShowSettings(false);
@@ -74,7 +118,8 @@ export default function CookieConsent() {
     });
   };
 
-  if (!showBanner) return null;
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted || !showBanner) return null;
 
   return (
     <>
@@ -259,7 +304,19 @@ export function useCookieConsent() {
   const [consent, setConsent] = useState<CookiePreferences | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("cookie-consent");
+    // Try cookie first, then localStorage as fallback
+    const cookieValue = getCookie(COOKIE_NAME);
+    if (cookieValue) {
+      try {
+        setConsent(JSON.parse(cookieValue));
+        return;
+      } catch {
+        // Invalid JSON in cookie
+      }
+    }
+
+    // Fallback to localStorage
+    const stored = localStorage.getItem(COOKIE_NAME);
     if (stored) {
       try {
         setConsent(JSON.parse(stored));
