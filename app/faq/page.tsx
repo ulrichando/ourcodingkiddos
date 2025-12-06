@@ -22,7 +22,7 @@ const categories = [
   { id: "all", label: "All Questions", icon: HelpCircle },
   { id: "getting-started", label: "Getting Started", icon: Sparkles },
   { id: "courses", label: "Courses & Learning", icon: BookOpen },
-  { id: "billing", label: "Billing & Pricing", icon: CreditCard },
+  { id: "billing", label: "Enrollment & Payments", icon: CreditCard },
   { id: "account", label: "Account & Parents", icon: Users },
   { id: "technical", label: "Technical Support", icon: Laptop },
   { id: "safety", label: "Safety & Privacy", icon: Shield },
@@ -88,36 +88,26 @@ const faqs = [
     answer: "Absolutely! All projects are automatically saved to the student's account. Students can access their portfolio of completed projects anytime, share them with friends and family, and continue building on them."
   },
 
-  // Billing & Pricing
+  // Billing & Payments
   {
     category: "billing",
-    question: "How much does it cost?",
-    answer: "We offer flexible pricing plans: Free (limited courses), Basic ($19/month for self-paced courses), and Premium ($49/month for unlimited courses + live classes). Annual plans receive a 20% discount. Visit our pricing page for full details."
-  },
-  {
-    category: "billing",
-    question: "Can I cancel my subscription anytime?",
-    answer: "Yes! You can cancel your subscription at any time from your account settings. Your access continues until the end of your current billing period. There are no cancellation fees or long-term commitments."
-  },
-  {
-    category: "billing",
-    question: "Do you offer refunds?",
-    answer: "We offer a 14-day money-back guarantee for new subscribers. If you're not satisfied with our service within the first 14 days, contact support for a full refund. Refunds after this period are considered on a case-by-case basis."
+    question: "How do I enroll my child?",
+    answer: "Contact us directly to discuss your child's needs and we'll help you find the right program. We offer personalized consultations to ensure the best fit for your child's age and skill level."
   },
   {
     category: "billing",
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards (Visa, MasterCard, American Express), debit cards, and PayPal. All payments are processed securely through Stripe. We do not store your card information on our servers."
+    answer: "We accept all major credit cards (Visa, MasterCard, American Express), debit cards, and PayPal. All payments are processed securely. We do not store your card information on our servers."
   },
   {
     category: "billing",
     question: "Do you offer family or group discounts?",
-    answer: "Yes! We offer family plans with discounts for multiple children. Schools and coding clubs can also contact us for special group pricing. Email support@ourcodingkiddos.com for details."
+    answer: "Yes! We offer special rates for families with multiple children. Schools and coding clubs can also contact us for group pricing. Email support@ourcodingkiddos.com for details."
   },
   {
     category: "billing",
     question: "Is there financial assistance available?",
-    answer: "We believe every child should have access to coding education. We offer scholarships and reduced pricing for families in need. Contact our support team to learn about available assistance programs."
+    answer: "We believe every child should have access to coding education. We offer scholarships and assistance for families in need. Contact our support team to learn about available programs."
   },
 
   // Account & Parents

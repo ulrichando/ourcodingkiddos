@@ -191,7 +191,7 @@ export default function ContactPage() {
                 <Phone className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Call Us</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">+1 (555) 123-4567</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">+1 (443) 297-9368</p>
               <p className="text-xs text-slate-500 mt-1">Mon-Fri, 9AM-6PM EST</p>
             </div>
 

@@ -175,7 +175,9 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
         // Calculate how many columns fit
         const alienCols = Math.min(8, Math.max(4, Math.floor((width - alienStartX * 2) / alienSpacingX)));
 
-        shipRef.current = { x: width / 2 - shipW / 2, y: height - shipH * 2.5, w: shipW, h: shipH };
+        // Position ship with guaranteed visibility - at least 50px from bottom, responsive offset
+        const shipBottomOffset = Math.max(50, Math.min(80, height * 0.12));
+        shipRef.current = { x: width / 2 - shipW / 2, y: height - shipH - shipBottomOffset, w: shipW, h: shipH };
         bulletsRef.current = [];
         aliensRef.current = [];
         alienDirRef.current = 1;
@@ -281,6 +283,14 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
       if (currentGame === 'spaceInvaders' && e.key === ' ' && bulletsRef.current.length < 5) {
         const ship = shipRef.current;
         bulletsRef.current.push({ x: ship.x + ship.w / 2, y: ship.y, vy: -10 });
+      }
+
+      // Tetris immediate input - reset move timer to allow responsive controls
+      if (currentGame === 'tetris') {
+        const key = e.key.toLowerCase();
+        if (key === 'arrowleft' || key === 'a' || key === 'arrowright' || key === 'd' || key === 'arrowup' || key === 'w') {
+          tetrisLastMoveRef.current = 0; // Allow immediate movement
+        }
       }
     };
 
@@ -482,8 +492,9 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           ctx.fillStyle = '#ef4444';
           ctx.fillRect(canvas.width - paddleW, aiPaddle.y, paddleW, aiPaddle.h);
 
-          // Draw ball
-          ctx.fillStyle = '#fff';
+          // Draw ball - theme aware color
+          const isDarkPong = document.documentElement.classList.contains('dark');
+          ctx.fillStyle = isDarkPong ? '#fff' : '#1e293b';
           ctx.beginPath();
           ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
           ctx.fill();
@@ -600,9 +611,9 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
             }
           };
 
-          // Handle input
+          // Handle input - reduced debounce for responsive controls
           const now = Date.now();
-          if (now - tetrisLastMoveRef.current > 100) {
+          if (now - tetrisLastMoveRef.current > 80) {
             if (keysRef.current.has('arrowleft') || keysRef.current.has('a')) {
               if (!checkCollision(piece.shape, piece.x - 1, piece.y)) piece.x--;
               tetrisLastMoveRef.current = now;
@@ -875,8 +886,9 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           ctx.fillStyle = '#ec4899';
           ctx.fillRect(paddle.x, paddleY, paddle.w, paddle.h);
 
-          // Draw ball
-          ctx.fillStyle = '#fff';
+          // Draw ball - theme aware color
+          const isDarkBB = document.documentElement.classList.contains('dark');
+          ctx.fillStyle = isDarkBB ? '#fff' : '#1e293b';
           ctx.beginPath();
           ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
           ctx.fill();
@@ -1129,17 +1141,17 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
 
   return (
     <div className="relative w-full max-w-4xl mx-auto">
-      {/* Main Container - Clean Terminal Style */}
-      <div className="relative rounded-2xl bg-slate-900/95 border border-white/10 overflow-hidden backdrop-blur-sm shadow-2xl">
-        {/* Editor Header */}
-        <div className="flex items-center justify-between px-5 py-3 bg-slate-800/80 border-b border-white/10">
+      {/* Main Container - Clean Terminal Style with fixed minimum height */}
+      <div className="relative rounded-2xl bg-slate-900/95 border border-white/10 overflow-hidden backdrop-blur-sm shadow-2xl min-h-[400px]">
+        {/* Editor Header - Fixed height to prevent layout shift */}
+        <div className="flex items-center justify-between px-5 py-3 bg-slate-800/80 border-b border-white/10 h-[52px]">
           <div className="flex items-center gap-3">
             <div className="flex gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500/80" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
               <div className="w-3 h-3 rounded-full bg-green-500/80" />
             </div>
-            <span className="text-sm text-white/60 font-mono">{currentExample.title}.py</span>
+            <span className="text-sm text-white/60 font-mono min-w-[100px]">{currentExample.title}.py</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Example Selector Pills */}
@@ -1191,16 +1203,14 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
           </div>
         </div>
 
-        {/* Output Area */}
+        {/* Output Area - Fixed height to prevent layout shift */}
         <div
           ref={outputRef}
-          className={`relative border-t border-white/10 bg-slate-950/50 overflow-hidden transition-all duration-500 ${
-            showOutput ? 'max-h-36 opacity-100' : 'max-h-0 opacity-0'
-          }`}
+          className="relative border-t border-white/10 bg-slate-950/50 h-[72px] overflow-hidden"
         >
-          <div className="p-5">
+          <div className={`p-5 transition-opacity duration-300 ${showOutput ? 'opacity-100' : 'opacity-0'}`}>
             <div className="flex items-center gap-2 text-xs text-white/50 mb-2 font-mono">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className={`w-2 h-2 rounded-full bg-green-500 ${showOutput ? 'animate-pulse' : ''}`} />
               Output:
             </div>
             <div className="font-mono text-xl text-white font-bold">
@@ -1225,8 +1235,8 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
           ))}
         </div>
 
-        {/* Action Bar */}
-        <div className="flex items-center justify-between px-5 py-3 bg-slate-800/50 border-t border-white/10">
+        {/* Action Bar - Fixed height to prevent layout shift */}
+        <div className="flex items-center justify-between px-5 py-3 bg-slate-800/50 border-t border-white/10 h-[60px]">
           <div className="flex items-center gap-3">
             <button
               onClick={runCodeDemo}

@@ -27,33 +27,33 @@ import Button from "@/components/ui/button";
 
 const timeline = [
   {
-    year: "2018",
+    year: "2019",
     title: "The Spark",
-    description: "While working at Google, Ulrich noticed a significant gap in accessible, quality coding education for kids. He began volunteering to teach coding on weekends.",
+    description: "While working as a software engineer, Ulrich noticed a significant gap in accessible, quality coding education for kids. He began mentoring young learners on weekends.",
     icon: Lightbulb,
   },
   {
-    year: "2020",
+    year: "2021",
     title: "The Vision Takes Shape",
-    description: "During the pandemic, Ulrich saw how many children lacked access to quality tech education. He started developing curriculum specifically designed for young learners.",
+    description: "During the pandemic, Ulrich saw how many children lacked access to quality tech education. He started developing curriculum specifically designed for young learners aged 7-18.",
     icon: Target,
   },
   {
-    year: "2022",
+    year: "2023",
     title: "Coding Kiddos is Born",
-    description: "Ulrich officially launched Our Coding Kiddos, combining his Google engineering expertise with a passion for education. The first 50 students enrolled within weeks.",
+    description: "Ulrich officially launched Our Coding Kiddos, combining his software engineering expertise with a passion for education. The first students enrolled and the journey began.",
     icon: Rocket,
   },
   {
     year: "2024",
-    title: "Growing Impact",
-    description: "Coding Kiddos expanded to serve thousands of students across 25+ countries, with a team of certified instructors and an award-winning curriculum.",
+    title: "Growing Community",
+    description: "Coding Kiddos grew to serve over 100 students across multiple countries, with a dedicated team of certified instructors delivering personalized coding education.",
     icon: Globe,
   },
   {
     year: "2025",
     title: "The Future",
-    description: "Today, we continue to innovate with AI-enhanced learning, gamified experiences, and a mission to make every child a creator of technology, not just a consumer.",
+    description: "Today, we continue to innovate with interactive learning, gamified experiences, and a mission to make every child a creator of technology, not just a consumer.",
     icon: Star,
   },
 ];
@@ -82,10 +82,10 @@ const values = [
 ];
 
 const stats = [
-  { value: "10,000+", label: "Students Taught" },
-  { value: "25+", label: "Countries Reached" },
+  { value: "150+", label: "Students Taught" },
+  { value: "5+", label: "Countries Reached" },
   { value: "98%", label: "Parent Satisfaction" },
-  { value: "50+", label: "Expert Instructors" },
+  { value: "4", label: "Expert Instructors" },
 ];
 
 export default function OurStoryPage() {
@@ -293,7 +293,7 @@ export default function OurStoryPage() {
                 </div>
 
                 {/* Icon */}
-                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg hidden md:flex">
+                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 items-center justify-center shadow-lg hidden md:flex">
                   <item.icon className="w-6 h-6 text-white" />
                 </div>
 

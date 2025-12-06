@@ -121,9 +121,9 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Left sidebar */}
-          <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Left sidebar - Collapsible on mobile */}
+          <div className="space-y-4 lg:space-y-6 order-2 lg:order-1">
             <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -153,7 +153,7 @@ export default function SchedulePage() {
                     </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-7 gap-1 text-center text-xs text-slate-500">
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center text-xs text-slate-500">
                   {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
                     <div key={d} className="py-1">
                       {d}
@@ -168,7 +168,7 @@ export default function SchedulePage() {
                           setSelectedDate(date);
                           setWeekStart(startOfWeek(date));
                         }}
-                        className={`w-10 h-10 rounded-lg text-sm font-medium ${
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-xs sm:text-sm font-medium ${
                           isSelected ? "bg-purple-500 text-white" : "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                         }`}
                       >
@@ -214,15 +214,16 @@ export default function SchedulePage() {
           </div>
 
           {/* Main content */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-4 lg:space-y-6 order-1 lg:order-2">
             {viewMode === "calendar" ? (
               <>
                 <Card className="border-0 shadow-sm dark:bg-slate-800 dark:border-slate-700">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-center justify-between gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="flex-shrink-0 h-8 w-8 p-0"
                         onClick={() => {
                           const next = addDays(weekStart, -7);
                           setWeekStart(next);
@@ -231,7 +232,7 @@ export default function SchedulePage() {
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
                         {weekDays.map((day) => {
                           const active = isSameDay(day, selectedDate);
                           return (
@@ -241,12 +242,12 @@ export default function SchedulePage() {
                                 setSelectedDate(day);
                                 setWeekStart(startOfWeek(day));
                               }}
-                              className={`flex flex-col items-center px-3 py-2 rounded-xl min-w-[60px] text-sm font-semibold ${
+                              className={`flex flex-col items-center px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl min-w-[44px] sm:min-w-[60px] text-xs sm:text-sm font-semibold flex-shrink-0 ${
                                 active ? "bg-purple-500 text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                               }`}
                             >
                               <span className="opacity-70">{formatDay(day, { weekday: "short" })}</span>
-                              <span className="text-lg">{formatDay(day, { day: "numeric" })}</span>
+                              <span className="text-base sm:text-lg">{formatDay(day, { day: "numeric" })}</span>
                             </button>
                           );
                         })}
@@ -254,6 +255,7 @@ export default function SchedulePage() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="flex-shrink-0 h-8 w-8 p-0"
                         onClick={() => {
                           const next = addDays(weekStart, 7);
                           setWeekStart(next);
@@ -304,7 +306,7 @@ export default function SchedulePage() {
                             </span>
                           </div>
                           {oneOnOneSessions.map((cls) => (
-                            <SessionCard key={cls.id} cls={cls} canJoin={canJoin} type="1on1" />
+                            <SessionCard key={cls.id} cls={cls} canJoin={canJoin} />
                           ))}
                         </div>
                       )}
@@ -325,7 +327,7 @@ export default function SchedulePage() {
                             </span>
                           </div>
                           {programSessions.map((cls) => (
-                            <SessionCard key={cls.id} cls={cls} canJoin={canJoin} type="program" />
+                            <SessionCard key={cls.id} cls={cls} canJoin={canJoin} />
                           ))}
                         </div>
                       )}
@@ -451,12 +453,32 @@ function AllClassesCard({ cls, canJoin }: { cls: any; canJoin: boolean }) {
 
   return (
     <Card className={`border-0 shadow-sm dark:bg-slate-800 border-l-4 ${style.border} ${style.bg}`}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
-            <TypeIcon className={`w-6 h-6 ${style.iconColor}`} />
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
+              <TypeIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${style.iconColor}`} />
+            </div>
+            <div className="flex-1 min-w-0 sm:hidden">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{cls.title}</h4>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge}`}>
+                  {style.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 dark:text-slate-400 flex-wrap">
+                <span className="flex items-center gap-1">
+                  <CalendarIcon className="w-3 h-3" />
+                  {cls.start.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="hidden sm:block flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-semibold text-slate-900 dark:text-slate-100">{cls.title}</h4>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge}`}>
@@ -483,13 +505,13 @@ function AllClassesCard({ cls, canJoin }: { cls: any; canJoin: boolean }) {
                 href={cls.meetingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity w-full sm:w-auto"
               >
                 <Video className="w-4 h-4" />
                 Join
               </a>
             ) : (
-              <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg">Students only</span>
+              <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg text-center w-full sm:w-auto">Students only</span>
             )
           )}
         </div>
@@ -499,7 +521,7 @@ function AllClassesCard({ cls, canJoin }: { cls: any; canJoin: boolean }) {
 }
 
 // Session Card Component
-function SessionCard({ cls, canJoin, type }: { cls: any; canJoin: boolean; type: "1on1" | "program" }) {
+function SessionCard({ cls, canJoin }: { cls: any; canJoin: boolean }) {
   const getSessionStyle = (sessionType: string) => {
     switch (sessionType?.toUpperCase()) {
       case "ONE_ON_ONE":
@@ -551,12 +573,31 @@ function SessionCard({ cls, canJoin, type }: { cls: any; canJoin: boolean; type:
 
   return (
     <Card className={`border-0 shadow-sm dark:bg-slate-800 border-l-4 ${style.border} ${style.bg}`}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
-            <TypeIcon className={`w-6 h-6 ${style.iconColor}`} />
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${style.iconBg} flex items-center justify-center flex-shrink-0`}>
+              <TypeIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${style.iconColor}`} />
+            </div>
+            <div className="flex-1 min-w-0 sm:hidden">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{cls.title}</h4>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge}`}>
+                  {style.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 dark:text-slate-400">
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {cls.start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                </span>
+                {cls.instructor && (
+                  <span className="truncate">with {cls.instructor}</span>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="hidden sm:block flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-semibold text-slate-900 dark:text-slate-100">{cls.title}</h4>
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge}`}>
@@ -579,13 +620,13 @@ function SessionCard({ cls, canJoin, type }: { cls: any; canJoin: boolean; type:
                 href={cls.meetingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity w-full sm:w-auto"
               >
                 <Video className="w-4 h-4" />
                 Join
               </a>
             ) : (
-              <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg">Students only</span>
+              <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-lg text-center w-full sm:w-auto">Students only</span>
             )
           )}
         </div>
@@ -640,26 +681,28 @@ function UpcomingClasses({ classes, canJoin, today, setSelectedDate, startOfWeek
         const TypeIcon = style.icon;
         return (
           <Card key={cls.id} className={`border-0 shadow-sm dark:bg-slate-800 border-l-4 ${style.border}`}>
-            <CardContent className="p-4 flex items-center gap-3">
-              <TypeIcon className={`w-5 h-5 ${style.iconColor}`} />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-slate-900 dark:text-slate-100">{cls.title}</p>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge}`}>
-                    {style.label}
-                  </span>
+            <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <TypeIcon className={`w-5 h-5 ${style.iconColor} flex-shrink-0`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-sm sm:text-base text-slate-900 dark:text-slate-100 truncate">{cls.title}</p>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.badge} flex-shrink-0`}>
+                      {style.label}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    {cls.start.toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  </p>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {cls.start.toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
-                </p>
               </div>
               {cls.meetingUrl && (
                 canJoin ? (
-                  <a href={cls.meetingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200">
+                  <a href={cls.meetingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 text-sm text-white bg-slate-900 dark:bg-white dark:text-slate-900 px-3 py-1.5 rounded-lg hover:opacity-90 w-full sm:w-auto">
                     <Video className="w-4 h-4" /> Join
                   </a>
                 ) : (
-                  <span className="text-xs text-slate-500">Students only</span>
+                  <span className="text-xs text-slate-500 text-center sm:text-left">Students only</span>
                 )
               )}
             </CardContent>

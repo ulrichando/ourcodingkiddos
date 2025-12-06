@@ -228,13 +228,13 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
               </div>
 
               {/* Filter Dropdowns */}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {/* Age Dropdown */}
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none min-w-[120px]">
                   <select
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
-                    className={`appearance-none px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition ${
+                    className={`w-full appearance-none px-3 sm:px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition ${
                       age !== "All Ages"
                         ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-400"
                         : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300"
@@ -248,11 +248,11 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                 </div>
 
                 {/* Level Dropdown */}
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none min-w-[120px]">
                   <select
                     value={level}
                     onChange={(e) => setLevel(e.target.value)}
-                    className={`appearance-none px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition ${
+                    className={`w-full appearance-none px-3 sm:px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition ${
                       level !== "All Levels"
                         ? "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-400"
                         : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300"

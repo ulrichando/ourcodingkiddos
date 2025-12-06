@@ -7,10 +7,7 @@ export default function StructuredData() {
     "url": "https://ourcodingkiddos.com",
     "logo": "https://ourcodingkiddos.com/icon.svg",
     "sameAs": [
-      // Add your social media links here
-      "https://facebook.com/ourcodingkiddos",
-      "https://twitter.com/codingkiddos",
-      "https://instagram.com/ourcodingkiddos"
+      "https://www.facebook.com/profile.php?id=61578690800757"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
