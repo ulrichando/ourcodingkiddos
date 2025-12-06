@@ -12,8 +12,22 @@ import {
 import { logout } from "@/lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
 
+// Type for navigation items
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  badge?: string;
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
 // Navigation configuration with groups
-const navGroups = [
+const navGroups: NavGroup[] = [
   {
     label: "Learn",
     items: [
@@ -50,7 +64,7 @@ const navGroups = [
 
 // Flat navigation for command palette
 const allNavItems = navGroups.flatMap(group => group.items);
-const extraItems = [
+const extraItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: Home, description: "Your personal hub" },
   { href: "/settings", label: "Settings", icon: Settings, description: "Manage your account" },
 ];
