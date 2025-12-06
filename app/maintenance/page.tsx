@@ -230,16 +230,6 @@ export default function MaintenancePage() {
           </p>
         </div>
 
-        {/* Admin Login Link - Hidden but accessible */}
-        <div className="pt-4">
-          <Link
-            href="/auth/login"
-            className="text-xs text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-          >
-            Admin Access
-          </Link>
-        </div>
-
         {/* Branding */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">

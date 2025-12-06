@@ -9,6 +9,19 @@ import type { UserRole } from "../types/next-auth";
 import { checkRateLimit, resetRateLimit } from "./validation";
 import { logLogin, logFailedLogin } from "./audit";
 
+// Check if site is in maintenance mode
+async function isMaintenanceMode(): Promise<boolean> {
+  try {
+    const settings = await prismaBase.platformSettings.findUnique({
+      where: { id: "default" },
+      select: { maintenanceMode: true },
+    });
+    return settings?.maintenanceMode ?? false;
+  } catch {
+    return false;
+  }
+}
+
 // Email provider is enabled only if SMTP settings are present
 const emailProvider =
   process.env.EMAIL_SERVER_HOST && process.env.EMAIL_FROM
@@ -81,6 +94,16 @@ const providers: NextAuthOptions["providers"] = [
             return null;
           }
 
+          // Check maintenance mode - only allow ADMIN login
+          if (user.role !== "ADMIN") {
+            const maintenance = await isMaintenanceMode();
+            if (maintenance) {
+              console.log('[Auth] Login blocked during maintenance for non-admin:', email);
+              logFailedLogin(email, "Login blocked during maintenance mode").catch(() => {});
+              throw new Error("Site is under maintenance. Please try again later.");
+            }
+          }
+
           // Reset rate limit on successful login
           resetRateLimit(email);
 
@@ -151,6 +174,15 @@ export const authOptions: NextAuthOptions = {
           where: { email: user.email },
           include: { accounts: { where: { provider: "google" } } },
         });
+
+        // Check maintenance mode for non-admin OAuth users
+        if (!existingUser || existingUser.role !== "ADMIN") {
+          const maintenance = await isMaintenanceMode();
+          if (maintenance) {
+            console.log('[Auth] OAuth login blocked during maintenance for:', user.email);
+            throw new Error("Site is under maintenance. Please try again later.");
+          }
+        }
 
         if (existingUser) {
           // User exists - check if Google account is already linked
