@@ -1,11 +1,65 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
+// Cache maintenance mode status to reduce DB hits
+let maintenanceCache: { status: boolean; timestamp: number } | null = null;
+const CACHE_TTL = 10000; // 10 seconds
+
+async function checkMaintenanceMode(baseUrl: string): Promise<boolean> {
+  // Return cached value if still valid
+  if (maintenanceCache && Date.now() - maintenanceCache.timestamp < CACHE_TTL) {
+    return maintenanceCache.status;
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/api/maintenance/status`, {
+      cache: 'no-store',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      maintenanceCache = {
+        status: data.maintenanceMode ?? false,
+        timestamp: Date.now()
+      };
+      return maintenanceCache.status;
+    }
+  } catch (error) {
+    console.error("Maintenance check failed:", error);
+  }
+
+  return false;
+}
+
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
     const role = token?.role as string | undefined;
+
+    // Paths that should be accessible during maintenance
+    const maintenanceExemptPaths = [
+      "/maintenance",
+      "/auth/login",
+      "/api/",
+      "/_next/",
+      "/favicon.ico",
+    ];
+
+    // Check if current path is exempt from maintenance mode
+    const isExemptPath = maintenanceExemptPaths.some(
+      (exemptPath) => path === exemptPath || path.startsWith(exemptPath)
+    );
+
+    // Check maintenance mode for non-admin users on non-exempt paths
+    if (!isExemptPath && role !== "ADMIN") {
+      const baseUrl = req.nextUrl.origin;
+      const isMaintenanceMode = await checkMaintenanceMode(baseUrl);
+
+      if (isMaintenanceMode) {
+        return NextResponse.redirect(new URL("/maintenance", req.url));
+      }
+    }
 
     // Admin routes - only ADMIN role
     if (path.startsWith("/dashboard/admin")) {
@@ -78,6 +132,7 @@ export default withAuth(
           "/playground",
           "/schedule",
           "/certificates/verify",
+          "/maintenance",
         ];
 
         // Check if it's a public route or public route prefix
