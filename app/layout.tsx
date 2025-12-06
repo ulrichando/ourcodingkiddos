@@ -4,6 +4,7 @@ import "./globals.css";
 import AppHeader from "../components/navigation/AppHeader";
 import AuthProvider from "../components/providers/AuthProvider";
 import ThemeHydrator from "../components/providers/ThemeHydrator";
+import ScreenSizeProvider from "../components/providers/ScreenSizeProvider";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import StructuredData from "../components/seo/StructuredData";
 import LazyComponents from "../components/providers/LazyComponents";
@@ -60,18 +61,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-slate-50 dark:bg-[#050812]`} suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen`} suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  const stored = localStorage.getItem("ok-theme");
-                  const theme = stored || "light";
+                  var stored = localStorage.getItem("ok-theme");
+                  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                  var theme = stored || (prefersDark ? "dark" : "light");
                   document.documentElement.classList.toggle("dark", theme === "dark");
                   document.documentElement.setAttribute("data-theme", theme);
                   if (!stored) localStorage.setItem("ok-theme", theme);
-                } catch (_) {}
+                } catch (e) {}
               })();
             `,
           }}
@@ -79,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <StructuredData />
         <AuthProvider>
           <ThemeHydrator />
+          <ScreenSizeProvider>
           <ErrorBoundary>
             <div className="min-h-screen flex flex-col">
               <AppHeader />
@@ -187,6 +190,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <LazyComponents />
             </div>
           </ErrorBoundary>
+          </ScreenSizeProvider>
         </AuthProvider>
       </body>
     </html>

@@ -193,8 +193,14 @@ export default function AppHeader() {
             <button
               onClick={() => {
                 const isDark = document.documentElement.classList.contains("dark");
+                const newTheme = isDark ? "light" : "dark";
+                // Add transition class for smooth theme switching
+                document.documentElement.classList.add("theme-transition");
                 document.documentElement.classList.toggle("dark", !isDark);
-                try { localStorage.setItem("ok-theme", isDark ? "light" : "dark"); } catch { /* Ignore localStorage errors in SSR */ }
+                document.documentElement.setAttribute("data-theme", newTheme);
+                try { localStorage.setItem("ok-theme", newTheme); } catch { /* Ignore localStorage errors in SSR */ }
+                // Remove transition class after animation completes
+                setTimeout(() => document.documentElement.classList.remove("theme-transition"), 300);
               }}
               className="h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Toggle theme"

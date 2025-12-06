@@ -2,19 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-  background-color: #f8fafc;
-  --color-primary: #8B5CF6;
-  --color-primary-dark: #7C3AED;
-  --color-secondary: #EC4899;
-  --color-accent: #F59E0B;
-}
-.dark:root {
-  color-scheme: dark;
-  background-color: #050812;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -22,214 +9,36 @@
 body {
   margin: 0;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-  color: #0f172a;
-  background: linear-gradient(135deg, #f0f9ff 0%, #ecfeff 45%, #fdf2f8 100%);
-}
-.dark body {
-  color: #e2e8f0;
-  background: #050812;
-  background: radial-gradient(circle at 20% 20%, rgba(88, 28, 135, 0.25), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.18), transparent 25%),
-    #050812;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hero code sample in dark mode: keep text bright */
-.dark pre,
-.dark code {
-  color: #e5e7eb !important;
-}
-.dark .code-card {
-  color: #e5e7eb !important;
+/* Logo */
+.logo {
+  font-family: "Baloo 2", "Quicksand", system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
-/* Global dark-mode adjustments so existing light classes look correct */
-.dark .bg-white {
-  background-color: #0f172a !important;
-  color: #e2e8f0 !important;
-}
-.dark [class*="bg-white/"] {
-  background-color: #0f172a !important;
-  color: #e2e8f0 !important;
-}
-.dark .bg-slate-50 {
-  background-color: #0a1224 !important;
-  color: #e2e8f0 !important;
-}
-.dark .bg-slate-100 {
-  background-color: #0d162b !important;
-  color: #e2e8f0 !important;
-}
-.dark .bg-slate-200 {
-  background-color: #131f36 !important;
-  color: #e2e8f0 !important;
-}
-.dark .bg-gradient-to-b.from-slate-50 {
-  background-image: linear-gradient(to bottom, #0a1224, #0a1224) !important;
-  color: #e2e8f0 !important;
-}
-.dark .bg-gradient-to-r.from-purple-600 {
-  /* keep gradients vivid on dark background */
-  color: #e2e8f0 !important;
-}
-.dark .text-slate-900 {
-  color: #e2e8f0 !important;
-}
-.dark .text-slate-800 {
-  color: #cbd5f5 !important;
-}
-.dark .text-slate-700,
-.dark .text-slate-600,
-.dark .text-slate-500 {
-  color: #94a3b8 !important;
-}
-.dark .text-slate-400,
-.dark .text-slate-300,
-.dark .text-slate-200 {
-  color: #cbd5e1 !important;
-}
-.dark .text-slate-100 {
-  color: #e2e8f0 !important;
-}
-.dark .border-slate-200 {
-  border-color: #1e293b !important;
-}
-.dark .border-slate-100 {
-  border-color: #162137 !important;
-}
-.dark .border-slate-300 {
-  border-color: #25324a !important;
-}
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.45);
+/* Footer */
+.site-footer {
+  margin-top: auto;
 }
 
-/* Messages list (left column) in dark mode */
-.dark .message-list,
-.dark .message-item {
-  background-color: #0d162b !important;
-  color: #e2e8f0 !important;
-  border-color: #1e293b !important;
-}
-.dark .message-item:hover,
-.dark .message-item:focus-visible {
-  background-color: #16243d !important;
-}
-.dark .message-item .text-muted {
-  color: #cbd5e1 !important;
-}
-.dark .message-item .text-dim {
-  color: #94a3b8 !important;
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 1.5rem 1rem;
+  }
+  .site-footer .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .site-footer ul {
+    padding-left: 0;
+  }
 }
 
-/* Course pages & learning sections */
-.dark .course-card,
-.dark .course-detail,
-.dark .course-section,
-.dark .lesson-shell {
-  color: #e2e8f0 !important;
-  background-color: transparent;
-}
-.dark .lesson-card,
-.dark .lesson-list,
-.dark .lesson-item,
-.dark .lesson-content {
-  color: #e2e8f0 !important;
-}
-.dark .lesson-card p,
-.dark .lesson-list p,
-.dark .lesson-item p,
-.dark .lesson-content p {
-  color: #cbd5e1 !important;
-}
-.dark .course-card h1,
-.dark .course-card h2,
-.dark .course-card h3,
-.dark .course-card h4,
-.dark .course-detail h1,
-.dark .course-detail h2,
-.dark .course-detail h3,
-.dark .course-detail h4,
-.dark .lesson-shell h1,
-.dark .lesson-shell h2,
-.dark .lesson-shell h3,
-.dark .lesson-shell h4 {
-  color: #e2e8f0 !important;
-}
-.dark .course-card p,
-.dark .course-detail p,
-.dark .lesson-shell p {
-  color: #cbd5e1 !important;
-}
-.dark .course-meta,
-.dark .course-muted {
-  color: #94a3b8 !important;
-}
-
-/* Lesson pages */
-.lesson-page {
-  /* Background handled by Tailwind classes for both themes */
-}
-.lesson-overview {
-  background: #ffffff;
-  color: #0f172a;
-}
-.dark .lesson-overview {
-  background: #0f172a !important;
-  color: #e2e8f0 !important;
-}
-.dark .lesson-overview h3 {
-  color: #e5e7eb !important;
-}
-.dark .lesson-overview p,
-.dark .lesson-overview li {
-  color: #cbd5e1 !important;
-}
-
-/* Pricing & hero cards in dark */
-.dark .pricing-card,
-.dark .pricing-summary,
-.dark .pricing-section {
-  color: #e5e7eb !important;
-  background-color: #0f172a !important;
-  border-color: #1e293b !important;
-}
-.dark .pricing-card h2,
-.dark .pricing-card h3,
-.dark .pricing-card h4,
-.dark .pricing-card span,
-.dark .pricing-card p {
-  color: #e5e7eb !important;
-}
-
-/* Code samples on dark */
-.dark .bg-slate-900 code,
-.dark .bg-slate-800 code,
-.dark .bg-\[\#0f1528\] code,
-.dark .bg-slate-900 pre,
-.dark .bg-slate-800 pre,
-.dark .bg-\[\#0f1528\] pre {
-  color: #e5e7eb !important;
-}
-
-a {
-  text-decoration: none;
-}
-
-/* Media defaults */
-img,
-video {
-  max-width: 100%;
-  height: auto;
-}
-
-.responsive-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
+/* Header nav mobile */
 @media (max-width: 768px) {
   .header-nav {
     flex-wrap: wrap;
@@ -244,99 +53,25 @@ video {
   }
 }
 
-.glass-panel {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 10px 50px rgba(15, 23, 42, 0.08);
+/* Responsive Grid */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
-.logo {
-  font-family: "Baloo 2", "Quicksand", system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: 0.01em;
+/* Media defaults */
+img, video {
+  max-width: 100%;
+  height: auto;
 }
 
-/* Footer mobile visibility */
-.site-footer {
-  margin-top: auto;
-}
-@media (max-width: 768px) {
-  .site-footer {
-    padding: 1.5rem 1rem;
-  }
-  .site-footer .grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem;
-  }
-  .site-footer ul {
-    padding-left: 0;
-  }
-}
-
-/* Smooth scrolling optimization */
+/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }
 
-* {
-  /* Hardware acceleration for all elements */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Optimize scrollable containers */
-[class*="overflow-y-auto"],
-[class*="overflow-auto"] {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  will-change: scroll-position;
-  /* Force GPU acceleration */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* Custom scrollbar styling for better appearance */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
-}
-
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
-}
-
-.dark * {
-  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
-}
-
-/* Gradient animation */
+/* Animations */
 @keyframes gradient-shift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -348,13 +83,68 @@ html {
   animation: gradient-shift 3s ease infinite;
 }
 
-/* Accessibility: Better focus outlines */
-*:focus-visible {
-  outline: 2px solid #8B5CF6;
-  outline-offset: 2px;
+/* Gradient text animation */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-/* Accessibility: Reduced motion support */
+.animate-gradient-x {
+  animation: gradient-x 4s ease infinite;
+}
+
+/* Scanline animation for dark mode */
+@keyframes scanline {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scaleX(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleX(1.1);
+  }
+}
+
+/* Star twinkle animation */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Floating animations */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-20px) translateX(10px); }
+  50% { transform: translateY(-10px) translateX(-5px); }
+  75% { transform: translateY(-30px) translateX(5px); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  33% { transform: translateY(-15px) translateX(-10px); }
+  66% { transform: translateY(-25px) translateX(10px); }
+}
+
+@keyframes float-pixel {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(5deg); }
+  50% { transform: translateY(-20px) rotate(0deg); }
+  75% { transform: translateY(-10px) rotate(-5deg); }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 6s ease-in-out infinite;
+}
+
+.animate-float-pixel {
+  animation: float-pixel 4s ease-in-out infinite;
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -362,5 +152,8 @@ html {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
   }
 }

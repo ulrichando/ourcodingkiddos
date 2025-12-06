@@ -35,6 +35,15 @@ import {
 // Game Types - Each maps to a code example
 type GameMode = 'snake' | 'pong' | 'tetris' | 'spaceInvaders' | 'brickBreaker';
 
+// Game info - shared between components
+const GAME_INFO: Record<GameMode, { label: string; hint: string; color: string }> = {
+  snake: { label: '🐍 Snake', hint: 'Use arrow keys or WASD to move!', color: '#22c55e' },
+  pong: { label: '🏓 Pong', hint: 'Move mouse up/down to control paddle!', color: '#3b82f6' },
+  tetris: { label: '🧱 Tetris', hint: 'Arrow keys to move, Up to rotate, Down to drop!', color: '#eab308' },
+  spaceInvaders: { label: '👾 Space Invaders', hint: 'Arrow keys to move, Space to shoot!', color: '#8b5cf6' },
+  brickBreaker: { label: '🧱 Brick Breaker', hint: 'Move mouse to control paddle!', color: '#ec4899' },
+};
+
 // Classic Arcade Games Background Component
 function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?: GameMode; onScoreUpdate?: (score: number) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +53,6 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
   // Game state
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  const [showHint, setShowHint] = useState(true);
   const [currentGame, setCurrentGame] = useState<GameMode>(gameMode);
 
   // Shared refs
@@ -81,14 +89,10 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
   const ballBBRef = useRef({ x: 0, y: 0, vx: 3, vy: -3, r: 8 });
   const bricksRef = useRef<Array<{x: number, y: number, w: number, h: number, alive: boolean, color: string}>>([]);
 
-  // Game labels and colors
-  const GAME_INFO: Record<GameMode, { label: string; hint: string; color: string }> = {
-    snake: { label: '🐍 Snake', hint: 'Use arrow keys or WASD to move!', color: '#22c55e' },
-    pong: { label: '🏓 Pong', hint: 'Move mouse up/down to control paddle!', color: '#3b82f6' },
-    tetris: { label: '🧱 Tetris', hint: 'Arrow keys to move, Up to rotate, Down to drop!', color: '#eab308' },
-    spaceInvaders: { label: '👾 Space Invaders', hint: 'Arrow keys to move, Space to shoot!', color: '#8b5cf6' },
-    brickBreaker: { label: '🧱 Brick Breaker', hint: 'Move mouse to control paddle!', color: '#ec4899' },
-  };
+  // Responsive scale factor helper
+  const getResponsiveScale = useCallback((width: number, height: number) => {
+    return Math.min(width, height) / 800;
+  }, []);
 
   // Initialize game when mode changes
   const initGame = useCallback((mode: GameMode, width: number, height: number) => {
@@ -97,11 +101,13 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
     gameOverRef.current = false;
     setGameOver(false);
 
-    const gridSize = 20;
+    // Responsive scale factor
+    const scale = getResponsiveScale(width, height);
+    const gridSize = Math.max(12, Math.round(20 * scale));
 
     switch (mode) {
       case 'snake': {
-        // Initialize Snake
+        // Initialize Snake with responsive grid
         const startX = Math.floor(width / 2 / gridSize) * gridSize;
         const startY = Math.floor(height / 2 / gridSize) * gridSize;
         snakeRef.current = [
@@ -117,12 +123,16 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
         break;
       }
 
-      case 'pong':
-        // Initialize Pong
-        paddleRef.current = { y: height / 2 - 40, h: 80 };
-        aiPaddleRef.current = { y: height / 2 - 40, h: 80 };
-        ballRef.current = { x: width / 2, y: height / 2, vx: 4, vy: 2, r: 8 };
+      case 'pong': {
+        // Initialize Pong with responsive sizes
+        const paddleH = Math.max(50, Math.round(80 * scale));
+        const ballR = Math.max(5, Math.round(8 * scale));
+        const ballSpeed = Math.max(2, 4 * scale);
+        paddleRef.current = { y: height / 2 - paddleH / 2, h: paddleH };
+        aiPaddleRef.current = { y: height / 2 - paddleH / 2, h: paddleH };
+        ballRef.current = { x: width / 2, y: height / 2, vx: ballSpeed, vy: ballSpeed / 2, r: ballR };
         break;
+      }
 
       case 'tetris': {
         // Initialize Tetris
@@ -154,38 +164,59 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
         break;
       }
 
-      case 'spaceInvaders':
-        // Initialize Space Invaders
-        shipRef.current = { x: width / 2 - 20, y: height - 50, w: 40, h: 20 };
+      case 'spaceInvaders': {
+        // Initialize Space Invaders with responsive sizes
+        const shipW = Math.max(25, Math.round(40 * scale));
+        const shipH = Math.max(15, Math.round(20 * scale));
+        const alienSpacingX = Math.max(35, Math.round(50 * scale));
+        const alienSpacingY = Math.max(30, Math.round(40 * scale));
+        const alienStartX = Math.max(40, Math.round(60 * scale));
+        const alienStartY = Math.max(40, Math.round(60 * scale));
+        // Calculate how many columns fit
+        const alienCols = Math.min(8, Math.max(4, Math.floor((width - alienStartX * 2) / alienSpacingX)));
+
+        shipRef.current = { x: width / 2 - shipW / 2, y: height - shipH * 2.5, w: shipW, h: shipH };
         bulletsRef.current = [];
         aliensRef.current = [];
         alienDirRef.current = 1;
-        // Create alien grid
+        // Create alien grid - responsive number of columns
         for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 8; col++) {
+          for (let col = 0; col < alienCols; col++) {
             aliensRef.current.push({
-              x: 60 + col * 50,
-              y: 60 + row * 40,
+              x: alienStartX + col * alienSpacingX,
+              y: alienStartY + row * alienSpacingY,
               alive: true,
             });
           }
         }
         break;
+      }
 
       case 'brickBreaker': {
-        // Initialize Brick Breaker
-        paddleBBRef.current = { x: width / 2 - 50, w: 100, h: 15 };
-        ballBBRef.current = { x: width / 2, y: height - 100, vx: 3, vy: -3, r: 8 };
+        // Initialize Brick Breaker with responsive sizes
+        const paddleW = Math.max(60, Math.round(100 * scale));
+        const paddleH = Math.max(10, Math.round(15 * scale));
+        const ballR = Math.max(5, Math.round(8 * scale));
+        const ballSpeed = Math.max(2, 3 * scale);
+
+        paddleBBRef.current = { x: width / 2 - paddleW / 2, w: paddleW, h: paddleH };
+        ballBBRef.current = { x: width / 2, y: height - 100, vx: ballSpeed, vy: -ballSpeed, r: ballR };
         bricksRef.current = [];
         const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
-        const brickW = 60;
-        const brickH = 20;
-        const cols = Math.floor((width - 40) / (brickW + 5));
-        for (let row = 0; row < 5; row++) {
+        const brickW = Math.max(40, Math.round(60 * scale));
+        const brickH = Math.max(15, Math.round(20 * scale));
+        const brickGap = Math.max(3, Math.round(5 * scale));
+        const brickPadding = Math.max(15, Math.round(20 * scale));
+        const cols = Math.max(4, Math.floor((width - brickPadding * 2) / (brickW + brickGap)));
+        const rows = Math.min(5, Math.max(3, Math.floor((height * 0.3) / (brickH + brickGap))));
+        const startX = (width - cols * (brickW + brickGap) + brickGap) / 2;
+        const startY = Math.max(40, Math.round(60 * scale));
+
+        for (let row = 0; row < rows; row++) {
           for (let col = 0; col < cols; col++) {
             bricksRef.current.push({
-              x: 20 + col * (brickW + 5),
-              y: 60 + row * (brickH + 5),
+              x: startX + col * (brickW + brickGap),
+              y: startY + row * (brickH + brickGap),
               w: brickW,
               h: brickH,
               alive: true,
@@ -196,12 +227,11 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
         break;
       }
     }
-  }, []);
+  }, [getResponsiveScale]);
 
   // Handle game mode changes
   useEffect(() => {
     setCurrentGame(gameMode);
-    setShowHint(true);
     if (canvasRef.current) {
       initGame(gameMode, canvasRef.current.width, canvasRef.current.height);
     }
@@ -268,7 +298,6 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
     };
 
     const handleClick = () => {
-      setShowHint(false);
       mouseRef.current.clicked = true;
 
       // Restart on game over
@@ -302,31 +331,40 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
     let lastTime = 0;
     let snakeTimer = 0;
     let pipeTimer = 0;
-    const gridSize = 20;
+
+    // Calculate responsive scale factor (reference: 800px)
+    const getScale = () => Math.min(canvas.width, canvas.height) / 800;
 
     const animate = (time: number) => {
       const dt = Math.min((time - lastTime) / 16.67, 2);
       lastTime = time;
 
-      // Clear canvas with semi-transparent black for trail effect
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.3)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Responsive scale factor
+      const scale = getScale();
+      const gridSize = Math.max(12, Math.round(20 * scale));
+
+      // Clear canvas to transparent - allows background to show through
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const gameInfo = GAME_INFO[currentGame];
 
       if (gameOverRef.current) {
-        // Game Over Screen
+        // Game Over Screen - responsive text sizes
+        const titleSize = Math.max(24, Math.round(48 * scale));
+        const scoreSize = Math.max(14, Math.round(24 * scale));
+        const hintSize = Math.max(12, Math.round(18 * scale));
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 48px sans-serif';
+        ctx.font = `bold ${titleSize}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 30);
-        ctx.font = '24px sans-serif';
-        ctx.fillText(`Score: ${scoreRef.current}`, canvas.width / 2, canvas.height / 2 + 20);
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - titleSize * 0.6);
+        ctx.font = `${scoreSize}px sans-serif`;
+        ctx.fillText(`Score: ${scoreRef.current}`, canvas.width / 2, canvas.height / 2 + scoreSize * 0.8);
         ctx.fillStyle = gameInfo.color;
-        ctx.font = '18px sans-serif';
-        ctx.fillText('Click to restart', canvas.width / 2, canvas.height / 2 + 60);
+        ctx.font = `${hintSize}px sans-serif`;
+        ctx.fillText('Click to restart', canvas.width / 2, canvas.height / 2 + scoreSize * 0.8 + hintSize * 2);
       } else {
         // ===== SNAKE GAME =====
         if (currentGame === 'snake') {
@@ -393,13 +431,14 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           const ball = ballRef.current;
           const paddle = paddleRef.current;
           const aiPaddle = aiPaddleRef.current;
-          const paddleW = 15;
+          // Responsive paddle width
+          const paddleW = Math.max(10, Math.round(15 * scale));
 
           // Player paddle follows mouse
           paddle.y = Math.max(0, Math.min(canvas.height - paddle.h, mouseRef.current.y - paddle.h / 2));
 
-          // AI paddle
-          const aiSpeed = 3;
+          // AI paddle - responsive speed
+          const aiSpeed = Math.max(2, 3 * scale);
           if (aiPaddle.y + aiPaddle.h / 2 < ball.y) aiPaddle.y += aiSpeed * dt;
           if (aiPaddle.y + aiPaddle.h / 2 > ball.y) aiPaddle.y -= aiSpeed * dt;
 
@@ -421,7 +460,8 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
             ball.vx = -Math.abs(ball.vx) * 1.02;
           }
 
-          // Ball out of bounds
+          // Ball out of bounds - responsive ball reset speed
+          const resetSpeed = Math.max(2, 4 * scale);
           if (ball.x < 0 || ball.x > canvas.width) {
             if (ball.x < 0) {
               gameOverRef.current = true;
@@ -432,8 +472,8 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
             }
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
-            ball.vx = 4 * (Math.random() > 0.5 ? 1 : -1);
-            ball.vy = 2 * (Math.random() - 0.5);
+            ball.vx = resetSpeed * (Math.random() > 0.5 ? 1 : -1);
+            ball.vy = (resetSpeed / 2) * (Math.random() - 0.5);
           }
 
           // Draw paddles
@@ -448,9 +488,10 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
           ctx.fill();
 
-          // Draw center line
+          // Draw center line - responsive dash
+          const dashSize = Math.max(5, Math.round(10 * scale));
           ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-          ctx.setLineDash([10, 10]);
+          ctx.setLineDash([dashSize, dashSize]);
           ctx.beginPath();
           ctx.moveTo(canvas.width / 2, 0);
           ctx.lineTo(canvas.width / 2, canvas.height);
@@ -677,9 +718,19 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           const bullets = bulletsRef.current;
           const aliens = aliensRef.current;
 
+          // Responsive sizes
+          const shipSpeed = Math.max(3, 5 * scale);
+          const alienSpeed = Math.max(0.3, 0.5 * scale);
+          const alienW = Math.max(20, Math.round(30 * scale));
+          const alienH = Math.max(15, Math.round(25 * scale));
+          const alienDropDist = Math.max(12, Math.round(20 * scale));
+          const bulletW = Math.max(3, Math.round(4 * scale));
+          const bulletH = Math.max(6, Math.round(10 * scale));
+          const eyeSize = Math.max(4, Math.round(6 * scale));
+
           // Ship movement
-          if (keysRef.current.has('arrowleft') || keysRef.current.has('a')) ship.x -= 5 * dt;
-          if (keysRef.current.has('arrowright') || keysRef.current.has('d')) ship.x += 5 * dt;
+          if (keysRef.current.has('arrowleft') || keysRef.current.has('a')) ship.x -= shipSpeed * dt;
+          if (keysRef.current.has('arrowright') || keysRef.current.has('d')) ship.x += shipSpeed * dt;
           ship.x = Math.max(0, Math.min(canvas.width - ship.w, ship.x));
 
           // Update bullets
@@ -690,21 +741,22 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
 
           // Update aliens
           let moveDown = false;
+          const edgePadding = Math.max(15, Math.round(20 * scale));
           aliens.forEach(alien => {
             if (alien.alive) {
-              alien.x += alienDirRef.current * 0.5 * dt;
-              if (alien.x < 20 || alien.x > canvas.width - 50) moveDown = true;
+              alien.x += alienDirRef.current * alienSpeed * dt;
+              if (alien.x < edgePadding || alien.x > canvas.width - alienW - edgePadding) moveDown = true;
             }
           });
           if (moveDown) {
             alienDirRef.current *= -1;
-            aliens.forEach(a => { if (a.alive) a.y += 20; });
+            aliens.forEach(a => { if (a.alive) a.y += alienDropDist; });
           }
 
           // Bullet-alien collision
           bullets.forEach((bullet, bi) => {
             aliens.forEach(alien => {
-              if (alien.alive && bullet.x > alien.x && bullet.x < alien.x + 30 && bullet.y > alien.y && bullet.y < alien.y + 25) {
+              if (alien.alive && bullet.x > alien.x && bullet.x < alien.x + alienW && bullet.y > alien.y && bullet.y < alien.y + alienH) {
                 alien.alive = false;
                 bullets.splice(bi, 1);
                 scoreRef.current += 10;
@@ -713,21 +765,27 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
             });
           });
 
-          // Check game over
-          if (aliens.some(a => a.alive && a.y > canvas.height - 100)) {
+          // Check game over - responsive bottom threshold
+          const bottomThreshold = Math.max(60, Math.round(100 * scale));
+          if (aliens.some(a => a.alive && a.y > canvas.height - bottomThreshold)) {
             gameOverRef.current = true;
             setGameOver(true);
           }
 
-          // Check win
+          // Check win - reset with responsive positioning
           if (!aliens.some(a => a.alive)) {
             scoreRef.current += 100;
             setScore(scoreRef.current);
-            // Reset aliens
+            // Reset aliens with responsive spacing
+            const alienSpacingX = Math.max(35, Math.round(50 * scale));
+            const alienSpacingY = Math.max(30, Math.round(40 * scale));
+            const alienStartX = Math.max(40, Math.round(60 * scale));
+            const alienStartY = Math.max(40, Math.round(60 * scale));
+            const alienCols = Math.min(8, Math.max(4, Math.floor((canvas.width - alienStartX * 2) / alienSpacingX)));
             aliens.length = 0;
             for (let row = 0; row < 4; row++) {
-              for (let col = 0; col < 8; col++) {
-                aliens.push({ x: 60 + col * 50, y: 60 + row * 40, alive: true });
+              for (let col = 0; col < alienCols; col++) {
+                aliens.push({ x: alienStartX + col * alienSpacingX, y: alienStartY + row * alienSpacingY, alive: true });
               }
             }
           }
@@ -741,19 +799,21 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           ctx.closePath();
           ctx.fill();
 
-          // Draw bullets
+          // Draw bullets - responsive size
           ctx.fillStyle = '#eab308';
-          bullets.forEach(b => ctx.fillRect(b.x - 2, b.y, 4, 10));
+          bullets.forEach(b => ctx.fillRect(b.x - bulletW / 2, b.y, bulletW, bulletH));
 
-          // Draw aliens
+          // Draw aliens - responsive size
           aliens.forEach(alien => {
             if (alien.alive) {
               ctx.fillStyle = '#8b5cf6';
-              ctx.fillRect(alien.x, alien.y, 30, 25);
-              // Eyes
+              ctx.fillRect(alien.x, alien.y, alienW, alienH);
+              // Eyes - responsive
               ctx.fillStyle = '#fff';
-              ctx.fillRect(alien.x + 5, alien.y + 8, 6, 6);
-              ctx.fillRect(alien.x + 19, alien.y + 8, 6, 6);
+              const eyeOffset = Math.round(alienW * 0.17);
+              const eyeY = Math.round(alienH * 0.32);
+              ctx.fillRect(alien.x + eyeOffset, alien.y + eyeY, eyeSize, eyeSize);
+              ctx.fillRect(alien.x + alienW - eyeOffset - eyeSize, alien.y + eyeY, eyeSize, eyeSize);
             }
           });
         }
@@ -763,6 +823,11 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           const paddle = paddleBBRef.current;
           const ball = ballBBRef.current;
           const bricks = bricksRef.current;
+
+          // Responsive paddle position
+          const paddleY = canvas.height - Math.max(20, Math.round(30 * scale));
+          const paddleCollisionTop = canvas.height - Math.max(30, Math.round(40 * scale));
+          const paddleCollisionBottom = canvas.height - Math.max(15, Math.round(25 * scale));
 
           // Paddle follows mouse
           paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, mouseRef.current.x - paddle.w / 2));
@@ -775,8 +840,8 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
           if (ball.x < ball.r || ball.x > canvas.width - ball.r) ball.vx *= -1;
           if (ball.y < ball.r) ball.vy *= -1;
 
-          // Ball collision with paddle
-          if (ball.y > canvas.height - 40 && ball.y < canvas.height - 25 &&
+          // Ball collision with paddle - responsive collision zone
+          if (ball.y > paddleCollisionTop && ball.y < paddleCollisionBottom &&
               ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
             ball.vy = -Math.abs(ball.vy);
             ball.vx += (ball.x - paddle.x - paddle.w / 2) * 0.1;
@@ -806,9 +871,9 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
             initGame('brickBreaker', canvas.width, canvas.height);
           }
 
-          // Draw paddle
+          // Draw paddle - responsive position
           ctx.fillStyle = '#ec4899';
-          ctx.fillRect(paddle.x, canvas.height - 30, paddle.w, paddle.h);
+          ctx.fillRect(paddle.x, paddleY, paddle.w, paddle.h);
 
           // Draw ball
           ctx.fillStyle = '#fff';
@@ -907,51 +972,6 @@ function LivingGameBackground({ gameMode = 'snake', onScoreUpdate }: { gameMode?
         </div>
       )}
 
-      {/* Interactive Hint - Professional glass morphism design */}
-      {showHint && !gameOver && (
-        <div
-          className="absolute left-1/2 -translate-x-1/2 z-30 flex items-center animate-fade-in-up"
-          style={{
-            bottom: 'clamp(4rem, 12vh, 7rem)',
-            padding: 'clamp(0.5rem, 1.2vw, 0.75rem) clamp(0.75rem, 2.5vw, 1.25rem)',
-            gap: 'clamp(0.375rem, 1vw, 0.625rem)',
-            background: 'linear-gradient(135deg, rgba(15, 15, 35, 0.85) 0%, rgba(30, 20, 60, 0.8) 100%)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            borderRadius: '9999px',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            boxShadow: `0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px ${gameInfo.color}20, inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
-          }}
-        >
-          <div
-            className="flex-shrink-0 flex items-center justify-center rounded-full"
-            style={{
-              width: 'clamp(1.25rem, 2.5vw, 1.75rem)',
-              height: 'clamp(1.25rem, 2.5vw, 1.75rem)',
-              background: `linear-gradient(135deg, ${gameInfo.color}30 0%, ${gameInfo.color}10 100%)`,
-              border: `1px solid ${gameInfo.color}40`,
-            }}
-          >
-            <Gamepad2
-              style={{
-                color: gameInfo.color,
-                width: 'clamp(0.75rem, 1.5vw, 1rem)',
-                height: 'clamp(0.75rem, 1.5vw, 1rem)',
-                filter: `drop-shadow(0 0 4px ${gameInfo.color}60)`,
-              }}
-            />
-          </div>
-          <span
-            className="text-white/95 font-semibold whitespace-nowrap tracking-wide"
-            style={{
-              fontSize: 'clamp(0.65rem, 1.4vw, 0.875rem)',
-              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-            {gameInfo.hint}
-          </span>
-        </div>
-      )}
     </div>
   );
 }
@@ -1108,22 +1128,22 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
   };
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto">
-      {/* Main Container - Code Editor Style */}
-      <div className="relative rounded-2xl bg-slate-900/90 border border-white/10 overflow-hidden backdrop-blur-sm shadow-2xl">
+    <div className="relative w-full max-w-4xl mx-auto">
+      {/* Main Container - Clean Terminal Style */}
+      <div className="relative rounded-2xl bg-slate-900/95 border border-white/10 overflow-hidden backdrop-blur-sm shadow-2xl">
         {/* Editor Header */}
-        <div className="flex items-center justify-between px-4 py-2 bg-slate-800/80 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1.5">
+        <div className="flex items-center justify-between px-5 py-3 bg-slate-800/80 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500/80" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
               <div className="w-3 h-3 rounded-full bg-green-500/80" />
             </div>
-            <span className="text-xs text-white/50 ml-2 font-mono">my_first_code.py</span>
+            <span className="text-sm text-white/60 font-mono">{currentExample.title}.py</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Example Selector Pills */}
-            <div className="hidden sm:flex items-center gap-1">
+            <div className="hidden sm:flex items-center gap-1.5">
               {CODE_EXAMPLES.map((ex, idx) => (
                 <button
                   key={ex.id}
@@ -1133,10 +1153,10 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
                     setShowOutput(false);
                     setParticles([]);
                   }}
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                     idx === currentExampleIndex
                       ? 'bg-violet-500 text-white'
-                      : 'bg-white/10 text-white/50 hover:bg-white/20'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white'
                   }`}
                 >
                   {ex.title}
@@ -1146,46 +1166,25 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
           </div>
         </div>
 
-        {/* Code Area with Mascot */}
-        <div className="relative flex">
-          {/* Mascot Character */}
-          <div className="absolute -left-2 -top-2 z-20 hidden sm:block">
-            <div className="relative">
-              {/* Mascot Body */}
-              <div
-                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg border-2 border-white/20 transform -rotate-6 hover:rotate-0 transition-transform cursor-pointer"
-                style={{ animation: 'mascotBounce 2s ease-in-out infinite' }}
-              >
-                <span className="text-2xl">{getMascotFace()}</span>
-              </div>
-              {/* Speech Bubble */}
-              <div className="absolute -right-2 top-0 transform translate-x-full">
-                <div className="relative bg-white dark:bg-slate-800 rounded-lg px-2 py-1 shadow-md">
-                  <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
-                    {isTyping ? 'Typing...' : showOutput ? 'It works!' : 'Watch this!'}
-                  </span>
-                  <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-white dark:bg-slate-800 transform rotate-45" />
-                </div>
-              </div>
-            </div>
-          </div>
-
+        {/* Code Area */}
+        <div className="relative">
           {/* Code Editor */}
-          <div className="flex-1 p-4 sm:pl-20 min-h-[140px]">
+          <div className="p-6 h-[200px]">
             {/* Line Numbers */}
-            <div className="flex">
-              <div className="text-right pr-4 select-none">
-                {(displayedCode || currentExample.code).split('\n').map((_, i) => (
-                  <div key={i} className="text-xs text-white/30 font-mono leading-6">
-                    {i + 1}
+            <div className="flex h-full">
+              <div className="text-right pr-6 select-none border-r border-white/10 mr-6">
+                {/* Always show 6 line numbers for consistent height */}
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <div key={num} className="text-sm text-white/30 font-mono leading-7">
+                    {num}
                   </div>
                 ))}
               </div>
               {/* Code Content */}
-              <div className="flex-1 font-mono text-sm">
-                <pre className="text-emerald-400 leading-6 whitespace-pre-wrap">
-                  {displayedCode || <span className="text-white/30">Click &quot;Run&quot; to see the magic...</span>}
-                  {isTyping && <span className="inline-block w-2 h-4 bg-emerald-400 animate-pulse ml-0.5" />}
+              <div className="flex-1 font-mono text-base overflow-hidden">
+                <pre className="text-emerald-400 leading-7 whitespace-pre-wrap">
+                  {displayedCode || <span className="text-white/40">Click "Run" to see the magic...</span>}
+                  {isTyping && <span className="inline-block w-2 h-5 bg-emerald-400 animate-pulse ml-0.5" />}
                 </pre>
               </div>
             </div>
@@ -1196,15 +1195,15 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
         <div
           ref={outputRef}
           className={`relative border-t border-white/10 bg-slate-950/50 overflow-hidden transition-all duration-500 ${
-            showOutput ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
+            showOutput ? 'max-h-36 opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="p-4">
-            <div className="flex items-center gap-2 text-xs text-white/50 mb-2">
+          <div className="p-5">
+            <div className="flex items-center gap-2 text-xs text-white/50 mb-2 font-mono">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               Output:
             </div>
-            <div className="font-mono text-lg text-white font-bold">
+            <div className="font-mono text-xl text-white font-bold">
               {currentExample.output}
             </div>
           </div>
@@ -1227,12 +1226,12 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between px-4 py-3 bg-slate-800/50 border-t border-white/10">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-5 py-3 bg-slate-800/50 border-t border-white/10">
+          <div className="flex items-center gap-3">
             <button
               onClick={runCodeDemo}
               disabled={isTyping}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-bold text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-bold text-sm transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/25"
             >
               <Play className="w-4 h-4" />
               Run Code
@@ -1244,14 +1243,14 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
                 setShowOutput(false);
                 setParticles([]);
               }}
-              className="flex items-center gap-1 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 text-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-sm font-medium transition-all"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-4 h-4" />
               Next
             </button>
           </div>
-          <div className="text-xs text-white/40">
-            ✨ Your kids will build this!
+          <div className="text-sm text-white/50">
+            Your kids will build this!
           </div>
         </div>
       </div>
@@ -1264,6 +1263,24 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
         </span>
         See what your child will learn to create
       </p>
+
+      {/* Game Controls Hint - Fixed at bottom-left, same level as chatbot */}
+      <div
+        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 animate-fade-in-up"
+      >
+        <Gamepad2
+          className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5"
+          style={{
+            color: GAME_INFO[currentExample.gameMode].color,
+            filter: `drop-shadow(0 0 4px ${GAME_INFO[currentExample.gameMode].color}60)`,
+          }}
+        />
+        <span
+          className="text-white/80 font-medium text-xs sm:text-sm"
+        >
+          {GAME_INFO[currentExample.gameMode].hint}
+        </span>
+      </div>
 
       {/* CSS for animations */}
       <style jsx>{`
@@ -1392,6 +1409,7 @@ const stats = [
 // Section navigation items
 const sectionNavItems = [
   { id: "courses", label: "Courses", icon: Target },
+  { id: "placement-test", label: "Skill Test", icon: Brain },
   { id: "features", label: "Why Us", icon: Zap },
   { id: "showcase", label: "Showcase", icon: Rocket },
   { id: "testimonials", label: "Reviews", icon: Heart },
@@ -1417,6 +1435,60 @@ export default function HomePage() {
   const [activeSection, setActiveSection] = useState("");
   const [showScrollNav, setShowScrollNav] = useState(false);
   const [gameMode, setGameMode] = useState<GameMode>('snake');
+
+  // Auto-scale hero content to fit any screen
+  const heroContentRef = useRef<HTMLDivElement>(null);
+  const [heroScale, setHeroScale] = useState(1);
+
+  // Calculate optimal scale for hero content to fit viewport
+  const calculateHeroScale = useCallback(() => {
+    if (!heroContentRef.current) return;
+
+    const headerHeight = 56; // h-14 = 3.5rem = 56px
+    const paddingY = 48; // pb-6 + some margin = ~48px
+    const availableHeight = window.innerHeight - headerHeight - paddingY;
+    const contentHeight = heroContentRef.current.scrollHeight;
+
+    // Only scale down if content is too tall, never scale up beyond 1
+    if (contentHeight > availableHeight) {
+      const scale = Math.max(0.65, availableHeight / contentHeight); // Min scale 0.65
+      setHeroScale(scale);
+    } else {
+      setHeroScale(1);
+    }
+  }, []);
+
+  // Listen for resize events and recalculate scale
+  useEffect(() => {
+    calculateHeroScale();
+
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(calculateHeroScale, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Also recalculate on orientation change (mobile)
+    window.addEventListener('orientationchange', () => {
+      setTimeout(calculateHeroScale, 200);
+    });
+
+    // Initial calculation after fonts/images load
+    if (document.readyState === 'complete') {
+      calculateHeroScale();
+    } else {
+      window.addEventListener('load', calculateHeroScale);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', calculateHeroScale);
+      clearTimeout(resizeTimeout);
+    };
+  }, [calculateHeroScale]);
 
   // Scroll spy - detect which section is in view
   const handleScroll = useCallback(() => {
@@ -1482,94 +1554,167 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Hero Section - Interactive Storytelling with Diverse Kids */}
-      <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-indigo-950 via-violet-950 to-slate-950">
-        {/* Animated World Map Background */}
+      {/* Hero Section - Modern 2025 Design with Light/Dark Theme Support */}
+      {/* Using h-[100dvh] for exact viewport height - dvh handles mobile browser chrome */}
+      <section className="relative h-[100dvh] w-full overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+        {/* Theme-Adaptive Background */}
         <div className="absolute inset-0 z-0">
-          {/* Base gradient with cultural warmth */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/40 via-indigo-950 to-slate-950" />
-
-          {/* Animated connection lines representing global community */}
-          <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0" />
-                <stop offset="50%" stopColor="#8b5cf6" stopOpacity="1" />
-                <stop offset="100%" stopColor="#ec4899" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {/* Connection paths between "kids around the world" */}
-            <path d="M100,300 Q300,100 500,300 T900,300" stroke="url(#lineGrad)" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDuration: '4s' }} />
-            <path d="M50,400 Q250,200 450,350 T850,250" stroke="url(#lineGrad)" strokeWidth="1.5" fill="none" className="animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
-            <path d="M150,200 Q350,400 550,250 T950,350" stroke="url(#lineGrad)" strokeWidth="1" fill="none" className="animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
-          </svg>
-
-          {/* Floating gradient orbs */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-violet-500/30 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-            <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-pink-500/20 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
-            <div className="absolute top-1/3 right-0 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-cyan-500/20 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }} />
-            <div className="absolute bottom-1/4 left-0 w-[350px] h-[350px] rounded-full bg-gradient-to-br from-amber-500/15 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '9s', animationDelay: '1s' }} />
+          {/* Light mode - Clean gradient */}
+          <div className="absolute inset-0 dark:opacity-0 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-violet-50/50 to-slate-100" />
+            {/* Subtle grid pattern */}
+            <div
+              className="absolute inset-0 opacity-[0.4]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(to right, rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
+                `,
+                backgroundSize: '60px 60px',
+              }}
+            />
+            {/* Gradient orbs for light mode */}
+            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-violet-200/40 to-pink-200/30 blur-[100px]" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-200/30 to-cyan-200/20 blur-[80px]" />
           </div>
 
-          {/* Stars/sparkles background - using deterministic positions */}
+          {/* Dark mode - Gaming aesthetic */}
+          <div className="absolute inset-0 opacity-0 dark:opacity-100 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-violet-900/30 via-slate-950 to-slate-950" />
+
+            {/* Retro Grid Floor - Perspective effect */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div
+                className="absolute bottom-0 left-0 right-0 h-[70%]"
+                style={{
+                  background: `
+                    linear-gradient(to bottom, transparent 0%, rgba(139, 92, 246, 0.15) 100%),
+                    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(139, 92, 246, 0.2) 39px, rgba(139, 92, 246, 0.2) 40px),
+                    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(139, 92, 246, 0.15) 39px, rgba(139, 92, 246, 0.15) 40px)
+                  `,
+                  transform: 'perspective(400px) rotateX(65deg)',
+                  transformOrigin: 'bottom',
+                }}
+              />
+            </div>
+
+          {/* Animated Neon Lines - Horizontal scanlines - MORE VISIBLE */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={`scanline-${i}`}
+                className="absolute left-0 right-0 h-[3px]"
+                style={{
+                  top: `${15 + i * 22}%`,
+                  background: 'linear-gradient(90deg, transparent 0%, #22d3ee 20%, #a855f7 50%, #22d3ee 80%, transparent 100%)',
+                  boxShadow: '0 0 20px #22d3ee, 0 0 40px #a855f7',
+                  animation: `scanline ${4 + i}s ease-in-out infinite`,
+                  animationDelay: `${i * 0.8}s`,
+                  opacity: 0.6,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Floating Neon Orbs - MUCH MORE VIBRANT */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-[5%] left-[5%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-violet-500/60 to-fuchsia-500/30 blur-[80px] animate-float-slow" />
+            <div className="absolute top-[15%] right-[10%] w-[450px] h-[450px] rounded-full bg-gradient-to-br from-cyan-400/50 to-blue-500/30 blur-[70px] animate-float-medium" />
+            <div className="absolute bottom-[15%] left-[15%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-pink-500/50 to-rose-500/30 blur-[100px] animate-float-slow" style={{ animationDelay: '2s' }} />
+            <div className="absolute bottom-[25%] right-[5%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-emerald-400/40 to-teal-500/20 blur-[60px] animate-float-medium" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-[40%] left-[40%] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/20 blur-[50px] animate-float-medium" style={{ animationDelay: '3s' }} />
+          </div>
+
+          {/* Pixel/Game-themed floating elements - MUCH LARGER */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating Pixels - Bigger and brighter */}
+            {[
+              { x: 5, y: 12, size: 20, color: '#22c55e', delay: 0 },
+              { x: 92, y: 20, size: 16, color: '#3b82f6', delay: 1 },
+              { x: 12, y: 65, size: 24, color: '#eab308', delay: 2 },
+              { x: 88, y: 55, size: 18, color: '#ec4899', delay: 0.5 },
+              { x: 48, y: 8, size: 14, color: '#8b5cf6', delay: 1.5 },
+              { x: 22, y: 38, size: 22, color: '#06b6d4', delay: 2.5 },
+              { x: 78, y: 75, size: 16, color: '#f97316', delay: 0.8 },
+              { x: 35, y: 82, size: 20, color: '#a855f7', delay: 1.8 },
+              { x: 65, y: 30, size: 12, color: '#10b981', delay: 3 },
+              { x: 8, y: 45, size: 15, color: '#f43f5e', delay: 2.2 },
+              { x: 95, y: 85, size: 18, color: '#6366f1', delay: 0.3 },
+              { x: 55, y: 92, size: 14, color: '#14b8a6', delay: 1.2 },
+            ].map((pixel, i) => (
+              <div
+                key={`pixel-${i}`}
+                className="absolute animate-float-pixel rounded-sm"
+                style={{
+                  left: `${pixel.x}%`,
+                  top: `${pixel.y}%`,
+                  width: `${pixel.size}px`,
+                  height: `${pixel.size}px`,
+                  backgroundColor: pixel.color,
+                  boxShadow: `0 0 ${pixel.size}px ${pixel.color}, 0 0 ${pixel.size * 2}px ${pixel.color}, 0 0 ${pixel.size * 3}px ${pixel.color}80`,
+                  animationDelay: `${pixel.delay}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Arcade-style corner decorations - MORE VISIBLE */}
+          <svg className="absolute top-0 left-0 w-48 h-48 opacity-40" viewBox="0 0 100 100">
+            <path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z" fill="url(#cornerGrad)" />
+            <defs>
+              <linearGradient id="cornerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#06b6d4" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <svg className="absolute top-0 right-0 w-48 h-48 opacity-40 rotate-90" viewBox="0 0 100 100">
+            <path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z" fill="url(#cornerGrad2)" />
+            <defs>
+              <linearGradient id="cornerGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ec4899" />
+                <stop offset="100%" stopColor="#8b5cf6" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Stars with glow effect */}
           <div className="absolute inset-0">
             {[
-              { x: 5, y: 12, s: 1.5, o: 0.3, d: 2.5, dl: 0 },
-              { x: 15, y: 8, s: 2, o: 0.4, d: 3, dl: 1 },
-              { x: 25, y: 20, s: 1.2, o: 0.2, d: 4, dl: 2 },
-              { x: 35, y: 5, s: 1.8, o: 0.35, d: 2.8, dl: 0.5 },
-              { x: 45, y: 15, s: 1.3, o: 0.25, d: 3.5, dl: 1.5 },
-              { x: 55, y: 10, s: 2.2, o: 0.45, d: 2.2, dl: 2.5 },
-              { x: 65, y: 22, s: 1.6, o: 0.3, d: 4.5, dl: 0.8 },
-              { x: 75, y: 8, s: 1.4, o: 0.2, d: 3.2, dl: 1.8 },
-              { x: 85, y: 18, s: 2.5, o: 0.5, d: 2.7, dl: 3 },
-              { x: 95, y: 12, s: 1.1, o: 0.15, d: 4.2, dl: 0.3 },
-              { x: 10, y: 35, s: 1.7, o: 0.35, d: 3.8, dl: 1.2 },
-              { x: 20, y: 42, s: 2.1, o: 0.4, d: 2.3, dl: 2.2 },
-              { x: 30, y: 38, s: 1.3, o: 0.25, d: 4.8, dl: 0.7 },
-              { x: 40, y: 45, s: 1.9, o: 0.45, d: 2.9, dl: 1.7 },
-              { x: 50, y: 32, s: 1.5, o: 0.3, d: 3.6, dl: 2.8 },
-              { x: 60, y: 48, s: 2.3, o: 0.5, d: 2.1, dl: 0.4 },
-              { x: 70, y: 40, s: 1.2, o: 0.2, d: 4.4, dl: 1.4 },
-              { x: 80, y: 35, s: 1.8, o: 0.35, d: 3.1, dl: 2.4 },
-              { x: 90, y: 42, s: 2.6, o: 0.45, d: 2.6, dl: 3.5 },
-              { x: 8, y: 55, s: 1.4, o: 0.25, d: 4.1, dl: 0.9 },
-              { x: 18, y: 62, s: 2, o: 0.4, d: 2.4, dl: 1.9 },
-              { x: 28, y: 58, s: 1.6, o: 0.3, d: 3.9, dl: 2.9 },
-              { x: 38, y: 65, s: 1.1, o: 0.15, d: 4.6, dl: 0.2 },
-              { x: 48, y: 52, s: 2.4, o: 0.5, d: 2, dl: 1.1 },
-              { x: 58, y: 68, s: 1.7, o: 0.35, d: 3.4, dl: 2.1 },
-              { x: 68, y: 55, s: 1.3, o: 0.25, d: 4.3, dl: 3.1 },
-              { x: 78, y: 62, s: 2.2, o: 0.45, d: 2.5, dl: 0.6 },
-              { x: 88, y: 58, s: 1.5, o: 0.3, d: 3.7, dl: 1.6 },
-              { x: 12, y: 75, s: 1.9, o: 0.4, d: 2.8, dl: 2.6 },
-              { x: 22, y: 82, s: 1.2, o: 0.2, d: 4.7, dl: 3.6 },
-              { x: 32, y: 78, s: 2.5, o: 0.5, d: 2.2, dl: 0.1 },
-              { x: 42, y: 85, s: 1.4, o: 0.25, d: 3.3, dl: 1.3 },
-              { x: 52, y: 72, s: 1.8, o: 0.35, d: 4, dl: 2.3 },
-              { x: 62, y: 88, s: 2.1, o: 0.45, d: 2.3, dl: 3.3 },
-              { x: 72, y: 75, s: 1.6, o: 0.3, d: 3.5, dl: 0.5 },
-              { x: 82, y: 82, s: 1.1, o: 0.15, d: 4.9, dl: 1.5 },
-              { x: 92, y: 78, s: 2.3, o: 0.4, d: 2.1, dl: 2.5 },
-              { x: 3, y: 92, s: 1.7, o: 0.35, d: 3.6, dl: 3.8 },
-              { x: 97, y: 95, s: 1.3, o: 0.25, d: 4.2, dl: 0.8 },
-              { x: 50, y: 90, s: 2, o: 0.4, d: 2.7, dl: 1.8 },
+              { x: 5, y: 12, s: 2, o: 0.6, d: 2.5, dl: 0 },
+              { x: 15, y: 8, s: 3, o: 0.7, d: 3, dl: 1 },
+              { x: 25, y: 20, s: 2, o: 0.5, d: 4, dl: 2 },
+              { x: 35, y: 5, s: 2.5, o: 0.6, d: 2.8, dl: 0.5 },
+              { x: 55, y: 10, s: 3, o: 0.8, d: 2.2, dl: 2.5 },
+              { x: 75, y: 8, s: 2, o: 0.5, d: 3.2, dl: 1.8 },
+              { x: 85, y: 18, s: 3.5, o: 0.9, d: 2.7, dl: 3 },
+              { x: 95, y: 12, s: 2, o: 0.4, d: 4.2, dl: 0.3 },
+              { x: 10, y: 35, s: 2.5, o: 0.6, d: 3.8, dl: 1.2 },
+              { x: 30, y: 38, s: 2, o: 0.5, d: 4.8, dl: 0.7 },
+              { x: 50, y: 32, s: 2, o: 0.5, d: 3.6, dl: 2.8 },
+              { x: 70, y: 40, s: 2, o: 0.4, d: 4.4, dl: 1.4 },
+              { x: 90, y: 42, s: 3, o: 0.7, d: 2.6, dl: 3.5 },
             ].map((star, i) => (
               <div
                 key={`star-${i}`}
-                className="absolute rounded-full bg-white"
+                className="absolute rounded-full"
                 style={{
                   width: `${star.s}px`,
                   height: `${star.s}px`,
                   top: `${star.y}%`,
                   left: `${star.x}%`,
+                  backgroundColor: '#fff',
+                  boxShadow: '0 0 4px #fff, 0 0 8px #8b5cf6',
                   opacity: star.o,
                   animation: `twinkle ${star.d}s ease-in-out infinite`,
                   animationDelay: `${star.dl}s`,
                 }}
               />
             ))}
+          </div>
+
+          {/* Vignette overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]" />
           </div>
         </div>
 
@@ -1578,72 +1723,77 @@ export default function HomePage() {
           <LivingGameBackground gameMode={gameMode} />
         </div>
 
-        {/* Main Content - Responsive Hero */}
-        <div className="relative z-20 min-h-screen flex flex-col pointer-events-none py-4">
+        {/* Main Content - Responsive Hero with Auto-Scale */}
+        <div className="relative z-20 h-full flex flex-col pointer-events-none">
           {/* Enable pointer events only on interactive elements */}
-          {/* Hero Content - Two Column Layout */}
-          <div className="flex-1 flex items-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-20">
+          {/* Hero Content - Two Column Layout with auto-scaling */}
+          {/* Padding top accounts for sticky header (h-14 = 3.5rem) */}
+          <div
+            ref={heroContentRef}
+            className="flex-1 flex items-center px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 origin-top transition-transform duration-300 ease-out"
+            style={{ transform: `scale(${heroScale})` }}
+          >
             <div className="max-w-7xl mx-auto w-full">
-              <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="grid lg:grid-cols-2 items-center gap-6 lg:gap-12">
                 {/* Left Column - Text Content */}
-                <div className="text-center lg:text-left space-y-3 sm:space-y-5 lg:space-y-6">
-                  {/* Small Badge */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                <div className="text-center lg:text-left flex flex-col gap-3 sm:gap-4">
+                  {/* Small Badge - Theme adaptive */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/10 dark:bg-white/10 border border-slate-900/20 dark:border-white/20 backdrop-blur-sm">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 dark:bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 dark:bg-emerald-400" />
                     </span>
-                    <span className="text-xs font-medium text-white/80">Live classes • Ages 5-18</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-white/90">Live classes • Ages 5-18</span>
                   </div>
 
-                  {/* Main Headline - Compact but Bold */}
-                  <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight">
+                  {/* Main Headline - BIGGER for 2025 */}
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-slate-900 dark:text-white leading-[1.05] tracking-tight">
                     Turn your child into a{' '}
-                    <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-amber-400 bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-violet-600 via-pink-500 to-amber-500 dark:from-violet-400 dark:via-pink-400 dark:to-amber-400 bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(167,139,250,0.3)] dark:drop-shadow-[0_0_30px_rgba(167,139,250,0.5)]">
                       future creator
                     </span>
                   </h1>
 
-                  {/* Subheadline - Concise */}
-                  <p className="text-sm sm:text-base md:text-lg text-white/70 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                  {/* Subheadline - Slightly larger */}
+                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-slate-600 dark:text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
                     Expert-led 1:1 coding classes with game-based learning.
                     Kids build real projects while having fun.
                   </p>
 
-                  {/* CTA Row */}
-                  <div className="flex flex-col sm:flex-row items-center lg:items-start gap-2 sm:gap-3 pt-1 sm:pt-2 pointer-events-auto">
+                  {/* CTA Row - Bigger buttons */}
+                  <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 pt-4 pointer-events-auto">
                     <Link
                       href="/free-trial"
-                      className="group relative inline-flex items-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full bg-white text-slate-900 font-bold text-sm shadow-2xl shadow-white/20 hover:shadow-white/40 transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 w-full sm:w-auto justify-center overflow-hidden"
+                      className="group relative inline-flex items-center gap-2.5 px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-violet-600 dark:bg-white text-white dark:text-slate-900 font-bold text-base sm:text-lg shadow-2xl shadow-violet-600/25 dark:shadow-white/25 hover:shadow-violet-600/50 dark:hover:shadow-white/50 transition-all duration-300 hover:-translate-y-1 hover:scale-105 w-full sm:w-auto justify-center overflow-hidden"
                     >
-                      <span className="absolute inset-0 bg-gradient-to-r from-violet-100 to-pink-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="absolute inset-0 bg-gradient-to-r from-violet-700 to-pink-600 dark:from-violet-100 dark:to-pink-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <span className="relative z-10 flex items-center gap-2">
                         Start Free Trial
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </Link>
                     <button
                       onClick={() => setShowVideo(true)}
                       aria-label="Watch video"
-                      className="inline-flex items-center gap-2 px-4 py-3 text-white/70 hover:text-white text-sm font-medium transition-colors"
+                      className="inline-flex items-center gap-2.5 px-5 py-3.5 text-slate-600 dark:text-white/80 hover:text-slate-900 dark:hover:text-white text-base font-semibold transition-colors hover:bg-slate-900/10 dark:hover:bg-white/10 rounded-full"
                     >
-                      <Play className="w-4 h-4 fill-current" aria-hidden="true" />
+                      <Play className="w-5 h-5 fill-current" aria-hidden="true" />
                       Watch demo
                     </button>
                   </div>
 
                   {/* Compact Trust Row - Hidden on very small screens */}
-                  <div className="hidden sm:flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-white/50 pt-2">
+                  <div className="hidden sm:flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2">
                     <span className="flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                      <Shield className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                       No credit card
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
                       4.9 rating
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-violet-400" />
+                      <Users className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
                       2,000+ students
                     </span>
                   </div>
@@ -1655,71 +1805,38 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Mobile Code Playground - Smaller version */}
-              <div className="lg:hidden mt-4 sm:mt-6 pointer-events-auto">
-                <div className="transform scale-[0.85] sm:scale-90 origin-top -mb-8 sm:-mb-4">
+              {/* Mobile Code Playground - Viewport-responsive */}
+              <div className="lg:hidden pointer-events-auto mt-4 sm:mt-6">
+                <div className="origin-top scale-[0.72] sm:scale-[0.82] -mb-16 sm:-mb-12">
                   <InteractiveCodePlayground onGameChange={setGameMode} />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Scroll Indicator - Professional minimal design */}
-          <div
-            className="flex justify-center pointer-events-auto"
-            style={{ padding: 'clamp(0.5rem, 2vh, 1.25rem) 0' }}
+        </div>
+
+        {/* Scroll Indicator - Absolutely positioned at bottom of hero */}
+        <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 z-30 flex justify-center pointer-events-auto">
+          <button
+            onClick={() => scrollToSection('courses')}
+            aria-label="Scroll down to explore courses"
+            className="group flex flex-col items-center gap-1.5 transition-all duration-300 hover:scale-105"
           >
-            <button
-              onClick={() => scrollToSection('courses')}
-              aria-label="Scroll down to explore courses"
-              className="group flex flex-col items-center transition-all duration-300 hover:scale-105"
-              style={{ gap: 'clamp(0.25rem, 0.75vh, 0.5rem)' }}
-            >
-              <span
-                className="font-medium uppercase tracking-[0.2em] text-white/70 group-hover:text-white transition-colors duration-300"
-                style={{
-                  fontSize: 'clamp(0.5rem, 1vw, 0.6875rem)',
-                  letterSpacing: '0.15em',
-                }}
-              >
-                Explore
-              </span>
-              <div
-                className="relative flex items-center justify-center"
-                style={{
-                  width: 'clamp(2rem, 4vw, 2.5rem)',
-                  height: 'clamp(2rem, 4vw, 2.5rem)',
-                }}
-              >
-                {/* Outer ring with pulse */}
-                <div
-                  className="absolute inset-0 rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-300"
-                  style={{
-                    border: '1px solid rgba(255, 255, 255, 0.4)',
-                    animation: 'pulse-ring 2s ease-out infinite',
-                  }}
-                />
-                {/* Inner circle */}
-                <div
-                  className="absolute rounded-full bg-white/10 group-hover:bg-white/20 backdrop-blur-sm transition-all duration-300"
-                  style={{
-                    width: 'clamp(1.5rem, 3vw, 2rem)',
-                    height: 'clamp(1.5rem, 3vw, 2rem)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                  }}
-                />
-                <ChevronDown
-                  className="relative z-10 text-white/80 group-hover:text-white transition-all duration-300"
-                  style={{
-                    width: 'clamp(0.875rem, 2vw, 1.125rem)',
-                    height: 'clamp(0.875rem, 2vw, 1.125rem)',
-                    animation: 'float-down 1.5s ease-in-out infinite',
-                  }}
-                  aria-hidden="true"
-                />
-              </div>
-            </button>
-          </div>
+            <span className="text-xs sm:text-sm font-medium uppercase tracking-widest text-slate-600 dark:text-white/80 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300">
+              Explore
+            </span>
+            <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14">
+              {/* Outer ring with pulse */}
+              <div className="absolute inset-0 rounded-full border-2 border-slate-400/40 dark:border-white/40 opacity-40 group-hover:opacity-60 transition-opacity duration-300 animate-[pulse-ring_2s_ease-out_infinite]" />
+              {/* Inner circle */}
+              <div className="absolute w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/10 dark:bg-white/15 group-hover:bg-slate-900/20 dark:group-hover:bg-white/25 border border-slate-400/30 dark:border-white/30 backdrop-blur-sm transition-all duration-300" />
+              <ChevronDown
+                className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 text-slate-700 dark:text-white group-hover:text-slate-900 dark:group-hover:text-white transition-all duration-300 animate-[float-down_1.5s_ease-in-out_infinite]"
+                aria-hidden="true"
+              />
+            </div>
+          </button>
         </div>
 
         {/* CSS Animations */}
@@ -1727,6 +1844,34 @@ export default function HomePage() {
           @keyframes twinkle {
             0%, 100% { opacity: 0.2; transform: scale(1); }
             50% { opacity: 0.8; transform: scale(1.5); }
+          }
+          @keyframes scanline {
+            0%, 100% { transform: translateX(-100%); opacity: 0; }
+            50% { transform: translateX(100%); opacity: 0.5; }
+          }
+          :global(.animate-float-slow) {
+            animation: floatSlow 8s ease-in-out infinite;
+          }
+          :global(.animate-float-medium) {
+            animation: floatMedium 6s ease-in-out infinite;
+          }
+          :global(.animate-float-pixel) {
+            animation: floatPixel 4s ease-in-out infinite;
+          }
+          @keyframes floatSlow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(20px, -20px) scale(1.05); }
+            66% { transform: translate(-10px, 10px) scale(0.95); }
+          }
+          @keyframes floatMedium {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(15px, -25px) rotate(5deg); }
+          }
+          @keyframes floatPixel {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            25% { transform: translateY(-10px) rotate(45deg); opacity: 1; }
+            50% { transform: translateY(-5px) rotate(90deg); opacity: 0.9; }
+            75% { transform: translateY(-15px) rotate(135deg); opacity: 1; }
           }
           @keyframes gradient-x {
             0%, 100% { background-position: 0% 50%; }
@@ -2038,6 +2183,101 @@ export default function HomePage() {
               See Recommended Courses
               <ArrowRight className="w-5 h-5" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Placement Test Section */}
+      <section id="placement-test" className="py-20 px-4 bg-gradient-to-b from-violet-50 to-white dark:from-slate-900 dark:to-slate-950">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-sm font-semibold mb-4">
+              <Brain className="w-4 h-4" /> Skill Assessment
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
+              Discover Your Child&apos;s <span className="bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text text-transparent">Coding Level</span>
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Take our fun placement test to find the perfect starting point. Get personalized course recommendations in just 5 minutes!
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-10">
+            {/* Multiple Choice Card */}
+            <Link
+              href="/placement-exam"
+              className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-500 to-cyan-600 p-1 hover:shadow-2xl hover:shadow-blue-500/25 transition-all hover:-translate-y-2"
+            >
+              <div className="h-full rounded-[22px] bg-white dark:bg-slate-900 p-6 sm:p-8">
+                <div className="w-14 h-14 mb-5 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Target className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Quick Quiz</h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm sm:text-base">
+                  15 questions covering programming basics, web development, and logic. Timed challenges with streak bonuses!
+                </p>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                    <Zap className="w-3 h-3" /> 5 min
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                    <Star className="w-3 h-3" /> Instant Results
+                  </span>
+                </div>
+                <span className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold group-hover:gap-3 transition-all">
+                  Start Quiz <ArrowRight className="w-5 h-5" />
+                </span>
+              </div>
+            </Link>
+
+            {/* Gamified Challenge Card */}
+            <Link
+              href="/placement-exam"
+              className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-500 to-purple-600 p-1 hover:shadow-2xl hover:shadow-violet-500/25 transition-all hover:-translate-y-2"
+            >
+              <div className="h-full rounded-[22px] bg-white dark:bg-slate-900 p-6 sm:p-8">
+                <div className="w-14 h-14 mb-5 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Gamepad2 className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2">Fun Challenges</h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm sm:text-base">
+                  Interactive puzzles, code debugging, drag-and-drop activities, and sequence challenges. Learn while playing!
+                </p>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium">
+                    <Sparkles className="w-3 h-3" /> 9 Challenges
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-medium">
+                    <Trophy className="w-3 h-3" /> Earn Points
+                  </span>
+                </div>
+                <span className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 font-semibold group-hover:gap-3 transition-all">
+                  Start Challenge <ArrowRight className="w-5 h-5" />
+                </span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Benefits */}
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <Zap className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <span>Personalized recommendations</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <Zap className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <span>Free certificate</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <Zap className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <span>No account required</span>
+            </div>
           </div>
         </div>
       </section>
