@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Loader2, Rocket, Mail, Lock } from "lucide-react";
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function StudentLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -52,44 +53,71 @@ export default function StudentLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 dark:from-purple-900 dark:via-slate-900 dark:to-blue-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border-4 border-purple-200 dark:border-purple-700 p-8 space-y-6">
-          <div className="text-center space-y-3">
-            <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 text-white text-4xl flex items-center justify-center shadow-lg animate-bounce">
-              🚀
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Fun colorful background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-pink-50 to-cyan-100 dark:from-slate-900 dark:via-purple-950/30 dark:to-slate-900" />
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-300/50 dark:bg-purple-900/30 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-pink-300/50 dark:bg-pink-900/30 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 left-0 w-64 h-64 bg-cyan-300/40 dark:bg-cyan-900/20 rounded-full blur-3xl" />
+
+      <div className="w-full max-w-md relative animate-fade-in-up">
+        <div className="bg-white dark:bg-slate-800/90 dark:backdrop-blur-sm rounded-2xl shadow-xl shadow-purple-200/50 dark:shadow-slate-900/50 border-2 border-purple-200/50 dark:border-purple-700/30 p-8 space-y-6">
+          {/* Fun header with animated rocket */}
+          <div className="text-center space-y-4">
+            <div className="mx-auto h-20 w-20 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 text-white flex items-center justify-center shadow-lg shadow-purple-500/30 relative overflow-hidden">
+              <Rocket className="w-10 h-10 animate-bounce" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/10 to-white/30" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Student Login
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-yellow-500" />
-              Ready to code?
-              <Sparkles className="w-4 h-4 text-yellow-500" />
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+                Student Login
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4 text-yellow-500" />
+                Ready to code?
+                <Sparkles className="w-4 h-4 text-yellow-500" />
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
+            {/* Email Field */}
+            <div className="space-y-1.5">
               <label className="text-sm font-bold text-purple-700 dark:text-purple-300">
                 Your Email
               </label>
-              <input
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@example.com"
-                className="w-full rounded-xl border-2 border-purple-200 dark:border-purple-600 bg-purple-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-500 px-4 py-3 text-lg focus:outline-none focus:ring-4 focus:ring-purple-300 dark:focus:ring-purple-600 focus:border-purple-400"
-              />
+              <div className={`relative flex items-center border-2 rounded-xl transition-all duration-200 ${
+                focusedField === "email"
+                  ? "ring-2 ring-purple-400/50 border-purple-400 dark:border-purple-500 bg-purple-50/50 dark:bg-purple-900/20"
+                  : "border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 bg-purple-50/30 dark:bg-slate-800"
+              }`}>
+                <Mail className={`w-5 h-5 ml-3 transition-colors ${focusedField === "email" ? "text-purple-500" : "text-purple-400"}`} />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="your.email@example.com"
+                  className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-600 px-3 py-3.5 text-base focus:outline-none"
+                />
+              </div>
             </div>
-            <div className="space-y-1">
+
+            {/* Password Field */}
+            <div className="space-y-1.5">
               <label className="text-sm font-bold text-purple-700 dark:text-purple-300">
                 Your Password
               </label>
-              <div className="relative">
+              <div className={`relative flex items-center border-2 rounded-xl transition-all duration-200 ${
+                focusedField === "password"
+                  ? "ring-2 ring-purple-400/50 border-purple-400 dark:border-purple-500 bg-purple-50/50 dark:bg-purple-900/20"
+                  : "border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 bg-purple-50/30 dark:bg-slate-800"
+              }`}>
+                <Lock className={`w-5 h-5 ml-3 transition-colors ${focusedField === "password" ? "text-purple-500" : "text-purple-400"}`} />
                 <input
                   name="password"
                   type={showPassword ? "text" : "password"}
@@ -97,53 +125,70 @@ export default function StudentLoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
                   placeholder="Your secret password"
-                  className="w-full rounded-xl border-2 border-purple-200 dark:border-purple-600 bg-purple-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-500 px-4 py-3 pr-12 text-lg focus:outline-none focus:ring-4 focus:ring-purple-300 dark:focus:ring-purple-600 focus:border-purple-400"
+                  className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-600 px-3 py-3.5 text-base focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300"
+                  className="p-2 mr-1 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
+            {/* Error Message */}
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 rounded-xl p-3">
-                <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 animate-fade-in">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
 
+            {/* Submit Button - Fun and colorful */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white font-bold rounded-xl py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-60 disabled:transform-none"
+              className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white font-bold rounded-xl py-4 text-lg shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="animate-spin">🌀</span> Logging in...
-                </span>
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Logging in...
+                </>
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  Let&apos;s Go! 🎮
-                </span>
+                <>
+                  Let&apos;s Go!
+                  <span className="text-xl">🎮</span>
+                </>
               )}
             </button>
           </form>
 
-          <div className="pt-4 border-t border-purple-100 dark:border-purple-800">
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-3">
+          {/* Footer */}
+          <div className="pt-4 border-t border-purple-100 dark:border-purple-800/50 space-y-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
               Ask your parent for your login details!
             </p>
             <Link
               href="/auth/login"
-              className="block text-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200"
+              className="block text-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
             >
               Parent or Instructor? Sign in here →
             </Link>
           </div>
+        </div>
+
+        {/* Fun badge */}
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-2">
+            <span className="text-lg">🌟</span>
+            Learn to code, one adventure at a time!
+            <span className="text-lg">🌟</span>
+          </p>
         </div>
       </div>
     </main>

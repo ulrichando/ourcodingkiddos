@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Sparkles, ArrowRight, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [magicSending, setMagicSending] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,73 +73,121 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold flex items-center justify-center shadow-lg">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-slate-50 to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-200/40 dark:bg-pink-900/20 rounded-full blur-3xl" />
+
+      <div className="w-full max-w-md relative animate-fade-in-up">
+        <div className="bg-white dark:bg-slate-800/90 dark:backdrop-blur-sm rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 p-8 space-y-6">
+          {/* Logo and Header */}
+          <div className="text-center space-y-3">
+            <div className="mx-auto h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 text-white font-bold flex items-center justify-center shadow-lg shadow-purple-500/30 text-lg">
               CK
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Welcome to Coding Kiddos</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Sign in to your account</p>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Welcome back</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Sign in to your Coding Kiddos account</p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email</label>
-              <input
-                name="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
+            {/* Email Field */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+              <div className={`relative flex items-center border rounded-xl transition-all duration-200 ${
+                focusedField === "email"
+                  ? "ring-2 ring-purple-500/30 border-purple-500 dark:border-purple-400"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"
+              }`}>
+                <Mail className={`w-4 h-4 ml-3 transition-colors ${focusedField === "email" ? "text-purple-500" : "text-slate-400"}`} />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="you@example.com"
+                  className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 py-3 text-sm focus:outline-none"
+                />
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
-              <div className="relative">
+
+            {/* Password Field */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
+              <div className={`relative flex items-center border rounded-xl transition-all duration-200 ${
+                focusedField === "password"
+                  ? "ring-2 ring-purple-500/30 border-purple-500 dark:border-purple-400"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"
+              }`}>
+                <Lock className={`w-4 h-4 ml-3 transition-colors ${focusedField === "password" ? "text-purple-500" : "text-slate-400"}`} />
                 <input
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="Enter your password"
+                  className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 py-3 text-sm focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="p-2 mr-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 animate-fade-in">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 dark:bg-purple-600 text-white font-semibold rounded-lg py-2.5 shadow-sm hover:bg-slate-800 dark:hover:bg-purple-700 disabled:opacity-60"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl py-3 shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="h-px flex-1 bg-slate-200 dark:bg-slate-600" />
-              <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">or</span>
-              <div className="h-px flex-1 bg-slate-200 dark:bg-slate-600" />
-            </div>
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+            <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 font-medium">or continue with</span>
+            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          </div>
 
-            {/* Google Sign In - for instructors to enable Google Meet */}
+          {/* Social & Magic Link Buttons */}
+          <div className="space-y-3">
+            {/* Google Sign In */}
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-lg py-2.5 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600"
+              className="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium rounded-xl py-3 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-200 active:scale-[0.98]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -149,39 +198,74 @@ export default function LoginPage() {
               Sign in with Google
             </button>
 
+            {/* Magic Link */}
             <button
               type="button"
               onClick={handleMagicLink}
               disabled={magicSending}
-              className="w-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-lg py-2.5 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-60"
+              className={`w-full flex items-center justify-center gap-2 border rounded-xl py-3 font-medium transition-all duration-200 active:scale-[0.98] ${
+                magicSent
+                  ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
+                  : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+              } disabled:opacity-60 disabled:cursor-not-allowed`}
             >
-              {magicSending ? "Sending link..." : magicSent ? "Link sent! Check your email" : "Email me a sign-in link"}
+              {magicSending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Sending link...
+                </>
+              ) : magicSent ? (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Link sent! Check your email
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4" />
+                  Email me a sign-in link
+                </>
+              )}
             </button>
             <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
               Instructors: Sign in with Google to enable Google Meet for your classes.
             </p>
           </div>
 
+          {/* Student Login Link */}
           <div className="text-center">
             <Link
               href="/auth/student-login"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/30 px-4 py-2 rounded-lg"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 px-4 py-2.5 rounded-xl transition-all duration-200 hover:shadow-md group"
             >
-              🎮 Student? Click here to login
+              <span className="text-lg">🎮</span>
+              Student? Click here to login
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
-          <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-            <Link href="/auth/forgot-password" className="hover:text-slate-700 dark:hover:text-slate-300">
+          {/* Footer Links */}
+          <div className="flex justify-between items-center text-sm pt-2">
+            <Link
+              href="/auth/forgot-password"
+              className="text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+            >
               Forgot password?
             </Link>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
               <span>Need an account?</span>
-              <Link href="/auth/register" className="text-purple-600 dark:text-purple-400 font-semibold hover:text-purple-700 dark:hover:text-purple-300">
+              <Link href="/auth/register" className="text-purple-600 dark:text-purple-400 font-semibold hover:text-purple-700 dark:hover:text-purple-300 transition-colors">
                 Sign up
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Trust badges */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            Secure, COPPA compliant platform
+          </p>
         </div>
       </div>
     </main>

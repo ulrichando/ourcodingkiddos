@@ -391,7 +391,7 @@ export default function AdminBlogPage() {
               <div className="p-6 space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title</label>
                     <input
                       type="text"
                       value={formData.title}
@@ -409,7 +409,7 @@ export default function AdminBlogPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Category</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
@@ -425,7 +425,7 @@ export default function AdminBlogPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Excerpt</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Excerpt</label>
                   <textarea
                     value={formData.excerpt}
                     onChange={(e) => setFormData((prev) => ({ ...prev, excerpt: e.target.value }))}

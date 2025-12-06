@@ -4,62 +4,75 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Home } from "lucide-react";
-import { BookOpen } from "lucide-react";
-import { Calendar } from "lucide-react";
-import { Settings } from "lucide-react";
-import { LogOut } from "lucide-react";
-import { Moon } from "lucide-react";
-import { Sun } from "lucide-react";
-import { Code2 } from "lucide-react";
-import { X } from "lucide-react";
-import { GraduationCap } from "lucide-react";
-import { Newspaper } from "lucide-react";
-import { Rocket } from "lucide-react";
-import { BookMarked } from "lucide-react";
-import { Search } from "lucide-react";
-import { Command } from "lucide-react";
-import { Zap } from "lucide-react";
-import { Menu } from "lucide-react";
-import { Brain } from "lucide-react";
-import { HelpCircle } from "lucide-react";
-import { Mail } from "lucide-react";
-import { Users } from "lucide-react";
-import { Heart } from "lucide-react";
-import { logout } from "../../lib/logout";
+import {
+  Home, BookOpen, Calendar, Settings, LogOut, Moon, Sun, Code2, X,
+  GraduationCap, Newspaper, Rocket, BookMarked, Search, Command, Zap,
+  Menu, Brain, HelpCircle, Mail, Users, Heart, ChevronDown, ArrowRight,
+} from "lucide-react";
+import { logout } from "@/lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
 
-// Navigation configuration
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: Home, keywords: ["home", "main"], shortcut: "D", description: "Your personal hub" },
-  { href: "/curriculum", label: "Curriculum", icon: BookMarked, keywords: ["learn", "lessons", "syllabus"], shortcut: "C", description: "Structured learning paths", badge: "New" },
-  { href: "/courses", label: "Courses", icon: BookOpen, keywords: ["learn", "classes", "study"], shortcut: "O", description: "Browse all courses" },
-  { href: "/playground", label: "Playground", icon: Code2, keywords: ["code", "practice", "sandbox", "editor"], shortcut: "P", description: "Write and run code", badge: "Popular" },
-  { href: "/placement-exam", label: "Placement Exam", icon: Brain, keywords: ["test", "quiz", "level", "assessment", "skill", "evaluate"], shortcut: "T", description: "Find your coding level", badge: "New" },
-  { href: "/programs", label: "Programs", icon: GraduationCap, keywords: ["enroll", "join", "classes"], shortcut: "R", description: "Enroll in programs" },
-  { href: "/showcase", label: "Showcase", icon: Rocket, keywords: ["projects", "students", "work", "gallery"], shortcut: "S", description: "Student projects gallery" },
-  { href: "/blog", label: "Blog", icon: Newspaper, keywords: ["news", "articles", "posts"], shortcut: "B", description: "News and articles" },
-  { href: "/schedule", label: "Schedule", icon: Calendar, keywords: ["calendar", "events", "dates", "sessions"], shortcut: "E", description: "View upcoming sessions" },
-  { href: "/faq", label: "FAQ", icon: HelpCircle, keywords: ["help", "questions", "support", "answers"], shortcut: "F", description: "Frequently asked questions" },
-  { href: "/contact", label: "Contact", icon: Mail, keywords: ["email", "support", "reach", "message", "help"], shortcut: "M", description: "Get in touch with us" },
-  { href: "/about", label: "About Us", icon: Users, keywords: ["team", "company", "mission", "who", "story"], shortcut: "A", description: "Learn about our mission" },
-  { href: "/our-story", label: "Our Story", icon: Heart, keywords: ["founder", "ceo", "ulrich", "google", "history", "journey"], shortcut: "U", description: "Meet our founder Ulrich Ando" },
-  { href: "/settings", label: "Settings", icon: Settings, keywords: ["account", "profile", "preferences"], shortcut: ",", description: "Manage your account" },
+// Navigation configuration with groups
+const navGroups = [
+  {
+    label: "Learn",
+    items: [
+      { href: "/curriculum", label: "Curriculum", icon: BookMarked, description: "Structured learning paths", badge: "New" },
+      { href: "/courses", label: "Courses", icon: BookOpen, description: "Browse all courses" },
+      { href: "/playground", label: "Playground", icon: Code2, description: "Write and run code", badge: "Popular" },
+      { href: "/placement-exam", label: "Placement Exam", icon: Brain, description: "Find your coding level" },
+    ],
+  },
+  {
+    label: "Programs",
+    items: [
+      { href: "/programs", label: "Programs", icon: GraduationCap, description: "Enroll in programs" },
+      { href: "/schedule", label: "Schedule", icon: Calendar, description: "View upcoming sessions" },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { href: "/showcase", label: "Showcase", icon: Rocket, description: "Student projects gallery" },
+      { href: "/blog", label: "Blog", icon: Newspaper, description: "News and articles" },
+    ],
+  },
+  {
+    label: "About",
+    items: [
+      { href: "/about", label: "About Us", icon: Users, description: "Learn about our mission" },
+      { href: "/our-story", label: "Our Story", icon: Heart, description: "Meet our founder" },
+      { href: "/faq", label: "FAQ", icon: HelpCircle, description: "Frequently asked questions" },
+      { href: "/contact", label: "Contact", icon: Mail, description: "Get in touch with us" },
+    ],
+  },
+];
+
+// Flat navigation for command palette
+const allNavItems = navGroups.flatMap(group => group.items);
+const extraItems = [
+  { href: "/dashboard", label: "Dashboard", icon: Home, description: "Your personal hub" },
+  { href: "/settings", label: "Settings", icon: Settings, description: "Manage your account" },
 ];
 
 export default function AppHeader() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [commandOpen, setCommandOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const commandRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   const userName = session?.user?.name || "Guest";
   const userInitial = userName.charAt(0).toUpperCase();
@@ -71,15 +84,31 @@ export default function AppHeader() {
     : userRole === "ADMIN" ? "/dashboard/admin"
     : "/dashboard/parent";
 
-  // Filter items based on search
-  const filteredItems = navItems.filter(item => {
+  // All items for command palette
+  const commandItems = [...allNavItems, ...extraItems].map(item => ({
+    ...item,
+    href: item.href === "/dashboard" ? dashboardHref : item.href,
+  }));
+
+  const filteredItems = commandItems.filter(item => {
     const query = searchQuery.toLowerCase();
     return item.label.toLowerCase().includes(query) ||
-      item.keywords.some(k => k.includes(query));
-  }).map(item => ({
-    ...item,
-    href: item.href === "/dashboard" ? dashboardHref : item.href
-  }));
+      item.description?.toLowerCase().includes(query);
+  });
+
+  // Dropdown handlers
+  const handleDropdownEnter = useCallback((label: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setActiveDropdown(label);
+  }, []);
+
+  const handleDropdownLeave = useCallback(() => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 150);
+  }, []);
 
   // Command palette keyboard shortcuts
   useEffect(() => {
@@ -93,13 +122,14 @@ export default function AppHeader() {
       if (e.key === "Escape") {
         setCommandOpen(false);
         setMenuOpen(false);
+        setActiveDropdown(null);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Focus search input when command palette opens
+  // Focus search input
   useEffect(() => {
     if (commandOpen && searchInputRef.current) {
       setTimeout(() => searchInputRef.current?.focus(), 50);
@@ -121,7 +151,6 @@ export default function AppHeader() {
     }
   }, [filteredItems, selectedIndex, router]);
 
-  // Reset selected index when search changes
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchQuery]);
@@ -135,6 +164,9 @@ export default function AppHeader() {
       if (commandRef.current && !commandRef.current.contains(e.target as Node)) {
         setCommandOpen(false);
       }
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -147,18 +179,28 @@ export default function AppHeader() {
   }, [mobileOpen, commandOpen]);
 
   const isActive = (href: string) => pathname?.startsWith(href);
-
-  // Use session status to determine login state (avoids hydration mismatch)
   const isLoggedIn = status === "authenticated";
   const isLoading = status === "loading";
 
+  // Hide header on dashboard routes (they have their own navigation)
+  const isDashboard = pathname?.startsWith("/dashboard");
+  if (isDashboard) return null;
+
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
+      {/* Skip to content - accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-violet-600 focus:text-white focus:rounded-lg"
+      >
+        Skip to content
+      </a>
+
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-950/60">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="h-8 w-8 rounded-lg bg-violet-600 flex items-center justify-center text-white font-bold text-sm">
+          <Link href="/" className="flex items-center gap-3 group">
+            <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow">
               CK
             </span>
             <span className="hidden sm:block font-semibold text-slate-900 dark:text-white">
@@ -166,43 +208,143 @@ export default function AppHeader() {
             </span>
           </Link>
 
-          {/* Center: Search Trigger */}
-          <button
-            onClick={() => setCommandOpen(true)}
-            className="hidden md:flex items-center gap-3 h-10 w-72 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >
-            <Search className="h-5 w-5" />
-            <span className="flex-1 text-left text-sm">Search...</span>
-            <kbd className="inline-flex items-center gap-0.5 px-2 py-1 rounded-md bg-slate-200 dark:bg-slate-700 text-[11px] font-medium">
-              <Command className="h-3 w-3" />K
-            </kbd>
-          </button>
+          {/* Center Navigation */}
+          <nav ref={navRef} className="hidden lg:flex items-center">
+            <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 rounded-full p-1">
+              {navGroups.map((group, groupIndex) => (
+                <div
+                  key={group.label}
+                  className="relative"
+                  onMouseEnter={() => handleDropdownEnter(group.label)}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <button
+                    className={`relative flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                      activeDropdown === group.label
+                        ? "text-slate-900 dark:text-white"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    {/* Animated background */}
+                    {activeDropdown === group.label && (
+                      <span
+                        className="absolute inset-0 bg-white dark:bg-slate-700 rounded-full shadow-sm"
+                        style={{
+                          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10">{group.label}</span>
+                    <ChevronDown className={`relative z-10 w-3.5 h-3.5 transition-transform duration-200 ${
+                      activeDropdown === group.label ? "rotate-180" : ""
+                    }`} />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {activeDropdown === group.label && (
+                    <div
+                      className="absolute top-full left-1/2 -translate-x-1/2 pt-3"
+                      onMouseEnter={() => handleDropdownEnter(group.label)}
+                      onMouseLeave={handleDropdownLeave}
+                    >
+                      <div className="w-72 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="p-2">
+                          {group.items.map((item, index) => {
+                            const Icon = item.icon;
+                            const active = isActive(item.href);
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setActiveDropdown(null)}
+                                onMouseEnter={() => setHoveredIndex(index)}
+                                onMouseLeave={() => setHoveredIndex(null)}
+                                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-150 group/item ${
+                                  active
+                                    ? "bg-violet-50 dark:bg-violet-900/20"
+                                    : hoveredIndex === index
+                                    ? "bg-slate-50 dark:bg-slate-800"
+                                    : ""
+                                }`}
+                              >
+                                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                                  active
+                                    ? "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400"
+                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover/item:bg-slate-200 dark:group-hover/item:bg-slate-700"
+                                }`}>
+                                  <Icon className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-medium text-sm ${
+                                      active ? "text-violet-700 dark:text-violet-300" : "text-slate-900 dark:text-white"
+                                    }`}>
+                                      {item.label}
+                                    </span>
+                                    {item.badge && (
+                                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                                        item.badge === "New"
+                                          ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                                          : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                                      }`}>
+                                        {item.badge}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                    {item.description}
+                                  </p>
+                                </div>
+                                <ArrowRight className={`w-4 h-4 text-slate-300 dark:text-slate-600 transition-all ${
+                                  hoveredIndex === index ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+                                }`} />
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </nav>
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Search Trigger */}
+            <button
+              onClick={() => setCommandOpen(true)}
+              className="hidden md:flex items-center gap-2 h-9 w-52 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+            >
+              <Search className="h-4 w-4" />
+              <span className="flex-1 text-left text-sm">Search...</span>
+              <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-[10px] font-medium">
+                <Command className="h-2.5 w-2.5" />K
+              </kbd>
+            </button>
+
             {/* Mobile search */}
             <button
               onClick={() => setCommandOpen(true)}
-              className="md:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="md:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
             </button>
 
-            {/* Theme toggle - uses suppressHydrationWarning */}
+            {/* Theme toggle */}
             <button
               onClick={() => {
                 const isDark = document.documentElement.classList.contains("dark");
                 const newTheme = isDark ? "light" : "dark";
-                // Add transition class for smooth theme switching
                 document.documentElement.classList.add("theme-transition");
                 document.documentElement.classList.toggle("dark", !isDark);
                 document.documentElement.setAttribute("data-theme", newTheme);
-                try { localStorage.setItem("ok-theme", newTheme); } catch { /* Ignore localStorage errors in SSR */ }
-                // Remove transition class after animation completes
+                try { localStorage.setItem("ok-theme", newTheme); } catch {}
                 setTimeout(() => document.documentElement.classList.remove("theme-transition"), 300);
               }}
-              className="h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Toggle theme"
               suppressHydrationWarning
             >
@@ -224,39 +366,45 @@ export default function AppHeader() {
                 <div className="relative" ref={menuRef}>
                   <button
                     onClick={() => setMenuOpen(o => !o)}
-                    className="flex items-center gap-2 h-9 pl-1 pr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex items-center gap-2 h-9 pl-1 pr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <span className="h-7 w-7 rounded-md bg-violet-600 text-white text-xs font-bold flex items-center justify-center">
+                    <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
                       {userInitial}
                     </span>
-                    <span className="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300 max-w-[80px] truncate">
-                      {userName}
-                    </span>
+                    <ChevronDown className={`hidden sm:block w-4 h-4 text-slate-400 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
                   </button>
 
                   {menuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg overflow-hidden">
-                      <div className="p-3 border-b border-slate-100 dark:border-slate-800">
-                        <p className="font-medium text-slate-900 dark:text-white truncate">{userName}</p>
-                        <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
-                        <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
+                    <div className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                        <p className="font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
+                        <p className="text-sm text-slate-500 truncate">{session?.user?.email}</p>
+                        <span className="inline-block mt-2 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
                           {userRole.toLowerCase()}
                         </span>
                       </div>
-                      <div className="p-1">
+                      <div className="p-2">
+                        <Link
+                          href={dashboardHref}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <Home className="h-4 w-4" />
+                          Dashboard
+                        </Link>
                         <Link
                           href="/settings"
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                           <Settings className="h-4 w-4" />
                           Settings
                         </Link>
                       </div>
-                      <div className="p-1 border-t border-slate-100 dark:border-slate-800">
+                      <div className="p-2 border-t border-slate-100 dark:border-slate-800">
                         <button
                           onClick={async () => { setMenuOpen(false); await logout(); }}
-                          className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
                           <LogOut className="h-4 w-4" />
                           Sign out
@@ -267,19 +415,27 @@ export default function AppHeader() {
                 </div>
               </>
             ) : (
-              <Link
-                href="/auth/login"
-                className="hidden sm:flex items-center gap-1.5 h-9 px-4 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium"
-              >
-                <Zap className="h-4 w-4" />
-                Get Started
-              </Link>
+              <div className="hidden sm:flex items-center gap-2">
+                <Link
+                  href="/auth/login"
+                  className="h-9 px-4 flex items-center text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white text-sm font-medium shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all"
+                >
+                  <Zap className="h-4 w-4" />
+                  Get Started
+                </Link>
+              </div>
             )}
 
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(o => !o)}
-              className="sm:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="lg:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Menu"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -298,10 +454,10 @@ export default function AppHeader() {
           <div className="relative flex items-start justify-center pt-[15vh] px-4">
             <div
               ref={commandRef}
-              className="w-full max-w-lg"
+              className="w-full max-w-lg animate-in fade-in slide-in-from-top-4 duration-200"
               onKeyDown={handleCommandKeyDown}
             >
-              <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
                 {/* Search Input */}
                 <div className="flex items-center px-4 border-b border-slate-100 dark:border-slate-800">
                   <Search className="h-5 w-5 text-slate-400 flex-shrink-0" />
@@ -310,82 +466,83 @@ export default function AppHeader() {
                     type="text"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search..."
-                    className="flex-1 h-12 px-3 bg-transparent text-base text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:outline-none focus:ring-0 border-none"
+                    placeholder="Search pages..."
+                    className="flex-1 h-14 px-3 bg-transparent text-base text-slate-900 dark:text-white placeholder-slate-400 outline-none"
                   />
-                  <kbd className="hidden sm:flex items-center px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-400">
+                  <kbd className="hidden sm:flex items-center px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-400">
                     ESC
                   </kbd>
                 </div>
 
                 {/* Results */}
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto p-2">
                   {filteredItems.length === 0 ? (
-                    <div className="py-10 text-center">
-                      <Search className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                    <div className="py-12 text-center">
+                      <Search className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                       <p className="text-sm text-slate-500">No results found</p>
                     </div>
                   ) : (
-                    <div className="py-2">
-                      {filteredItems.map((item, index) => {
-                        const Icon = item.icon;
-                        const selected = index === selectedIndex;
-
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setCommandOpen(false)}
-                            onMouseEnter={() => setSelectedIndex(index)}
-                            className={`flex items-center gap-3 mx-2 px-3 py-2.5 rounded-lg transition-colors ${
-                              selected
-                                ? "bg-slate-100 dark:bg-slate-800"
-                                : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                            }`}
-                          >
-                            <div className={`flex h-9 w-9 items-center justify-center rounded-md flex-shrink-0 ${
-                              selected ? "bg-slate-200 dark:bg-slate-700" : "bg-slate-100 dark:bg-slate-800"
-                            }`}>
-                              <Icon className={`h-4 w-4 ${selected ? "text-slate-700 dark:text-slate-200" : "text-slate-500"}`} />
+                    filteredItems.map((item, index) => {
+                      const Icon = item.icon;
+                      const selected = index === selectedIndex;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setCommandOpen(false)}
+                          onMouseEnter={() => setSelectedIndex(index)}
+                          className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                            selected
+                              ? "bg-violet-50 dark:bg-violet-900/20"
+                              : "hover:bg-slate-50 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 ${
+                            selected
+                              ? "bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                          }`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className={`font-medium text-sm ${
+                                selected ? "text-violet-700 dark:text-violet-300" : "text-slate-900 dark:text-white"
+                              }`}>
+                                {item.label}
+                              </span>
+                              {item.badge && (
+                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                                  item.badge === "New"
+                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                                    : "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
+                                }`}>
+                                  {item.badge}
+                                </span>
+                              )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className={`font-medium text-sm ${selected ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"}`}>{item.label}</span>
-                                {item.badge && (
-                                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase ${
-                                    item.badge === "New"
-                                      ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
-                                      : "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
-                                  }`}>
-                                    {item.badge}
-                                  </span>
-                                )}
-                              </div>
-                              <p className={`text-xs truncate ${selected ? "text-slate-500 dark:text-slate-400" : "text-slate-400"}`}>
-                                {item.description}
-                              </p>
-                            </div>
-                            <kbd className={`hidden sm:flex items-center justify-center w-6 h-6 rounded text-xs font-medium ${
-                              selected ? "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                            }`}>
-                              {item.shortcut}
-                            </kbd>
-                          </Link>
-                        );
-                      })}
-                    </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                              {item.description}
+                            </p>
+                          </div>
+                          {selected && (
+                            <ArrowRight className="w-4 h-4 text-violet-500" />
+                          )}
+                        </Link>
+                      );
+                    })
                   )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-400">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-400">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1.5">
                       <kbd className="w-5 h-5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] flex items-center justify-center">↑</kbd>
                       <kbd className="w-5 h-5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] flex items-center justify-center">↓</kbd>
                       Navigate
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1.5">
                       <kbd className="px-1.5 h-5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] flex items-center justify-center">↵</kbd>
                       Select
                     </span>
@@ -398,75 +555,141 @@ export default function AppHeader() {
         </div>
       )}
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - Slide from right */}
       {mobileOpen && (
-        <div className="sm:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-900 shadow-xl">
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-slate-900 shadow-2xl animate-in slide-in-from-right duration-300">
             <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between px-4 h-14 border-b border-slate-200 dark:border-slate-800">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 h-16 border-b border-slate-200 dark:border-slate-800">
                 <span className="font-semibold text-slate-900 dark:text-white">Menu</span>
-                <button onClick={() => setMobileOpen(false)} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
+              {/* User section */}
               {isLoggedIn && (
                 <div className="p-4 border-b border-slate-200 dark:border-slate-800">
                   <div className="flex items-center gap-3">
-                    <span className="h-10 w-10 rounded-lg bg-violet-600 text-white font-bold flex items-center justify-center">
+                    <span className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 text-white font-bold flex items-center justify-center shadow-lg shadow-violet-500/25">
                       {userInitial}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 dark:text-white truncate">{userName}</p>
-                      <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
+                      <p className="font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
+                      <p className="text-sm text-slate-500 truncate">{session?.user?.email}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              <nav className="flex-1 overflow-y-auto p-2">
-                {navItems.map(item => {
-                  const Icon = item.icon;
-                  const href = item.href === "/dashboard" ? dashboardHref : item.href;
-                  const active = isActive(href);
-
-                  return (
+              {/* Navigation */}
+              <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+                {/* Dashboard link for logged in users */}
+                {isLoggedIn && (
+                  <div>
                     <Link
-                      key={item.href}
-                      href={href}
+                      href={dashboardHref}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm ${
-                        active
-                          ? "bg-violet-600 text-white"
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium ${
+                        isActive(dashboardHref)
+                          ? "bg-violet-600 text-white shadow-lg shadow-violet-500/25"
                           : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
                     >
-                      <Icon className="h-5 w-5" />
-                      {item.label}
+                      <Home className="h-5 w-5" />
+                      Dashboard
                     </Link>
-                  );
-                })}
+                  </div>
+                )}
+
+                {/* Nav groups */}
+                {navGroups.map(group => (
+                  <div key={group.label}>
+                    <p className="px-4 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {group.label}
+                    </p>
+                    <div className="space-y-1">
+                      {group.items.map(item => {
+                        const Icon = item.icon;
+                        const active = isActive(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                              active
+                                ? "bg-violet-600 text-white shadow-lg shadow-violet-500/25"
+                                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            }`}
+                          >
+                            <Icon className="h-5 w-5" />
+                            <span className="flex-1">{item.label}</span>
+                            {item.badge && (
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                                active
+                                  ? "bg-white/20 text-white"
+                                  : item.badge === "New"
+                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                                    : "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
+                              }`}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </nav>
 
-              <div className="p-3 border-t border-slate-200 dark:border-slate-800">
+              {/* Footer */}
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
                 {isLoggedIn ? (
-                  <button
-                    onClick={async () => { setMobileOpen(false); await logout(); }}
-                    className="flex w-full items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    Sign out
-                  </button>
+                  <>
+                    <Link
+                      href="/settings"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <Settings className="h-5 w-5" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={async () => { setMobileOpen(false); await logout(); }}
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sign out
+                    </button>
+                  </>
                 ) : (
-                  <Link
-                    href="/auth/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm text-white bg-violet-600"
-                  >
-                    <Zap className="h-5 w-5" />
-                    Get Started
-                  </Link>
+                  <>
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-white bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-violet-500/25"
+                    >
+                      <Zap className="h-5 w-5" />
+                      Get Started
+                    </Link>
+                  </>
                 )}
               </div>
             </div>

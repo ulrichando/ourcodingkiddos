@@ -15,12 +15,12 @@ const accentMap = {
 export function AdminStatCard({ label, value, sublabel, accent = "purple" }: StatCardProps) {
   const gradient = accentMap[accent] ?? accentMap.purple;
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 space-y-2">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-4 space-y-2">
       <div className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${gradient}`}>
         {label}
       </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
-      {sublabel && <p className="text-sm text-slate-600">{sublabel}</p>}
+      <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</div>
+      {sublabel && <p className="text-sm text-slate-600 dark:text-slate-400">{sublabel}</p>}
     </div>
   );
 }

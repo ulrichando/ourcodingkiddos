@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   Search,
   Clock,
   Star,
   BookOpen,
   X,
-  SlidersHorizontal,
   Globe,
   Smartphone,
   Joystick,
@@ -21,6 +20,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 
 const COURSES_PER_PAGE = 9;
@@ -55,11 +56,11 @@ const categoryConfig = [
 ];
 
 const levelColors: Record<string, string> = {
-  beginner: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
-  intermediate: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
-  advanced: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400",
-  expert: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400",
-  master: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+  beginner: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800",
+  intermediate: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800",
+  advanced: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border border-purple-200 dark:border-purple-800",
+  expert: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800",
+  master: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800",
 };
 
 // Language display names for filter tags
@@ -85,8 +86,10 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
   const [level, setLevel] = useState("All Levels");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [animateCards, setAnimateCards] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // Read URL language parameter and filter by specific language
   useEffect(() => {
@@ -103,6 +106,13 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
       }
     }
   }, [searchParams]);
+
+  // Trigger card animations on filter change
+  useEffect(() => {
+    setAnimateCards(false);
+    const timer = setTimeout(() => setAnimateCards(true), 50);
+    return () => clearTimeout(timer);
+  }, [query, age, level, selectedCategory, selectedLanguage, currentPage]);
 
   const activeFiltersCount = (age !== "All Ages" ? 1 : 0) + (level !== "All Levels" ? 1 : 0) + (selectedCategory !== "all" ? 1 : 0) + (selectedLanguage ? 1 : 0);
 
@@ -165,22 +175,35 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
-      <section className="pt-12 pb-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-3">
-            <span className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-xs font-semibold">
+      {/* Hero Section with gradient background */}
+      <section className="relative pt-16 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-50 via-slate-50 to-slate-50 dark:from-purple-950/30 dark:via-slate-900 dark:to-slate-900" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-200/30 dark:bg-purple-900/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-pink-200/30 dark:bg-pink-900/20 rounded-full blur-3xl" />
+
+        <div className="max-w-7xl mx-auto relative">
+          {/* Header with animations */}
+          <div className="text-center space-y-4 animate-fade-in">
+            <span className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 px-4 py-1.5 rounded-full text-xs font-semibold border border-purple-200 dark:border-purple-800">
+              <Sparkles className="w-3.5 h-3.5" />
               Learn to Code
             </span>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100">Explore Our Courses</h1>
-            <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Find the perfect course for your coding journey
+            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-100">
+              Explore Our <span className="text-gradient">Courses</span>
+            </h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Find the perfect course for your coding journey. From HTML basics to AI mastery.
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Category Cards */}
+      <section className="pb-16 px-4 sm:px-6 lg:px-8 -mt-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Category Cards with staggered animation */}
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3">
-            {categoryConfig.map((cat) => {
+            {categoryConfig.map((cat, index) => {
               const Icon = cat.icon;
               const isSelected = selectedCategory === cat.id;
               return (
@@ -188,18 +211,19 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                   key={cat.id}
                   onClick={() => {
                     setSelectedCategory(cat.id);
-                    setSelectedLanguage(null); // Clear language filter when selecting category
+                    setSelectedLanguage(null);
                   }}
-                  className={`group flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-200 ${
+                  className={`group flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-300 animate-fade-in-up ${
                     isSelected
-                      ? "bg-white dark:bg-slate-800 shadow-lg ring-2 ring-purple-500 dark:ring-purple-400 scale-105"
-                      : "bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md"
+                      ? "bg-white dark:bg-slate-800 shadow-lg shadow-purple-500/10 ring-2 ring-purple-500 dark:ring-purple-400 scale-105"
+                      : "bg-white/60 dark:bg-slate-800/60 hover:bg-white dark:hover:bg-slate-800 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 hover:scale-105"
                   }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <span className={`text-xs font-medium ${isSelected ? "text-purple-600 dark:text-purple-400" : "text-slate-600 dark:text-slate-400"}`}>
+                  <span className={`text-xs font-medium transition-colors ${isSelected ? "text-purple-600 dark:text-purple-400" : "text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-100"}`}>
                     {cat.label}
                   </span>
                 </button>
@@ -208,20 +232,29 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
           </div>
 
           {/* Search and Filters Bar */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+          <div className="bg-white dark:bg-slate-800/80 dark:backdrop-blur-sm rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700/50 p-4 transition-all duration-300 hover:shadow-md">
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* Search */}
-              <div className="flex-1 flex items-center gap-2 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent transition">
-                <Search className="h-5 w-5 text-slate-400" />
+              {/* Search with animated border */}
+              <div className={`flex-1 flex items-center gap-2 border rounded-xl px-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 transition-all duration-300 ${
+                isSearchFocused
+                  ? "ring-2 ring-purple-500/30 border-purple-500 dark:border-purple-400 shadow-sm shadow-purple-500/10"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"
+              }`}>
+                <Search className={`h-5 w-5 transition-colors ${isSearchFocused ? "text-purple-500" : "text-slate-400"}`} />
                 <input
                   type="text"
                   placeholder="Search courses..."
                   className="w-full outline-none text-sm text-slate-700 dark:text-slate-300 bg-transparent placeholder:text-slate-400"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
                 />
                 {query && (
-                  <button onClick={() => setQuery("")} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <button
+                    onClick={() => setQuery("")}
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-600"
+                  >
                     <X className="h-4 w-4" />
                   </button>
                 )}
@@ -234,10 +267,10 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                   <select
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
-                    className={`w-full appearance-none px-3 sm:px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition ${
+                    className={`w-full appearance-none px-3 sm:px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 ${
                       age !== "All Ages"
-                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-400"
-                        : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300"
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-400 shadow-sm"
+                        : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500"
                     }`}
                   >
                     {ageFilters.map((a) => (
@@ -252,10 +285,10 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                   <select
                     value={level}
                     onChange={(e) => setLevel(e.target.value)}
-                    className={`w-full appearance-none px-3 sm:px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition ${
+                    className={`w-full appearance-none px-3 sm:px-4 py-2.5 pr-8 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30 ${
                       level !== "All Levels"
-                        ? "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-400"
-                        : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300"
+                        ? "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-400 shadow-sm"
+                        : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500"
                     }`}
                   >
                     {levelFilters.map((l) => (
@@ -269,7 +302,7 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                 {activeFiltersCount > 0 && (
                   <button
                     onClick={clearAllFilters}
-                    className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium hover:bg-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/50 transition flex items-center gap-1"
+                    className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-medium hover:bg-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/50 transition-all duration-200 flex items-center gap-1 active:scale-95"
                   >
                     <X className="h-4 w-4" />
                     <span className="hidden sm:inline">Clear</span>
@@ -278,96 +311,107 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
               </div>
             </div>
 
-            {/* Active Filters Tags */}
-            {activeFiltersCount > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            {/* Active Filters Tags with smooth animations */}
+            <div className={`overflow-hidden transition-all duration-300 ${activeFiltersCount > 0 ? "max-h-20 opacity-100 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-wrap gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400 py-1">Active filters:</span>
                 {selectedCategory !== "all" && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 text-xs font-medium animate-scale-in border border-purple-200 dark:border-purple-800">
                     {categoryConfig.find(c => c.id === selectedCategory)?.label}
-                    <button onClick={() => setSelectedCategory("all")} className="hover:text-purple-900 dark:hover:text-purple-200">
+                    <button onClick={() => setSelectedCategory("all")} className="hover:text-purple-900 dark:hover:text-purple-200 transition-colors">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
                 {age !== "All Ages" && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-medium animate-scale-in border border-emerald-200 dark:border-emerald-800">
                     {age}
-                    <button onClick={() => setAge("All Ages")} className="hover:text-emerald-900 dark:hover:text-emerald-200">
+                    <button onClick={() => setAge("All Ages")} className="hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
                 {level !== "All Levels" && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-xs font-medium animate-scale-in border border-blue-200 dark:border-blue-800">
                     {level}
-                    <button onClick={() => setLevel("All Levels")} className="hover:text-blue-900 dark:hover:text-blue-200">
+                    <button onClick={() => setLevel("All Levels")} className="hover:text-blue-900 dark:hover:text-blue-200 transition-colors">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
                 {selectedLanguage && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 text-xs font-medium animate-scale-in border border-orange-200 dark:border-orange-800">
                     {languageLabels[selectedLanguage] || selectedLanguage.toUpperCase()}
-                    <button onClick={() => setSelectedLanguage(null)} className="hover:text-orange-900 dark:hover:text-orange-200">
+                    <button onClick={() => setSelectedLanguage(null)} className="hover:text-orange-900 dark:hover:text-orange-200 transition-colors">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Results Count */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-600 dark:text-slate-400">
               {filtered.length === 0 ? (
-                <span className="font-semibold text-slate-900 dark:text-slate-100">0</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">0</span>
               ) : (
                 <>
-                  Showing <span className="font-semibold text-slate-900 dark:text-slate-100">{startIndex + 1}-{Math.min(endIndex, filtered.length)}</span> of{" "}
-                  <span className="font-semibold text-slate-900 dark:text-slate-100">{filtered.length}</span>
+                  Showing <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{startIndex + 1}-{Math.min(endIndex, filtered.length)}</span> of{" "}
+                  <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{filtered.length}</span>
                 </>
               )}{" "}
               courses
             </p>
             {totalPages > 1 && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-slate-500 dark:text-slate-400 tabular-nums">
                 Page {currentPage} of {totalPages}
               </p>
             )}
           </div>
 
-          {/* Course Grid */}
+          {/* Course Grid with staggered animations */}
           {filtered.length === 0 ? (
-            <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                <Search className="w-8 h-8 text-slate-400" />
+            <div className="text-center py-20 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/50 animate-fade-in">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
+                <Search className="w-10 h-10 text-slate-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">No courses found</h3>
-              <p className="text-slate-500 dark:text-slate-400 mb-4">Try adjusting your filters or search query</p>
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">No courses found</h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-6">Try adjusting your filters or search query</p>
               <button
                 onClick={clearAllFilters}
-                className="px-4 py-2 rounded-lg bg-purple-500 text-white font-medium hover:bg-purple-600 transition"
+                className="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-medium hover:bg-purple-700 transition-all duration-200 shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 active:scale-95"
               >
                 Clear all filters
               </button>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedCourses.map((course) => (
+            <div ref={gridRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedCourses.map((course, index) => (
                 <Link key={course.id} href={`/courses/${course.slug}`}>
-                  <div className="group rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-xl hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 bg-white dark:bg-slate-800 h-full flex flex-col">
-                    <div className="h-32 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-colors" />
-                      <LanguageIcon language={course.language.toLowerCase()} size="lg" showLabel />
+                  <div
+                    className={`group rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden bg-white dark:bg-slate-800/80 dark:backdrop-blur-sm h-full flex flex-col transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50 hover:-translate-y-1 hover:border-purple-300 dark:hover:border-purple-600 ${
+                      animateCards ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                    }`}
+                    style={{ transitionDelay: `${index * 75}ms` }}
+                  >
+                    {/* Card Header with gradient overlay */}
+                    <div className="h-36 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-500" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),transparent)]" />
+                      <div className="transform transition-transform duration-500 group-hover:scale-110">
+                        <LanguageIcon language={course.language.toLowerCase()} size="lg" showLabel />
+                      </div>
                     </div>
+
+                    {/* Card Body */}
                     <div className="p-5 flex-1 flex flex-col">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${levelColors[course.level.toLowerCase()] || "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300"}`}>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${levelColors[course.level.toLowerCase()] || "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600"}`}>
                           {course.level}
                         </span>
-                        <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium">
+                        <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-600">
                           {course.age}
                         </span>
                       </div>
@@ -377,19 +421,24 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                       <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 flex-1">
                         {course.description}
                       </p>
-                      <div className="flex items-center gap-4 text-xs font-medium pt-3 border-t border-slate-100 dark:border-slate-700">
-                        <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                          <Clock className="w-4 h-4" />
-                          {course.hours}h
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-amber-500">
-                          <Star className="w-4 h-4 fill-amber-500" />
-                          {course.xp} XP
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                          <BookOpen className="w-4 h-4" />
-                          {course.lessonsCount} lessons
-                        </span>
+
+                      {/* Card Footer */}
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <div className="flex items-center gap-3 text-xs font-medium">
+                          <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                            <Clock className="w-4 h-4" />
+                            <span className="tabular-nums">{course.hours}h</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-amber-500">
+                            <Star className="w-4 h-4 fill-amber-500" />
+                            <span className="tabular-nums">{course.xp} XP</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                            <BookOpen className="w-4 h-4" />
+                            <span className="tabular-nums">{course.lessonsCount}</span>
+                          </span>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   </div>
@@ -398,14 +447,14 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
             </div>
           )}
 
-          {/* Pagination Controls */}
+          {/* Pagination Controls with improved styling */}
           {totalPages > 1 && (
             <nav className="flex items-center justify-center gap-1 pt-8" aria-label="Pagination">
               {/* Previous Button */}
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800"
+                className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 active:scale-95"
                 aria-label="Go to previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -423,10 +472,10 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page as number)}
-                      className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition ${
+                      className={`min-w-[44px] px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 tabular-nums active:scale-95 ${
                         currentPage === page
-                          ? "bg-purple-600 text-white shadow-md"
-                          : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                          ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
+                          : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                       }`}
                       aria-label={`Go to page ${page}`}
                       aria-current={currentPage === page ? "page" : undefined}
@@ -441,7 +490,7 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800"
+                className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 active:scale-95"
                 aria-label="Go to next page"
               >
                 <span className="hidden sm:inline">Next</span>

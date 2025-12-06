@@ -414,7 +414,7 @@ export default function AdminProgramsPage() {
               <div className="p-6 space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Title</label>
                     <input
                       type="text"
                       value={formData.title}
@@ -432,7 +432,7 @@ export default function AdminProgramsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Slug</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Slug</label>
                     <input
                       type="text"
                       value={formData.slug}
@@ -443,7 +443,7 @@ export default function AdminProgramsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
@@ -454,7 +454,7 @@ export default function AdminProgramsPage() {
 
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Language</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Language</label>
                     <select
                       value={formData.language}
                       onChange={(e) => setFormData((prev) => ({ ...prev, language: e.target.value }))}
@@ -470,7 +470,7 @@ export default function AdminProgramsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Age Group</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Age Group</label>
                     <select
                       value={formData.ageGroup}
                       onChange={(e) => setFormData((prev) => ({ ...prev, ageGroup: e.target.value }))}
@@ -482,7 +482,7 @@ export default function AdminProgramsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Level</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Level</label>
                     <select
                       value={formData.level}
                       onChange={(e) => setFormData((prev) => ({ ...prev, level: e.target.value }))}
@@ -497,7 +497,7 @@ export default function AdminProgramsPage() {
 
                 <div className="grid md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Sessions</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sessions</label>
                     <input
                       type="number"
                       value={formData.sessionCount}
@@ -508,7 +508,7 @@ export default function AdminProgramsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Duration (min)</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Duration (min)</label>
                     <input
                       type="number"
                       value={formData.sessionDuration}
@@ -519,7 +519,7 @@ export default function AdminProgramsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Price ($)</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price ($)</label>
                     <input
                       type="number"
                       value={formData.priceCents / 100}
@@ -530,7 +530,7 @@ export default function AdminProgramsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Original Price ($)</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Original Price ($)</label>
                     <input
                       type="number"
                       value={formData.originalPriceCents / 100}
@@ -547,7 +547,7 @@ export default function AdminProgramsPage() {
 
                 {/* Features */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Features</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Features</label>
                   <div className="flex gap-2 mb-2">
                     <input
                       type="text"
@@ -560,7 +560,7 @@ export default function AdminProgramsPage() {
                     <button
                       type="button"
                       onClick={addFeature}
-                      className="px-4 py-2 rounded-lg bg-purple-100 text-purple-700 font-semibold"
+                      className="px-4 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-semibold hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
                     >
                       Add
                     </button>

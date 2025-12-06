@@ -19,15 +19,16 @@ import {
   X,
   HelpCircle,
   UserPlus,
-  Video,
   Newspaper,
   Rocket,
-  Mail,
-  CalendarDays,
   Award,
   UserCircle,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Command,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const navigationGroups = [
   {
@@ -86,21 +87,53 @@ const navigationGroups = [
   }
 ];
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  onCommandOpen?: () => void;
+};
+
+export default function AdminSidebar({ onCommandOpen }: AdminSidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Load collapsed state from localStorage
   useEffect(() => {
     setMounted(true);
+    const stored = localStorage.getItem("admin-sidebar-collapsed");
+    if (stored !== null) {
+      setIsCollapsed(stored === "true");
+    }
   }, []);
+
+  // Persist collapsed state
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed((prev) => {
+      const newValue = !prev;
+      localStorage.setItem("admin-sidebar-collapsed", String(newValue));
+      return newValue;
+    });
+  }, []);
+
+  // Keyboard shortcut for collapse (Cmd/Ctrl + B)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "b") {
+        e.preventDefault();
+        toggleCollapsed();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggleCollapsed]);
 
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        aria-label="Toggle menu"
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -108,37 +141,69 @@ export default function AdminSidebar() {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:relative top-0 left-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-40 transition-transform duration-200 flex flex-col ${
+        className={`fixed lg:relative top-0 left-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-40 flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } w-64 flex-shrink-0`}
+        } ${isCollapsed ? "lg:w-[72px]" : "w-64"}`}
       >
-        {/* Logo Section - Fixed at top */}
-        <div className="p-6 flex-shrink-0">
-          <Link href="/dashboard/admin" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <LayoutDashboard className="w-6 h-6 text-white" />
+        {/* Logo Section */}
+        <div className={`p-4 flex-shrink-0 border-b border-slate-100 dark:border-slate-800 ${isCollapsed ? "px-3" : "px-4"}`}>
+          <Link href="/dashboard/admin" className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <LayoutDashboard className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h2 className="font-bold text-slate-900 dark:text-slate-100">Admin</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Control Panel</p>
-            </div>
+            {!isCollapsed && (
+              <div className="overflow-hidden">
+                <h2 className="font-bold text-slate-900 dark:text-slate-100 truncate">Admin</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">Control Panel</p>
+              </div>
+            )}
           </Link>
         </div>
 
+        {/* Search/Command Trigger */}
+        {!isCollapsed && (
+          <div className="px-4 py-3">
+            <button
+              onClick={onCommandOpen}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+            >
+              <Search className="w-4 h-4" />
+              <span className="flex-1 text-left">Search...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-500 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-slate-300 dark:group-hover:bg-slate-600">
+                <Command className="w-2.5 h-2.5" />K
+              </kbd>
+            </button>
+          </div>
+        )}
+
+        {isCollapsed && (
+          <div className="px-3 py-3">
+            <button
+              onClick={onCommandOpen}
+              className="w-full flex items-center justify-center p-2 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              title="Search (⌘K)"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Navigation Section - Scrollable */}
-        <nav className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
+        <nav className={`flex-1 overflow-y-auto py-4 space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>
           {navigationGroups.map((group) => (
             <div key={group.title}>
-              <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                {group.title}
-              </h3>
+              {!isCollapsed && (
+                <h3 className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-3">
+                  {group.title}
+                </h3>
+              )}
               <ul className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
@@ -148,14 +213,19 @@ export default function AdminSidebar() {
                       <Link
                         href={item.href}
                         onClick={() => setIsOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                        title={isCollapsed ? item.label : undefined}
+                        className={`flex items-center gap-3 rounded-lg transition-all duration-200 ${
+                          isCollapsed ? "justify-center p-2.5" : "px-3 py-2"
+                        } ${
                           isActive
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/25"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <Icon className={`flex-shrink-0 ${isCollapsed ? "w-5 h-5" : "w-4 h-4"}`} />
+                        {!isCollapsed && (
+                          <span className="text-sm font-medium truncate">{item.label}</span>
+                        )}
                       </Link>
                     </li>
                   );
@@ -164,6 +234,21 @@ export default function AdminSidebar() {
             </div>
           ))}
         </nav>
+
+        {/* Collapse Toggle Button - Desktop only */}
+        <div className={`hidden lg:flex border-t border-slate-100 dark:border-slate-800 p-3 ${isCollapsed ? "justify-center" : "justify-end"}`}>
+          <button
+            onClick={toggleCollapsed}
+            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            title={isCollapsed ? "Expand sidebar (⌘B)" : "Collapse sidebar (⌘B)"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </aside>
     </>
   );
