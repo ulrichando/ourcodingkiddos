@@ -37,11 +37,12 @@ export default withAuth(
     const path = req.nextUrl.pathname;
     const role = token?.role as string | undefined;
 
-    // Paths that should be accessible during maintenance (minimal - NO login for non-admins)
+    // Paths that should be accessible during maintenance
     const maintenanceExemptPaths = [
       "/maintenance",
-      "/api/maintenance", // Only maintenance status API
-      "/api/auth", // Required for auth flow but login will be blocked
+      "/auth/login", // Allow login page so admins can log in
+      "/api/maintenance", // Maintenance status API
+      "/api/auth", // Required for auth flow
       "/_next/",
       "/favicon.ico",
     ];
