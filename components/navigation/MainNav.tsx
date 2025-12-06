@@ -94,7 +94,7 @@ export default function MainNav({ user, userType = "parent", onLogout }: Props) 
 
           <div className="flex items-center gap-2 relative">
             <NotificationBell userEmail={user?.email} />
-            <Button variant="ghost" className="flex items-center gap-2" onClick={() => setMenuOpen((o) => !o)}>
+            <Button variant="ghost" onClick={() => setMenuOpen((o) => !o)}>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
                 {userInitial}
               </div>

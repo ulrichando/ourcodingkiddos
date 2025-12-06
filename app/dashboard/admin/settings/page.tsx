@@ -750,7 +750,7 @@ export default function SettingsPage() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
+            size="lg"
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving..." : "Save Settings"}

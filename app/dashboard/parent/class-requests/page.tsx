@@ -270,7 +270,7 @@ export default function ClassRequestsPage() {
             <p className="text-slate-600 dark:text-slate-400">Request personalized lessons for your child</p>
           </div>
           <Button onClick={() => setShowNewRequest(true)} className="self-start">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4" />
             New Request
           </Button>
         </div>
@@ -395,7 +395,7 @@ export default function ClassRequestsPage() {
                 <p className="text-slate-600 dark:text-slate-400">Request a 1-on-1 class to get started</p>
               </div>
               <Button onClick={() => setShowNewRequest(true)}>
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 Create Request
               </Button>
             </CardContent>
@@ -773,12 +773,12 @@ export default function ClassRequestsPage() {
                   <Button type="submit" disabled={submitting || pricingLoading}>
                     {submitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         Processing...
                       </>
                     ) : (
                       <>
-                        <CreditCard className="w-4 h-4 mr-2" />
+                        <CreditCard className="w-4 h-4" />
                         Proceed to Payment {pricing ? `(${pricing.totalPriceFormatted})` : ''}
                       </>
                     )}

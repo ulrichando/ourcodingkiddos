@@ -33,13 +33,13 @@ export default function NotFound() {
         {/* Suggested Actions */}
         <div className="grid sm:grid-cols-2 gap-4 max-w-sm mx-auto">
           <Link href="/" className="block">
-            <Button className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white h-12">
+            <Button className="w-full h-12">
               <Home className="w-5 h-5" />
               Go Home
             </Button>
           </Link>
           <Link href="/courses" className="block">
-            <Button variant="outline" className="w-full inline-flex items-center justify-center gap-2 h-12">
+            <Button variant="outline" className="w-full h-12">
               <BookOpen className="w-5 h-5" />
               Browse Courses
             </Button>

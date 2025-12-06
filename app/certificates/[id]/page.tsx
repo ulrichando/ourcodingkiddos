@@ -139,7 +139,7 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
             <Link href="/certificates">
               <Button variant="outline">Back</Button>
             </Link>
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white inline-flex items-center gap-2" onClick={handleDownload}>
+            <Button onClick={handleDownload}>
               <Download className="h-4 w-4" />
               Download
             </Button>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
 
 type ClassRequest = {
   id: string;
@@ -27,22 +27,58 @@ type ClassRequest = {
   adminNotes?: string;
 };
 
-const statusColors = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  APPROVED: "bg-blue-100 text-blue-800",
-  SCHEDULED: "bg-green-100 text-green-800",
-  REJECTED: "bg-red-100 text-red-800",
-  COMPLETED: "bg-gray-100 text-gray-800",
+const statusConfig = {
+  PENDING: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-700 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/30",
+    dot: "bg-amber-500"
+  },
+  APPROVED: {
+    bg: "bg-blue-50 dark:bg-blue-500/10",
+    text: "text-blue-700 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-500/30",
+    dot: "bg-blue-500"
+  },
+  SCHEDULED: {
+    bg: "bg-emerald-50 dark:bg-emerald-500/10",
+    text: "text-emerald-700 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-500/30",
+    dot: "bg-emerald-500"
+  },
+  REJECTED: {
+    bg: "bg-red-50 dark:bg-red-500/10",
+    text: "text-red-700 dark:text-red-400",
+    border: "border-red-200 dark:border-red-500/30",
+    dot: "bg-red-500"
+  },
+  COMPLETED: {
+    bg: "bg-slate-50 dark:bg-slate-500/10",
+    text: "text-slate-600 dark:text-slate-400",
+    border: "border-slate-200 dark:border-slate-500/30",
+    dot: "bg-slate-400"
+  },
 };
 
 export default function AdminClassRequestsPage() {
   const [requests, setRequests] = useState<ClassRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("all");
+  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     loadRequests();
   }, []);
+
+  // Close action menu when clicking outside
+  useEffect(() => {
+    const handleClick = () => setActionMenuId(null);
+    if (actionMenuId) {
+      document.addEventListener("click", handleClick);
+      return () => document.removeEventListener("click", handleClick);
+    }
+  }, [actionMenuId]);
 
   const loadRequests = async () => {
     try {
@@ -132,185 +168,366 @@ export default function AdminClassRequestsPage() {
   const approvedCount = requests.filter(r => r.status === "APPROVED").length;
   const scheduledCount = requests.filter(r => r.status === "SCHEDULED").length;
 
+  const filteredRequests = filter === "all"
+    ? requests
+    : requests.filter(r => r.status === filter);
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">1-on-1 Class Requests</h1>
-          <p className="text-slate-600">Manage parent requests for personalized classes</p>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Class Requests</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {requests.length} total request{requests.length !== 1 ? "s" : ""}
+            </p>
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
-                </div>
-                <AlertCircle className="w-8 h-8 text-yellow-600" />
+        {/* Stats Row */}
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            onClick={() => setFilter(filter === "PENDING" ? "all" : "PENDING")}
+            className={`p-4 rounded-xl border transition-all ${
+              filter === "PENDING"
+                ? "border-amber-300 dark:border-amber-500/50 bg-amber-50 dark:bg-amber-500/10"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <div className="text-left">
+                <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{pendingCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Pending</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </button>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Approved</p>
-                  <p className="text-2xl font-bold text-blue-600">{approvedCount}</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-blue-600" />
+          <button
+            onClick={() => setFilter(filter === "APPROVED" ? "all" : "APPROVED")}
+            className={`p-4 rounded-xl border transition-all ${
+              filter === "APPROVED"
+                ? "border-blue-300 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-500/10"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <div className="text-left">
+                <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{approvedCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Approved</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </button>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Scheduled</p>
-                  <p className="text-2xl font-bold text-green-600">{scheduledCount}</p>
-                </div>
-                <Calendar className="w-8 h-8 text-green-600" />
+          <button
+            onClick={() => setFilter(filter === "SCHEDULED" ? "all" : "SCHEDULED")}
+            className={`p-4 rounded-xl border transition-all ${
+              filter === "SCHEDULED"
+                ? "border-emerald-300 dark:border-emerald-500/50 bg-emerald-50 dark:bg-emerald-500/10"
+                : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <div className="text-left">
+                <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{scheduledCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Scheduled</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </button>
+        </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600">Total</p>
-                  <p className="text-2xl font-bold text-slate-900">{requests.length}</p>
-                </div>
-                <User className="w-8 h-8 text-slate-600" />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Filter Tabs */}
+        <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-fit">
+          {["all", "PENDING", "APPROVED", "SCHEDULED", "COMPLETED"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                filter === status
+                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              }`}
+            >
+              {status === "all" ? "All" : status.charAt(0) + status.slice(1).toLowerCase()}
+            </button>
+          ))}
         </div>
 
         {/* Requests List */}
-        <div className="space-y-4">
-          {requests.length === 0 ? (
-            <Card className="border-0 shadow-sm">
-              <CardContent className="p-12 text-center">
-                <p className="text-slate-500">No class requests yet</p>
-              </CardContent>
-            </Card>
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          {filteredRequests.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-6 h-6 text-slate-400" />
+              </div>
+              <p className="text-slate-600 dark:text-slate-400">No requests found</p>
+              <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">
+                {filter !== "all" ? "Try changing the filter" : "Class requests will appear here"}
+              </p>
+            </div>
           ) : (
-            requests.map(request => (
-              <Card key={request.id} className="border-0 shadow-sm">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold text-slate-900">{request.requestedTopic}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColors[request.status as keyof typeof statusColors]}`}>
+            <div className="divide-y divide-slate-100 dark:divide-slate-700">
+              {filteredRequests.map(request => {
+                const config = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.PENDING;
+                const isExpanded = expandedId === request.id;
+
+                return (
+                  <div key={request.id} className="group">
+                    {/* Main Row */}
+                    <div className="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                      {/* Status Indicator */}
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${config.dot}`} />
+
+                      {/* Main Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                            {request.requestedTopic}
+                          </h3>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${config.bg} ${config.text} ${config.border}`}>
                             {request.status}
                           </span>
                         </div>
-                        <div className="text-sm text-slate-600 space-y-1">
-                          <p><strong>Parent:</strong> {request.parentName || request.parentEmail}</p>
-                          {request.studentName && <p><strong>Student:</strong> {request.studentName} {request.studentAge && `(Age ${request.studentAge})`}</p>}
-                          {request.duration && <p><strong>Duration:</strong> {request.duration} minutes</p>}
-                          {request.instructorName && <p><strong>Instructor:</strong> {request.instructorName}</p>}
+                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <User className="w-3.5 h-3.5" />
+                            {request.parentName || request.parentEmail}
+                          </span>
+                          {request.studentName && (
+                            <span>Student: {request.studentName}</span>
+                          )}
+                          {request.duration && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              {request.duration}min
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => setExpandedId(expandedId === request.id ? null : request.id)}
-                        className="text-sm text-purple-600 hover:underline"
-                      >
-                        {expandedId === request.id ? "Hide Details" : "Show Details"}
-                      </button>
+
+                      {/* Date */}
+                      <div className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
+                        {formatDate(request.createdAt)}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        {/* Quick Actions */}
+                        {request.status === "PENDING" && (
+                          <div className="hidden sm:flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleUpdateStatus(request.id, "APPROVED"); }}
+                              className="h-8"
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => { e.stopPropagation(); handleUpdateStatus(request.id, "REJECTED"); }}
+                              className="h-8"
+                            >
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* More Actions Menu */}
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActionMenuId(actionMenuId === request.id ? null : request.id);
+                            }}
+                            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                          >
+                            <MoreHorizontal className="w-4 h-4 text-slate-500" />
+                          </button>
+
+                          {actionMenuId === request.id && (
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-10">
+                              {request.status === "PENDING" && (
+                                <>
+                                  <button
+                                    onClick={() => handleUpdateStatus(request.id, "APPROVED")}
+                                    className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                                  >
+                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleUpdateStatus(request.id, "REJECTED")}
+                                    className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                                  >
+                                    <XCircle className="w-4 h-4 text-red-500" />
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                              {(request.status === "APPROVED" || request.status === "PENDING") && (
+                                <button
+                                  onClick={() => handleAssignInstructor(request.id)}
+                                  className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                                >
+                                  <User className="w-4 h-4 text-blue-500" />
+                                  Assign Instructor
+                                </button>
+                              )}
+                              {request.status === "SCHEDULED" && (
+                                <button
+                                  onClick={() => handleUpdateStatus(request.id, "COMPLETED")}
+                                  className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                                >
+                                  <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                  Mark Completed
+                                </button>
+                              )}
+                              <div className="border-t border-slate-100 dark:border-slate-700 my-1" />
+                              <button
+                                onClick={() => setExpandedId(isExpanded ? null : request.id)}
+                                className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                              >
+                                {isExpanded ? (
+                                  <><ChevronUp className="w-4 h-4" /> Hide Details</>
+                                ) : (
+                                  <><ChevronDown className="w-4 h-4" /> View Details</>
+                                )}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Expand Button */}
+                        <button
+                          onClick={() => setExpandedId(isExpanded ? null : request.id)}
+                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-slate-500" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-slate-500" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Expanded Details */}
-                    {expandedId === request.id && (
-                      <div className="border-t pt-4 space-y-3">
-                        {request.description && (
-                          <div>
-                            <p className="text-xs font-semibold text-slate-500 mb-1">Description:</p>
-                            <p className="text-sm text-slate-700">{request.description}</p>
-                          </div>
-                        )}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 pt-0 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                          {/* Left Column */}
+                          <div className="space-y-3">
+                            {request.description && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Description</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300">{request.description}</p>
+                              </div>
+                            )}
 
-                        {request.preferredDays && request.preferredDays.length > 0 && (
-                          <div>
-                            <p className="text-xs font-semibold text-slate-500 mb-1">Preferred Days:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {request.preferredDays.map(day => (
-                                <span key={day} className="text-xs px-2 py-1 bg-slate-100 rounded">{day}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                            {request.studentAge && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Student Age</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300">{request.studentAge} years old</p>
+                              </div>
+                            )}
 
-                        {request.preferredTimes && request.preferredTimes.length > 0 && (
-                          <div>
-                            <p className="text-xs font-semibold text-slate-500 mb-1">Preferred Times:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {request.preferredTimes.map(time => (
-                                <span key={time} className="text-xs px-2 py-1 bg-slate-100 rounded">{time}</span>
-                              ))}
-                            </div>
+                            {request.instructorName && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Assigned Instructor</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300">{request.instructorName}</p>
+                              </div>
+                            )}
                           </div>
-                        )}
 
-                        {request.parentNotes && (
-                          <div>
-                            <p className="text-xs font-semibold text-slate-500 mb-1">Parent Notes:</p>
-                            <p className="text-sm text-slate-700">{request.parentNotes}</p>
+                          {/* Right Column */}
+                          <div className="space-y-3">
+                            {request.preferredDays && request.preferredDays.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Preferred Days</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {request.preferredDays.map(day => (
+                                    <span key={day} className="px-2 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded">
+                                      {day}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {request.preferredTimes && request.preferredTimes.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Preferred Times</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {request.preferredTimes.map(time => (
+                                    <span key={time} className="px-2 py-0.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded">
+                                      {time}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {request.parentNotes && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Parent Notes</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300">{request.parentNotes}</p>
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
 
                         {request.adminNotes && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-xs font-semibold text-blue-700 mb-1">Admin Notes:</p>
-                            <p className="text-sm text-blue-900">{request.adminNotes}</p>
+                          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <p className="text-xs font-medium text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-1">Admin Notes</p>
+                            <p className="text-sm text-blue-900 dark:text-blue-200">{request.adminNotes}</p>
                           </div>
                         )}
+
+                        {/* Mobile Actions */}
+                        <div className="flex flex-wrap gap-2 mt-4 sm:hidden">
+                          {request.status === "PENDING" && (
+                            <>
+                              <Button size="sm" onClick={() => handleUpdateStatus(request.id, "APPROVED")}>
+                                <CheckCircle className="w-4 h-4" />
+                                Approve
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(request.id, "REJECTED")}>
+                                <XCircle className="w-4 h-4" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {(request.status === "APPROVED" || request.status === "PENDING") && (
+                            <Button size="sm" variant="outline" onClick={() => handleAssignInstructor(request.id)}>
+                              <User className="w-4 h-4" />
+                              Assign
+                            </Button>
+                          )}
+                          {request.status === "SCHEDULED" && (
+                            <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(request.id, "COMPLETED")}>
+                              <CheckCircle className="w-4 h-4" />
+                              Complete
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     )}
-
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-2 pt-4 border-t">
-                      {request.status === "PENDING" && (
-                        <>
-                          <Button size="sm" onClick={() => handleUpdateStatus(request.id, "APPROVED")}>
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(request.id, "REJECTED")}>
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Reject
-                          </Button>
-                        </>
-                      )}
-                      {(request.status === "APPROVED" || request.status === "PENDING") && (
-                        <Button size="sm" variant="outline" onClick={() => handleAssignInstructor(request.id)}>
-                          <User className="w-4 h-4 mr-1" />
-                          Assign & Schedule
-                        </Button>
-                      )}
-                      {request.status === "SCHEDULED" && (
-                        <Button size="sm" variant="outline" onClick={() => handleUpdateStatus(request.id, "COMPLETED")}>
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Mark Completed
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="text-xs text-slate-500">
-                      Requested on {new Date(request.createdAt).toLocaleString()}
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
