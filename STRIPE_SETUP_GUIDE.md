@@ -82,7 +82,7 @@ STRIPE_FAMILY_PRICE_ID="price_xxxxxxxxxxxxx"
 
 1. Go to **Developers** → **Webhooks** in your Stripe Dashboard
 2. Click **Add endpoint**
-3. **Endpoint URL**: `https://yourcodingkiddos.com/api/stripe/webhook`
+3. **Endpoint URL**: `https://ourcodingkiddos.com/api/stripe/webhook`
    - For testing locally: Use [Stripe CLI](https://stripe.com/docs/stripe-cli) or a service like [ngrok](https://ngrok.com/)
 4. **Events to listen to**:
    - ✅ `checkout.session.completed`
