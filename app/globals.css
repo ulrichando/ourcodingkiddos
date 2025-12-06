@@ -6,11 +6,17 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Prevent pull-to-refresh and overscroll effects that can cause white space */
+  overscroll-behavior: none;
 }
 
 /* Logo */
