@@ -187,7 +187,7 @@ export default function AdminSupportTicketsPage() {
             <p className="text-slate-600">Manage customer support requests</p>
           </div>
           <Button onClick={() => setShowNewTicket(true)} className="self-start">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4" />
             Create Ticket
           </Button>
         </div>
@@ -470,12 +470,12 @@ export default function AdminSupportTicketsPage() {
                   <Button type="submit" disabled={submitting}>
                     {submitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         Creating...
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <CheckCircle className="w-4 h-4" />
                         Create Ticket
                       </>
                     )}

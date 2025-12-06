@@ -337,12 +337,12 @@ export default function SupportPage() {
                     <Button type="submit" disabled={submitting || !replyText.trim()}>
                       {submitting ? (
                         <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" />
                           Sending...
                         </>
                       ) : (
                         <>
-                          <Send className="w-4 h-4 mr-2" />
+                          <Send className="w-4 h-4" />
                           Send Reply
                         </>
                       )}
@@ -368,7 +368,7 @@ export default function SupportPage() {
             <p className="text-slate-600 dark:text-slate-400">Get help from our support team</p>
           </div>
           <Button onClick={() => setShowNewTicket(true)} className="self-start">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4" />
             New Ticket
           </Button>
         </div>
@@ -383,7 +383,7 @@ export default function SupportPage() {
                 <p className="text-slate-600 dark:text-slate-400">Create a ticket to get help from our team</p>
               </div>
               <Button onClick={() => setShowNewTicket(true)}>
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 Create Ticket
               </Button>
             </CardContent>
@@ -522,12 +522,12 @@ export default function SupportPage() {
                   <Button type="submit" disabled={submitting}>
                     {submitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         Creating...
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <CheckCircle className="w-4 h-4" />
                         Create Ticket
                       </>
                     )}

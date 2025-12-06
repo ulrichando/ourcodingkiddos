@@ -152,7 +152,7 @@ export default function CookiePolicyPage() {
             </ul>
             <div className="pt-2">
               <Button onClick={manageCookies} className="bg-purple-600 hover:bg-purple-700 text-white">
-                <Settings className="w-4 h-4 mr-2" />
+                <Settings className="w-4 h-4" />
                 Manage Cookie Settings
               </Button>
             </div>

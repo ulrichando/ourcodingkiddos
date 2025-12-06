@@ -151,7 +151,7 @@ export default function CookieConsent() {
                       onClick={acceptAll}
                       className="bg-purple-600 hover:bg-purple-700 text-white"
                     >
-                      <Check className="w-4 h-4 mr-2" />
+                      <Check className="w-4 h-4" />
                       Accept All
                     </Button>
                     <Button
@@ -165,7 +165,7 @@ export default function CookieConsent() {
                       onClick={() => setShowSettings(true)}
                       className="text-slate-600 dark:text-slate-400"
                     >
-                      <Settings className="w-4 h-4 mr-2" />
+                      <Settings className="w-4 h-4" />
                       Customize
                     </Button>
                   </div>
