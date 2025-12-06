@@ -570,23 +570,25 @@ model VerificationToken {
 }
 
 model PlatformSettings {
-  id                       String   @id @default("default")
-  siteName                 String   @default("Our Coding Kiddos")
-  maintenanceMode          Boolean  @default(false)
-  allowRegistration        Boolean  @default(true)
-  requireEmailVerification Boolean  @default(false)
-  defaultXpPerLesson       Int      @default(50)
-  xpPerLevel               Int      @default(500)
-  maxStudentsPerParent     Int      @default(5)
-  sessionDurationMinutes   Int      @default(60)
-  enableNotifications      Boolean  @default(true)
-  enableMessaging          Boolean  @default(true)
-  enableCertificates       Boolean  @default(true)
-  enableBadges             Boolean  @default(true)
-  stripeEnabled            Boolean  @default(false)
-  demoMode                 Boolean  @default(false)
-  updatedAt                DateTime @updatedAt
-  createdAt                DateTime @default(now())
+  id                       String    @id @default("default")
+  siteName                 String    @default("Our Coding Kiddos")
+  maintenanceMode          Boolean   @default(false)
+  maintenanceMessage       String?   // Custom maintenance message
+  maintenanceEndTime       DateTime? // Scheduled maintenance end time for countdown
+  allowRegistration        Boolean   @default(true)
+  requireEmailVerification Boolean   @default(false)
+  defaultXpPerLesson       Int       @default(50)
+  xpPerLevel               Int       @default(500)
+  maxStudentsPerParent     Int       @default(5)
+  sessionDurationMinutes   Int       @default(60)
+  enableNotifications      Boolean   @default(true)
+  enableMessaging          Boolean   @default(true)
+  enableCertificates       Boolean   @default(true)
+  enableBadges             Boolean   @default(true)
+  stripeEnabled            Boolean   @default(false)
+  demoMode                 Boolean   @default(false)
+  updatedAt                DateTime  @updatedAt
+  createdAt                DateTime  @default(now())
 }
 
 model AuditLog {

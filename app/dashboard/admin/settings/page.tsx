@@ -6,17 +6,21 @@ import Button from "../../../../components/ui/button";
 import {
   Save,
   Settings as SettingsIcon,
-  Bell,
   Mail,
   Clock,
   Users,
   Shield,
   Palette,
+  Wrench,
+  AlertTriangle,
+  Eye,
 } from "lucide-react";
 
 type Settings = {
   siteName: string;
   maintenanceMode: boolean;
+  maintenanceMessage: string | null;
+  maintenanceEndTime: string | null;
   allowRegistration: boolean;
   requireEmailVerification: boolean;
   defaultXpPerLesson: number;
@@ -55,7 +59,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"general" | "email" | "sessions" | "age" | "appearance">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "maintenance" | "email" | "sessions" | "age" | "appearance">("general");
 
   useEffect(() => {
     async function fetchSettings() {
@@ -156,12 +160,14 @@ export default function SettingsPage() {
         <div className="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
           {[
             { id: "general", label: "General", icon: SettingsIcon },
+            { id: "maintenance", label: "Maintenance", icon: Wrench, highlight: settings?.maintenanceMode },
             { id: "email", label: "Email Notifications", icon: Mail },
             { id: "sessions", label: "Sessions", icon: Clock },
             { id: "age", label: "Age Groups", icon: Users },
             { id: "appearance", label: "Appearance", icon: Palette },
           ].map((tab) => {
             const Icon = tab.icon;
+            const isHighlighted = 'highlight' in tab && tab.highlight;
             return (
               <button
                 key={tab.id}
@@ -172,8 +178,11 @@ export default function SettingsPage() {
                     : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className={`w-4 h-4 ${isHighlighted ? 'text-yellow-500' : ''}`} />
                 {tab.label}
+                {isHighlighted && (
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                )}
               </button>
             );
           })}
@@ -263,7 +272,6 @@ export default function SettingsPage() {
 
               <div className="space-y-3">
                 {[
-                  { key: "maintenanceMode", label: "Maintenance Mode", desc: "Disable access to the platform for non-admins" },
                   { key: "allowRegistration", label: "Allow Registration", desc: "Enable new user signups" },
                   { key: "requireEmailVerification", label: "Require Email Verification", desc: "Users must verify email before accessing platform" },
                   { key: "enableNotifications", label: "Enable Notifications", desc: "Allow platform notifications" },
@@ -301,6 +309,162 @@ export default function SettingsPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Maintenance Mode Tab */}
+        {activeTab === "maintenance" && (
+          <div className="space-y-6">
+            {/* Status Banner */}
+            {settings.maintenanceMode && (
+              <div className="flex items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-yellow-800 dark:text-yellow-200">Maintenance Mode is Active</p>
+                  <p className="text-sm text-yellow-600 dark:text-yellow-400">Non-admin users cannot access the site or log in.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Wrench className="w-5 h-5" />
+                Maintenance Mode Settings
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Enable maintenance mode to temporarily block access to the site. Only admins can access the site during maintenance.
+              </p>
+
+              {/* Main Toggle */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Enable Maintenance Mode</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Block all non-admin access to the platform</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={settings.maintenanceMode}
+                      onChange={() => toggleSetting("maintenanceMode" as keyof Settings)}
+                    />
+                    <div className={`relative w-14 h-7 rounded-full transition-all duration-300 ease-in-out ${
+                      settings.maintenanceMode ? "bg-gradient-to-r from-yellow-500 to-orange-500" : "bg-slate-200 dark:bg-slate-600"
+                    }`}>
+                      <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                        settings.maintenanceMode ? "translate-x-7" : "translate-x-0"
+                      }`} />
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Custom Message */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Custom Maintenance Message
+                </label>
+                <textarea
+                  value={settings.maintenanceMessage || ""}
+                  onChange={(e) => setSettings({ ...settings, maintenanceMessage: e.target.value || null })}
+                  placeholder="We're currently performing scheduled maintenance to improve your learning experience. Hang tight, young coders!"
+                  rows={3}
+                  className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none"
+                />
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  This message will be displayed to users on the maintenance page.
+                </p>
+              </div>
+
+              {/* Scheduled End Time */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Scheduled End Time (Optional)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={settings.maintenanceEndTime ? new Date(settings.maintenanceEndTime).toISOString().slice(0, 16) : ""}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    maintenanceEndTime: e.target.value ? new Date(e.target.value).toISOString() : null
+                  })}
+                  className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                />
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  A countdown timer will be shown on the maintenance page if set.
+                </p>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Quick Actions</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const endTime = new Date();
+                      endTime.setMinutes(endTime.getMinutes() + 30);
+                      setSettings({
+                        ...settings,
+                        maintenanceEndTime: endTime.toISOString()
+                      });
+                    }}
+                    className="px-3 py-1.5 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition"
+                  >
+                    Set 30 min
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const endTime = new Date();
+                      endTime.setHours(endTime.getHours() + 1);
+                      setSettings({
+                        ...settings,
+                        maintenanceEndTime: endTime.toISOString()
+                      });
+                    }}
+                    className="px-3 py-1.5 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition"
+                  >
+                    Set 1 hour
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const endTime = new Date();
+                      endTime.setHours(endTime.getHours() + 2);
+                      setSettings({
+                        ...settings,
+                        maintenanceEndTime: endTime.toISOString()
+                      });
+                    }}
+                    className="px-3 py-1.5 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition"
+                  >
+                    Set 2 hours
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSettings({ ...settings, maintenanceEndTime: null })}
+                    className="px-3 py-1.5 text-sm bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition"
+                  >
+                    Clear Time
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview Link */}
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <a
+                  href="/maintenance"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition"
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview Maintenance Page
+                </a>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Email Notifications Tab */}
