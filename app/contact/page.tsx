@@ -21,6 +21,7 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Textarea from "@/components/ui/textarea";
 import { checkRateLimit, formatTimeRemaining } from "@/lib/rate-limit";
+import { emails } from "@/lib/emails";
 
 const subjects = [
   { value: "general", label: "General Inquiry" },
@@ -193,7 +194,7 @@ export default function ContactPage() {
           {/* Right column cards */}
           <div className="space-y-4">
             {/* Email card */}
-            <a href="mailto:support@ourcodingkiddos.com" className="block p-5 md:p-6 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl hover:border-purple-300 dark:hover:border-purple-500/40 hover:shadow-md transition group">
+            <a href={`mailto:${emails.support}`} className="block p-5 md:p-6 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl hover:border-purple-300 dark:hover:border-purple-500/40 hover:shadow-md transition group">
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
                   <Mail className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -201,7 +202,7 @@ export default function ContactPage() {
                 <ArrowUpRight className="w-5 h-5 text-slate-300 dark:text-slate-600 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
               </div>
               <h3 className="font-semibold text-slate-900 dark:text-white mb-1">Email Us</h3>
-              <p className="text-sm text-purple-600 dark:text-purple-400">support@ourcodingkiddos.com</p>
+              <p className="text-sm text-purple-600 dark:text-purple-400">{emails.support}</p>
             </a>
 
             {/* Phone card */}

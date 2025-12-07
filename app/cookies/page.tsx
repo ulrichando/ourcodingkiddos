@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Cookie, Shield, BarChart3, Megaphone, Settings } from "lucide-react";
 import Button from "@/components/ui/button";
+import { emails } from "@/lib/emails";
 
 export default function CookiePolicyPage() {
   const manageCookies = () => {
@@ -198,10 +199,10 @@ export default function CookiePolicyPage() {
             <p className="text-slate-700 dark:text-slate-300">
               If you have any questions about our use of cookies, please contact us at{" "}
               <a
-                href="mailto:support@ourcodingkiddos.com"
+                href={`mailto:${emails.support}`}
                 className="text-purple-600 dark:text-purple-400 hover:underline"
               >
-                support@ourcodingkiddos.com
+                {emails.support}
               </a>
             </p>
           </section>

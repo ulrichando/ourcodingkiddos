@@ -27,6 +27,7 @@ import {
   ChevronRight,
   Search,
   Command,
+  Mail,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -66,6 +67,7 @@ const navigationGroups = [
     title: "Communication",
     items: [
       { href: "/dashboard/admin/announcements", label: "Announcements", icon: Megaphone },
+      { href: "/dashboard/admin/email", label: "Email Users", icon: Mail },
       { href: "/dashboard/admin/support-tickets", label: "Support Tickets", icon: HelpCircle },
     ]
   },

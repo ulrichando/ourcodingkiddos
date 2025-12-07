@@ -1,10 +1,12 @@
 import { Resend } from "resend";
+import { SENDER_EMAIL, REPLY_TO_EMAIL } from "./emails";
 
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Default from email
-const DEFAULT_FROM = process.env.EMAIL_FROM || "Our Coding Kiddos <noreply@ourcodingkiddos.com>";
+// Default from email - uses centralized config
+const DEFAULT_FROM = SENDER_EMAIL;
+const DEFAULT_REPLY_TO = REPLY_TO_EMAIL;
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -25,7 +27,7 @@ export interface SendEmailResult {
  * Send an email using Resend
  */
 export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
-  const { to, subject, html, text, from = DEFAULT_FROM, replyTo } = options;
+  const { to, subject, html, text, from = DEFAULT_FROM, replyTo = DEFAULT_REPLY_TO } = options;
 
   // Check if API key is configured
   if (!process.env.RESEND_API_KEY) {

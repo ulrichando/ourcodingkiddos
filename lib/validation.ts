@@ -52,12 +52,49 @@ export function validateEmail(email: string): boolean {
 }
 
 /**
- * Sanitizes user input to prevent XSS
+ * Sanitizes user input to prevent XSS attacks
+ * Escapes HTML entities and removes dangerous patterns
  */
 export function sanitizeInput(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+
   return input
     .trim()
-    .replace(/[<>]/g, ""); // Remove angle brackets to prevent HTML injection
+    // Escape HTML entities
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    // Remove javascript: and data: URLs
+    .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/vbscript:/gi, '')
+    // Remove event handlers
+    .replace(/on\w+\s*=/gi, '');
+}
+
+/**
+ * Sanitizes HTML content for safe display
+ * Less aggressive than sanitizeInput - preserves some HTML but removes dangerous elements
+ */
+export function sanitizeHtml(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+
+  return input
+    .trim()
+    // Remove script tags
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove event handlers
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/\son\w+\s*=\s*[^\s>]*/gi, '')
+    // Remove javascript: URLs
+    .replace(/href\s*=\s*["']?\s*javascript:[^"'>]*/gi, 'href="#"')
+    // Remove data: URLs from src
+    .replace(/src\s*=\s*["']?\s*data:[^"'>]*/gi, 'src=""')
+    // Remove iframe, embed, object tags
+    .replace(/<(iframe|embed|object)[^>]*>.*?<\/\1>/gi, '')
+    .replace(/<(iframe|embed|object)[^>]*\/?>/gi, '');
 }
 
 /**
@@ -79,9 +116,31 @@ export function validateName(name: string): { isValid: boolean; error?: string }
   return { isValid: true };
 }
 
-// Rate limiting helper (simple in-memory implementation)
-// For production, use Redis or similar
+/**
+ * Rate limiting implementation
+ *
+ * Development: Uses in-memory Map (sufficient for single-instance)
+ * Production: Configure Upstash Redis for distributed rate limiting
+ *
+ * To upgrade to Redis:
+ * 1. Install: npm install @upstash/ratelimit @upstash/redis
+ * 2. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in env
+ * 3. Use @upstash/ratelimit sliding window algorithm
+ */
+
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+// Periodic cleanup to prevent memory leaks (every 5 minutes)
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of loginAttempts.entries()) {
+      if (now > value.resetAt) {
+        loginAttempts.delete(key);
+      }
+    }
+  }, 5 * 60 * 1000);
+}
 
 export function checkRateLimit(identifier: string, maxAttempts = 5, windowMs = 15 * 60 * 1000): boolean {
   const now = Date.now();
@@ -102,4 +161,21 @@ export function checkRateLimit(identifier: string, maxAttempts = 5, windowMs = 1
 
 export function resetRateLimit(identifier: string): void {
   loginAttempts.delete(identifier);
+}
+
+/**
+ * Get remaining attempts for an identifier
+ */
+export function getRateLimitStatus(identifier: string, maxAttempts = 5): {
+  remaining: number;
+  resetAt: number | null
+} {
+  const attempts = loginAttempts.get(identifier);
+  if (!attempts) {
+    return { remaining: maxAttempts, resetAt: null };
+  }
+  return {
+    remaining: Math.max(0, maxAttempts - attempts.count),
+    resetAt: attempts.resetAt
+  };
 }

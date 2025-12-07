@@ -21,8 +21,8 @@ export async function POST(request: Request) {
   }
   const role: Role = "PARENT";
 
-  if (!name || !email || !password || password.length < 6) {
-    return NextResponse.json({ status: "error", message: "Invalid input" }, { status: 400 });
+  if (!name || !email || !password || password.length < 8) {
+    return NextResponse.json({ status: "error", message: "Password must be at least 8 characters" }, { status: 400 });
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

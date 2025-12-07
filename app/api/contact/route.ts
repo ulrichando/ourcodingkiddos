@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email";
-
-// Support email where contact form submissions are sent
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@ourcodingkiddos.com";
+import { SUPPORT_EMAIL } from "@/lib/emails";
 
 export async function POST(request: Request) {
   try {

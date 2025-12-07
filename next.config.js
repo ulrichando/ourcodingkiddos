@@ -38,8 +38,52 @@ const nextConfig = {
     ],
   },
 
-  // Headers for caching static assets
+  // Security and caching headers
   async headers() {
+    // Security headers for all routes
+    const securityHeaders = [
+      {
+        key: 'X-DNS-Prefetch-Control',
+        value: 'on',
+      },
+      {
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN',
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+      },
+      {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
+      },
+      {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(self), geolocation=()',
+      },
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000; includeSubDomains',
+      },
+      {
+        key: 'Content-Security-Policy',
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "font-src 'self' https://fonts.gstatic.com",
+          "img-src 'self' data: blob: https://images.unsplash.com https://*.stripe.com",
+          "connect-src 'self' https://api.stripe.com https://*.google.com https://*.googleapis.com wss://*.resend.com",
+          "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://meet.google.com",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "frame-ancestors 'self'",
+        ].join('; '),
+      },
+    ];
+
     return [
       {
         source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
@@ -61,12 +105,7 @@ const nextConfig = {
       },
       {
         source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
-        ],
+        headers: securityHeaders,
       },
     ];
   },

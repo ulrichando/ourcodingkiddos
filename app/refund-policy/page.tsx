@@ -15,6 +15,7 @@ import {
   Calendar,
   Shield,
 } from "lucide-react";
+import { emails } from "@/lib/emails";
 
 export default function RefundPolicyPage() {
   const lastUpdated = "December 2024";
@@ -319,10 +320,10 @@ export default function RefundPolicyPage() {
                 <li>
                   <strong>Email us at</strong>{" "}
                   <a
-                    href="mailto:support@ourcodingkiddos.com"
+                    href={`mailto:${emails.billing}`}
                     className="text-purple-600 dark:text-purple-400 hover:underline"
                   >
-                    support@ourcodingkiddos.com
+                    {emails.billing}
                   </a>{" "}
                   with the subject line &quot;Refund Request&quot;
                 </li>
@@ -381,10 +382,10 @@ export default function RefundPolicyPage() {
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:support@ourcodingkiddos.com"
+                  href={`mailto:${emails.billing}`}
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
-                  support@ourcodingkiddos.com
+                  {emails.billing}
                 </a>
               </p>
               <p>

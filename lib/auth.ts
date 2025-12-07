@@ -6,7 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prismaBase } from "./prisma";
 import type { UserRole } from "../types/next-auth";
-import { checkRateLimit, resetRateLimit } from "./validation";
+import { checkLoginRateLimit, resetLoginRateLimit } from "./upstash-rate-limit";
 import { logLogin, logFailedLogin } from "./audit";
 
 // Check if site is in maintenance mode
@@ -73,8 +73,9 @@ const providers: NextAuthOptions["providers"] = [
         return null;
       }
 
-      // Rate limiting: prevent brute force attacks
-      if (!checkRateLimit(email, 5, 15 * 60 * 1000)) {
+      // Rate limiting: prevent brute force attacks (using Upstash Redis)
+      const rateLimitResult = await checkLoginRateLimit(email);
+      if (!rateLimitResult.success) {
         logFailedLogin(email, "Rate limit exceeded").catch(() => {});
         throw new Error("Too many login attempts. Please try again later.");
       }
@@ -105,7 +106,7 @@ const providers: NextAuthOptions["providers"] = [
           }
 
           // Reset rate limit on successful login
-          resetRateLimit(email);
+          resetLoginRateLimit(email).catch(() => {});
 
           // Log successful login
           logLogin(email, user.id).catch(() => {});

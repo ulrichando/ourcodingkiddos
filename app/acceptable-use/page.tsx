@@ -16,6 +16,7 @@ import {
   Ban,
   Eye,
 } from "lucide-react";
+import { emails } from "@/lib/emails";
 
 export default function AcceptableUsePolicyPage() {
   const lastUpdated = "December 2024";
@@ -333,10 +334,10 @@ export default function AcceptableUsePolicyPage() {
                 <div>
                   <p className="font-medium text-slate-900 dark:text-slate-100">Email Report</p>
                   <a
-                    href="mailto:support@ourcodingkiddos.com"
+                    href={`mailto:${emails.support}`}
                     className="text-sm text-amber-600 dark:text-amber-400 hover:underline"
                   >
-                    support@ourcodingkiddos.com
+                    {emails.support}
                   </a>
                 </div>
               </div>
@@ -410,10 +411,10 @@ export default function AcceptableUsePolicyPage() {
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:support@ourcodingkiddos.com"
+                  href={`mailto:${emails.support}`}
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
-                  support@ourcodingkiddos.com
+                  {emails.support}
                 </a>
               </p>
             </div>

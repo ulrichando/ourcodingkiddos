@@ -18,6 +18,7 @@ import {
   Monitor,
   FileText,
 } from "lucide-react";
+import { emails } from "@/lib/emails";
 
 export default function SafetyPage() {
   const lastUpdated = "December 2024";
@@ -238,10 +239,10 @@ export default function SafetyPage() {
             <p className="text-slate-700 dark:text-slate-300">
               To exercise any of these rights, contact us at{" "}
               <a
-                href="mailto:support@ourcodingkiddos.com"
+                href={`mailto:${emails.safety}`}
                 className="text-purple-600 dark:text-purple-400 hover:underline"
               >
-                support@ourcodingkiddos.com
+                {emails.safety}
               </a>
             </p>
           </section>
@@ -337,10 +338,10 @@ export default function SafetyPage() {
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">Safety Team</p>
                   <a
-                    href="mailto:support@ourcodingkiddos.com"
+                    href={`mailto:${emails.safety}`}
                     className="text-amber-600 dark:text-amber-400 hover:underline"
                   >
-                    support@ourcodingkiddos.com
+                    {emails.safety}
                   </a>
                 </div>
               </div>
@@ -405,10 +406,10 @@ export default function SafetyPage() {
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:support@ourcodingkiddos.com"
+                  href={`mailto:${emails.safety}`}
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
-                  support@ourcodingkiddos.com
+                  {emails.safety}
                 </a>
               </p>
             </div>

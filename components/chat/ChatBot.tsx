@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { MessageCircle, X, Send, Sparkles, RefreshCcw, ArrowRight, User, LogIn } from "lucide-react";
 import Button from "../ui/button";
+import { emails } from "@/lib/emails";
 
 type Message = { role: "assistant" | "user"; content: string };
 
@@ -111,7 +112,7 @@ export default function ChatBot() {
     await new Promise((r) => setTimeout(r, 800 + Math.random() * 400));
 
     const response = matchQuery(userMessage) ||
-      "Thanks for your question! For specific inquiries, email us at support@ourcodingkiddos.com or tell me more about what you're looking for.";
+      `Thanks for your question! For specific inquiries, email us at ${emails.support} or tell me more about what you're looking for.`;
 
     setMessages((prev) => [...prev, { role: "assistant", content: response }]);
     setIsTyping(false);
