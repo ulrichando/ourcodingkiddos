@@ -66,6 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="google-site-verification" content="yp_rid3CBPWufr6CMjIwP8Cc7pltqQezUnE5EMwry-k" />
       </head>
       <body className={`${inter.className} min-h-screen antialiased`} suppressHydrationWarning>
         <script

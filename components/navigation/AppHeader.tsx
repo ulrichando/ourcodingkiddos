@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Home, BookOpen, Calendar, Settings, LogOut, Moon, Sun, Code2, X,
   GraduationCap, Newspaper, Rocket, BookMarked, Search, Command, Zap,
-  Menu, Brain, HelpCircle, Mail, Users, Heart, ChevronDown, ArrowRight,
+  Menu, Brain, HelpCircle, Mail, Users, Heart, ChevronDown, ArrowRight, Shield,
 } from "lucide-react";
 import { logout } from "@/lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
@@ -58,6 +58,7 @@ const navGroups: NavGroup[] = [
       { href: "/our-story", label: "Our Story", icon: Heart, description: "Meet our founder" },
       { href: "/faq", label: "FAQ", icon: HelpCircle, description: "Frequently asked questions" },
       { href: "/contact", label: "Contact", icon: Mail, description: "Get in touch with us" },
+      { href: "/privacy", label: "Privacy Policy", icon: Shield, description: "How we protect your data" },
     ],
   },
 ];

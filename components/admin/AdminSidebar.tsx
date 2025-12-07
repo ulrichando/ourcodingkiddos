@@ -29,6 +29,7 @@ import {
   Command,
   Mail,
   Home,
+  MessageSquare,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -56,6 +57,7 @@ const navigationGroups = [
       { href: "/dashboard/admin/content", label: "Course Builder", icon: FileText },
       { href: "/dashboard/admin/blog", label: "Blog", icon: Newspaper },
       { href: "/dashboard/admin/showcase", label: "Student Showcase", icon: Rocket },
+      { href: "/dashboard/admin/reviews", label: "Parent Reviews", icon: MessageSquare },
     ]
   },
   {

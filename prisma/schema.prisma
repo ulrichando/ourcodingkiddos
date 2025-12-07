@@ -1067,3 +1067,27 @@ model NewsletterSubscriber {
   @@index([email])
   @@index([isActive])
 }
+
+// =====================================================
+// PARENT REVIEWS
+// =====================================================
+
+model ParentReview {
+  id           String   @id @default(cuid())
+  authorEmail  String
+  authorName   String
+  authorPhoto  String?  // URL to photo
+  childName    String?  // Optional: "Parent of [child], age X"
+  childAge     Int?
+  rating       Int      @default(5) // 1-5 stars
+  title        String?
+  content      String   @db.Text
+  isApproved   Boolean  @default(false) // Admin must approve
+  isFeatured   Boolean  @default(false) // Show on homepage
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isApproved])
+  @@index([isFeatured])
+  @@index([authorEmail])
+}

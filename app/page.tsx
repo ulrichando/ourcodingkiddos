@@ -11,7 +11,6 @@ import {
   ArrowRight,
   Zap,
   Shield,
-  Globe,
   Brain,
   Rocket,
   Heart,
@@ -1358,54 +1357,19 @@ const testimonials = [
     quote: "My son went from playing games all day to building his own. The transformation is incredible!",
     name: "Amara J.",
     role: "Parent of Kwame, 12",
-    avatar: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=100&h=100&fit=crop", // African American woman
+    avatar: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=100&h=100&fit=crop",
   },
   {
     quote: "I built a website for my mom's bakery! She was so proud. Now I want to make apps too.",
     name: "Sofia R.",
     role: "Student, Age 14",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop", // Young woman
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop",
   },
   {
     quote: "The instructors are patient and make coding fun. My daughter actually looks forward to lessons.",
     name: "Wei Chen",
     role: "Parent of Mei, 9",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop", // Asian man
-  },
-];
-
-const studentProjects = [
-  {
-    name: "Space Shooter",
-    creator: "Jamal, Age 11",
-    description: "A thrilling arcade game where you defend Earth from alien invaders",
-    icon: Rocket,
-    color: "from-violet-500 to-purple-600",
-    image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=250&fit=crop",
-  },
-  {
-    name: "Weather App",
-    creator: "Priya, Age 13",
-    description: "Real-time weather forecasts with beautiful animations",
-    icon: Globe,
-    color: "from-blue-500 to-cyan-600",
-    image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=400&h=250&fit=crop",
-  },
-  {
-    name: "Pet Care Bot",
-    creator: "Aiden, Age 10",
-    description: "An AI chatbot that helps kids learn how to care for pets",
-    icon: Brain,
-    color: "from-emerald-500 to-green-600",
-    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=250&fit=crop",
-  },
-  {
-    name: "Music Mixer",
-    creator: "Kenji, Age 14",
-    description: "Create your own beats and melodies with this interactive app",
-    icon: Sparkles,
-    color: "from-pink-500 to-rose-600",
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
   },
 ];
 
@@ -1421,7 +1385,6 @@ const sectionNavItems = [
   { id: "courses", label: "Courses", icon: Target },
   { id: "placement-test", label: "Skill Test", icon: Brain },
   { id: "features", label: "Why Us", icon: Zap },
-  { id: "showcase", label: "Showcase", icon: Rocket },
   { id: "testimonials", label: "Reviews", icon: Heart },
 ];
 
@@ -2340,60 +2303,6 @@ export default function HomePage() {
       {/* Upcoming Classes */}
       <UpcomingClassesSection />
 
-      {/* Student Projects Showcase */}
-      <section id="showcase" className="py-20 px-4 bg-white dark:bg-slate-950">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 text-sm font-semibold mb-4">
-              <Trophy className="w-4 h-4" /> Student Showcase
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
-              Built by Kids Like You
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Check out these amazing projects created by our talented students
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {studentProjects.map((project) => (
-              <div
-                key={project.name}
-                className="group h-full overflow-hidden rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-pink-300 dark:hover:border-pink-700 transition-all hover:shadow-xl hover:-translate-y-2"
-              >
-                <div className="relative h-40 overflow-hidden">
-                  <Image src={project.image} alt={project.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${project.color} opacity-60`} />
-                  <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 rounded-full bg-white/90 dark:bg-slate-900/90 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      {project.creator}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-4 left-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${project.color} flex items-center justify-center shadow-lg`}>
-                      <project.icon className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{project.name}</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">{project.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <Link
-              href="/showcase"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 font-semibold hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors"
-            >
-              View All Projects <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <section id="testimonials" className="py-20 px-4 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto">
@@ -2501,6 +2410,36 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust & Legal Section */}
+      <section className="py-8 px-4 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm">
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+              <Shield className="w-4 h-4 text-emerald-500" />
+              <span>COPPA Compliant</span>
+            </div>
+            <Link
+              href="/privacy"
+              className="font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 hover:underline"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 hover:underline"
+            >
+              Terms of Service
+            </Link>
+            <Link
+              href="/safety"
+              className="font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 hover:underline"
+            >
+              Child Safety
+            </Link>
           </div>
         </div>
       </section>

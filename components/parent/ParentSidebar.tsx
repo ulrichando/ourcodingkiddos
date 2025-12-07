@@ -64,6 +64,7 @@ const navigationGroups = [
       { href: "/dashboard/parent/schedule", label: "Schedule", icon: Clock },
       { href: "/dashboard/parent/showcase", label: "Showcase", icon: Rocket },
       { href: "/dashboard/parent/blog", label: "Blog", icon: Newspaper },
+      { href: "/dashboard/parent/reviews", label: "Leave a Review", icon: Heart },
     ]
   },
   {
