@@ -35,10 +35,12 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRateLimitError(null);
+    setSubmitError(null);
 
     // Check rate limit (3 submissions per minute)
     const rateLimit = checkRateLimit("contact-form", { maxRequests: 3, windowMs: 60000 });
@@ -48,9 +50,26 @@ export default function ContactPage() {
     }
 
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      setIsSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Failed to send message. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -144,11 +163,11 @@ export default function ContactPage() {
                 <Textarea name="message" value={formData.message} onChange={handleChange} placeholder="How can we help?" required className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 min-h-[140px] rounded-xl resize-none focus:ring-purple-500 focus:border-purple-500" />
               </div>
 
-              {/* Rate limit error message */}
-              {rateLimitError && (
+              {/* Error messages */}
+              {(rateLimitError || submitError) && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400">
                   <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <p className="text-sm">{rateLimitError}</p>
+                  <p className="text-sm">{rateLimitError || submitError}</p>
                 </div>
               )}
 
