@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import prisma from "../../../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
+import { AgeGroup } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
@@ -117,17 +118,15 @@ export async function PUT(
     }
 
     // Determine age group based on age
-    let ageGroup = null;
+    let ageGroup: AgeGroup | null = null;
     if (age) {
       const ageNum = parseInt(age);
-      if (ageNum >= 7 && ageNum <= 9) {
-        ageGroup = "KIDS_7_9";
-      } else if (ageNum >= 10 && ageNum <= 12) {
-        ageGroup = "TWEENS_10_12";
-      } else if (ageNum >= 13 && ageNum <= 15) {
-        ageGroup = "TEENS_13_15";
-      } else if (ageNum >= 16 && ageNum <= 18) {
-        ageGroup = "YOUNG_ADULTS_16_18";
+      if (ageNum >= 7 && ageNum <= 10) {
+        ageGroup = AgeGroup.AGES_7_10;
+      } else if (ageNum >= 11 && ageNum <= 14) {
+        ageGroup = AgeGroup.AGES_11_14;
+      } else if (ageNum >= 15) {
+        ageGroup = AgeGroup.AGES_15_18;
       }
     }
 
@@ -139,7 +138,7 @@ export async function PUT(
         avatar: avatar || undefined,
         age: age ? parseInt(age) : undefined,
         dob: dob ? new Date(dob) : undefined,
-        ageGroup: ageGroup || undefined,
+        ageGroup: ageGroup ?? undefined,
       },
       select: {
         id: true,
@@ -153,11 +152,6 @@ export async function PUT(
         streakDays: true,
         badges: true,
         lastActiveDate: true,
-        user: {
-          select: {
-            createdAt: true,
-          },
-        },
       },
     });
 
@@ -190,7 +184,6 @@ export async function PUT(
         streakDays: updatedStudent.streakDays,
         badges: updatedStudent.badges || [],
         lastActiveDate: updatedStudent.lastActiveDate,
-        createdAt: updatedStudent.user?.createdAt,
       },
     });
   } catch (error: any) {

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { Role } from "../../../../generated/prisma-client";
 import prisma from "../../../../lib/prisma";
 import { createNotification } from "../../notifications/route";
 import { logCreate } from "../../../../lib/audit";
+import { sendVerificationEmail } from "../../../../lib/email";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -63,5 +65,29 @@ export async function POST(request: Request) {
     { userName: name, userRole: role }
   );
 
-  return NextResponse.json({ status: "ok", user: { id: user.id, email: user.email } }, { status: 201 });
+  // Generate email verification token
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  // Save verification token
+  await prisma.verificationToken.create({
+    data: {
+      identifier: email,
+      token: verificationToken,
+      expires: tokenExpires,
+    },
+  });
+
+  // Send verification email
+  const baseUrl = process.env.NEXTAUTH_URL || "https://ourcodingkiddos.com";
+  const verifyUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+  sendVerificationEmail(email, name, verifyUrl).catch((err) => {
+    console.error("[register] Failed to send verification email:", err);
+  });
+
+  return NextResponse.json({
+    status: "ok",
+    user: { id: user.id, email: user.email },
+    message: "Account created! Please check your email to verify your address."
+  }, { status: 201 });
 }

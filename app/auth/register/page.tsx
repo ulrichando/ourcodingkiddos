@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, User, Sparkles, ArrowRight, Loader2, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2, Shield, CheckCircle, BadgeCheck } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -210,13 +210,38 @@ export default function RegisterPage() {
         </div>
 
         {/* Trust badges */}
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-500" />
-            COPPA compliant & secure platform
-          </p>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          {/* COPPA Compliance Badge */}
+          <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+              <BadgeCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">COPPA Compliant</p>
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Children&apos;s privacy protected</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+              <Shield className="w-3 h-3 text-emerald-500" />
+              256-bit SSL
+            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+              <CheckCircle className="w-3 h-3 text-emerald-500" />
+              Verified instructors
+            </p>
+          </div>
+
           <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-            By signing up, you agree to our Terms of Service and Privacy Policy
+            By signing up, you agree to our{" "}
+            <Link href="/terms" className="text-purple-600 dark:text-purple-400 hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-purple-600 dark:text-purple-400 hover:underline">
+              Privacy Policy
+            </Link>
           </p>
         </div>
       </div>

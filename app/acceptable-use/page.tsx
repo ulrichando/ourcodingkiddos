@@ -19,7 +19,7 @@ import {
 import { emails } from "@/lib/emails";
 
 export default function AcceptableUsePolicyPage() {
-  const lastUpdated = "December 2024";
+  const lastUpdated = "December 2025";
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">

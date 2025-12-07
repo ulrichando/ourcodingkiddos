@@ -31,7 +31,7 @@ export default function CookiePolicyPage() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Cookie Policy</h1>
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Last updated: December 2024</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Last updated: December 2025</p>
           </div>
 
           {/* Introduction */}
