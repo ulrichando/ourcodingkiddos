@@ -134,11 +134,11 @@ const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 if (typeof setInterval !== 'undefined') {
   setInterval(() => {
     const now = Date.now();
-    for (const [key, value] of loginAttempts.entries()) {
+    loginAttempts.forEach((value, key) => {
       if (now > value.resetAt) {
         loginAttempts.delete(key);
       }
-    }
+    });
   }, 5 * 60 * 1000);
 }
 
