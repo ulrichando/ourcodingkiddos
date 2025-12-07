@@ -364,7 +364,7 @@ export default function TermsPage() {
               If you have questions about these Terms of Service, please contact us:
             </p>
             <div className="space-y-1 text-slate-700 dark:text-slate-300">
-              <p>Email: <a href="mailto:legal@ourcodingkiddos.com" className="text-purple-600 dark:text-purple-400 hover:underline">legal@ourcodingkiddos.com</a></p>
+              <p>Email: <a href="mailto:support@ourcodingkiddos.com" className="text-purple-600 dark:text-purple-400 hover:underline">support@ourcodingkiddos.com</a></p>
               <p>Website: <a href="https://ourcodingkiddos.com/contact" className="text-purple-600 dark:text-purple-400 hover:underline">ourcodingkiddos.com/contact</a></p>
             </div>
           </section>

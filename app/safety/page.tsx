@@ -238,10 +238,10 @@ export default function SafetyPage() {
             <p className="text-slate-700 dark:text-slate-300">
               To exercise any of these rights, contact us at{" "}
               <a
-                href="mailto:privacy@ourcodingkiddos.com"
+                href="mailto:support@ourcodingkiddos.com"
                 className="text-purple-600 dark:text-purple-400 hover:underline"
               >
-                privacy@ourcodingkiddos.com
+                support@ourcodingkiddos.com
               </a>
             </p>
           </section>
@@ -337,10 +337,10 @@ export default function SafetyPage() {
                 <div>
                   <p className="font-semibold text-slate-900 dark:text-slate-100">Safety Team</p>
                   <a
-                    href="mailto:safety@ourcodingkiddos.com"
+                    href="mailto:support@ourcodingkiddos.com"
                     className="text-amber-600 dark:text-amber-400 hover:underline"
                   >
-                    safety@ourcodingkiddos.com
+                    support@ourcodingkiddos.com
                   </a>
                 </div>
               </div>
@@ -403,21 +403,12 @@ export default function SafetyPage() {
             </p>
             <div className="space-y-1 text-slate-700 dark:text-slate-300">
               <p>
-                Privacy:{" "}
+                Email:{" "}
                 <a
-                  href="mailto:privacy@ourcodingkiddos.com"
+                  href="mailto:support@ourcodingkiddos.com"
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
-                  privacy@ourcodingkiddos.com
-                </a>
-              </p>
-              <p>
-                Safety:{" "}
-                <a
-                  href="mailto:safety@ourcodingkiddos.com"
-                  className="text-purple-600 dark:text-purple-400 hover:underline"
-                >
-                  safety@ourcodingkiddos.com
+                  support@ourcodingkiddos.com
                 </a>
               </p>
             </div>

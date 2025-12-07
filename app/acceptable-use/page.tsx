@@ -333,10 +333,10 @@ export default function AcceptableUsePolicyPage() {
                 <div>
                   <p className="font-medium text-slate-900 dark:text-slate-100">Email Report</p>
                   <a
-                    href="mailto:safety@ourcodingkiddos.com"
+                    href="mailto:support@ourcodingkiddos.com"
                     className="text-sm text-amber-600 dark:text-amber-400 hover:underline"
                   >
-                    safety@ourcodingkiddos.com
+                    support@ourcodingkiddos.com
                   </a>
                 </div>
               </div>

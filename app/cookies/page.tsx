@@ -198,10 +198,10 @@ export default function CookiePolicyPage() {
             <p className="text-slate-700 dark:text-slate-300">
               If you have any questions about our use of cookies, please contact us at{" "}
               <a
-                href="mailto:privacy@ourcodingkiddos.com"
+                href="mailto:support@ourcodingkiddos.com"
                 className="text-purple-600 dark:text-purple-400 hover:underline"
               >
-                privacy@ourcodingkiddos.com
+                support@ourcodingkiddos.com
               </a>
             </p>
           </section>

@@ -183,7 +183,7 @@ const faqs = [
   {
     category: "safety",
     question: "How can I delete my child's data?",
-    answer: "Parents can request data deletion at any time by contacting privacy@ourcodingkiddos.com or through account settings. We'll process deletion requests within 30 days as required by privacy regulations."
+    answer: "Parents can request data deletion at any time by contacting support@ourcodingkiddos.com or through account settings. We'll process deletion requests within 30 days as required by privacy regulations."
   },
 ];
 
