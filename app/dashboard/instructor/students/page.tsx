@@ -5,6 +5,7 @@ import Link from "next/link";
 import { User, Mail, Smile, Wifi, WifiOff, ArrowLeft } from "lucide-react";
 import Button from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import InstructorLayout from "@/components/instructor/InstructorLayout";
 
 type StudentRow = {
   id: string;
@@ -50,16 +51,11 @@ export default function InstructorStudentsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <InstructorLayout>
+      <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
-              <Link href="/dashboard/instructor" className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
-                <ArrowLeft className="h-4 w-4" /> Back to dashboard
-              </Link>
-            </p>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">Students</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Students</h1>
             <p className="text-slate-600 dark:text-slate-400">View all students and see who is online.</p>
           </div>
         </div>
@@ -112,6 +108,6 @@ export default function InstructorStudentsPage() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </InstructorLayout>
   );
 }

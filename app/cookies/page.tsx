@@ -151,7 +151,7 @@ export default function CookiePolicyPage() {
               <li>Use browser extensions that manage cookie consent</li>
             </ul>
             <div className="pt-2">
-              <Button onClick={manageCookies} className="bg-purple-600 hover:bg-purple-700 text-white">
+              <Button onClick={manageCookies}>
                 <Settings className="w-4 h-4" />
                 Manage Cookie Settings
               </Button>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../../components
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import ParentLayout from "../../../../components/parent/ParentLayout";
 
 export default function ManageStudentsPage() {
   const { data: session } = useSession();
@@ -121,8 +122,8 @@ export default function ManageStudentsPage() {
   const activeList = showArchived ? archivedStudents : students;
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+    <ParentLayout>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <Link href="/dashboard/parent" className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-4">
@@ -413,6 +414,6 @@ export default function ManageStudentsPage() {
           </div>
         )}
       </div>
-    </main>
+    </ParentLayout>
   );
 }

@@ -824,8 +824,9 @@ export default function StudentDashboard() {
                           {c.completed}/{c.totalLessons} lessons
                         </div>
                       </div>
-                      <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30">
-                        Continue <ChevronRight className="h-4 w-4 ml-1" />
+                      <Button>
+                        Continue
+                        <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -958,7 +959,7 @@ export default function StudentDashboard() {
               <Sparkles className="h-12 w-12 mx-auto mb-3 text-purple-500 dark:text-purple-400" />
               <p className="text-lg font-medium text-slate-700 dark:text-white/70">Explore our courses!</p>
               <Link href="/courses">
-                <Button className="mt-4 bg-purple-500 hover:bg-purple-600">Browse Courses</Button>
+                <Button className="mt-4">Browse Courses</Button>
               </Link>
             </div>
           ) : (

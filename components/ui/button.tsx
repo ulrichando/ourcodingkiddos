@@ -94,7 +94,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           />
         </svg>
       )}
-      <span className={cn(loading && "invisible")}>{children}</span>
+      <span className={cn("inline-flex items-center gap-2", loading && "invisible")}>{children}</span>
     </button>
   )
 );

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Clock, Video, Users, CalendarDays, Link2, Loader2, CheckCircle2, Repeat, UserCircle } from "lucide-react";
 import Button from "../../../../components/ui/button";
+import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 
 export default function CreateClassPage() {
   const router = useRouter();
@@ -164,8 +165,8 @@ export default function CreateClassPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <InstructorLayout>
+      <div className="max-w-4xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Create a New Class</h1>
           <p className="text-slate-600 dark:text-slate-400">Set up the session details and meeting link.</p>
@@ -461,7 +462,7 @@ export default function CreateClassPage() {
           {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
 
           <div className="flex gap-3">
-            <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white" disabled={loading}>
+            <Button type="submit" disabled={loading}>
               {loading ? "Creating..." : isRecurring ? `Create ${numberOfWeeks} Classes` : "Create Class"}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.push("/dashboard/instructor")}>
@@ -470,6 +471,6 @@ export default function CreateClassPage() {
           </div>
         </form>
       </div>
-    </main>
+    </InstructorLayout>
   );
 }

@@ -12,6 +12,7 @@ import {
   ChevronRight,
   AlertTriangle,
 } from "lucide-react";
+import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 
 type ContentItem = {
   id: string;
@@ -67,8 +68,8 @@ export default function InstructorContentPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <InstructorLayout>
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Demo Account Banner */}
         {isDemoAccount && (
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
@@ -186,6 +187,6 @@ export default function InstructorContentPage() {
           </div>
         </div>
       </div>
-    </main>
+    </InstructorLayout>
   );
 }

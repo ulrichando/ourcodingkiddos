@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus, Trash2, Clock, Calendar, Loader2, ToggleLeft, ToggleRight, Repeat, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "../../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 
 type AvailabilitySlot = {
   id: string;
@@ -230,25 +231,20 @@ export default function AvailabilityPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-      </main>
+      <InstructorLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+        </div>
+      </InstructorLayout>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <InstructorLayout>
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <Link
-              href="/dashboard/instructor"
-              className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Set Your Availability
             </h1>
@@ -656,6 +652,6 @@ export default function AvailabilityPage() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </InstructorLayout>
   );
 }

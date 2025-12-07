@@ -59,8 +59,8 @@ export default function CertificateCard({ certificate }: { certificate: Certific
         </div>
 
         <Link href={`/certificates/${certificate.id}`}>
-          <Button className="w-full bg-purple-600 hover:bg-purple-700">
-            <Eye className="w-4 h-4 mr-2" />
+          <Button className="w-full">
+            <Eye className="w-4 h-4" />
             View Certificate
           </Button>
         </Link>

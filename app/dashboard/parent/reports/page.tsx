@@ -6,6 +6,7 @@ import { ArrowLeft, TrendingUp, Award, BookOpen, Calendar, Download, Star, Zap, 
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
+import ParentLayout from "../../../../components/parent/ParentLayout";
 
 type StudentProgress = {
   student: {
@@ -168,13 +169,10 @@ export default function ProgressReportsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+    <ParentLayout>
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <Link href="/dashboard/parent" className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-4">
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-          </Link>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-3">
@@ -496,6 +494,6 @@ export default function ProgressReportsPage() {
           </div>
         )}
       </div>
-    </main>
+    </ParentLayout>
   );
 }

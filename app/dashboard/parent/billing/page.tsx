@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Button from "@/components/ui/button";
+import ParentLayout from "@/components/parent/ParentLayout";
 
 interface BillingSummary {
   totalSpent: number;
@@ -184,17 +185,10 @@ export default function ParentBillingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
+    <ParentLayout>
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <Link
-            href="/dashboard/parent"
-            className="inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 mb-3"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Link>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <Wallet className="w-8 h-8 text-purple-500" />
             Billing & Payments
@@ -712,6 +706,6 @@ export default function ParentBillingPage() {
           </div>
         )}
       </div>
-    </main>
+    </ParentLayout>
   );
 }

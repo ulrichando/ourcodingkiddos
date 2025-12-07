@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, User, Sparkles, Camera, X, ChevronLeft, ChevronRight, Gamepad2, Globe, Smartphone, Cpu, Brain, Palette, Eye, Ear, Hand, BookOpen } from "lucide-react";
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
+import ParentLayout from "../../../../components/parent/ParentLayout";
 
 const avatars = ["🦊", "🐼", "🦁", "🐯", "🐸", "🦉", "🐙", "🦄", "🐲", "🤖", "👾", "🎮"];
 const ageOptions = ["7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
@@ -153,11 +154,8 @@ export default function AddStudentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7ecff,_#ffffff_45%)] dark:bg-[radial-gradient(circle_at_top,_#1e1b4b,_#0f172a_45%)] flex items-start justify-center px-4 py-6 sm:py-10">
-      <div className="w-full max-w-4xl">
-        <Link href="/dashboard/parent" className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-4">
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </Link>
+    <ParentLayout>
+      <div className="w-full max-w-4xl mx-auto">
 
         <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden">
           {/* Progress Bar */}
@@ -503,6 +501,6 @@ export default function AddStudentPage() {
           </div>
         </div>
       </div>
-    </main>
+    </ParentLayout>
   );
 }

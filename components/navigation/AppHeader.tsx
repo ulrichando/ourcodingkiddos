@@ -196,9 +196,11 @@ export default function AppHeader() {
   const isLoggedIn = status === "authenticated";
   const isLoading = status === "loading";
 
-  // Hide header on dashboard routes (they have their own navigation)
-  const isDashboard = pathname?.startsWith("/dashboard");
-  if (isDashboard) return null;
+  // Hide header on admin, parent, and instructor dashboards (they have their own layouts with sidebar navigation)
+  const isAdminDashboard = pathname?.startsWith("/dashboard/admin");
+  const isParentDashboard = pathname?.startsWith("/dashboard/parent");
+  const isInstructorDashboard = pathname?.startsWith("/dashboard/instructor");
+  if (isAdminDashboard || isParentDashboard || isInstructorDashboard) return null;
 
   return (
     <>

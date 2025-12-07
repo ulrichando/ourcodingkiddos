@@ -2,9 +2,10 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, User, Award, BookOpen, Star, MessageSquare, Phone, UserCircle, AlertCircle } from "lucide-react";
+import { Mail, User, Award, BookOpen, Star, MessageSquare, Phone, UserCircle, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Button from "@/components/ui/button";
+import InstructorLayout from "@/components/instructor/InstructorLayout";
 
 type Guardian = {
   id: string;
@@ -66,17 +67,22 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-500 dark:text-slate-400">
-        Loading student...
-      </main>
+      <InstructorLayout>
+        <div className="flex items-center justify-center min-h-[50vh] text-slate-500 dark:text-slate-400">
+          <div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+          <span className="ml-3">Loading student...</span>
+        </div>
+      </InstructorLayout>
     );
   }
 
   if (!student) {
     return (
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-500 dark:text-slate-400">
-        Student not found.
-      </main>
+      <InstructorLayout>
+        <div className="flex items-center justify-center min-h-[50vh] text-slate-500 dark:text-slate-400">
+          Student not found.
+        </div>
+      </InstructorLayout>
     );
   }
 
@@ -85,15 +91,11 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
   const parentEmail = student.guardian?.user?.email || student.parentEmail;
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <InstructorLayout>
+      <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/dashboard/instructor/students" className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
-              <ArrowLeft className="h-4 w-4" />
-              Back to students
-            </Link>
-            <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{student.name}</h1>
               {/* Online/Offline Status Badge */}
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -141,7 +143,7 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
                     <Link href={`/messages?to=${encodeURIComponent(parentEmail || "")}&name=${encodeURIComponent(parentName)}&subject=${encodeURIComponent(
                       `Regarding ${student.name} - Class Attendance`
                     )}`}>
-                      <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                      <Button variant="secondary">
                         <MessageSquare className="h-4 w-4" />
                         Contact Parent Now
                       </Button>
@@ -237,6 +239,6 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
           </CardContent>
         </Card>
       </div>
-    </main>
+    </InstructorLayout>
   );
 }

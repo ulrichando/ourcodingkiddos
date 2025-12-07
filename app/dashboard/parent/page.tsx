@@ -7,6 +7,7 @@ import StudentCard from "../../../components/dashboard/StudentCard";
 import Button from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { useSession } from "next-auth/react";
+import ParentLayout from "../../../components/parent/ParentLayout";
 
 // Time-based greeting helper
 const getGreeting = () => {
@@ -106,8 +107,8 @@ export default function ParentDashboardPage() {
   const totalBadges = useMemo(() => students.reduce((sum, s) => sum + (s.badges?.length || 0), 0), [students]);
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+    <ParentLayout>
+      <div className="max-w-7xl mx-auto">
         {/* Welcome Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -653,6 +654,6 @@ export default function ParentDashboardPage() {
           </Card>
         </div>
       )}
-    </main>
+    </ParentLayout>
   );
 }

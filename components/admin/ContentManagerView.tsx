@@ -2031,10 +2031,10 @@ export default function ContentManagerView({ courses, homePath, dbError = false,
                 <Button type="button" variant="outline" onClick={() => setCertificateModal(false)} disabled={issuingCertificate}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500" disabled={issuingCertificate}>
+                <Button type="submit" variant="success" disabled={issuingCertificate}>
                   {issuingCertificate ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       Issuing...
                     </>
                   ) : (

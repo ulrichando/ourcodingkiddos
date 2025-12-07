@@ -312,7 +312,7 @@ export default function AdminDashboardShell({
                       className="pl-10"
                     />
                   </div>
-                  <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={openCreateUserModal}>
+                  <Button onClick={openCreateUserModal}>
                     Add User
                   </Button>
                 </div>
@@ -655,7 +655,7 @@ export default function AdminDashboardShell({
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">All Courses</h2>
                   <Link href="/dashboard/admin/content">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto">Manage Content</Button>
+                    <Button className="w-full sm:w-auto">Manage Content</Button>
                   </Link>
                 </div>
 
@@ -740,13 +740,13 @@ export default function AdminDashboardShell({
         title={userModalMode === "create" ? "Add User" : "Edit User"}
         footer={
           <>
-            <Button variant="ghost" onClick={closeUserModal} className="text-slate-700 dark:text-slate-300" disabled={isLoading}>
+            <Button variant="ghost" onClick={closeUserModal} disabled={isLoading}>
               Cancel
             </Button>
-            <Button onClick={saveUser} className="bg-purple-600 hover:bg-purple-700 text-white" disabled={isLoading}>
+            <Button onClick={saveUser} disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Saving...
                 </>
               ) : (

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import { Calendar, Clock, User, BookOpen, Plus, CheckCircle, XCircle, AlertCircle, Loader2, Users, CreditCard, Tag } from "lucide-react";
+import ParentLayout from "../../../../components/parent/ParentLayout";
 
 type ClassRequest = {
   id: string;
@@ -261,8 +262,8 @@ export default function ClassRequestsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <ParentLayout>
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -789,6 +790,6 @@ export default function ClassRequestsPage() {
           </div>
         </div>
       )}
-    </main>
+    </ParentLayout>
   );
 }

@@ -83,10 +83,7 @@ export default function AnnouncementsPage() {
         </div>
 
       <div className="flex justify-end items-center">
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl flex items-center gap-2"
-        >
+        <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="w-4 h-4" />
           New Announcement
         </Button>
@@ -155,15 +152,10 @@ export default function AnnouncementsPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button type="submit" disabled={submitting} className="bg-purple-600 text-white px-4 py-2 rounded-lg">
+            <Button type="submit" disabled={submitting}>
               {submitting ? "Sending..." : "Send Announcement"}
             </Button>
-            <Button
-              type="button"
-              onClick={() => setShowForm(false)}
-              variant="outline"
-              className="px-4 py-2 rounded-lg"
-            >
+            <Button type="button" onClick={() => setShowForm(false)} variant="outline">
               Cancel
             </Button>
           </div>

@@ -147,24 +147,14 @@ export default function CookieConsent() {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      onClick={acceptAll}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
+                    <Button onClick={acceptAll}>
                       <Check className="w-4 h-4" />
                       Accept All
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={rejectAll}
-                    >
+                    <Button variant="outline" onClick={rejectAll}>
                       Reject All
                     </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowSettings(true)}
-                      className="text-slate-600 dark:text-slate-400"
-                    >
+                    <Button variant="ghost" onClick={() => setShowSettings(true)}>
                       <Settings className="w-4 h-4" />
                       Customize
                     </Button>
@@ -275,16 +265,10 @@ export default function CookieConsent() {
               </div>
 
               <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                <Button
-                  onClick={acceptSelected}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
+                <Button onClick={acceptSelected}>
                   Save Preferences
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={acceptAll}
-                >
+                <Button variant="outline" onClick={acceptAll}>
                   Accept All
                 </Button>
                 <Link href="/cookies" className="text-sm text-purple-600 dark:text-purple-400 hover:underline self-center ml-auto">

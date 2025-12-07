@@ -131,14 +131,11 @@ export default function ChatBot() {
       <button
         onClick={() => setIsOpen(true)}
         data-chat-toggle
-        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 group ${isOpen ? "hidden" : ""}`}
+        style={{ background: "linear-gradient(to bottom right, #7c3aed, #9333ea)" }}
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-14 h-14 rounded-full text-white shadow-lg shadow-violet-500/25 flex items-center justify-center transition-all hover:scale-105 hover:shadow-violet-500/40 border-0 cursor-pointer ${isOpen ? "hidden" : ""}`}
       >
-        <div className="relative">
-          <div className="w-14 h-14 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg flex items-center justify-center transition-transform group-hover:scale-105">
-            <MessageCircle className="w-6 h-6" />
-          </div>
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
-        </div>
+        <MessageCircle className="w-6 h-6" />
+        <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
       </button>
 
       {/* Chat Window */}
@@ -290,7 +287,7 @@ export default function ChatBot() {
             ) : (
               <button
                 onClick={() => router.push("/auth/login")}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium text-sm hover:opacity-90 transition-opacity"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-medium text-sm shadow-lg shadow-violet-500/25 hover:from-violet-500 hover:to-purple-500 hover:shadow-violet-500/40 transition-all"
               >
                 <LogIn className="w-4 h-4" />
                 Sign in to chat
