@@ -44,7 +44,7 @@ export default function ParentBlogPage() {
     fetchPosts();
   }, []);
 
-  const categories = ["all", ...new Set(posts.map((p) => p.category).filter(Boolean))];
+  const categories = ["all", ...Array.from(new Set(posts.map((p) => p.category).filter((c): c is string => Boolean(c))))];
 
   const filteredPosts = posts.filter((post) => {
     const matchesSearch = post.title.toLowerCase().includes(search.toLowerCase()) ||
