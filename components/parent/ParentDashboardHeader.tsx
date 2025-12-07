@@ -74,7 +74,10 @@ export default function ParentDashboardHeader({ onMenuToggle, isSidebarOpen }: P
     .slice(0, 2) || "PA";
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <header
+      className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <div className="flex items-center justify-between px-4 lg:px-6 h-14">
         {/* Left: Menu Button + Breadcrumbs */}
         <div className="flex items-center gap-3">

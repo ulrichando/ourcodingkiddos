@@ -631,6 +631,62 @@ html.theme-transition *::after {
 }
 
 /* ================================================
+   iOS SAFE AREA & MOBILE SUPPORT
+   ================================================ */
+
+/* iOS momentum scrolling */
+.ios-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area utilities */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-y {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-all {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* iOS touch target minimum size */
+@supports (-webkit-touch-callout: none) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent tap highlight on iOS */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ================================================
    REDUCED MOTION
    ================================================ */
 
