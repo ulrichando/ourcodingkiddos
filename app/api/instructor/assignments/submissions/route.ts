@@ -155,7 +155,7 @@ export async function POST(req: Request) {
       attachments: attachments || null,
       repoUrl: repoUrl || null,
       demoUrl: demoUrl || null,
-      status: isDraft ? "DRAFT" : (isLate ? "LATE" : "SUBMITTED"),
+      status: isDraft ? SubmissionStatus.DRAFT : (isLate ? SubmissionStatus.LATE : SubmissionStatus.SUBMITTED),
       submittedAt: isDraft ? null : new Date(),
     };
 
@@ -166,14 +166,14 @@ export async function POST(req: Request) {
         where: { id: existingSubmission.id },
         data: {
           ...submissionData,
-          status: isDraft ? SubmissionStatus.DRAFT : (existingSubmission.status === SubmissionStatus.RETURNED ? SubmissionStatus.RESUBMITTED : submissionData.status as SubmissionStatus),
+          status: isDraft ? SubmissionStatus.DRAFT : (existingSubmission.status === SubmissionStatus.RETURNED ? SubmissionStatus.RESUBMITTED : submissionData.status),
         },
       });
     } else {
       // Create new submission
       submission = await prisma.assignmentSubmission.create({
         data: {
-          assignmentId,
+          assignment: { connect: { id: assignmentId } },
           studentId: userId,
           studentEmail: email,
           studentName: userName || null,
