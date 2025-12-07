@@ -282,6 +282,7 @@ model ClassSession {
   id                String             @id @default(cuid())
   instructorId      String?
   instructorEmail   String
+  programId         String?            // Link to Program for consistency
   title             String
   description       String?
   sessionType       SessionType
@@ -300,9 +301,11 @@ model ClassSession {
   updatedAt         DateTime           @updatedAt
   bookings          Booking[]
   instructor        User?              @relation("ClassSessionInstructor", fields: [instructorId], references: [id])
+  program           Program?           @relation(fields: [programId], references: [id])
 
   @@index([instructorId])
   @@index([startTime])
+  @@index([programId])
 }
 
 model InstructorAvailability {
@@ -828,6 +831,7 @@ model Program {
   updatedAt         DateTime            @updatedAt
   enrollments       ProgramEnrollment[]
   courses           ProgramCourse[]     // courses included in this program
+  classSessions     ClassSession[]      // scheduled class sessions for this program
 }
 
 model ProgramCourse {

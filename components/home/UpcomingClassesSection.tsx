@@ -16,6 +16,8 @@ import {
 
 interface ClassSession {
   id: string;
+  programId?: string;
+  programSlug?: string;
   title: string;
   description?: string;
   language?: string;
@@ -25,10 +27,25 @@ interface ClassSession {
   durationMinutes: number;
   maxStudents?: number;
   enrolledCount?: number;
-  instructorEmail?: string;
+  thumbnailUrl?: string;
 }
 
 const ITEMS_PER_PAGE = 4;
+
+const languageLabels: Record<string, string> = {
+  HTML: "HTML & CSS",
+  CSS: "CSS",
+  JAVASCRIPT: "JavaScript",
+  PYTHON: "Python",
+  ROBLOX: "Roblox Studio",
+  AI_ML: "AI & Machine Learning",
+  GAME_DEVELOPMENT: "Game Development",
+  WEB_DEVELOPMENT: "Web Development",
+  MOBILE_DEVELOPMENT: "Mobile Apps",
+  ROBOTICS: "Robotics",
+  ENGINEERING: "Engineering",
+  CAREER_PREP: "Career Prep",
+};
 
 export default function UpcomingClassesSection() {
   const [classes, setClasses] = useState<ClassSession[]>([]);
@@ -111,12 +128,14 @@ export default function UpcomingClassesSection() {
 
   const getAgeGroupLabel = (ageGroup?: string) => {
     switch (ageGroup) {
-      case "YOUNG":
+      case "AGES_7_10":
         return "Ages 7-10";
-      case "JUNIOR":
+      case "AGES_11_14":
         return "Ages 11-14";
-      case "SENIOR":
+      case "AGES_15_18":
         return "Ages 15-18";
+      case "AGES_18_PLUS":
+        return "Ages 18+";
       default:
         return "All Ages";
     }
@@ -166,15 +185,15 @@ export default function UpcomingClassesSection() {
               Upcoming Classes
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              No classes scheduled at the moment. Check back soon!
+              Classes held every Saturday &amp; Sunday, 9am-10am. Browse our programs to enroll!
             </p>
           </div>
           <div className="text-center">
             <Link
-              href="/schedule"
+              href="/programs"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold px-6 py-3 rounded-full"
             >
-              View Full Schedule <ArrowRight className="w-4 h-4" />
+              View Programs <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -190,10 +209,10 @@ export default function UpcomingClassesSection() {
             Live Classes
           </span>
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Upcoming Classes
+            Weekend Classes
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Join live sessions with expert instructors
+            Join live sessions every Saturday &amp; Sunday, 9am-10am EST
           </p>
         </div>
 
@@ -225,6 +244,12 @@ export default function UpcomingClassesSection() {
                   <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-2 line-clamp-2">
                     {cls.title}
                   </h3>
+
+                  {cls.language && (
+                    <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 mb-3">
+                      {languageLabels[cls.language] || cls.language}
+                    </span>
+                  )}
 
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
@@ -268,10 +293,10 @@ export default function UpcomingClassesSection() {
                   )}
 
                   <Link
-                    href="/schedule"
+                    href={cls.programSlug ? `/programs/${cls.programSlug}` : "/programs"}
                     className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                   >
-                    View Details
+                    View Program
                   </Link>
                 </div>
               </div>
@@ -319,10 +344,10 @@ export default function UpcomingClassesSection() {
         {/* View All Link */}
         <div className="text-center mt-8">
           <Link
-            href="/schedule"
+            href="/programs"
             className="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold hover:underline"
           >
-            View Full Schedule <ArrowRight className="w-4 h-4" />
+            View All Programs <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
