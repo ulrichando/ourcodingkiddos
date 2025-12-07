@@ -69,6 +69,7 @@ const navigationGroups = [
   {
     title: "Account",
     items: [
+      { href: "/dashboard/parent/profile", label: "My Profile", icon: UserPlus },
       { href: "/dashboard/parent/billing", label: "Billing", icon: CreditCard },
       { href: "/dashboard/parent/messages", label: "Messages", icon: MessageSquare },
       { href: "/dashboard/parent/settings", label: "Settings", icon: Settings },

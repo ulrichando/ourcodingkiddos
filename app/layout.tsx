@@ -11,10 +11,13 @@ import LazyComponents from "../components/providers/LazyComponents";
 import Footer from "../components/footer/Footer";
 
 // Optimize font loading - prevents layout shift
+// Using "optional" prevents font swap flash entirely
 const inter = Inter({
   subsets: ["latin"],
-  display: "swap",
+  display: "optional",
   variable: "--font-inter",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -61,15 +64,17 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen`} suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      </head>
+      <body className={`${inter.className} min-h-screen antialiased`} suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
                   var stored = localStorage.getItem("ok-theme");
-                  var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-                  var theme = stored || (prefersDark ? "dark" : "light");
+                  var theme = stored || "dark";
                   document.documentElement.classList.toggle("dark", theme === "dark");
                   document.documentElement.setAttribute("data-theme", theme);
                   if (!stored) localStorage.setItem("ok-theme", theme);

@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, MoreHorizontal, CreditCard, DollarSign } from "lucide-react";
 
 type ClassRequest = {
   id: string;
@@ -25,6 +24,14 @@ type ClassRequest = {
   createdAt: string;
   parentNotes?: string;
   adminNotes?: string;
+  // Pricing fields
+  numberOfSessions?: number;
+  daysPerWeek?: number;
+  numberOfWeeks?: number;
+  totalPrice?: number;
+  pricePerSession?: number;
+  paymentStatus?: string;
+  preferredInstructorName?: string;
 };
 
 const statusConfig = {
@@ -291,15 +298,33 @@ export default function AdminClassRequestsPage() {
 
                       {/* Main Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
                             {request.requestedTopic}
                           </h3>
                           <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${config.bg} ${config.text} ${config.border}`}>
                             {request.status}
                           </span>
+                          {/* Payment Status Badge */}
+                          {request.paymentStatus && (
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full border flex items-center gap-1 ${
+                              request.paymentStatus === 'PAID'
+                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
+                                : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30'
+                            }`}>
+                              <CreditCard className="w-3 h-3" />
+                              {request.paymentStatus}
+                            </span>
+                          )}
+                          {/* Show "Awaiting Payment" for approved but unpaid */}
+                          {request.status === 'APPROVED' && !request.paymentStatus && (
+                            <span className="px-2 py-0.5 text-xs font-medium rounded-full border bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/30 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" />
+                              Awaiting Payment
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
                           <span className="flex items-center gap-1">
                             <User className="w-3.5 h-3.5" />
                             {request.parentName || request.parentEmail}
@@ -311,6 +336,18 @@ export default function AdminClassRequestsPage() {
                             <span className="flex items-center gap-1">
                               <Clock className="w-3.5 h-3.5" />
                               {request.duration}min
+                            </span>
+                          )}
+                          {request.numberOfSessions && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {request.numberOfSessions} sessions
+                            </span>
+                          )}
+                          {request.totalPrice && (
+                            <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
+                              <DollarSign className="w-3.5 h-3.5" />
+                              ${(request.totalPrice / 100).toFixed(2)}
                             </span>
                           )}
                         </div>
@@ -426,7 +463,65 @@ export default function AdminClassRequestsPage() {
                     {/* Expanded Details */}
                     {isExpanded && (
                       <div className="px-4 pb-4 pt-0 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                        {/* Workflow Status Banner */}
+                        <div className="mt-4 mb-4 p-3 rounded-lg border">
+                          {request.status === 'PENDING' && (
+                            <div className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 p-3 rounded-lg">
+                              <p className="font-medium">Step 1: Review Request</p>
+                              <p className="text-sm mt-1">Review this request and approve or reject it. Once approved, the parent will be notified to complete payment.</p>
+                            </div>
+                          )}
+                          {request.status === 'APPROVED' && (!request.paymentStatus || request.paymentStatus !== 'PAID') && (
+                            <div className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-200 p-3 rounded-lg">
+                              <p className="font-medium">Step 2: Awaiting Payment</p>
+                              <p className="text-sm mt-1">Request approved. Waiting for parent to complete payment before scheduling can proceed.</p>
+                            </div>
+                          )}
+                          {request.status === 'APPROVED' && request.paymentStatus === 'PAID' && (
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 p-3 rounded-lg">
+                              <p className="font-medium">Step 3: Ready to Schedule</p>
+                              <p className="text-sm mt-1">Payment received! You can now assign an instructor and schedule the sessions.</p>
+                            </div>
+                          )}
+                          {request.status === 'SCHEDULED' && (
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200 p-3 rounded-lg">
+                              <p className="font-medium">Scheduled</p>
+                              <p className="text-sm mt-1">This request has been scheduled with an instructor. Mark as completed when sessions are done.</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Pricing Summary */}
+                        {(request.totalPrice || request.numberOfSessions) && (
+                          <div className="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+                            <p className="text-xs font-medium text-purple-700 dark:text-purple-400 uppercase tracking-wide mb-2">Pricing Details</p>
+                            <div className="flex flex-wrap gap-4 text-sm">
+                              {request.numberOfSessions && (
+                                <div>
+                                  <span className="text-slate-500 dark:text-slate-400">Sessions:</span>{" "}
+                                  <span className="font-medium text-slate-900 dark:text-slate-100">{request.numberOfSessions}</span>
+                                  {request.daysPerWeek && request.numberOfWeeks && (
+                                    <span className="text-slate-400 dark:text-slate-500"> ({request.daysPerWeek}×/wk × {request.numberOfWeeks} wks)</span>
+                                  )}
+                                </div>
+                              )}
+                              {request.pricePerSession && (
+                                <div>
+                                  <span className="text-slate-500 dark:text-slate-400">Per Session:</span>{" "}
+                                  <span className="font-medium text-slate-900 dark:text-slate-100">${(request.pricePerSession / 100).toFixed(2)}</span>
+                                </div>
+                              )}
+                              {request.totalPrice && (
+                                <div>
+                                  <span className="text-slate-500 dark:text-slate-400">Total:</span>{" "}
+                                  <span className="font-bold text-purple-700 dark:text-purple-300">${(request.totalPrice / 100).toFixed(2)}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Left Column */}
                           <div className="space-y-3">
                             {request.description && (
@@ -440,6 +535,13 @@ export default function AdminClassRequestsPage() {
                               <div>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Student Age</p>
                                 <p className="text-sm text-slate-700 dark:text-slate-300">{request.studentAge} years old</p>
+                              </div>
+                            )}
+
+                            {request.preferredInstructorName && (
+                              <div>
+                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">Preferred Instructor</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300">{request.preferredInstructorName}</p>
                               </div>
                             )}
 

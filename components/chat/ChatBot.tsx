@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { MessageCircle, X, Send, Sparkles, RefreshCcw, ArrowRight, User, LogIn } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useSession, signIn } from "next-auth/react";
+import { MessageCircle, X, Send, Sparkles, RefreshCcw, ArrowRight, LogIn, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
 import Button from "../ui/button";
 import { emails } from "@/lib/emails";
 
@@ -45,7 +44,6 @@ function formatMessage(content: string) {
 }
 
 export default function ChatBot() {
-  const router = useRouter();
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const userName = session?.user?.name?.split(" ")[0] || "there";
@@ -56,6 +54,13 @@ export default function ChatBot() {
   const [hasInteracted, setHasInteracted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Login form state
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -96,7 +101,7 @@ export default function ChatBot() {
       setMessages((prev) => [
         ...prev,
         { role: "user", content: input.trim() },
-        { role: "assistant", content: "Please sign in to send custom messages. You can use the suggestions above, or sign in for full access!" },
+        { role: "assistant", content: "Please sign in to send custom messages. You can use the quick suggestions above, or click the **Sign in to chat** button below!" },
       ]);
       setInput("");
       setHasInteracted(true);
@@ -122,6 +127,35 @@ export default function ChatBot() {
     setMessages([]);
     setHasInteracted(false);
     setInput("");
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail || !loginPassword) return;
+
+    setIsLoggingIn(true);
+    setLoginError("");
+
+    try {
+      const result = await signIn("credentials", {
+        email: loginEmail,
+        password: loginPassword,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setLoginError("Invalid email or password");
+      } else {
+        // Success - close login form
+        setShowLoginForm(false);
+        setLoginEmail("");
+        setLoginPassword("");
+      }
+    } catch {
+      setLoginError("Something went wrong. Please try again.");
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   const greeting = isAuthenticated ? `Hi ${userName}!` : "Hi there!";
@@ -285,9 +319,76 @@ export default function ChatBot() {
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
+            ) : showLoginForm ? (
+              /* Inline Login Form */
+              <form onSubmit={handleLogin} className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => { setShowLoginForm(false); setLoginError(""); }}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Sign in to chat</span>
+                </div>
+
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="Email"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                    required
+                  />
+                </div>
+
+                {loginError && (
+                  <p className="text-xs text-red-500 dark:text-red-400">{loginError}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoggingIn}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-medium text-sm shadow-lg shadow-violet-500/25 hover:from-violet-500 hover:to-purple-500 disabled:opacity-70 transition-all"
+                >
+                  {isLoggingIn ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4" />
+                      Sign in
+                    </>
+                  )}
+                </button>
+
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+                  Don&apos;t have an account?{" "}
+                  <a href="/auth/register" className="text-violet-600 dark:text-violet-400 hover:underline">
+                    Sign up
+                  </a>
+                </p>
+              </form>
             ) : (
               <button
-                onClick={() => router.push("/auth/login")}
+                onClick={() => setShowLoginForm(true)}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-medium text-sm shadow-lg shadow-violet-500/25 hover:from-violet-500 hover:to-purple-500 hover:shadow-violet-500/40 transition-all"
               >
                 <LogIn className="w-4 h-4" />

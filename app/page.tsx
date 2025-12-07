@@ -1318,12 +1318,12 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
 }
 import UpcomingClassesSection from "../components/home/UpcomingClassesSection";
 
-// Age groups for course selector
+// Age groups for course selector (matches database: AGES_7_10, AGES_11_14, AGES_15_18, AGES_18_PLUS)
 const ageGroups = [
-  { id: "young", label: "Ages 5-8", icon: "🎨", color: "from-pink-500 to-rose-500" },
-  { id: "kids", label: "Ages 9-12", icon: "🎮", color: "from-violet-500 to-purple-600" },
-  { id: "teens", label: "Ages 13-16", icon: "💻", color: "from-blue-500 to-cyan-600" },
-  { id: "advanced", label: "Ages 16+", icon: "🚀", color: "from-emerald-500 to-green-600" },
+  { id: "kids", label: "Ages 7-10", icon: "🎨", color: "from-pink-500 to-rose-500" },
+  { id: "tweens", label: "Ages 11-14", icon: "🎮", color: "from-violet-500 to-purple-600" },
+  { id: "teens", label: "Ages 15-18", icon: "💻", color: "from-blue-500 to-cyan-600" },
+  { id: "young-adults", label: "Ages 18+", icon: "🎓", color: "from-emerald-500 to-teal-600" },
 ];
 
 const features = [
@@ -1331,69 +1331,69 @@ const features = [
     icon: Gamepad2,
     title: "Learn by Playing",
     description: "Every lesson feels like a game with points, badges, and rewards.",
-    image: "https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&h=300&fit=crop", // Kids learning with technology
   },
   {
     icon: Users,
     title: "Live 1:1 Mentors",
     description: "Real instructors who know each student by name.",
-    image: "https://images.unsplash.com/photo-1609220136736-443140cffec6?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=400&h=300&fit=crop", // Teacher helping student
   },
   {
     icon: Rocket,
     title: "Build Real Projects",
     description: "Create games, websites, and apps that actually work.",
-    image: "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop", // Kids coding on laptop
   },
   {
     icon: Shield,
     title: "Safe Environment",
     description: "Kid-friendly platform with parent dashboards.",
-    image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=400&h=300&fit=crop", // Happy kids in classroom
   },
 ];
 
 const testimonials = [
   {
     quote: "My son went from playing games all day to building his own. The transformation is incredible!",
-    name: "Sarah M.",
-    role: "Parent of Marcus, 12",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    name: "Amara J.",
+    role: "Parent of Kwame, 12",
+    avatar: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=100&h=100&fit=crop", // African American woman
   },
   {
     quote: "I built a website for my mom's bakery! She was so proud. Now I want to make apps too.",
-    name: "Emma T.",
+    name: "Sofia R.",
     role: "Student, Age 14",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop", // Young woman
   },
   {
     quote: "The instructors are patient and make coding fun. My daughter actually looks forward to lessons.",
-    name: "David K.",
-    role: "Parent of Lily, 9",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    name: "Wei Chen",
+    role: "Parent of Mei, 9",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop", // Asian man
   },
 ];
 
 const studentProjects = [
   {
     name: "Space Shooter",
-    creator: "Alex, Age 11",
+    creator: "Jamal, Age 11",
     description: "A thrilling arcade game where you defend Earth from alien invaders",
     icon: Rocket,
     color: "from-violet-500 to-purple-600",
-    image: "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=250&fit=crop",
   },
   {
     name: "Weather App",
-    creator: "Maya, Age 13",
+    creator: "Priya, Age 13",
     description: "Real-time weather forecasts with beautiful animations",
     icon: Globe,
     color: "from-blue-500 to-cyan-600",
-    image: "https://images.unsplash.com/photo-1592210454359-9043f067919b?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=400&h=250&fit=crop",
   },
   {
     name: "Pet Care Bot",
-    creator: "Sam, Age 10",
+    creator: "Aiden, Age 10",
     description: "An AI chatbot that helps kids learn how to care for pets",
     icon: Brain,
     color: "from-emerald-500 to-green-600",
@@ -1401,11 +1401,11 @@ const studentProjects = [
   },
   {
     name: "Music Mixer",
-    creator: "Jordan, Age 14",
+    creator: "Kenji, Age 14",
     description: "Create your own beats and melodies with this interactive app",
     icon: Sparkles,
     color: "from-pink-500 to-rose-600",
-    image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop",
   },
 ];
 
@@ -1753,7 +1753,7 @@ export default function HomePage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 dark:bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 dark:bg-emerald-400" />
                     </span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-white/90">Live classes • Ages 5-18</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-white/90">Live classes • Ages 7+</span>
                   </div>
 
                   {/* Main Headline - BIGGER for 2025 */}
@@ -2480,8 +2480,8 @@ export default function HomePage() {
                 <div className="relative hidden lg:block">
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     <Image
-                      src="https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&h=400&fit=crop&q=80"
-                      alt="Diverse group of happy kids celebrating together"
+                      src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop&q=80"
+                      alt="Diverse group of happy kids learning together in classroom"
                       width={600}
                       height={400}
                       className="w-full h-auto object-cover"

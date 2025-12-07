@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import { Calendar, Clock, User, BookOpen, Plus, CheckCircle, XCircle, AlertCircle, Loader2, Users, CreditCard, Tag } from "lucide-react";
+import { Calendar, Clock, User, BookOpen, Plus, CheckCircle, XCircle, AlertCircle, Loader2, Users, CreditCard } from "lucide-react";
 import ParentLayout from "../../../../components/parent/ParentLayout";
 
 type ClassRequest = {
@@ -202,8 +202,8 @@ export default function ClassRequestsPage() {
     setSubmitting(true);
 
     try {
-      // Create checkout session and redirect to payment
-      const res = await fetch("/api/one-on-one/checkout", {
+      // Submit request for admin review (no payment yet)
+      const res = await fetch("/api/class-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -212,23 +212,62 @@ export default function ClassRequestsPage() {
           duration: parseInt(formData.duration),
           numberOfSessions: totalSessions,
           daysPerWeek: parseInt(formData.daysPerWeek),
-          numberOfWeeks: parseInt(formData.numberOfWeeks)
+          numberOfWeeks: parseInt(formData.numberOfWeeks),
+          totalPrice: pricing?.totalPrice,
+          pricePerSession: pricing?.pricePerSession,
+          discountApplied: pricing?.discount
         })
       });
 
       const data = await res.json();
 
-      if (data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
+      if (data.success) {
+        setShowNewRequest(false);
+        loadRequests();
+        alert("Your request has been submitted and is pending admin review. You'll be able to pay once it's approved.");
+        // Reset form
+        setFormData({
+          studentId: "",
+          studentName: "",
+          studentAge: "",
+          requestedTopic: "",
+          description: "",
+          preferredDays: [],
+          preferredTimes: [],
+          duration: "60",
+          daysPerWeek: "1",
+          numberOfWeeks: "4",
+          parentNotes: "",
+          preferredInstructorId: "",
+          preferredInstructorName: ""
+        });
       } else {
-        alert(`Error: ${data.error || "Failed to create checkout session"}`);
+        alert(`Error: ${data.error || "Failed to submit request"}`);
       }
     } catch (error) {
       console.error("Failed to submit request:", error);
       alert("Failed to submit request. Please try again.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handlePayNow = async (requestId: string) => {
+    try {
+      const res = await fetch(`/api/one-on-one/checkout/${requestId}`, {
+        method: "POST"
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(`Error: ${data.error || "Failed to create checkout session"}`);
+      }
+    } catch (error) {
+      console.error("Failed to initiate payment:", error);
+      alert("Failed to initiate payment. Please try again.");
     }
   };
 
@@ -513,6 +552,37 @@ export default function ClassRequestsPage() {
                             <p className="text-sm text-red-900 dark:text-red-100">{request.rejectionReason}</p>
                           </div>
                         )}
+
+                        {/* Pay Now button for APPROVED requests */}
+                        {request.status === "APPROVED" && request.paymentStatus !== "PAID" && (
+                          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mt-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                              <div>
+                                <p className="font-semibold text-green-700 dark:text-green-300">Request Approved!</p>
+                                <p className="text-sm text-green-600 dark:text-green-400">
+                                  Your request has been approved. Please complete the payment to proceed.
+                                </p>
+                              </div>
+                              <Button
+                                onClick={() => handlePayNow(request.id)}
+                                className="bg-green-600 hover:bg-green-700 text-white whitespace-nowrap"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                Pay Now {request.totalPrice ? `($${(request.totalPrice / 100).toFixed(2)})` : ''}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Pending review notice */}
+                        {request.status === "PENDING" && (
+                          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mt-3">
+                            <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                              <AlertCircle className="w-4 h-4 inline mr-1" />
+                              Your request is being reviewed. You'll be able to pay once it's approved.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -775,16 +845,19 @@ export default function ClassRequestsPage() {
                     {submitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
+                        Submitting...
                       </>
                     ) : (
                       <>
-                        <CreditCard className="w-4 h-4" />
-                        Proceed to Payment {pricing ? `(${pricing.totalPriceFormatted})` : ''}
+                        <Plus className="w-4 h-4" />
+                        Submit Request {pricing ? `(${pricing.totalPriceFormatted})` : ''}
                       </>
                     )}
                   </Button>
                 </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-2">
+                  Your request will be reviewed by our team. Payment will be required once approved.
+                </p>
               </div>
             </form>
           </div>

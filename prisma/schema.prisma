@@ -648,6 +648,7 @@ enum AgeGroup {
   AGES_7_10
   AGES_11_14
   AGES_15_18
+  AGES_18_PLUS
 }
 
 enum ThemePreference {

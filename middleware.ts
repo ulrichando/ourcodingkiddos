@@ -134,6 +134,12 @@ export default withAuth(
           "/schedule",
           "/certificates/verify",
           "/maintenance",
+          "/safety",
+          "/acceptable-use",
+          "/refund-policy",
+          "/our-story",
+          "/support",
+          "/free-trial",
         ];
 
         // Check if it's a public route or public route prefix

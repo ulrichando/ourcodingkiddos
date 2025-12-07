@@ -49,7 +49,6 @@ export async function POST(req: Request) {
 
     const userEmail = session.user.email.toLowerCase();
     const userName = session.user.name;
-    const userRole = (session as any)?.user?.role?.toUpperCase();
 
     const body = await req.json();
     const {
@@ -61,7 +60,16 @@ export async function POST(req: Request) {
       preferredDays,
       preferredTimes,
       duration,
-      parentNotes
+      parentNotes,
+      // New pricing fields
+      numberOfSessions,
+      daysPerWeek,
+      numberOfWeeks,
+      totalPrice,
+      pricePerSession,
+      discountApplied,
+      preferredInstructorId,
+      preferredInstructorName
     } = body;
 
     // Validate required fields
@@ -69,32 +77,35 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Topic is required" }, { status: 400 });
     }
 
-    // Create class request
+    // Create class request with pricing info (pending admin review)
     const request = await prisma.classRequest.create({
       data: {
         parentEmail: userEmail,
         parentName: userName,
-        studentId,
-        studentName,
-        studentAge,
+        studentId: studentId || undefined,
+        studentName: studentName || undefined,
+        studentAge: studentAge ? parseInt(studentAge) : undefined,
         requestedTopic,
-        description,
+        description: description || undefined,
         preferredDays: preferredDays || [],
         preferredTimes: preferredTimes || [],
         duration: duration || 60,
-        parentNotes,
-        status: "PENDING"
+        parentNotes: parentNotes || undefined,
+        // Pricing info
+        numberOfSessions: numberOfSessions || undefined,
+        daysPerWeek: daysPerWeek || undefined,
+        numberOfWeeks: numberOfWeeks || undefined,
+        totalPrice: totalPrice || undefined,
+        pricePerSession: pricePerSession || undefined,
+        discountApplied: discountApplied || undefined,
+        // Instructor preference
+        preferredInstructorId: preferredInstructorId || undefined,
+        preferredInstructorName: preferredInstructorName || undefined,
+        // Status - pending admin review, no payment yet
+        status: "PENDING",
+        paymentStatus: null
       }
     });
-
-    // Create notification for admins
-    const admins = await prisma.user.findMany({
-      where: { role: "ADMIN" },
-      select: { email: true }
-    });
-
-    // Note: You might want to implement a notification system here
-    // For now, we'll just return success
 
     return NextResponse.json({
       success: true,

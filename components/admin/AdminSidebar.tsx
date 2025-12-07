@@ -28,6 +28,7 @@ import {
   Search,
   Command,
   Mail,
+  Home,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -68,6 +69,7 @@ const navigationGroups = [
     items: [
       { href: "/dashboard/admin/announcements", label: "Announcements", icon: Megaphone },
       { href: "/dashboard/admin/email", label: "Email Users", icon: Mail },
+      { href: "/dashboard/admin/subscribers", label: "Subscribers", icon: Users },
       { href: "/dashboard/admin/support-tickets", label: "Support Tickets", icon: HelpCircle },
     ]
   },
@@ -236,6 +238,20 @@ export default function AdminSidebar({ onCommandOpen }: AdminSidebarProps) {
             </div>
           ))}
         </nav>
+
+        {/* Back to Homepage */}
+        <div className={`border-t border-slate-100 dark:border-slate-800 ${isCollapsed ? "p-3" : "p-4"}`}>
+          <Link
+            href="/"
+            className={`flex items-center gap-3 rounded-lg transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 ${
+              isCollapsed ? "justify-center p-2.5" : "px-3 py-2"
+            }`}
+            title={isCollapsed ? "Back to Homepage" : undefined}
+          >
+            <Home className={`flex-shrink-0 ${isCollapsed ? "w-5 h-5" : "w-4 h-4"}`} />
+            {!isCollapsed && <span className="text-sm font-medium">Back to Homepage</span>}
+          </Link>
+        </div>
 
         {/* Collapse Toggle Button - Desktop only */}
         <div className={`hidden lg:flex border-t border-slate-100 dark:border-slate-800 p-3 ${isCollapsed ? "justify-center" : "justify-end"}`}>

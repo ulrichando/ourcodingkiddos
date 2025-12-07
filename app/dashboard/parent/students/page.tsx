@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Archive, Trash2, RotateCcw, AlertTriangle, Download } from "lucide-react";
+import { ArrowLeft, Archive, Trash2, RotateCcw, AlertTriangle, Download, Pencil } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
@@ -260,6 +260,16 @@ export default function ManageStudentsPage() {
                       <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
                         {!showArchived ? (
                           <>
+                            <Link href={`/dashboard/parent/students/${student.id}`}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20"
+                              >
+                                <Pencil className="w-4 h-4 sm:mr-2" />
+                                <span className="hidden sm:inline">Edit</span>
+                              </Button>
+                            </Link>
                             <Button
                               variant="outline"
                               size="sm"

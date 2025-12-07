@@ -7,7 +7,19 @@ import { Card, CardContent } from "../../components/ui/card";
 import Button from "../../components/ui/button";
 
 const classTypes = ["All Types", "1:1 Sessions", "Group Classes", "Workshops", "Camps"];
-const languages = ["All Languages", "HTML", "CSS", "JavaScript", "Python", "Roblox"];
+const programs = [
+  "All Programs",
+  "Scratch",
+  "Python",
+  "JavaScript",
+  "HTML & CSS",
+  "Web Development",
+  "Roblox Studio",
+  "Game Development",
+  "Mobile Apps",
+  "AI & Machine Learning",
+  "Robotics",
+];
 
 async function fetchClasses() {
   const res = await fetch("/api/classes", { cache: "no-store" });
@@ -195,10 +207,10 @@ export default function SchedulePage() {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Language</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Program</p>
                   <select className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100">
-                    {languages.map((l) => (
-                      <option key={l}>{l}</option>
+                    {programs.map((p) => (
+                      <option key={p}>{p}</option>
                     ))}
                   </select>
                 </div>

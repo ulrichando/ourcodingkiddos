@@ -36,7 +36,26 @@ function getCookie(name: string): string | null {
 
 function setCookie(name: string, value: string, maxAge: number): void {
   if (typeof document === "undefined") return;
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  // Add Secure flag for HTTPS, use SameSite=Lax for cross-site compatibility
+  const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
+  const secureFlag = isSecure ? "; Secure" : "";
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`;
+}
+
+// Get consent from localStorage (more reliable) or cookies (backup)
+function getStoredConsent(): string | null {
+  if (typeof window === "undefined") return null;
+
+  // Try localStorage first (more reliable, not affected by ITP/ad blockers)
+  try {
+    const localValue = localStorage.getItem(COOKIE_NAME);
+    if (localValue) return localValue;
+  } catch {
+    // localStorage might not be available
+  }
+
+  // Fallback to cookie
+  return getCookie(COOKIE_NAME);
 }
 
 export default function CookieConsent() {
@@ -49,8 +68,8 @@ export default function CookieConsent() {
     // Mark as mounted to avoid hydration issues
     setMounted(true);
 
-    // Check if user has already made a choice using cookies
-    const consent = getCookie(COOKIE_NAME);
+    // Check if user has already made a choice (localStorage first, then cookies)
+    const consent = getStoredConsent();
 
     if (!consent) {
       // Small delay to avoid layout shift on page load
@@ -65,6 +84,15 @@ export default function CookieConsent() {
         if (savedPrefs && typeof savedPrefs.necessary === "boolean") {
           setPreferences(savedPrefs);
           // Don't show banner - user already consented
+
+          // Sync storage: ensure both localStorage and cookie are set
+          // This helps if one was cleared but the other wasn't
+          try {
+            localStorage.setItem(COOKIE_NAME, consent);
+          } catch {
+            // localStorage might not be available
+          }
+          setCookie(COOKIE_NAME, consent, COOKIE_MAX_AGE);
         } else {
           // Invalid data, show banner
           setShowBanner(true);
@@ -77,16 +105,18 @@ export default function CookieConsent() {
   }, []);
 
   const savePreferences = (prefs: CookiePreferences) => {
-    // Save to cookie (persists for 1 year)
-    setCookie(COOKIE_NAME, JSON.stringify(prefs), COOKIE_MAX_AGE);
+    const prefsJson = JSON.stringify(prefs);
 
-    // Also save to localStorage as backup
+    // Save to localStorage FIRST (more reliable, not affected by ITP/ad blockers)
     try {
-      localStorage.setItem(COOKIE_NAME, JSON.stringify(prefs));
+      localStorage.setItem(COOKIE_NAME, prefsJson);
       localStorage.setItem("cookie-consent-date", new Date().toISOString());
     } catch {
       // localStorage might not be available
     }
+
+    // Also save to cookie as backup (for server-side access)
+    setCookie(COOKIE_NAME, prefsJson, COOKIE_MAX_AGE);
 
     setPreferences(prefs);
     setShowBanner(false);
@@ -288,19 +318,8 @@ export function useCookieConsent() {
   const [consent, setConsent] = useState<CookiePreferences | null>(null);
 
   useEffect(() => {
-    // Try cookie first, then localStorage as fallback
-    const cookieValue = getCookie(COOKIE_NAME);
-    if (cookieValue) {
-      try {
-        setConsent(JSON.parse(cookieValue));
-        return;
-      } catch {
-        // Invalid JSON in cookie
-      }
-    }
-
-    // Fallback to localStorage
-    const stored = localStorage.getItem(COOKIE_NAME);
+    // Use the unified getter (localStorage first, then cookies)
+    const stored = getStoredConsent();
     if (stored) {
       try {
         setConsent(JSON.parse(stored));

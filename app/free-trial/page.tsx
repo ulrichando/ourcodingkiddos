@@ -6,18 +6,17 @@ import Link from "next/link";
 import { CheckCircle2, Star, Users, Calendar, Clock, Sparkles, ArrowRight, Play } from "lucide-react";
 
 const AGE_GROUPS = [
-  { value: "AGES_5_7", label: "Ages 5-7", description: "Little Coders" },
-  { value: "AGES_8_10", label: "Ages 8-10", description: "Junior Developers" },
-  { value: "AGES_11_13", label: "Ages 11-13", description: "Teen Programmers" },
-  { value: "AGES_14_17", label: "Ages 14-17", description: "Advanced Coders" },
+  { value: "AGES_7_10", label: "Ages 7-10", description: "Young Coders" },
+  { value: "AGES_11_14", label: "Ages 11-14", description: "Junior Developers" },
+  { value: "AGES_15_18", label: "Ages 15-18", description: "Advanced Coders" },
 ];
 
 const LANGUAGES = [
-  { value: "SCRATCH", label: "Scratch", icon: "🧩", description: "Visual coding for beginners", ageGroups: ["AGES_5_7", "AGES_8_10"] },
-  { value: "PYTHON", label: "Python", icon: "🐍", description: "Most popular first language", ageGroups: ["AGES_8_10", "AGES_11_13", "AGES_14_17"] },
-  { value: "JAVASCRIPT", label: "JavaScript", icon: "⚡", description: "Build websites & games", ageGroups: ["AGES_11_13", "AGES_14_17"] },
-  { value: "ROBLOX", label: "Roblox Lua", icon: "🎮", description: "Create Roblox games", ageGroups: ["AGES_8_10", "AGES_11_13", "AGES_14_17"] },
-  { value: "HTML_CSS", label: "HTML & CSS", icon: "🌐", description: "Design web pages", ageGroups: ["AGES_8_10", "AGES_11_13", "AGES_14_17"] },
+  { value: "SCRATCH", label: "Scratch", icon: "🧩", description: "Visual coding for beginners", ageGroups: ["AGES_7_10"] },
+  { value: "PYTHON", label: "Python", icon: "🐍", description: "Most popular first language", ageGroups: ["AGES_7_10", "AGES_11_14", "AGES_15_18"] },
+  { value: "JAVASCRIPT", label: "JavaScript", icon: "⚡", description: "Build websites & games", ageGroups: ["AGES_11_14", "AGES_15_18"] },
+  { value: "ROBLOX", label: "Roblox Lua", icon: "🎮", description: "Create Roblox games", ageGroups: ["AGES_7_10", "AGES_11_14"] },
+  { value: "HTML_CSS", label: "HTML & CSS", icon: "🌐", description: "Design web pages", ageGroups: ["AGES_7_10", "AGES_11_14", "AGES_15_18"] },
 ];
 
 const TIME_SLOTS = [
@@ -203,7 +202,7 @@ export default function FreeTrialPage() {
             <div className="relative hidden lg:block">
               <div className="relative">
                 <Image
-                  src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&h=500&fit=crop"
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=500&fit=crop"
                   alt="Diverse children learning to code together"
                   width={600}
                   height={500}

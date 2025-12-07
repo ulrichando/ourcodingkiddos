@@ -34,6 +34,7 @@ const ageGroupLabels: Record<string, string> = {
   AGES_7_10: "Ages 7-10",
   AGES_11_14: "Ages 11-14",
   AGES_15_18: "Ages 15-18",
+  AGES_18_PLUS: "Ages 18+",
 };
 
 const languageLabels: Record<string, string> = {
