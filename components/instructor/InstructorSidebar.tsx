@@ -17,6 +17,7 @@ import {
   ChevronRight,
   GraduationCap,
   BarChart3,
+  ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -31,6 +32,7 @@ const navigationGroups = [
     title: "Teaching",
     items: [
       { href: "/dashboard/instructor/students", label: "My Students", icon: Users },
+      { href: "/dashboard/instructor/assignments", label: "Assignments", icon: ClipboardList },
       { href: "/dashboard/instructor/create-class", label: "Create Class", icon: PlusCircle },
       { href: "/dashboard/instructor/content", label: "Course Content", icon: BookOpen },
     ]

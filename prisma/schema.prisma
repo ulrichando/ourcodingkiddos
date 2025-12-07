@@ -1073,6 +1073,112 @@ model NewsletterSubscriber {
 }
 
 // =====================================================
+// ASSIGNMENT SYSTEM
+// =====================================================
+
+model Assignment {
+  id                String                 @id @default(cuid())
+  title             String
+  description       String                 @db.Text
+  instructions      String                 @db.Text
+  type              AssignmentType         @default(CODING_PROJECT)
+  language          Language?
+  ageGroup          AgeGroup?
+  dueDate           DateTime?
+  maxPoints         Int                    @default(100)
+  xpReward          Int                    @default(50)
+  starterCode       String?                @db.Text
+  solutionCode      String?                @db.Text
+  rubric            Json?                  // grading criteria
+  attachments       Json?                  // array of {name, url} objects
+  isPublished       Boolean                @default(false)
+  allowLateSubmission Boolean              @default(true)
+
+  // Associations
+  instructorId      String
+  instructorEmail   String
+  courseId          String?
+  lessonId          String?
+  programId         String?
+  classSessionId    String?
+
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  submissions       AssignmentSubmission[]
+
+  @@index([instructorId])
+  @@index([instructorEmail])
+  @@index([courseId])
+  @@index([programId])
+  @@index([isPublished])
+  @@index([dueDate])
+}
+
+model AssignmentSubmission {
+  id                String                 @id @default(cuid())
+  assignmentId      String
+  studentId         String                 // User ID
+  studentEmail      String
+  studentName       String?
+
+  // Submission content
+  code              String?                @db.Text
+  content           String?                @db.Text  // written response
+  attachments       Json?                  // array of {name, url} objects
+  repoUrl           String?                // GitHub repository link
+  demoUrl           String?                // Live demo link
+
+  // Status tracking
+  status            SubmissionStatus       @default(DRAFT)
+  submittedAt       DateTime?
+
+  // Grading
+  score             Int?
+  feedback          String?                @db.Text
+  rubricScores      Json?                  // individual rubric item scores
+  gradedAt          DateTime?
+  gradedByEmail     String?
+  gradedByName      String?
+
+  // Resubmission support
+  attemptNumber     Int                    @default(1)
+  previousSubmissionId String?
+
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  assignment        Assignment             @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId, attemptNumber])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@index([studentEmail])
+  @@index([status])
+}
+
+enum AssignmentType {
+  CODING_PROJECT    // Write code from scratch
+  CODE_REVIEW       // Review and improve existing code
+  DEBUGGING         // Find and fix bugs
+  QUIZ              // Multiple choice/short answer
+  READING           // Read material and respond
+  VIDEO             // Watch and respond
+  CREATIVE          // Open-ended creative project
+  CHALLENGE         // Timed coding challenge
+}
+
+enum SubmissionStatus {
+  DRAFT             // Started but not submitted
+  SUBMITTED         // Awaiting grading
+  IN_REVIEW         // Instructor is reviewing
+  GRADED            // Has been graded
+  RETURNED          // Returned for revision
+  RESUBMITTED       // Student resubmitted after feedback
+  LATE              // Submitted after due date
+}
+
+// =====================================================
 // PARENT REVIEWS
 // =====================================================
 

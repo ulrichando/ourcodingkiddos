@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Clock, Video, Users, CalendarDays, Link2, Loader2, CheckCircle2, Repeat, UserCircle } from "lucide-react";
+import { Clock, Video, Users, CalendarDays, Link2, Loader2, CheckCircle2, Repeat, UserCircle, BookOpen } from "lucide-react";
 import Button from "../../../../components/ui/button";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 
@@ -20,6 +20,11 @@ export default function CreateClassPage() {
   const [meetingUrl, setMeetingUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Program selection state
+  const [programs, setPrograms] = useState<Array<{ id: string; title: string; language: string; ageGroup: string }>>([]);
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+  const [loadingPrograms, setLoadingPrograms] = useState(true);
 
   // Recurring class state
   const [isRecurring, setIsRecurring] = useState(false);
@@ -38,6 +43,35 @@ export default function CreateClassPage() {
       setMaxStudents(1);
     }
   }, [sessionType]);
+
+  // Fetch programs on mount
+  useEffect(() => {
+    async function fetchPrograms() {
+      try {
+        const res = await fetch("/api/admin/programs");
+        if (res.ok) {
+          const data = await res.json();
+          setPrograms(data.programs || []);
+        }
+      } catch (e) {
+        console.error("Failed to fetch programs:", e);
+      } finally {
+        setLoadingPrograms(false);
+      }
+    }
+    fetchPrograms();
+  }, []);
+
+  // Auto-fill language and age group when a program is selected
+  useEffect(() => {
+    if (selectedProgramId) {
+      const program = programs.find(p => p.id === selectedProgramId);
+      if (program) {
+        if (program.language) setLanguage(program.language);
+        if (program.ageGroup) setAgeGroup(program.ageGroup);
+      }
+    }
+  }, [selectedProgramId, programs]);
 
   // Calculate preview dates for recurring classes
   const previewDates = useMemo(() => {
@@ -146,6 +180,7 @@ export default function CreateClassPage() {
       isRecurring,
       recurrencePattern: isRecurring ? recurrencePattern : null,
       numberOfWeeks: isRecurring ? numberOfWeeks : 1,
+      programId: selectedProgramId || null,
     };
 
     const res = await fetch("/api/instructor/classes", {
@@ -193,6 +228,30 @@ export default function CreateClassPage() {
               placeholder="What will students learn in this class?"
               rows={3}
             />
+          </div>
+
+          {/* Program Selection */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-purple-500" />
+              Link to Program (Optional)
+            </label>
+            <select
+              value={selectedProgramId}
+              onChange={(e) => setSelectedProgramId(e.target.value)}
+              disabled={loadingPrograms}
+              className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+            >
+              <option value="">-- No Program (Standalone Class) --</option>
+              {programs.map((program) => (
+                <option key={program.id} value={program.id}>
+                  {program.title} ({program.language} • {program.ageGroup?.replace("AGES_", "Ages ").replace("_", "-")})
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Link this class to a program for better tracking and enrollment management.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">

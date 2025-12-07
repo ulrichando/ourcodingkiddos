@@ -1,85 +1,63 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
 
-// Get the next N upcoming weekend dates (Saturday and Sunday)
-function getUpcomingWeekendDates(count: number = 4): Date[] {
-  const dates: Date[] = [];
-  const now = new Date();
-  const currentDay = now.getDay();
-
-  // Find next Saturday (day 6) or Sunday (day 0)
-  let daysUntilSaturday = (6 - currentDay + 7) % 7;
-  if (daysUntilSaturday === 0 && now.getHours() >= 10) {
-    // If today is Saturday but class already passed, go to Sunday
-    daysUntilSaturday = 1;
-  }
-
-  let nextDate = new Date(now);
-  nextDate.setDate(now.getDate() + daysUntilSaturday);
-  nextDate.setHours(9, 0, 0, 0); // 9am
-
-  while (dates.length < count) {
-    const dayOfWeek = nextDate.getDay();
-    if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
-      dates.push(new Date(nextDate));
-    }
-    nextDate.setDate(nextDate.getDate() + 1);
-  }
-
-  return dates;
-}
-
 export async function GET() {
-  // Public endpoint to list upcoming classes based on published programs
+  // Public endpoint to list upcoming scheduled class sessions
   try {
-    // Fetch published programs
-    const programs = await prisma.program.findMany({
-      where: { isPublished: true },
-      orderBy: [{ isFeatured: "desc" }, { orderIndex: "asc" }],
+    // Fetch actual scheduled class sessions from the database
+    const now = new Date();
+
+    const sessions = await prisma.classSession.findMany({
+      where: {
+        status: "SCHEDULED",
+        startTime: { gte: now },
+      },
+      orderBy: { startTime: "asc" },
       select: {
         id: true,
         title: true,
-        slug: true,
-        shortDescription: true,
+        description: true,
         language: true,
         ageGroup: true,
-        sessionDuration: true,
-        thumbnailUrl: true,
+        sessionType: true,
+        startTime: true,
+        durationMinutes: true,
+        maxStudents: true,
+        enrolledCount: true,
+        programId: true,
+        instructorEmail: true,
       },
     });
 
-    if (programs.length === 0) {
-      return NextResponse.json({ sessions: [] });
-    }
+    // If we have program IDs, fetch program details for thumbnails
+    const programIds = sessions
+      .map((s) => s.programId)
+      .filter((id): id is string => id !== null);
 
-    // Generate upcoming weekend sessions for each program
-    const upcomingDates = getUpcomingWeekendDates(4);
-    const sessions = [];
+    const programs = programIds.length > 0
+      ? await prisma.program.findMany({
+          where: { id: { in: programIds } },
+          select: {
+            id: true,
+            slug: true,
+            thumbnailUrl: true,
+          },
+        })
+      : [];
 
-    for (const program of programs) {
-      // Create a session entry for the next available weekend date
-      const nextDate = upcomingDates[0];
-      sessions.push({
-        id: `${program.id}-${nextDate.toISOString()}`,
-        programId: program.id,
-        programSlug: program.slug,
-        title: program.title,
-        description: program.shortDescription || `Live ${program.title} class session`,
-        language: program.language,
-        ageGroup: program.ageGroup,
-        sessionType: "GROUP",
-        startTime: nextDate.toISOString(),
-        durationMinutes: program.sessionDuration || 60,
-        maxStudents: 10,
-        enrolledCount: 0,
-        thumbnailUrl: program.thumbnailUrl,
-      });
-    }
+    const programMap = new Map(programs.map((p) => [p.id, p]));
 
-    // Sort by start time
-    sessions.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    // Enrich sessions with program info
+    const enrichedSessions = sessions.map((session) => {
+      const program = session.programId ? programMap.get(session.programId) : null;
+      return {
+        ...session,
+        programSlug: program?.slug || null,
+        thumbnailUrl: program?.thumbnailUrl || null,
+      };
+    });
 
-    return NextResponse.json({ sessions });
+    return NextResponse.json({ sessions: enrichedSessions });
   } catch (e) {
     console.error("[classes] GET error:", e);
     return NextResponse.json({ error: "Failed to load classes" }, { status: 500 });

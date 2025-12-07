@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     isRecurring,
     recurrencePattern,
     numberOfWeeks,
+    programId,
   } = body ?? {};
 
   if (!title || !sessionType || !startTime || !durationMinutes) {
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
           status: "SCHEDULED",
           isRecurring: isRecurring || false,
           recurrencePattern: isRecurring ? recurrencePattern : null,
+          ...(programId ? { programId } : {}),
         },
         select: {
           id: true,
@@ -111,21 +113,50 @@ export async function GET() {
 
   if (!session?.user || !email || (role !== "INSTRUCTOR" && role !== "ADMIN")) {
     // Allow read access for students/parents to see list of classes
+    const now = new Date();
     const sessions = await prisma.classSession.findMany({
-      where: { status: "SCHEDULED", startTime: { gt: new Date() } },
+      where: { status: "SCHEDULED", startTime: { gte: now } },
       orderBy: { startTime: "asc" },
       select: {
         id: true,
         title: true,
+        description: true,
+        language: true,
+        ageGroup: true,
         sessionType: true,
         startTime: true,
         durationMinutes: true,
         maxStudents: true,
         enrolledCount: true,
         meetingUrl: true,
+        programId: true,
       },
     });
-    return NextResponse.json({ sessions });
+
+    // Enrich with program info
+    const programIds = sessions
+      .map((s) => s.programId)
+      .filter((id): id is string => id !== null);
+
+    const programs = programIds.length > 0
+      ? await prisma.program.findMany({
+          where: { id: { in: programIds } },
+          select: { id: true, slug: true, thumbnailUrl: true },
+        })
+      : [];
+
+    const programMap = new Map(programs.map((p) => [p.id, p]));
+
+    const enrichedSessions = sessions.map((s) => {
+      const program = s.programId ? programMap.get(s.programId) : null;
+      return {
+        ...s,
+        programSlug: program?.slug || null,
+        thumbnailUrl: program?.thumbnailUrl || null,
+      };
+    });
+
+    return NextResponse.json({ sessions: enrichedSessions });
   }
 
   // Instructors should see all scheduled classes (including those created by others) so they can manage or join.
@@ -136,6 +167,9 @@ export async function GET() {
     select: {
       id: true,
       title: true,
+      description: true,
+      language: true,
+      ageGroup: true,
       sessionType: true,
       startTime: true,
       durationMinutes: true,
@@ -143,8 +177,32 @@ export async function GET() {
       enrolledCount: true,
       meetingUrl: true,
       instructorEmail: true,
+      programId: true,
     },
   });
 
-  return NextResponse.json({ sessions });
+  // Enrich with program info for consistency with public API
+  const programIds = sessions
+    .map((s) => s.programId)
+    .filter((id): id is string => id !== null);
+
+  const programs = programIds.length > 0
+    ? await prisma.program.findMany({
+        where: { id: { in: programIds } },
+        select: { id: true, slug: true, thumbnailUrl: true },
+      })
+    : [];
+
+  const programMap = new Map(programs.map((p) => [p.id, p]));
+
+  const enrichedSessions = sessions.map((session) => {
+    const program = session.programId ? programMap.get(session.programId) : null;
+    return {
+      ...session,
+      programSlug: program?.slug || null,
+      thumbnailUrl: program?.thumbnailUrl || null,
+    };
+  });
+
+  return NextResponse.json({ sessions: enrichedSessions });
 }

@@ -8,7 +8,7 @@ import {
   Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar,
   ArrowRight, Target as Aim, Loader2, Sparkles, Gift, Rocket,
   CheckCircle, Lock, Play, ChevronRight, Medal, Crown, Code2,
-  Plus, X, Upload, Eye, Heart
+  Plus, X, Upload, Eye, Heart, ClipboardList
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
@@ -722,17 +722,17 @@ export default function StudentDashboard() {
                 <Code2 className="h-4 w-4" />
                 Code Now
               </Link>
-              <Link href="/courses" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold hover:from-green-600 hover:to-emerald-600 transition shadow-md">
+              <Link href="/dashboard/student/assignments" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition shadow-md">
+                <ClipboardList className="h-4 w-4" />
+                Assignments
+              </Link>
+              <Link href="/courses" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/20 transition">
                 <BookOpen className="h-4 w-4" />
                 Learn
               </Link>
               <Link href="/schedule" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/20 transition">
                 <Calendar className="h-4 w-4" />
                 My Classes
-              </Link>
-              <Link href="/showcase" className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white text-sm font-medium hover:bg-slate-200 dark:hover:bg-white/20 transition">
-                <Rocket className="h-4 w-4" />
-                Showcase
               </Link>
             </div>
           </div>
