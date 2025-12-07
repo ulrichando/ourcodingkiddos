@@ -76,7 +76,7 @@ export async function GET(req: Request) {
     // Combine assignments with their submission status
     const assignmentsWithStatus = assignments.map((assignment) => {
       const submission = submissionMap.get(assignment.id);
-      const isPastDue = assignment.dueDate && new Date(assignment.dueDate) < new Date();
+      const isPastDue = assignment.dueDate ? new Date(assignment.dueDate) < new Date() : false;
 
       return {
         ...assignment,
