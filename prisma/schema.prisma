@@ -1049,3 +1049,19 @@ enum FreeTrialStatus {
   DECLINED          // Decided not to continue
   EXPIRED           // Never scheduled within time limit
 }
+
+// =====================================================
+// NEWSLETTER SUBSCRIBERS
+// =====================================================
+
+model NewsletterSubscriber {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  isActive      Boolean   @default(true)
+  subscribedAt  DateTime  @default(now())
+  unsubscribedAt DateTime?
+  source        String?   // where they signed up (footer, blog, etc.)
+
+  @@index([email])
+  @@index([isActive])
+}
