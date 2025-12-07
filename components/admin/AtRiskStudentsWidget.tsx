@@ -106,29 +106,29 @@ export default function AtRiskStudentsWidget({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-amber-500" />
-          At-Risk Students
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 flex-shrink-0" />
+          <span className="truncate">At-Risk Students</span>
           {students.length > 0 && (
-            <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">
+            <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full flex-shrink-0">
               {students.length}
             </span>
           )}
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <button
             onClick={onRefresh || fetchAtRiskStudents}
-            className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
           <Link
             href="/dashboard/admin/students/at-risk"
-            className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium flex items-center gap-1"
+            className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium flex items-center gap-1"
           >
-            View All <ChevronRight className="w-4 h-4" />
+            <span className="hidden sm:inline">View All</span> <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -150,41 +150,41 @@ export default function AtRiskStudentsWidget({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {students.slice(0, 5).map((student) => (
             <Link
               key={student.id}
               href={`/dashboard/admin/students/${student.id}`}
-              className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors gap-2"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 {student.avatar ? (
                   <img
                     src={student.avatar}
                     alt={student.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                     {student.name.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100 text-sm">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate">
                     {student.name}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                     {student.riskDetails}
                   </p>
                 </div>
               </div>
               <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(
+                className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium flex-shrink-0 ${getRiskColor(
                   student.riskType
                 )}`}
               >
                 {getRiskIcon(student.riskType)}
-                {getRiskLabel(student.riskType)}
+                <span className="hidden sm:inline">{getRiskLabel(student.riskType)}</span>
               </span>
             </Link>
           ))}

@@ -109,42 +109,42 @@ export default function QuickActionsWidget({
   const displayedActions = showAllActions ? quickActions : quickActions.slice(0, 4);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-amber-500" />
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
           Quick Actions
         </h2>
         <button
           onClick={() => setShowAllActions(!showAllActions)}
-          className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium flex items-center gap-1"
+          className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium flex items-center gap-1"
         >
           {showAllActions ? (
             <>
-              <X className="w-4 h-4" /> Show Less
+              <X className="w-3 h-3 sm:w-4 sm:h-4" /> Less
             </>
           ) : (
             <>
-              <Plus className="w-4 h-4" /> Show All
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4" /> More
             </>
           )}
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
         {displayedActions.map((action) => {
           const Icon = action.icon;
           const content = (
-            <div className="group flex flex-col items-center p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition-all cursor-pointer bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800">
+            <div className="group flex flex-col items-center p-3 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition-all cursor-pointer bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800">
               <div
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg`}
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition-transform shadow-lg`}
               >
-                <Icon className="w-6 h-6 text-white" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-sm font-medium text-slate-900 dark:text-slate-100 text-center">
+              <span className="text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-100 text-center truncate w-full">
                 {action.label}
               </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1 hidden sm:block">
+              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 text-center mt-0.5 sm:mt-1 hidden sm:block line-clamp-1">
                 {action.description}
               </span>
             </div>

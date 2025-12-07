@@ -160,9 +160,9 @@ export default function ParentDashboardPage() {
             ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Students Section */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Your Students</h2>
 
             {loadingStudents ? (
@@ -341,7 +341,7 @@ export default function ParentDashboardPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Schedule Header Card */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 p-4 text-white shadow-lg">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -544,32 +544,31 @@ export default function ParentDashboardPage() {
 
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-slate-900 dark:text-slate-100">Quick Actions</CardTitle>
+                <CardTitle className="text-base sm:text-lg text-slate-900 dark:text-slate-100">Quick Actions</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  { label: "Add Another Student", icon: Plus, href: "/dashboard/parent/add-student" },
-                  { label: "Request 1-on-1 Class", icon: Users, href: "/dashboard/parent/class-requests" },
-                  { label: "Browse Courses", icon: BookOpen, href: "/courses" },
-                  { label: "View Certificates", icon: Award, href: "/certificates" },
-                  { label: "View Progress Reports", icon: TrendingUp, href: "/dashboard/parent/reports" },
-                  { label: "Billing & Payments", icon: CreditCard, href: "/dashboard/parent/billing" },
-                  { label: "Manage Students", icon: Settings, href: "/dashboard/parent/students" },
-                  { label: "Contact Instructor", icon: MessageSquare, href: "/messages" },
-                ].map((action: any) => (
-                  <Link key={action.label} href={action.href}>
-                    <Button
-                      variant={action.highlight ? "default" : "ghost"}
-                      className={action.highlight
-                        ? "w-full justify-start font-semibold bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-3"
-                        : "w-full justify-start font-semibold text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-3 px-0"
-                      }
-                    >
-                      <action.icon className={`w-4 h-4 flex-shrink-0 ${action.highlight ? "text-white" : "text-slate-700 dark:text-slate-400"}`} />
-                      <span className="text-sm">{action.label}</span>
-                    </Button>
-                  </Link>
-                ))}
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-2 sm:grid-cols-1 gap-1 sm:gap-0 sm:space-y-2">
+                  {[
+                    { label: "Add Student", icon: Plus, href: "/dashboard/parent/add-student" },
+                    { label: "Request Class", icon: Users, href: "/dashboard/parent/class-requests" },
+                    { label: "Browse Courses", icon: BookOpen, href: "/courses" },
+                    { label: "Certificates", icon: Award, href: "/certificates" },
+                    { label: "Progress", icon: TrendingUp, href: "/dashboard/parent/reports" },
+                    { label: "Billing", icon: CreditCard, href: "/dashboard/parent/billing" },
+                    { label: "Manage Students", icon: Settings, href: "/dashboard/parent/students" },
+                    { label: "Messages", icon: MessageSquare, href: "/messages" },
+                  ].map((action: any) => (
+                    <Link key={action.label} href={action.href}>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 h-auto text-xs sm:text-sm"
+                      >
+                        <action.icon className="w-4 h-4 flex-shrink-0 text-slate-500 dark:text-slate-400" />
+                        <span className="truncate">{action.label}</span>
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -14,9 +14,16 @@ import {
   HelpCircle,
   ChevronDown,
   Home,
+  Menu,
+  X,
 } from "lucide-react";
 import { logout } from "@/lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
+
+type ParentDashboardHeaderProps = {
+  onMenuToggle?: () => void;
+  isSidebarOpen?: boolean;
+};
 
 // Breadcrumb path mappings
 const pathLabels: Record<string, string> = {
@@ -28,7 +35,7 @@ const pathLabels: Record<string, string> = {
   billing: "Billing",
 };
 
-export default function ParentDashboardHeader() {
+export default function ParentDashboardHeader({ onMenuToggle, isSidebarOpen }: ParentDashboardHeaderProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -69,15 +76,25 @@ export default function ParentDashboardHeader() {
   return (
     <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between px-4 lg:px-6 h-14">
-        {/* Left: Breadcrumbs */}
-        <nav className="flex items-center gap-1 text-sm ml-12 lg:ml-0">
-          <Link
-            href="/"
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+        {/* Left: Menu Button + Breadcrumbs */}
+        <div className="flex items-center gap-3">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={onMenuToggle}
+            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Toggle menu"
           >
-            <Home className="w-4 h-4" />
-          </Link>
-          {breadcrumbs.map((crumb) => (
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
+          <nav className="flex items-center gap-1 text-sm">
+            <Link
+              href="/"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            >
+              <Home className="w-4 h-4" />
+            </Link>
+            {breadcrumbs.map((crumb) => (
             <div key={crumb.href} className="flex items-center gap-1">
               <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600" />
               {crumb.isLast ? (
@@ -94,7 +111,8 @@ export default function ParentDashboardHeader() {
               )}
             </div>
           ))}
-        </nav>
+          </nav>
+        </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">

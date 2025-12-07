@@ -15,8 +15,6 @@ import {
   Settings,
   Activity,
   Shield,
-  Menu,
-  X,
   HelpCircle,
   UserPlus,
   Newspaper,
@@ -95,11 +93,12 @@ const navigationGroups = [
 
 type AdminSidebarProps = {
   onCommandOpen?: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 };
 
-export default function AdminSidebar({ onCommandOpen }: AdminSidebarProps) {
+export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -135,20 +134,13 @@ export default function AdminSidebar({ onCommandOpen }: AdminSidebarProps) {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-        aria-label="Toggle menu"
-      >
-        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
+      {/* Mobile Menu Button - Hidden, controlled by header */}
 
       {/* Overlay for mobile */}
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -218,7 +210,7 @@ export default function AdminSidebar({ onCommandOpen }: AdminSidebarProps) {
                     <li key={item.href}>
                       <Link
                         href={item.href}
-                        onClick={() => setIsOpen(false)}
+                        onClick={onClose}
                         title={isCollapsed ? item.label : undefined}
                         className={`flex items-center gap-3 rounded-lg transition-all duration-200 ${
                           isCollapsed ? "justify-center p-2.5" : "px-3 py-2"
