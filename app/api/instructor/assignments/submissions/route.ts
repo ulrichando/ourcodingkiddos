@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
+import { SubmissionStatus } from "../../../../../generated/prisma-client";
 
 // GET - List submissions for an assignment (instructor) or student's own submissions
 export async function GET(req: Request) {
@@ -165,7 +166,7 @@ export async function POST(req: Request) {
         where: { id: existingSubmission.id },
         data: {
           ...submissionData,
-          status: isDraft ? "DRAFT" : (existingSubmission.status === "RETURNED" ? "RESUBMITTED" : submissionData.status),
+          status: isDraft ? SubmissionStatus.DRAFT : (existingSubmission.status === SubmissionStatus.RETURNED ? SubmissionStatus.RESUBMITTED : submissionData.status as SubmissionStatus),
         },
       });
     } else {

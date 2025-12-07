@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Facebook, ArrowUpRight, Mail } from "lucide-react";
 import NewsletterForm from "./NewsletterForm";
@@ -38,9 +39,9 @@ const footerLinks = {
     links: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "/cookies" },
+      { label: "Class Policies", href: "/policies" },
       { label: "Refund Policy", href: "/refund-policy" },
-      { label: "Acceptable Use", href: "/acceptable-use" },
+      { label: "Cookie Policy", href: "/cookies" },
       { label: "Child Safety", href: "/safety" },
     ],
   },
@@ -101,9 +102,13 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-3">
             <Link href="/" className="inline-flex items-center gap-3 group mb-6">
-              <span className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow">
-                CK
-              </span>
+              <Image
+                src="/icon.svg"
+                alt="Coding Kiddos Logo"
+                width={48}
+                height={48}
+                className="rounded-xl shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow"
+              />
               <span className="text-xl font-bold text-white">
                 Coding Kiddos
               </span>
@@ -176,12 +181,22 @@ export default function Footer() {
               >
                 Terms
               </Link>
+              <Link
+                href="/policies"
+                className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                Policies
+              </Link>
               <span className="text-sm text-slate-600 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 All systems operational
               </span>
             </div>
           </div>
+          {/* Trademark Disclaimer */}
+          <p className="text-xs text-slate-600 text-center mt-4 max-w-3xl mx-auto">
+            All third-party company names, logos, and trademarks referenced on this site are for illustrative purposes only and remain the property of their respective owners. We are not affiliated with or endorsed by these companies.
+          </p>
         </div>
       </div>
     </footer>

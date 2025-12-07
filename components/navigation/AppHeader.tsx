@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -217,16 +218,20 @@ export default function AppHeader() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow">
-              CK
-            </span>
+            <Image
+              src="/icon.svg"
+              alt="Coding Kiddos Logo"
+              width={36}
+              height={36}
+              className="rounded-xl shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow"
+            />
             <span className="hidden sm:block font-semibold text-slate-900 dark:text-white">
               Coding Kiddos
             </span>
           </Link>
 
           {/* Center Navigation */}
-          <nav ref={navRef} className="hidden lg:flex items-center">
+          <nav ref={navRef} className="hidden md:flex items-center">
             <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 rounded-full p-1">
               {navGroups.map((group, groupIndex) => (
                 <div
@@ -440,7 +445,7 @@ export default function AppHeader() {
                   Log in
                 </Link>
                 <Link
-                  href="/auth/login"
+                  href="/auth/register"
                   className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white text-sm font-medium shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all"
                 >
                   <Zap className="h-4 w-4" />
@@ -452,7 +457,7 @@ export default function AppHeader() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileOpen(o => !o)}
-              className="lg:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="md:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Menu"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -574,7 +579,7 @@ export default function AppHeader() {
 
       {/* Mobile Navigation - Slide from right */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50">
+        <div className="md:hidden fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
@@ -602,16 +607,34 @@ export default function AppHeader() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-slate-900 dark:text-white truncate">{userName}</p>
                       <p className="text-sm text-slate-500 truncate">{session?.user?.email}</p>
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
+                        {userRole.toLowerCase()}
+                      </span>
                     </div>
+                    {showBell && (
+                      <NotificationBell userEmail={session?.user?.email || ""} />
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Navigation */}
               <nav className="flex-1 overflow-y-auto p-4 space-y-6">
-                {/* Dashboard link for logged in users */}
-                {isLoggedIn && (
-                  <div>
+                {/* Quick links */}
+                <div className="space-y-1">
+                  <Link
+                    href="/"
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium ${
+                      pathname === "/"
+                        ? "bg-violet-600 text-white shadow-lg shadow-violet-500/25"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <Home className="h-5 w-5" />
+                    Home
+                  </Link>
+                  {isLoggedIn && (
                     <Link
                       href={dashboardHref}
                       onClick={() => setMobileOpen(false)}
@@ -621,11 +644,11 @@ export default function AppHeader() {
                           : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
                     >
-                      <Home className="h-5 w-5" />
+                      <Rocket className="h-5 w-5" />
                       Dashboard
                     </Link>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {/* Nav groups */}
                 {navGroups.map(group => (
@@ -699,7 +722,7 @@ export default function AppHeader() {
                       Log in
                     </Link>
                     <Link
-                      href="/auth/login"
+                      href="/auth/register"
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-white bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-violet-500/25"
                     >

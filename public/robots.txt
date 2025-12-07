@@ -1,23 +1,52 @@
-# Allow all search engines to crawl the site
+# Robots.txt for Our Coding Kiddos
+# https://ourcodingkiddos.com
+
+# Allow all search engines
 User-agent: *
 Allow: /
 
-# Disallow private areas
+# Main content pages - prioritize crawling
+Allow: /programs
+Allow: /courses
+Allow: /schedule
+Allow: /curriculum
+Allow: /playground
+Allow: /placement-exam
+Allow: /showcase
+Allow: /blog
+Allow: /about
+Allow: /our-story
+Allow: /contact
+Allow: /faq
+
+# Legal pages
+Allow: /privacy
+Allow: /terms
+Allow: /policies
+Allow: /refund-policy
+Allow: /safety
+Allow: /cookies
+
+# Disallow private/admin areas
 Disallow: /api/
 Disallow: /dashboard/
 Disallow: /auth/
 Disallow: /_next/
 Disallow: /admin/
+Disallow: /settings
 
-# Allow crawling of public pages
-Allow: /courses
-Allow: /pricing
-Allow: /playground
-Allow: /about
-Allow: /contact
+# Disallow search/query pages to avoid duplicate content
+Disallow: /*?*
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
 
 # Sitemap location
 Sitemap: https://ourcodingkiddos.com/sitemap.xml
-
-# Crawl delay for polite crawling
-Crawl-delay: 1

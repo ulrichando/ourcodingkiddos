@@ -21,15 +21,46 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ourcodingkiddos.com"),
   title: {
-    default: "Our Coding Kiddos - Learn to Code",
+    default: "Our Coding Kiddos - Online Coding Classes for Kids Ages 7-18",
     template: "%s | Our Coding Kiddos"
   },
-  description: "Empowering young minds with coding skills. Interactive online coding classes for kids in HTML, CSS, JavaScript, Python, and Roblox.",
-  keywords: ["coding for kids", "programming classes", "learn to code", "kids coding", "online coding courses", "HTML for kids", "Python for kids", "JavaScript for kids"],
-  authors: [{ name: "Our Coding Kiddos" }],
+  description: "Top-rated online coding classes for kids ages 7-18. Learn JavaScript, Python, HTML, CSS, and game development with live instructors. Fun, interactive programming courses designed for young beginners. Enroll today!",
+  keywords: [
+    "coding classes for kids",
+    "kids coding courses online",
+    "learn programming for children",
+    "online coding school for kids",
+    "JavaScript for kids",
+    "Python for kids",
+    "HTML CSS for beginners",
+    "game development for kids",
+    "Roblox programming",
+    "coding bootcamp for children",
+    "virtual coding lessons",
+    "best coding classes for kids",
+    "programming for ages 7-18",
+    "kids learn to code",
+    "interactive coding courses"
+  ],
+  authors: [{ name: "Our Coding Kiddos", url: "https://ourcodingkiddos.com" }],
   creator: "Our Coding Kiddos",
   publisher: "Our Coding Kiddos",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://ourcodingkiddos.com",
+  },
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" }
@@ -50,15 +81,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
+    url: "https://ourcodingkiddos.com",
     siteName: "Our Coding Kiddos",
-    title: "Our Coding Kiddos - Learn to Code",
-    description: "Empowering young minds with coding skills. Interactive online coding classes for kids.",
+    title: "Our Coding Kiddos - Online Coding Classes for Kids Ages 7-18",
+    description: "Top-rated online coding classes for kids. Learn JavaScript, Python, HTML & game development with live instructors. Fun, interactive lessons for ages 7-18!",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Our Coding Kiddos - Online Coding Classes for Kids",
+      }
+    ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Our Coding Kiddos - Learn to Code",
-    description: "Empowering young minds with coding skills. Interactive online coding classes for kids.",
+  verification: {
+    google: "yp_rid3CBPWufr6CMjIwP8Cc7pltqQezUnE5EMwry-k",
   },
+  category: "education",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -66,7 +105,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <meta name="google-site-verification" content="yp_rid3CBPWufr6CMjIwP8Cc7pltqQezUnE5EMwry-k" />
       </head>
       <body className={`${inter.className} min-h-screen antialiased`} suppressHydrationWarning>
         <script
