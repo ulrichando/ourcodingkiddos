@@ -104,9 +104,9 @@ export async function POST(request: NextRequest) {
       let attachments: { filename: string; contentType: string; size: number }[] = [];
 
       try {
-        // Fetch email details from Resend
+        // Fetch email details from Resend Receiving API (for inbound emails)
         const emailDetails = await fetch(
-          `https://api.resend.com/emails/${email_id}`,
+          `https://api.resend.com/emails/receiving/${email_id}`,
           {
             headers: {
               Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -116,13 +116,16 @@ export async function POST(request: NextRequest) {
 
         if (emailDetails.ok) {
           const details = await emailDetails.json();
+          console.log("[Resend Webhook] Email details:", JSON.stringify(details, null, 2));
           textBody = details.text || null;
           htmlBody = details.html || null;
+        } else {
+          console.error("[Resend Webhook] Failed to fetch email details:", emailDetails.status, await emailDetails.text());
         }
 
         // Fetch attachments metadata
         const attachmentsResponse = await fetch(
-          `https://api.resend.com/emails/${email_id}/attachments`,
+          `https://api.resend.com/emails/receiving/${email_id}/attachments`,
           {
             headers: {
               Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
