@@ -31,7 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <AdminSidebar onCommandOpen={openCommand} isOpen={isSidebarOpen} onClose={closeSidebar} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <DashboardHeader onCommandOpen={openCommand} onMenuToggle={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pt-4 lg:pt-6 admin-scrollbar ios-scroll safe-right">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pt-4 lg:pt-6 dashboard-scrollbar ios-scroll safe-right">
           {children}
         </main>
       </div>

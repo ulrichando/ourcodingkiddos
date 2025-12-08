@@ -42,10 +42,10 @@ const variantClasses: Record<Variant, string> = {
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs gap-1.5",
-  md: "h-10 px-4 text-sm gap-2",
-  lg: "h-12 px-6 text-base gap-2.5",
-  icon: "h-10 w-10 p-0",
+  sm: "h-9 min-h-[44px] px-3 text-xs gap-1.5",
+  md: "h-10 min-h-[44px] px-4 text-sm gap-2",
+  lg: "h-12 min-h-[44px] px-6 text-base gap-2.5",
+  icon: "h-10 w-10 min-h-[44px] min-w-[44px] p-0",
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

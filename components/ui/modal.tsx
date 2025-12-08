@@ -87,13 +87,13 @@ export function Modal({ isOpen, onClose, title, children, footer, size = "md" }:
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm safe-all p-4"
       onClick={onClose}
     >
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={modalRef}
-        className={`w-full ${sizeClasses[size]} rounded-2xl bg-admin-input border border-white/10 p-6 space-y-4 shadow-2xl`}
+        className={`w-full ${sizeClasses[size]} rounded-2xl bg-admin-input border border-white/10 p-6 space-y-4 shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto ios-scroll`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -105,7 +105,7 @@ export function Modal({ isOpen, onClose, title, children, footer, size = "md" }:
           </h3>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors p-2 -m-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

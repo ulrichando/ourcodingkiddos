@@ -151,7 +151,7 @@ export default function NotificationBell({ userEmail }: { userEmail?: string }) 
               </Button>
             )}
           </div>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto ios-scroll">
             {loading ? (
               <div className="p-6 text-center text-slate-500 dark:text-slate-400">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-50 animate-pulse" />

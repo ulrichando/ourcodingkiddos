@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import {
   Shield,
@@ -52,6 +53,7 @@ type SortField = "timestamp" | "user" | "action" | "resource" | "status" | "seve
 type SortDirection = "asc" | "desc";
 
 export default function AuditLogsPage() {
+  const { data: session, status } = useSession();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,9 +118,12 @@ export default function AuditLogsPage() {
     }
   }, [autoRefresh, autoRefreshLoaded]);
 
-  // Auto-refresh with visibility awareness - pauses when tab is inactive
+  // Auto-refresh with visibility awareness - pauses when tab is inactive or user logs out
   useEffect(() => {
-    if (!autoRefresh) return;
+    // Stop auto-refresh if not authenticated or if auto-refresh is disabled
+    if (!autoRefresh || status !== "authenticated") {
+      return;
+    }
 
     let interval: NodeJS.Timeout | null = null;
 
@@ -127,7 +132,10 @@ export default function AuditLogsPage() {
       if (interval) clearInterval(interval);
       // Start new interval
       interval = setInterval(() => {
-        loadLogs();
+        // Double-check session is still valid before fetching
+        if (status === "authenticated") {
+          loadLogs();
+        }
       }, 30000); // Refresh every 30 seconds
     };
 
@@ -139,7 +147,7 @@ export default function AuditLogsPage() {
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "visible" && status === "authenticated") {
         // Tab became visible - reload data immediately and restart polling
         loadLogs();
         startPolling();
@@ -149,7 +157,7 @@ export default function AuditLogsPage() {
       }
     };
 
-    // Only start polling if tab is currently visible
+    // Only start polling if tab is currently visible and user is authenticated
     if (document.visibilityState === "visible") {
       startPolling();
     }
@@ -161,7 +169,7 @@ export default function AuditLogsPage() {
       stopPolling();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [autoRefresh, page]);
+  }, [autoRefresh, page, status]);
 
   // Quick filter handler
   const applyQuickFilter = (filter: string) => {

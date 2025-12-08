@@ -192,7 +192,7 @@ export default function NotificationCenter({
             </div>
 
             {/* Notifications List */}
-            <div className="max-h-[380px] overflow-y-auto">
+            <div className="max-h-[380px] overflow-y-auto ios-scroll">
               {loading ? (
                 <div className="p-8 text-center text-slate-500 dark:text-slate-400">
                   Loading notifications...

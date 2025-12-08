@@ -30,9 +30,9 @@ const variantClasses: Record<InputVariant, string> = {
 };
 
 const sizeClasses: Record<InputSize, string> = {
-  sm: "h-8 px-3 text-xs",
-  md: "h-10 px-4 text-sm",
-  lg: "h-12 px-4 text-base",
+  sm: "h-9 min-h-[44px] px-3 text-base sm:text-xs",
+  md: "h-11 min-h-[44px] px-4 text-base sm:text-sm",
+  lg: "h-12 min-h-[44px] px-4 text-base",
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(

@@ -211,7 +211,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
           </div>
 
           {/* Results */}
-          <div className="max-h-[400px] overflow-y-auto p-2">
+          <div className="max-h-[400px] overflow-y-auto ios-scroll p-2">
             {flatCommands.length === 0 ? (
               <div className="py-8 text-center text-slate-500 dark:text-slate-400">
                 <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />

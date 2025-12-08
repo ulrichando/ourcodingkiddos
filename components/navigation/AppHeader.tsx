@@ -214,7 +214,7 @@ export default function AppHeader() {
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-950/60">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-950/60 safe-top">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
@@ -497,7 +497,7 @@ export default function AppHeader() {
                 </div>
 
                 {/* Results */}
-                <div className="max-h-80 overflow-y-auto p-2">
+                <div className="max-h-80 overflow-y-auto ios-scroll p-2">
                   {filteredItems.length === 0 ? (
                     <div className="py-12 text-center">
                       <Search className="h-8 w-8 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
@@ -619,7 +619,7 @@ export default function AppHeader() {
               )}
 
               {/* Navigation */}
-              <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+              <nav className="flex-1 overflow-y-auto ios-scroll p-4 space-y-6">
                 {/* Quick links */}
                 <div className="space-y-1">
                   <Link

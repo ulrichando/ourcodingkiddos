@@ -634,55 +634,123 @@ html.theme-transition *::after {
    iOS SAFE AREA & MOBILE SUPPORT
    ================================================ */
 
-/* iOS momentum scrolling */
+/* iOS momentum scrolling with overscroll prevention */
 .ios-scroll {
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
-/* Safe area utilities */
-.safe-top {
-  padding-top: env(safe-area-inset-top);
+/* Universal dashboard scrollbar - use on all dashboard main content areas */
+.dashboard-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+.dashboard-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.safe-left {
-  padding-left: env(safe-area-inset-left);
+.dashboard-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
 }
 
-.safe-right {
-  padding-right: env(safe-area-inset-right);
+.dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-.safe-x {
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+.dark .dashboard-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
-.safe-y {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+.dark .dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
-.safe-all {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+/* Safe area utilities with max() fallback for better compatibility */
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: max(0px, env(safe-area-inset-top));
+  }
+
+  .safe-bottom {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+
+  .safe-left {
+    padding-left: max(0px, env(safe-area-inset-left));
+  }
+
+  .safe-right {
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+
+  .safe-x {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+
+  .safe-y {
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+
+  .safe-all {
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Fallback for browsers without max() support */
+@supports not (padding: max(0px)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .safe-x {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .safe-y {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-all {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }
 
 /* iOS touch target minimum size */
 @supports (-webkit-touch-callout: none) {
-  button, a, input, select, textarea {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
   /* Prevent tap highlight on iOS */
   * {
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Prevent iOS Safari auto-zoom on form inputs */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
   }
 }
 

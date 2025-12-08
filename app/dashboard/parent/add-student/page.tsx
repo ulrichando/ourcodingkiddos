@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, User, Sparkles, Camera, X, ChevronLeft, ChevronRight, Gamepad2, Globe, Smartphone, Cpu, Brain, Palette, Eye, Ear, Hand, BookOpen } from "lucide-react";
+import { ArrowLeft, User, Sparkles, Camera, X, ChevronLeft, ChevronRight, Gamepad2, Globe, Smartphone, Cpu, Brain, Palette, Eye, Ear, Hand, BookOpen, AlertTriangle } from "lucide-react";
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
 import ParentLayout from "../../../../components/parent/ParentLayout";
@@ -193,6 +193,19 @@ export default function AddStudentPage() {
             {/* Step 1: Profile Information */}
             {step === 1 && (
               <div className="space-y-6">
+                {/* Important Notice */}
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
+                      Important: Use your child&apos;s email address
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                      Your child will use this email and password to log in to their student account. Do not use your parent email here.
+                    </p>
+                  </div>
+                </div>
+
                 {/* Photo Upload */}
                 <div className="space-y-3">
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Profile Picture</p>
@@ -275,14 +288,17 @@ export default function AddStudentPage() {
                   </label>
 
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
-                    Email (for login) *
+                    Child&apos;s Email (for login) *
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="child@example.com"
+                      placeholder="yourchild@example.com"
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-normal">
+                      Use your child&apos;s email address, not yours. This will be their login email.
+                    </p>
                   </label>
 
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
@@ -322,7 +338,7 @@ export default function AddStudentPage() {
                 </div>
 
                 <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
-                  <strong>Note:</strong> Share the email and password with your child to access their student portal.
+                  <strong>Remember:</strong> After creating the account, share the email and password with your child so they can log in to their student portal.
                 </p>
               </div>
             )}

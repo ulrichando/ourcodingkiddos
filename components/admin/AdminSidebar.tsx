@@ -199,7 +199,7 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
         )}
 
         {/* Navigation Section - Scrollable */}
-        <nav className={`flex-1 overflow-y-auto py-4 space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>
+        <nav className={`flex-1 overflow-y-auto ios-scroll py-4 space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>
           {navigationGroups.map((group) => (
             <div key={group.title}>
               {!isCollapsed && (
