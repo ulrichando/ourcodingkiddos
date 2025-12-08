@@ -93,11 +93,12 @@ export default function AppHeader() {
   const userName = session?.user?.name || "Guest";
   const userInitial = userName.charAt(0).toUpperCase();
   const userRole = session?.user?.role?.toUpperCase() ?? "PARENT";
-  const showBell = ["PARENT", "STUDENT", "INSTRUCTOR", "ADMIN"].includes(userRole);
+  const showBell = ["PARENT", "STUDENT", "INSTRUCTOR", "ADMIN", "SUPPORT"].includes(userRole);
 
   const dashboardHref = userRole === "STUDENT" ? "/dashboard/student"
     : userRole === "INSTRUCTOR" ? "/dashboard/instructor"
     : userRole === "ADMIN" ? "/dashboard/admin"
+    : userRole === "SUPPORT" ? "/dashboard/support"
     : "/dashboard/parent";
 
   // All items for command palette
@@ -198,11 +199,12 @@ export default function AppHeader() {
   const isLoggedIn = status === "authenticated";
   const isLoading = status === "loading";
 
-  // Hide header on admin, parent, and instructor dashboards (they have their own layouts with sidebar navigation)
+  // Hide header on admin, parent, instructor, and support dashboards (they have their own layouts with sidebar navigation)
   const isAdminDashboard = pathname?.startsWith("/dashboard/admin");
   const isParentDashboard = pathname?.startsWith("/dashboard/parent");
   const isInstructorDashboard = pathname?.startsWith("/dashboard/instructor");
-  if (isAdminDashboard || isParentDashboard || isInstructorDashboard) return null;
+  const isSupportDashboard = pathname?.startsWith("/dashboard/support");
+  if (isAdminDashboard || isParentDashboard || isInstructorDashboard || isSupportDashboard) return null;
 
   return (
     <>

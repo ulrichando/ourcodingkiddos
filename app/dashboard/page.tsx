@@ -24,6 +24,9 @@ export default function DashboardRedirect() {
       case "ADMIN":
         router.replace("/dashboard/admin");
         break;
+      case "SUPPORT":
+        router.replace("/dashboard/support");
+        break;
       case "INSTRUCTOR":
         router.replace("/dashboard/instructor");
         break;

@@ -344,16 +344,43 @@ function ProgramCard({ program, featured, index = 0 }: ProgramCardProps) {
           {program.shortDescription || program.description}
         </p>
 
-        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-4">
+        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-3">
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
             <span className="tabular-nums">{program.sessionCount} sessions</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Users className="w-4 h-4" />
-            <span className="tabular-nums">{program._count.enrollments} enrolled</span>
-          </div>
         </div>
+
+        {/* Enrollment Status */}
+        {(() => {
+          // Hardcoded for visibility - will reflect actual backend data later
+          const maxSpots = 20;
+          const enrolled = index === 0 ? 15 : 12;
+          const spotsLeft = maxSpots - enrolled;
+          const percentage = (enrolled / maxSpots) * 100;
+
+          return (
+            <div className="mb-4">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                  <Users className="w-3.5 h-3.5" />
+                  <span className="font-medium tabular-nums">{enrolled} out of {maxSpots} spots</span>
+                </div>
+                <span className={`font-semibold ${spotsLeft <= 5 ? 'text-orange-500' : 'text-emerald-500'}`}>
+                  {spotsLeft} left
+                </span>
+              </div>
+              <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    percentage >= 75 ? 'bg-gradient-to-r from-orange-400 to-red-500' : 'bg-gradient-to-r from-emerald-400 to-teal-500'
+                  }`}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
           <div>

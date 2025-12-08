@@ -622,6 +622,7 @@ enum Role {
   STUDENT
   PARENT
   INSTRUCTOR
+  SUPPORT
   ADMIN
 }
 

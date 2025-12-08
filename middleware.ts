@@ -52,8 +52,8 @@ export default withAuth(
       (exemptPath) => path === exemptPath || path.startsWith(exemptPath)
     );
 
-    // Check maintenance mode for non-admin users on non-exempt paths
-    if (!isExemptPath && role !== "ADMIN") {
+    // Check maintenance mode for non-admin/support users on non-exempt paths
+    if (!isExemptPath && role !== "ADMIN" && role !== "SUPPORT") {
       const baseUrl = req.nextUrl.origin;
       const isMaintenanceMode = await checkMaintenanceMode(baseUrl);
 
@@ -65,6 +65,13 @@ export default withAuth(
     // Admin routes - only ADMIN role
     if (path.startsWith("/dashboard/admin")) {
       if (role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/auth/login?error=unauthorized", req.url));
+      }
+    }
+
+    // Support routes - only SUPPORT or ADMIN
+    if (path.startsWith("/dashboard/support")) {
+      if (role !== "SUPPORT" && role !== "ADMIN") {
         return NextResponse.redirect(new URL("/auth/login?error=unauthorized", req.url));
       }
     }

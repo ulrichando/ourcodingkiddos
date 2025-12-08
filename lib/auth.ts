@@ -95,8 +95,8 @@ const providers: NextAuthOptions["providers"] = [
             return null;
           }
 
-          // Check maintenance mode - only allow ADMIN login
-          if (user.role !== "ADMIN") {
+          // Check maintenance mode - only allow ADMIN and SUPPORT login
+          if (user.role !== "ADMIN" && user.role !== "SUPPORT") {
             const maintenance = await isMaintenanceMode();
             if (maintenance) {
               console.log('[Auth] Login blocked during maintenance for non-admin:', email);
@@ -176,8 +176,8 @@ export const authOptions: NextAuthOptions = {
           include: { accounts: { where: { provider: "google" } } },
         });
 
-        // Check maintenance mode for non-admin OAuth users
-        if (!existingUser || existingUser.role !== "ADMIN") {
+        // Check maintenance mode for non-admin/support OAuth users
+        if (!existingUser || (existingUser.role !== "ADMIN" && existingUser.role !== "SUPPORT")) {
           const maintenance = await isMaintenanceMode();
           if (maintenance) {
             console.log('[Auth] OAuth login blocked during maintenance for:', user.email);

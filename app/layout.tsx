@@ -9,6 +9,7 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import StructuredData from "../components/seo/StructuredData";
 import LazyComponents from "../components/providers/LazyComponents";
 import Footer from "../components/footer/Footer";
+import VisitorTracker from "../components/analytics/VisitorTracker";
 
 // Optimize font loading - prevents layout shift
 // Using "optional" prevents font swap flash entirely
@@ -132,6 +133,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="flex-1" role="main" id="main-content">{children}</main>
               <Footer />
               <LazyComponents />
+              <VisitorTracker />
             </div>
           </ErrorBoundary>
           </ScreenSizeProvider>

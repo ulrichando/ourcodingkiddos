@@ -35,11 +35,13 @@ export default function LoginPage() {
       const target =
         sessionRole === "ADMIN"
           ? "/dashboard/admin"
-          : sessionRole === "INSTRUCTOR"
-            ? "/dashboard/instructor"
-            : sessionRole === "STUDENT"
-              ? "/dashboard/student"
-              : "/dashboard/parent";
+          : sessionRole === "SUPPORT"
+            ? "/dashboard/support"
+            : sessionRole === "INSTRUCTOR"
+              ? "/dashboard/instructor"
+              : sessionRole === "STUDENT"
+                ? "/dashboard/student"
+                : "/dashboard/parent";
       router.push(target);
     } catch (err: any) {
       setError(err?.message || "Sign in failed");

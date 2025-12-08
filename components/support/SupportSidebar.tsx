@@ -4,31 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  BarChart3,
-  Users,
-  GraduationCap,
-  BookOpen,
-  FileText,
-  Megaphone,
-  DollarSign,
-  Calendar,
-  Settings,
-  Activity,
-  Shield,
+  Headphones,
+  MessageSquare,
   HelpCircle,
-  UserPlus,
-  Newspaper,
-  Rocket,
-  Award,
   UserCircle,
   ChevronLeft,
   ChevronRight,
   Search,
   Command,
-  Mail,
   Home,
-  MessageSquare,
-  Headphones,
+  Users,
+  Clock,
+  FileText,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -36,94 +23,60 @@ const navigationGroups = [
   {
     title: "Dashboard",
     items: [
-      { href: "/dashboard/admin", label: "Overview", icon: LayoutDashboard },
-      { href: "/dashboard/admin/analytics", label: "Analytics", icon: BarChart3 },
+      { href: "/dashboard/support", label: "Overview", icon: LayoutDashboard },
     ]
   },
   {
-    title: "Users & Access",
+    title: "Customer Support",
     items: [
-      { href: "/dashboard/admin/users", label: "Users", icon: Users },
-      { href: "/dashboard/admin/instructors", label: "Instructors", icon: Award },
-      { href: "/dashboard/admin/parents", label: "Parent Stats", icon: UserCircle },
-      { href: "/dashboard/admin/support-staff", label: "Support Staff", icon: Headphones },
+      { href: "/dashboard/support/live-chat", label: "Live Chat", icon: Headphones },
+      { href: "/dashboard/support/tickets", label: "Support Tickets", icon: HelpCircle },
+      { href: "/dashboard/support/messages", label: "Messages", icon: MessageSquare },
     ]
   },
   {
-    title: "Content Management",
+    title: "Management",
     items: [
-      { href: "/dashboard/admin/programs", label: "Programs", icon: GraduationCap },
-      { href: "/dashboard/admin/courses", label: "Courses", icon: BookOpen },
-      { href: "/dashboard/admin/content", label: "Course Builder", icon: FileText },
-      { href: "/dashboard/admin/blog", label: "Blog", icon: Newspaper },
-      { href: "/dashboard/admin/showcase", label: "Student Showcase", icon: Rocket },
-      { href: "/dashboard/admin/reviews", label: "Parent Reviews", icon: MessageSquare },
+      { href: "/dashboard/support/customers", label: "Customers", icon: Users },
+      { href: "/dashboard/support/history", label: "Chat History", icon: Clock },
+      { href: "/dashboard/support/canned-responses", label: "Quick Replies", icon: FileText },
     ]
   },
   {
-    title: "Analytics",
+    title: "Profile",
     items: [
-      { href: "/dashboard/admin/reports", label: "Reports", icon: FileText },
-    ]
-  },
-  {
-    title: "Communication",
-    items: [
-      { href: "/dashboard/admin/live-chat", label: "Live Chat", icon: Headphones },
-      { href: "/dashboard/admin/announcements", label: "Announcements", icon: Megaphone },
-      { href: "/dashboard/admin/email", label: "Email Users", icon: Mail },
-      { href: "/dashboard/admin/subscribers", label: "Subscribers", icon: Users },
-      { href: "/dashboard/admin/support-tickets", label: "Support Tickets", icon: HelpCircle },
-    ]
-  },
-  {
-    title: "Business",
-    items: [
-      { href: "/dashboard/admin/finance", label: "Finance", icon: DollarSign },
-      { href: "/dashboard/admin/sessions", label: "Sessions", icon: Calendar },
-      { href: "/dashboard/admin/class-requests", label: "Class Requests", icon: UserPlus },
-    ]
-  },
-  {
-    title: "System",
-    items: [
-      { href: "/dashboard/admin/settings", label: "Settings", icon: Settings },
-      { href: "/dashboard/admin/health", label: "Health Monitor", icon: Activity },
-      { href: "/dashboard/admin/audit", label: "Audit Logs", icon: Shield },
+      { href: "/dashboard/support/profile", label: "My Profile", icon: UserCircle },
     ]
   }
 ];
 
-type AdminSidebarProps = {
+type SupportSidebarProps = {
   onCommandOpen?: () => void;
   isOpen?: boolean;
   onClose?: () => void;
 };
 
-export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }: AdminSidebarProps) {
+export default function SupportSidebar({ onCommandOpen, isOpen = false, onClose }: SupportSidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Load collapsed state from localStorage
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem("admin-sidebar-collapsed");
+    const stored = localStorage.getItem("support-sidebar-collapsed");
     if (stored !== null) {
       setIsCollapsed(stored === "true");
     }
   }, []);
 
-  // Persist collapsed state
   const toggleCollapsed = useCallback(() => {
     setIsCollapsed((prev) => {
       const newValue = !prev;
-      localStorage.setItem("admin-sidebar-collapsed", String(newValue));
+      localStorage.setItem("support-sidebar-collapsed", String(newValue));
       return newValue;
     });
   }, []);
 
-  // Keyboard shortcut for collapse (Cmd/Ctrl + B)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "b") {
@@ -137,9 +90,6 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
 
   return (
     <>
-      {/* Mobile Menu Button - Hidden, controlled by header */}
-
-      {/* Overlay for mobile */}
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30 transition-opacity"
@@ -147,7 +97,6 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed lg:relative top-0 left-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-40 flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -160,14 +109,14 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
       >
         {/* Logo Section */}
         <div className={`p-4 flex-shrink-0 border-b border-slate-100 dark:border-slate-800 ${isCollapsed ? "px-3" : "px-4"}`}>
-          <Link href="/dashboard/admin" className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <LayoutDashboard className="w-5 h-5 text-white" />
+          <Link href="/dashboard/support" className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Headphones className="w-5 h-5 text-white" />
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden">
-                <h2 className="font-bold text-slate-900 dark:text-slate-100 truncate">Admin</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">Control Panel</p>
+                <h2 className="font-bold text-slate-900 dark:text-slate-100 truncate">Support</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">Agent Dashboard</p>
               </div>
             )}
           </Link>
@@ -194,14 +143,14 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
             <button
               onClick={onCommandOpen}
               className="w-full flex items-center justify-center p-2 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              title="Search (⌘K)"
+              title="Search"
             >
               <Search className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* Navigation Section - Scrollable */}
+        {/* Navigation Section */}
         <nav className={`flex-1 overflow-y-auto ios-scroll py-4 space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>
           {navigationGroups.map((group) => (
             <div key={group.title}>
@@ -224,7 +173,7 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
                           isCollapsed ? "justify-center p-2.5" : "px-3 py-2"
                         } ${
                           isActive
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md shadow-purple-500/25"
+                            ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/25"
                             : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                         }`}
                       >
@@ -255,12 +204,12 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
           </Link>
         </div>
 
-        {/* Collapse Toggle Button - Desktop only */}
+        {/* Collapse Toggle Button */}
         <div className={`hidden lg:flex border-t border-slate-100 dark:border-slate-800 p-3 ${isCollapsed ? "justify-center" : "justify-end"}`}>
           <button
             onClick={toggleCollapsed}
             className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            title={isCollapsed ? "Expand sidebar (⌘B)" : "Collapse sidebar (⌘B)"}
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
               <ChevronRight className="w-4 h-4" />
