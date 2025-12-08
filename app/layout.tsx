@@ -123,6 +123,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
+        {/* Server-rendered links for Google's crawler (doesn't execute JS) */}
+        <noscript>
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '12px', backgroundColor: '#0f172a', textAlign: 'center', zIndex: 9999 }}>
+            <a href="/privacy" style={{ color: '#94a3b8', marginRight: '16px', textDecoration: 'underline' }}>Privacy Policy</a>
+            <a href="/terms" style={{ color: '#94a3b8', textDecoration: 'underline' }}>Terms of Service</a>
+          </div>
+        </noscript>
         <StructuredData />
         <AuthProvider>
           <ThemeHydrator />
@@ -132,6 +139,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <AppHeader />
               <main className="flex-1" role="main" id="main-content">{children}</main>
               <Footer />
+              {/* Server-rendered privacy link for Google OAuth verification (visible to crawlers) */}
+              <div className="bg-slate-950 text-center py-2 text-xs text-slate-600 border-t border-slate-800">
+                <a href="https://ourcodingkiddos.com/privacy" className="hover:text-slate-400 underline">Privacy Policy</a>
+                <span className="mx-2">|</span>
+                <a href="https://ourcodingkiddos.com/terms" className="hover:text-slate-400 underline">Terms of Service</a>
+              </div>
               <LazyComponents />
               <VisitorTracker />
             </div>
