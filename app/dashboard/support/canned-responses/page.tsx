@@ -107,7 +107,7 @@ export default function SupportCannedResponsesPage() {
     }
   }, [session, status, router]);
 
-  const categories = [...new Set(responses.map((r) => r.category))];
+  const categories = Array.from(new Set(responses.map((r) => r.category)));
 
   const filteredResponses = responses.filter((response) => {
     const matchesSearch =
