@@ -139,12 +139,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <AppHeader />
               <main className="flex-1" role="main" id="main-content">{children}</main>
               <Footer />
-              {/* Server-rendered privacy link for Google OAuth verification (visible to crawlers) */}
-              <div className="bg-slate-950 text-center py-2 text-xs text-slate-600 border-t border-slate-800">
-                <a href="https://ourcodingkiddos.com/privacy" className="hover:text-slate-400 underline">Privacy Policy</a>
-                <span className="mx-2">|</span>
-                <a href="https://ourcodingkiddos.com/terms" className="hover:text-slate-400 underline">Terms of Service</a>
-              </div>
               <LazyComponents />
               <VisitorTracker />
             </div>
