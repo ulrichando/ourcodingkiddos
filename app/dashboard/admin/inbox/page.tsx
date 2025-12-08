@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import {
   Mail,
@@ -16,12 +15,13 @@ import {
   Send,
   Clock,
   User,
-  Tag,
-  AlertCircle,
   CheckCircle,
   X,
   Paperclip,
   RefreshCw,
+  Edit3,
+  Bell,
+  BellOff,
 } from "lucide-react";
 
 type ReceivedEmail = {
@@ -96,9 +96,110 @@ export default function AdminInboxPage() {
   const [replyBody, setReplyBody] = useState("");
   const [sending, setSending] = useState(false);
 
+  // Compose state
+  const [showComposeForm, setShowComposeForm] = useState(false);
+  const [composeFrom, setComposeFrom] = useState("support@ourcodingkiddos.com");
+  const [composeTo, setComposeTo] = useState("");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [senderAddresses, setSenderAddresses] = useState<{ value: string; label: string; displayName: string }[]>([]);
+
+  // Notification state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const previousUnreadCount = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Play notification sound using Web Audio API
+  const playNotificationSound = useCallback(() => {
+    if (!notificationsEnabled) return;
+
+    try {
+      // Create audio context on demand (browser requirement)
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      }
+
+      const ctx = audioContextRef.current;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      // Pleasant notification tone (two-tone chime)
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime); // A5
+      oscillator.frequency.setValueAtTime(1108.73, ctx.currentTime + 0.1); // C#6
+
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.4);
+    } catch (error) {
+      console.log("Could not play notification sound:", error);
+    }
+  }, [notificationsEnabled]);
+
+  // Check for new emails periodically
+  const checkForNewEmails = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/emails?status=UNREAD&limit=1");
+      const data = await res.json();
+      const currentUnreadCount = data.statusCounts?.UNREAD || 0;
+
+      // Play sound if unread count increased (new email arrived)
+      if (previousUnreadCount.current !== null && currentUnreadCount > previousUnreadCount.current) {
+        playNotificationSound();
+
+        // Also show browser notification if permitted
+        if (Notification.permission === "granted") {
+          new Notification("New Email", {
+            body: `You have ${currentUnreadCount} unread email${currentUnreadCount > 1 ? "s" : ""}`,
+            icon: "/icon.svg",
+          });
+        }
+      }
+
+      previousUnreadCount.current = currentUnreadCount;
+    } catch (error) {
+      console.error("Failed to check for new emails:", error);
+    }
+  }, [playNotificationSound]);
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Set up polling for new emails (every 30 seconds)
+  useEffect(() => {
+    // Initial check
+    checkForNewEmails();
+
+    // Poll every 30 seconds
+    const pollInterval = setInterval(checkForNewEmails, 30000);
+
+    return () => clearInterval(pollInterval);
+  }, [checkForNewEmails]);
+
   useEffect(() => {
     loadEmails();
+    loadSenderAddresses();
   }, [statusFilter, categoryFilter, search]);
+
+  const loadSenderAddresses = async () => {
+    try {
+      const res = await fetch("/api/admin/emails/compose");
+      const data = await res.json();
+      if (data.addresses) {
+        setSenderAddresses(data.addresses);
+      }
+    } catch (error) {
+      console.error("Failed to load sender addresses:", error);
+    }
+  };
 
   const loadEmails = async () => {
     try {
@@ -246,6 +347,63 @@ export default function AdminInboxPage() {
     }
   };
 
+  const handleSendCompose = async () => {
+    if (!composeTo.trim() || !composeSubject.trim() || !composeBody.trim()) return;
+
+    try {
+      setSending(true);
+
+      // Create HTML email body with branding
+      const htmlBody = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, #8B5CF6, #EC4899); border-radius: 12px; line-height: 50px; color: white; font-weight: bold; font-size: 20px;">CK</div>
+          </div>
+          <div style="line-height: 1.6; color: #333;">
+            ${composeBody.replace(/\n/g, "<br>")}
+          </div>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+          <p style="color: #64748b; font-size: 14px;">
+            Best regards,<br>
+            <strong>Our Coding Kiddos Team</strong>
+          </p>
+          <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 20px;">
+            &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+          </p>
+        </div>
+      `;
+
+      const res = await fetch("/api/admin/emails/compose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: composeTo,
+          subject: composeSubject,
+          htmlBody,
+          textBody: composeBody,
+          fromAddress: composeFrom,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Email sent successfully!");
+        setShowComposeForm(false);
+        setComposeTo("");
+        setComposeSubject("");
+        setComposeBody("");
+      } else {
+        alert(`Failed to send: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Failed to send email:", error);
+      alert("Failed to send email");
+    } finally {
+      setSending(false);
+    }
+  };
+
   const unreadCount = statusCounts["UNREAD"] || 0;
   const inProgressCount = statusCounts["IN_PROGRESS"] || 0;
   const repliedCount = statusCounts["REPLIED"] || 0;
@@ -259,9 +417,27 @@ export default function AdminInboxPage() {
           <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Inbox</h1>
-              <Button size="sm" variant="outline" onClick={loadEmails}>
-                <RefreshCw className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button size="sm" onClick={() => setShowComposeForm(true)}>
+                  <Edit3 className="w-4 h-4" />
+                  Compose
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                  title={notificationsEnabled ? "Disable notification sounds" : "Enable notification sounds"}
+                >
+                  {notificationsEnabled ? (
+                    <Bell className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <BellOff className="w-4 h-4 text-slate-400" />
+                  )}
+                </Button>
+                <Button size="sm" variant="outline" onClick={loadEmails}>
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Stats */}
@@ -598,6 +774,91 @@ export default function AdminInboxPage() {
           )}
         </div>
       </div>
+
+      {/* Compose Email Modal */}
+      {showComposeForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Compose New Email
+              </h3>
+              <button onClick={() => setShowComposeForm(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="p-4 flex-1 overflow-y-auto space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">From</label>
+                <select
+                  value={composeFrom}
+                  onChange={(e) => setComposeFrom(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                >
+                  {senderAddresses.map((addr) => (
+                    <option key={addr.value} value={addr.value}>
+                      {addr.displayName} &lt;{addr.value}&gt;
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">To</label>
+                <input
+                  type="email"
+                  value={composeTo}
+                  onChange={(e) => setComposeTo(e.target.value)}
+                  placeholder="recipient@example.com"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+                <input
+                  type="text"
+                  value={composeSubject}
+                  onChange={(e) => setComposeSubject(e.target.value)}
+                  placeholder="Email subject"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Message</label>
+                <textarea
+                  value={composeBody}
+                  onChange={(e) => setComposeBody(e.target.value)}
+                  rows={10}
+                  placeholder="Type your message..."
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowComposeForm(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendCompose} disabled={sending || !composeTo.trim() || !composeSubject.trim() || !composeBody.trim()}>
+                {sending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send Email
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

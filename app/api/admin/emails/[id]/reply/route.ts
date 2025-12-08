@@ -4,6 +4,18 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 
+// Get display name based on email address
+function getEmailDisplayName(email: string): string {
+  const address = email.toLowerCase();
+  if (address.includes("support")) return "Our Coding Kiddos Support";
+  if (address.includes("billing")) return "Our Coding Kiddos Billing";
+  if (address.includes("info")) return "Our Coding Kiddos";
+  if (address.includes("hello")) return "Our Coding Kiddos";
+  if (address.includes("safety")) return "Our Coding Kiddos Safety";
+  if (address.includes("partner")) return "Our Coding Kiddos Partnerships";
+  return "Our Coding Kiddos";
+}
+
 // POST /api/admin/emails/[id]/reply - Send a reply to the email
 export async function POST(
   request: NextRequest,
@@ -44,12 +56,17 @@ export async function POST(
       return NextResponse.json({ error: "Email not found" }, { status: 404 });
     }
 
-    // Send the reply email via Resend
+    // Reply from the same address the customer emailed (e.g., support@, billing@, etc.)
+    const replyFromAddress = originalEmail.to;
+    const replyFromName = getEmailDisplayName(replyFromAddress);
+
     const result = await sendEmail({
       to: originalEmail.from,
       subject: subject.startsWith("Re:") ? subject : `Re: ${subject}`,
       html: htmlBody,
       text: textBody,
+      from: `${replyFromName} <${replyFromAddress}>`,
+      replyTo: replyFromAddress,
     });
 
     if (!result.success) {
