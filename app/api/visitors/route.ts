@@ -22,11 +22,11 @@ const activeVisitors = new Map<string, {
 // Clean up old visitors (older than 5 minutes)
 function cleanupOldVisitors() {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-  for (const [id, visitor] of activeVisitors) {
+  activeVisitors.forEach((visitor, id) => {
     if (visitor.lastSeen < fiveMinutesAgo) {
       activeVisitors.delete(id);
     }
-  }
+  });
 }
 
 // GET - Get active visitors (admin and support)
