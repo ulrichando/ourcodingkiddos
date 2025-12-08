@@ -7,6 +7,13 @@ import { emails } from "@/lib/emails";
 
 export const dynamic = "force-dynamic";
 
+// Generate unique ticket number
+function generateTicketNumber(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `TKT-${timestamp}${random}`;
+}
+
 // Create or find existing support conversation
 async function getOrCreateSupportConversation(userEmail: string, userName: string) {
   // Look for existing support conversation for this user
@@ -118,10 +125,12 @@ export async function POST(request: Request) {
     if (!existingTicket) {
       await prisma.supportTicket.create({
         data: {
+          ticketNumber: generateTicketNumber(),
           userEmail: userEmail,
+          userRole: session?.user?.role || "PARENT",
           userName: userName,
           subject: "Chat Support Request",
-          message: message.trim(),
+          description: message.trim(),
           category: "GENERAL",
           status: "OPEN",
           priority: "MEDIUM",
@@ -132,7 +141,7 @@ export async function POST(request: Request) {
       await prisma.supportTicket.update({
         where: { id: existingTicket.id },
         data: {
-          message: `${existingTicket.message}\n\n---\nNew message (${new Date().toLocaleString()}):\n${message.trim()}`,
+          description: `${existingTicket.description}\n\n---\nNew message (${new Date().toLocaleString()}):\n${message.trim()}`,
           updatedAt: new Date(),
         },
       });
