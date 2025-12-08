@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { Resend } from "resend";
+import prisma from "@/lib/prisma";
 import crypto from "crypto";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Resend webhook event types
 interface ResendEmailReceivedEvent {
