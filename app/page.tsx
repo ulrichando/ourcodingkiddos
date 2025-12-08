@@ -1330,25 +1330,25 @@ const features = [
     icon: Gamepad2,
     title: "Learn by Playing",
     description: "Every lesson feels like a game with points, badges, and rewards.",
-    image: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?w=400&h=300&fit=crop", // Kids playing and learning
+    image: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=400&h=300&fit=crop", // Kids playing with technology
   },
   {
     icon: Users,
     title: "Live 1:1 Mentors",
     description: "Real instructors who know each student by name.",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=300&fit=crop", // Black woman teacher/mentor
+    image: "https://images.pexels.com/photos/5905445/pexels-photo-5905445.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop", // Black male teacher
   },
   {
     icon: Rocket,
     title: "Build Real Projects",
     description: "Create games, websites, and apps that actually work.",
-    image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&h=300&fit=crop", // African kids using laptop
+    image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=300&fit=crop", // Kids learning technology
   },
   {
     icon: Shield,
     title: "Safe Environment",
     description: "Kid-friendly platform with parent dashboards.",
-    image: "https://images.unsplash.com/photo-1602052793312-b99c2a9ee797?w=400&h=300&fit=crop", // Happy diverse kids in school
+    image: "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=400&h=300&fit=crop", // Happy diverse children
   },
 ];
 
@@ -1357,19 +1357,19 @@ const testimonials = [
     quote: "My son went from playing games all day to building his own. The transformation is incredible!",
     name: "Amara J.",
     role: "Parent of Kwame, 12",
-    avatar: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=100&h=100&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop", // African woman portrait
   },
   {
     quote: "I built a website for my mom's bakery! She was so proud. Now I want to make apps too.",
     name: "Sofia R.",
     role: "Student, Age 14",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop", // Young girl portrait
   },
   {
     quote: "The instructors are patient and make coding fun. My daughter actually looks forward to lessons.",
     name: "Wei Chen",
     role: "Parent of Mei, 9",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Asian man portrait
   },
 ];
 
@@ -2497,7 +2497,7 @@ export default function HomePage() {
                 <div className="relative hidden lg:block">
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     <Image
-                      src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d9a?w=600&h=400&fit=crop&q=80"
+                      src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop&q=80"
                       alt="Diverse group of happy kids learning together in classroom"
                       width={600}
                       height={400}
