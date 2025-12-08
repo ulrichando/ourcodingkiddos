@@ -26,6 +26,7 @@ import {
   Search,
   Command,
   Mail,
+  Inbox,
   Home,
   MessageSquare,
   Headphones,
@@ -69,6 +70,7 @@ const navigationGroups = [
   {
     title: "Communication",
     items: [
+      { href: "/dashboard/admin/inbox", label: "Inbox", icon: Inbox },
       { href: "/dashboard/admin/live-chat", label: "Live Chat", icon: Headphones },
       { href: "/dashboard/admin/announcements", label: "Announcements", icon: Megaphone },
       { href: "/dashboard/admin/email", label: "Email Users", icon: Mail },

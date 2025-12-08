@@ -1180,6 +1180,98 @@ enum SubmissionStatus {
 }
 
 // =====================================================
+// RECEIVED EMAILS (Resend Inbound)
+// =====================================================
+
+model ReceivedEmail {
+  id              String            @id @default(cuid())
+  resendEmailId   String            @unique // Resend's email ID
+  from            String            // Sender email address
+  fromName        String?           // Sender display name
+  to              String            // Recipient email (your domain)
+  subject         String
+  textBody        String?           @db.Text
+  htmlBody        String?           @db.Text
+  snippet         String?           // Preview text
+  attachments     Json?             // Array of {filename, contentType, size, downloadUrl}
+
+  // Processing status
+  status          ReceivedEmailStatus @default(UNREAD)
+  category        ReceivedEmailCategory @default(GENERAL)
+  priority        TicketPriority    @default(MEDIUM)
+
+  // Threading/conversation
+  threadId        String?           // Group related emails
+  parentEmailId   String?           // Reply-to email ID
+  inReplyTo       String?           // Message-ID header for threading
+
+  // Assignment
+  assignedToEmail String?
+  assignedToName  String?
+
+  // Link to existing entities
+  supportTicketId String?           // If converted to support ticket
+  userId          String?           // If sender is a known user
+
+  // Metadata
+  receivedAt      DateTime          @default(now())
+  processedAt     DateTime?
+  archivedAt      DateTime?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  replies         EmailReply[]
+
+  @@index([from])
+  @@index([status])
+  @@index([category])
+  @@index([receivedAt])
+  @@index([threadId])
+}
+
+model EmailReply {
+  id              String          @id @default(cuid())
+  receivedEmailId String
+  fromEmail       String          // Staff member who replied
+  fromName        String?
+  toEmail         String          // Customer email
+  subject         String
+  htmlBody        String          @db.Text
+  textBody        String?         @db.Text
+
+  // Resend tracking
+  resendMessageId String?         // ID from Resend after sending
+  status          String          @default("sent") // sent, delivered, failed
+
+  createdAt       DateTime        @default(now())
+
+  receivedEmail   ReceivedEmail   @relation(fields: [receivedEmailId], references: [id], onDelete: Cascade)
+
+  @@index([receivedEmailId])
+  @@index([fromEmail])
+}
+
+enum ReceivedEmailStatus {
+  UNREAD
+  READ
+  IN_PROGRESS
+  REPLIED
+  ARCHIVED
+  SPAM
+}
+
+enum ReceivedEmailCategory {
+  GENERAL
+  SUPPORT
+  BILLING
+  ENROLLMENT
+  FEEDBACK
+  PARTNERSHIP
+  SPAM
+}
+
+// =====================================================
 // PARENT REVIEWS
 // =====================================================
 
