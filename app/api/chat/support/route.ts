@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       data: {
         conversationId: conversation.id,
         fromEmail: userEmail,
-        fromRole: session?.user?.role || "GUEST",
+        fromRole: session?.user?.role || "PARENT",
         fromName: userName,
         content: message.trim(),
       },
