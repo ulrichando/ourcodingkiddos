@@ -193,10 +193,6 @@ export default function Footer() {
               </span>
             </div>
           </div>
-          {/* Trademark Disclaimer */}
-          <p className="text-xs text-slate-600 text-center mt-4 max-w-3xl mx-auto">
-            All third-party company names, logos, and trademarks referenced on this site are for illustrative purposes only and remain the property of their respective owners. We are not affiliated with or endorsed by these companies.
-          </p>
         </div>
       </div>
     </footer>

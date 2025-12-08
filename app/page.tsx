@@ -1330,25 +1330,25 @@ const features = [
     icon: Gamepad2,
     title: "Learn by Playing",
     description: "Every lesson feels like a game with points, badges, and rewards.",
-    image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&h=300&fit=crop", // Kids learning with technology
+    image: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?w=400&h=300&fit=crop", // Kids playing and learning
   },
   {
     icon: Users,
     title: "Live 1:1 Mentors",
     description: "Real instructors who know each student by name.",
-    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=400&h=300&fit=crop", // Teacher helping student
+    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=300&fit=crop", // Black woman teacher/mentor
   },
   {
     icon: Rocket,
     title: "Build Real Projects",
     description: "Create games, websites, and apps that actually work.",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop", // Kids coding on laptop
+    image: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&h=300&fit=crop", // African kids using laptop
   },
   {
     icon: Shield,
     title: "Safe Environment",
     description: "Kid-friendly platform with parent dashboards.",
-    image: "https://images.unsplash.com/photo-1544776193-352d25ca82cd?w=400&h=300&fit=crop", // Happy kids in classroom
+    image: "https://images.unsplash.com/photo-1602052793312-b99c2a9ee797?w=400&h=300&fit=crop", // Happy diverse kids in school
   },
 ];
 
@@ -2497,7 +2497,7 @@ export default function HomePage() {
                 <div className="relative hidden lg:block">
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     <Image
-                      src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop&q=80"
+                      src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d9a?w=600&h=400&fit=crop&q=80"
                       alt="Diverse group of happy kids learning together in classroom"
                       width={600}
                       height={400}

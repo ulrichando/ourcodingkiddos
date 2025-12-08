@@ -26,6 +26,13 @@ module.exports = {
           header: "#121d36",
           input: "#0f192f",
         },
+        // Purple-tinted light theme colors
+        light: {
+          bg: "#faf8fc",        // Main background - subtle lavender
+          surface: "#fdfcfe",   // Cards/surfaces - almost white with purple hint
+          muted: "#f5f3f7",     // Muted backgrounds - light purple-gray
+          border: "#e9e4f0",    // Borders - soft purple-gray
+        },
       },
       animation: {
         float: "float 4s ease-in-out infinite",

@@ -973,160 +973,100 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
       <section id="schedule" className="py-16 px-4 bg-slate-50 dark:bg-slate-800/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-4">Upcoming Class Schedule</h2>
+            <h2 className="text-3xl font-bold mb-4">Weekly Class Schedule</h2>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Browse available class times and find the perfect fit for your schedule. New sessions
-              are added regularly.
+              Our classes run every weekend. Join us for live, interactive coding sessions!
             </p>
           </div>
 
-          {/* Schedule Filters */}
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-medium">Filter:</span>
+          {/* Weekly Programs Grid */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Saturday - JavaScript Game Development */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border-2 border-purple-200 dark:border-purple-800 hover:shadow-xl transition">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                  <Code className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400 mb-2 inline-block">
+                    Every Saturday
+                  </span>
+                  <h3 className="font-bold text-xl text-slate-900 dark:text-slate-100 mb-2">
+                    JavaScript Game Development
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                    Learn to build interactive games using JavaScript. Perfect for kids who love gaming and want to create their own!
+                  </p>
+                  <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      9:00 AM - 11:00 AM
+                    </span>
+                    <span>•</span>
+                    <span>2 hours</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-purple-100 dark:border-purple-800">
+                <Link
+                  href="/programs"
+                  className="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold hover:underline"
+                >
+                  Learn More & Enroll <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
-            <select
-              value={scheduleFilter}
-              onChange={(e) => handleFilterChange(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
-            >
-              <option value="all">All Classes</option>
-              <optgroup label="Age Group">
-                {Object.entries(ageGroupLabels).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Subject">
-                {Object.entries(languageLabels)
-                  .slice(0, 8)
-                  .map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-              </optgroup>
-            </select>
+
+            {/* Sunday - Intro to Programming */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border-2 border-pink-200 dark:border-pink-800 hover:shadow-xl transition">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center flex-shrink-0">
+                  <Play className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-400 mb-2 inline-block">
+                    Every Sunday
+                  </span>
+                  <h3 className="font-bold text-xl text-slate-900 dark:text-slate-100 mb-2">
+                    Intro to Programming
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                    Start your coding journey with the fundamentals. Great for beginners who are new to programming!
+                  </p>
+                  <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      9:00 AM - 11:00 AM
+                    </span>
+                    <span>•</span>
+                    <span>2 hours</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-4 border-t border-pink-100 dark:border-pink-800">
+                <Link
+                  href="/programs"
+                  className="inline-flex items-center gap-2 text-pink-600 dark:text-pink-400 font-semibold hover:underline"
+                >
+                  Learn More & Enroll <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
 
-          {/* Schedule Grid */}
-          {filteredSessions.length > 0 ? (
-            <>
-              {/* Session count */}
-              <div className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                Showing {sessionStartIndex + 1}-{Math.min(sessionStartIndex + SESSIONS_PER_PAGE, filteredSessions.length)} of {filteredSessions.length} classes
-              </div>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {paginatedSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg transition"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-semibold">{session.title}</h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                          {languageLabels[session.language] || session.language}
-                        </p>
-                      </div>
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                        {ageGroupLabels[session.ageGroup] || session.ageGroup}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(session.startTime)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {formatTime(session.startTime)}
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {session.enrolledCount || 0}/{session.maxStudents || "∞"} enrolled
-                      </span>
-                      <Link
-                        href="/booking"
-                        className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-                      >
-                        Enroll →
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination Controls */}
-              {totalSessionPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <button
-                    onClick={() => setSchedulePage(p => Math.max(1, p - 1))}
-                    disabled={schedulePage === 1}
-                    className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition border border-slate-200 dark:border-slate-700"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </button>
-
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(totalSessionPages, 5) }, (_, i) => {
-                      let pageNum;
-                      if (totalSessionPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (schedulePage <= 3) {
-                        pageNum = i + 1;
-                      } else if (schedulePage >= totalSessionPages - 2) {
-                        pageNum = totalSessionPages - 4 + i;
-                      } else {
-                        pageNum = schedulePage - 2 + i;
-                      }
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setSchedulePage(pageNum)}
-                          className={`w-10 h-10 rounded-lg text-sm font-semibold transition ${
-                            pageNum === schedulePage
-                              ? "bg-purple-600 text-white"
-                              : "text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => setSchedulePage(p => Math.min(totalSessionPages, p + 1))}
-                    disabled={schedulePage === totalSessionPages}
-                    className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition border border-slate-200 dark:border-slate-700"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-              <h3 className="text-xl font-bold mb-2">No Upcoming Sessions</h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-4">
-                New class sessions are added regularly. Contact us to request a specific time.
-              </p>
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-purple-700 transition"
-              >
-                Request a Class Time
-              </Link>
-            </div>
-          )}
+          {/* View Full Schedule CTA */}
+          <div className="text-center mt-10">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
+              Classes repeat weekly. View the full calendar for specific dates.
+            </p>
+            <Link
+              href="/schedule"
+              className="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-purple-700 transition"
+            >
+              <Calendar className="w-5 h-5" />
+              View Full Schedule
+            </Link>
+          </div>
         </div>
       </section>
 

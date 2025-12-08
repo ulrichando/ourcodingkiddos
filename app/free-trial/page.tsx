@@ -202,7 +202,7 @@ export default function FreeTrialPage() {
             <div className="relative hidden lg:block">
               <div className="relative">
                 <Image
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=500&fit=crop"
+                  src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=500&fit=crop"
                   alt="Diverse children learning to code together"
                   width={600}
                   height={500}
