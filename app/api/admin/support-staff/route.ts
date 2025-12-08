@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       data: {
         name,
         email,
-        password: hashedPassword,
+        hashedPassword,
         role: "SUPPORT",
       },
       select: {
@@ -171,7 +171,7 @@ export async function PUT(request: Request) {
     }
 
     // Build update data
-    const updateData: { name?: string; email?: string; password?: string } = {};
+    const updateData: { name?: string; email?: string; hashedPassword?: string } = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (password) {
@@ -181,7 +181,7 @@ export async function PUT(request: Request) {
           { status: 400 }
         );
       }
-      updateData.password = await bcrypt.hash(password, 10);
+      updateData.hashedPassword = await bcrypt.hash(password, 10);
     }
 
     // Update the user
