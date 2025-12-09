@@ -1675,32 +1675,22 @@ export default function HomePage() {
                     </button>
                   </div>
 
-                  {/* Privacy Policy Link - Always visible for Google verification */}
-                  <div className="flex justify-center tablet:justify-start pt-3 pointer-events-auto">
-                    <Link
-                      href="/privacy"
-                      className="text-xs text-slate-500 dark:text-white/50 hover:text-slate-700 dark:hover:text-white/70 underline"
-                    >
-                      Privacy Policy
-                    </Link>
-                  </div>
-
-                  {/* Compact Trust Row - Hidden on very small screens */}
-                  <div className="hidden sm:flex flex-wrap items-center justify-center tablet:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2 pointer-events-auto">
+                  {/* Trust & Legal Row - Always visible */}
+                  <div className="flex flex-wrap items-center justify-center tablet:justify-start gap-3 sm:gap-4 text-xs text-slate-500 dark:text-white/50 pt-3 pointer-events-auto">
                     <span className="flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                       No credit card
                     </span>
-                    <span className="flex items-center gap-1.5">
+                    <span className="hidden sm:flex items-center gap-1.5">
                       <Star className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-500 dark:fill-amber-400" />
                       4.9 rating
                     </span>
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
-                      2,000+ students
-                    </span>
-                    <Link href="/privacy" className="hover:text-slate-700 dark:hover:text-white/70 underline">
+                    <span className="text-slate-400 dark:text-white/30">|</span>
+                    <Link href="/privacy" className="text-slate-600 dark:text-white/70 hover:text-violet-600 dark:hover:text-violet-400 underline font-medium">
                       Privacy Policy
+                    </Link>
+                    <Link href="/terms" className="text-slate-600 dark:text-white/70 hover:text-violet-600 dark:hover:text-violet-400 underline font-medium">
+                      Terms of Service
                     </Link>
                   </div>
                 </div>
