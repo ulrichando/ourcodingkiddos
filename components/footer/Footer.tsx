@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Facebook, ArrowUpRight, Mail } from "lucide-react";
+import { Facebook, Instagram, ArrowUpRight, Mail } from "lucide-react";
 import NewsletterForm from "./NewsletterForm";
 
 const footerLinks = {
@@ -50,9 +50,15 @@ const footerLinks = {
 const socialLinks = [
   {
     label: "Facebook",
-    href: "https://www.facebook.com/profile.php?id=61578690800757",
+    href: "https://www.facebook.com/coding.kiddos/",
     icon: Facebook,
     hoverColor: "hover:text-blue-500",
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/codingkiddos/",
+    icon: Instagram,
+    hoverColor: "hover:text-pink-500",
   },
 ];
 
