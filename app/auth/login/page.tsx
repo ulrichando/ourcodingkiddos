@@ -14,6 +14,14 @@ export default function LoginPage() {
 
   // Check if user was logged out due to inactivity
   useEffect(() => {
+    // Always clear inactivity localStorage on login page load to ensure fresh session
+    try {
+      localStorage.removeItem("lastActivityTime");
+      localStorage.removeItem("forceLogout");
+    } catch {
+      // localStorage not available
+    }
+
     if (searchParams.get("reason") === "inactivity") {
       setInactivityLogout(true);
       // Clear the URL parameter
@@ -41,6 +49,17 @@ export default function LoginPage() {
         password: passwordValue,
       });
       if (res?.error) throw new Error(res.error);
+
+      // Clear inactivity localStorage to prevent immediate logout
+      try {
+        localStorage.removeItem("lastActivityTime");
+        localStorage.removeItem("forceLogout");
+        // Set fresh activity time for the new session
+        localStorage.setItem("lastActivityTime", Date.now().toString());
+      } catch {
+        // localStorage not available
+      }
+
       const session = await getSession();
       const sessionRole = typeof (session?.user as any)?.role === "string" ? ((session?.user as any)?.role as string).toUpperCase() : null;
       const target =
@@ -209,7 +228,15 @@ export default function LoginPage() {
             {/* Google Sign In */}
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => {
+                // Clear inactivity localStorage before Google sign-in
+                try {
+                  localStorage.removeItem("lastActivityTime");
+                  localStorage.removeItem("forceLogout");
+                  localStorage.setItem("lastActivityTime", Date.now().toString());
+                } catch {}
+                signIn("google", { callbackUrl: "/dashboard" });
+              }}
               className="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium rounded-xl py-3 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-200 active:scale-[0.98]"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">

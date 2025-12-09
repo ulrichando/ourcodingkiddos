@@ -1,27 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Sparkles, Loader2, Rocket, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Loader2, Rocket, User, Lock } from "lucide-react";
 
 export default function StudentLoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // Clear inactivity localStorage on page load to ensure fresh session
+  useEffect(() => {
+    try {
+      localStorage.removeItem("lastActivityTime");
+      localStorage.removeItem("forceLogout");
+    } catch {
+      // localStorage not available
+    }
+  }, []);
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const emailValue = email.trim().toLowerCase();
+    // Students log in with username (converted to pseudo-email for auth)
+    const usernameValue = username.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    const emailValue = `${usernameValue}@student.ourcodingkiddos.local`;
     const passwordValue = password;
 
-    if (!emailValue || !passwordValue) {
-      setError("Please enter your email and password");
+    if (!usernameValue || !passwordValue) {
+      setError("Please enter your username and password");
       return;
     }
 
@@ -34,7 +46,15 @@ export default function StudentLoginPage() {
         email: emailValue,
         password: passwordValue,
       });
-      if (res?.error) throw new Error("Wrong email or password. Try again!");
+      if (res?.error) throw new Error("Wrong username or password. Try again!");
+
+      // Clear inactivity localStorage to prevent immediate logout
+      try {
+        localStorage.removeItem("lastActivityTime");
+        localStorage.removeItem("forceLogout");
+        localStorage.setItem("lastActivityTime", Date.now().toString());
+      } catch {}
+
       const session = await getSession();
       const sessionRole = typeof (session?.user as any)?.role === "string"
         ? ((session?.user as any)?.role as string).toUpperCase()
@@ -81,27 +101,27 @@ export default function StudentLoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
+            {/* Username Field */}
             <div className="space-y-1.5">
               <label className="text-sm font-bold text-purple-700 dark:text-purple-300">
-                Your Email
+                Your Username
               </label>
               <div className={`relative flex items-center border-2 rounded-xl transition-all duration-200 ${
-                focusedField === "email"
+                focusedField === "username"
                   ? "ring-2 ring-purple-400/50 border-purple-400 dark:border-purple-500 bg-purple-50/50 dark:bg-purple-900/20"
                   : "border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 bg-purple-50/30 dark:bg-slate-800"
               }`}>
-                <Mail className={`w-5 h-5 ml-3 transition-colors ${focusedField === "email" ? "text-purple-500" : "text-purple-400"}`} />
+                <User className={`w-5 h-5 ml-3 transition-colors ${focusedField === "username" ? "text-purple-500" : "text-purple-400"}`} />
                 <input
-                  name="email"
-                  type="email"
+                  name="username"
+                  type="text"
                   required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setFocusedField("email")}
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))}
+                  onFocus={() => setFocusedField("username")}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="your.email@example.com"
+                  placeholder="your username"
                   className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-600 px-3 py-3.5 text-base focus:outline-none"
                 />
               </div>
