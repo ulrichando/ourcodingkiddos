@@ -1676,7 +1676,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Compact Trust Row - Hidden on very small screens */}
-                  <div className="hidden sm:flex flex-wrap items-center justify-center tablet:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2">
+                  <div className="hidden sm:flex flex-wrap items-center justify-center tablet:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2 pointer-events-auto">
                     <span className="flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                       No credit card
