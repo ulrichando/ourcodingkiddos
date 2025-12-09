@@ -125,13 +125,12 @@ export default function ParentSidebar({ isOpen = false, onClose }: ParentSidebar
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:relative top-0 left-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-40 flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out ${
+        className={`fixed lg:relative top-0 left-0 h-dvh max-h-dvh bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-40 flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         } ${isCollapsed ? "lg:w-[72px]" : "w-64"}`}
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingLeft: "env(safe-area-inset-left)",
-          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {/* Logo Section */}
@@ -150,7 +149,7 @@ export default function ParentSidebar({ isOpen = false, onClose }: ParentSidebar
         </div>
 
         {/* Navigation Section - Scrollable */}
-        <nav className={`flex-1 overflow-y-auto ios-scroll py-4 space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>
+        <nav className={`flex-1 overflow-y-auto overflow-x-hidden ios-scroll py-4 pb-20 lg:pb-4 safe-bottom space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>
           {navigationGroups.map((group) => (
             <div key={group.title}>
               {!isCollapsed && (

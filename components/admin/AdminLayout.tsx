@@ -27,12 +27,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
 
   return (
-    <div className="flex h-dvh flex-col lg:flex-row overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex min-h-dvh h-dvh flex-col lg:flex-row bg-slate-50 dark:bg-slate-950">
       <AdminSidebar onCommandOpen={openCommand} isOpen={isSidebarOpen} onClose={closeSidebar} />
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <DashboardHeader onCommandOpen={openCommand} onMenuToggle={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pt-4 lg:pt-6 dashboard-scrollbar ios-scroll safe-right">
-          {children}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6 pb-20 lg:pb-6 dashboard-scrollbar ios-scroll safe-right safe-bottom">
+          <div className="min-h-full">
+            {children}
+          </div>
         </main>
       </div>
       <CommandPalette isOpen={isCommandOpen} onClose={closeCommand} />

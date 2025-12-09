@@ -686,6 +686,30 @@ html.theme-transition *::after {
 .ios-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  /* Ensure scroll container fills available space on iOS */
+  min-height: 0;
+  /* Fix for iOS Chrome scroll issues */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* iOS mobile viewport fix - ensures scroll reaches bottom */
+@supports (-webkit-touch-callout: none) {
+  /* iOS only */
+  .ios-scroll {
+    /* Add extra padding for iOS home indicator */
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  /* Dashboard main content needs extra bottom space on iOS */
+  main.ios-scroll {
+    padding-bottom: max(80px, calc(env(safe-area-inset-bottom, 20px) + 60px));
+  }
+
+  /* Ensure full height scrolling on iOS */
+  .h-dvh, .min-h-dvh {
+    min-height: -webkit-fill-available;
+  }
 }
 
 /* Universal dashboard scrollbar - use on all dashboard main content areas */
