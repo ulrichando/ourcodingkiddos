@@ -1,14 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff, Mail, Lock, Sparkles, ArrowRight, Loader2, Clock } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [inactivityLogout, setInactivityLogout] = useState(false);
+
+  // Check if user was logged out due to inactivity
+  useEffect(() => {
+    if (searchParams.get("reason") === "inactivity") {
+      setInactivityLogout(true);
+      // Clear the URL parameter
+      window.history.replaceState({}, "", "/auth/login");
+    }
+  }, [searchParams]);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -93,6 +104,16 @@ export default function LoginPage() {
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Sign in to your Coding Kiddos account</p>
             </div>
           </div>
+
+          {/* Inactivity logout message */}
+          {inactivityLogout && (
+            <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+              <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                You were logged out due to inactivity. Please sign in again.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}

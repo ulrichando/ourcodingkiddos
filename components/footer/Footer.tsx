@@ -98,9 +98,9 @@ export default function Footer() {
 
       {/* Main Footer Content */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 tablet:px-8 py-12 tablet:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-12 gap-6 tablet:gap-8 lg:gap-12">
-          {/* Brand Column */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-8 lg:gap-12">
+          {/* Brand Column - Full width on mobile, half on sm, 2 cols on lg */}
+          <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-3 group mb-6">
               <Image
                 src="/icon.svg"
@@ -137,9 +137,9 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Link Columns */}
+          {/* Link Columns - Equal width, symmetric spacing */}
           {Object.entries(footerLinks).map(([key, section]) => (
-            <div key={key} className="col-span-1 md:col-span-2">
+            <div key={key} className="col-span-1">
               <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
                 {section.title}
               </h4>

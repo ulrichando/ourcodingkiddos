@@ -135,7 +135,11 @@ export const authOptions: NextAuthOptions = {
   // Using type assertion because our custom Prisma output path creates type incompatibility
   adapter: PrismaAdapter(prismaBase as any),
   secret: process.env.NEXTAUTH_SECRET,
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours - session expires after this time
+    updateAge: 60 * 60, // 1 hour - refresh session if user is active
+  },
   providers,
   callbacks: {
     async jwt({ token, user, account }) {
