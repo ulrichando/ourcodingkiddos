@@ -315,10 +315,12 @@ export default function StudentDashboard() {
       }));
     }
 
-    if (studentId) {
-      fetch(`/api/students?id=${studentId}`, { cache: "no-store" })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
+    // Fetch student profile - either by URL param ID or from session
+    const fetchStudentProfile = async (id: string) => {
+      try {
+        const res = await fetch(`/api/students?id=${id}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
           const s = data?.students?.[0];
           if (s) {
             setStudent({
@@ -327,23 +329,45 @@ export default function StudentDashboard() {
               totalXp: s.total_xp || s.totalXp || 0,
               currentLevel: s.current_level || s.currentLevel || 1,
               streakDays: s.streak_days || s.streakDays || 0,
-              avatar: s.avatar || avatarParam || "🦊",
+              avatar: s.avatar || avatarParam || localStorage.getItem("studentAvatar") || "🦊",
             });
           }
-        })
-        .catch(() => {});
+        }
+      } catch {}
 
-      fetch(`/api/students/${studentId}/stats`, { cache: "no-store" })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
+      try {
+        const statsRes = await fetch(`/api/students/${id}/stats`, { cache: "no-store" });
+        if (statsRes.ok) {
+          const data = await statsRes.json();
           if (data) {
             setStats(data.stats || stats);
             setContinueLearning(data.continueLearning || []);
             setRecommendedCourses(data.recommendedCourses || []);
             setBadges(data.badges || []);
           }
-        })
-        .catch(() => {});
+        }
+      } catch {}
+    };
+
+    if (studentId) {
+      // Use URL param ID if provided (e.g., parent viewing student dashboard)
+      fetchStudentProfile(studentId);
+    } else if (session?.user) {
+      // For logged-in students, use their session data
+      const sessionUser = session.user as any;
+
+      // First, try to use the session name directly
+      if (sessionUser.name) {
+        setStudent((prev) => ({
+          ...prev,
+          name: sessionUser.name,
+        }));
+      }
+
+      // Then fetch full profile if we have a user ID
+      if (sessionUser.id) {
+        fetchStudentProfile(sessionUser.id);
+      }
     }
 
     const stored = sessionStorage.getItem("studentSession") || localStorage.getItem("studentName");
@@ -362,7 +386,7 @@ export default function StudentDashboard() {
         setStudent((prev) => ({ ...prev, name: stored || prev.name }));
       }
     }
-  }, [searchParams]);
+  }, [searchParams, session]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
