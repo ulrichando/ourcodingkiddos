@@ -1675,6 +1675,16 @@ export default function HomePage() {
                     </button>
                   </div>
 
+                  {/* Privacy Policy Link - Always visible for Google verification */}
+                  <div className="flex justify-center tablet:justify-start pt-3 pointer-events-auto">
+                    <Link
+                      href="/privacy"
+                      className="text-xs text-slate-500 dark:text-white/50 hover:text-slate-700 dark:hover:text-white/70 underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </div>
+
                   {/* Compact Trust Row - Hidden on very small screens */}
                   <div className="hidden sm:flex flex-wrap items-center justify-center tablet:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2 pointer-events-auto">
                     <span className="flex items-center gap-1.5">
