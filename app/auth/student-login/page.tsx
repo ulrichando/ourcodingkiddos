@@ -27,14 +27,25 @@ export default function StudentLoginPage() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Students log in with username (converted to pseudo-email for auth)
-    const usernameValue = username.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
-    const emailValue = `${usernameValue}@student.ourcodingkiddos.local`;
+    const inputValue = username.trim().toLowerCase();
     const passwordValue = password;
 
-    if (!usernameValue || !passwordValue) {
+    if (!inputValue || !passwordValue) {
       setError("Please enter your username and password");
       return;
+    }
+
+    // Check if input looks like an email (for existing students) or username (for new students)
+    const isEmail = inputValue.includes("@");
+    let emailValue: string;
+
+    if (isEmail) {
+      // Existing student with real email
+      emailValue = inputValue;
+    } else {
+      // New student with username - convert to pseudo-email
+      const usernameValue = inputValue.replace(/[^a-z0-9]/g, "");
+      emailValue = `${usernameValue}@student.ourcodingkiddos.local`;
     }
 
     setError(null);
@@ -46,7 +57,7 @@ export default function StudentLoginPage() {
         email: emailValue,
         password: passwordValue,
       });
-      if (res?.error) throw new Error("Wrong username or password. Try again!");
+      if (res?.error) throw new Error("Wrong username/email or password. Try again!");
 
       // Clear inactivity localStorage to prevent immediate logout
       try {
@@ -101,10 +112,10 @@ export default function StudentLoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Field */}
+            {/* Username/Email Field */}
             <div className="space-y-1.5">
               <label className="text-sm font-bold text-purple-700 dark:text-purple-300">
-                Your Username
+                Your Username or Email
               </label>
               <div className={`relative flex items-center border-2 rounded-xl transition-all duration-200 ${
                 focusedField === "username"
@@ -118,10 +129,10 @@ export default function StudentLoginPage() {
                   required
                   autoComplete="username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   onFocus={() => setFocusedField("username")}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="your username"
+                  placeholder="coder123 or email@example.com"
                   className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-purple-300 dark:placeholder:text-purple-600 px-3 py-3.5 text-base focus:outline-none"
                 />
               </div>
