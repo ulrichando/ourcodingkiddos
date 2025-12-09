@@ -1273,24 +1273,6 @@ function InteractiveCodePlayground({ onGameChange }: { onGameChange?: (mode: Gam
         See what your child will learn to create
       </p>
 
-      {/* Game Controls Hint - Fixed at bottom-left, same level as chatbot */}
-      <div
-        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 animate-fade-in-up"
-      >
-        <Gamepad2
-          className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5"
-          style={{
-            color: GAME_INFO[currentExample.gameMode].color,
-            filter: `drop-shadow(0 0 4px ${GAME_INFO[currentExample.gameMode].color}60)`,
-          }}
-        />
-        <span
-          className="text-white/80 font-medium text-xs sm:text-sm"
-        >
-          {GAME_INFO[currentExample.gameMode].hint}
-        </span>
-      </div>
-
       {/* CSS for animations */}
       <style jsx>{`
         @keyframes floatUp {
@@ -1707,6 +1689,9 @@ export default function HomePage() {
                       <Users className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
                       2,000+ students
                     </span>
+                    <Link href="/privacy" className="hover:text-slate-700 dark:hover:text-white/70 underline">
+                      Privacy Policy
+                    </Link>
                   </div>
                 </div>
 
@@ -1714,6 +1699,21 @@ export default function HomePage() {
                 <div className="hidden tablet:block pointer-events-auto">
                   <div className="tablet:scale-[0.85] lg:scale-100 origin-top-right">
                     <InteractiveCodePlayground onGameChange={setGameMode} />
+                  </div>
+                  {/* Game Controls Hint - Under the terminal, same row as Free Trial */}
+                  <div className="flex justify-center mt-20">
+                    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+                      <Gamepad2
+                        className="flex-shrink-0 w-5 h-5"
+                        style={{
+                          color: GAME_INFO[gameMode].color,
+                          filter: `drop-shadow(0 0 4px ${GAME_INFO[gameMode].color}60)`,
+                        }}
+                      />
+                      <span className="text-white/80 font-medium text-sm">
+                        {GAME_INFO[gameMode].hint}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
