@@ -1388,26 +1388,26 @@ const sectionNavItems = [
   { id: "testimonials", label: "Reviews", icon: Heart },
 ];
 
-// Smooth scroll to section
-const scrollToSection = (sectionId: string) => {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    const offset = 80; // Account for sticky header
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - offset;
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth",
-    });
-  }
-};
-
 export default function HomePage() {
   const [selectedAge, setSelectedAge] = useState("kids");
   const [showVideo, setShowVideo] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const [showScrollNav, setShowScrollNav] = useState(false);
   const [gameMode, setGameMode] = useState<GameMode>('snake');
+
+  // Smooth scroll to section - must be inside component for proper event handling
+  const scrollToSection = useCallback((sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100; // Account for sticky header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  }, []);
 
   // Auto-scale hero content to fit any screen
   const heroContentRef = useRef<HTMLDivElement>(null);
@@ -1463,39 +1463,47 @@ export default function HomePage() {
     };
   }, [calculateHeroScale]);
 
-  // Scroll spy - detect which section is in view
-  const handleScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + 150;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-
-    // Show navigation after scrolling past hero
-    setShowScrollNav(window.scrollY > 400);
-
-    // Check if near bottom
-    if (window.scrollY + windowHeight >= documentHeight - 100) {
-      setActiveSection("testimonials");
-      return;
-    }
-
-    // Find active section
-    for (const item of sectionNavItems) {
-      const element = document.getElementById(item.id);
-      if (element) {
-        const { offsetTop, offsetHeight } = element;
-        if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-          setActiveSection(item.id);
-          break;
-        }
-      }
-    }
-  }, []);
-
+  // Scroll spy using Intersection Observer - more reliable than scroll events
   useEffect(() => {
+    // Show/hide navigation based on scroll position
+    const handleScroll = () => {
+      setShowScrollNav(window.scrollY > 400);
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // Initial check
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+
+    // Intersection Observer for section detection
+    const observerOptions = {
+      root: null, // viewport
+      rootMargin: "-40% 0px -50% 0px", // Creates a "middle zone" for activation
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      // Find the entry that is intersecting
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all section elements
+    sectionNavItems.forEach((item) => {
+      const element = document.getElementById(item.id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      observer.disconnect();
+    };
+  }, []);
 
   // Scroll to top
   const scrollToTop = () => {
