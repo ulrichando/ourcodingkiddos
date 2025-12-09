@@ -52,11 +52,11 @@ export default function PrivacyPage() {
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Personal Information</h3>
                 <p className="text-slate-700 dark:text-slate-300 mb-2">We may collect the following personal information:</p>
                 <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
-                  <li><strong>Account Information:</strong> Name, email address, password (encrypted), and profile picture</li>
-                  <li><strong>Parent/Guardian Information:</strong> Contact details for account verification and communications</li>
-                  <li><strong>Student Information:</strong> First name, age range, and learning progress</li>
+                  <li><strong>Parent Account Information:</strong> Name, email address, password (encrypted), and profile picture</li>
+                  <li><strong>Parent/Guardian Information:</strong> Contact details for account verification and all communications</li>
+                  <li><strong>Student Information:</strong> First name, username (no email), age (not birthdate), learning progress, and code projects</li>
                   <li><strong>Payment Information:</strong> Processed securely through Stripe; we do not store credit card numbers</li>
-                  <li><strong>Communication Data:</strong> Messages sent through our platform</li>
+                  <li><strong>Communication Data:</strong> Messages sent through our platform (parents only)</li>
                 </ul>
               </div>
 
@@ -87,23 +87,76 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          {/* Children's Privacy - COPPA */}
+          {/* Children's Privacy - COPPA 2025 */}
           <section className="space-y-4 p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Children&apos;s Privacy (COPPA Compliance)</h2>
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Children&apos;s Privacy (COPPA 2025 Compliance)</h2>
             </div>
             <p className="text-slate-700 dark:text-slate-300">
               Coding Kiddos is designed for children, and we take their privacy very seriously.
-              We comply with the Children&apos;s Online Privacy Protection Act (COPPA).
+              We comply with the Children&apos;s Online Privacy Protection Act (COPPA), including the 2024 amendments
+              (effective June 23, 2025).
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-slate-700 dark:text-slate-300">
-              <li><strong>Parental Consent:</strong> We require verifiable parental consent before collecting personal information from children under 13</li>
-              <li><strong>Limited Collection:</strong> We only collect information necessary to provide our educational services</li>
-              <li><strong>No Behavioral Advertising:</strong> We do not use children&apos;s data for targeted advertising</li>
-              <li><strong>Parental Control:</strong> Parents can review, modify, or delete their child&apos;s information at any time</li>
-              <li><strong>Secure Environment:</strong> Student accounts have restricted features to ensure a safe learning environment</li>
-            </ul>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Parental Consent</h3>
+                <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li>We require <strong>verifiable parental consent</strong> before collecting any personal information from children under 13</li>
+                  <li>Parents must be 18 or older and explicitly consent during registration</li>
+                  <li>Consent is obtained through our secure parent account registration process</li>
+                  <li>Parents receive confirmation of consent via email</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">No Email Collection for Children</h3>
+                <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li>Children log in with a <strong>username only</strong> - we do not collect email addresses from children</li>
+                  <li>All communications and notifications are sent to the parent&apos;s email address</li>
+                  <li>Usernames are created by parents and contain no personally identifiable information</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Limited Data Collection</h3>
+                <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li>We only collect: first name, age (not birthdate), learning progress, and code projects</li>
+                  <li>Profile photos require separate parental consent and are optional</li>
+                  <li>We do <strong>not</strong> collect: biometric data, precise geolocation, or device identifiers for advertising</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">No Targeted Advertising</h3>
+                <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li>We do <strong>not</strong> use children&apos;s data for behavioral or targeted advertising</li>
+                  <li>We do <strong>not</strong> share children&apos;s data with advertising networks</li>
+                  <li>We do <strong>not</strong> create advertising profiles for children</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Parental Rights</h3>
+                <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li><strong>Review:</strong> Parents can view all data collected about their child at any time</li>
+                  <li><strong>Modify:</strong> Parents can update or correct their child&apos;s information</li>
+                  <li><strong>Delete:</strong> Parents can request deletion of their child&apos;s account and all associated data</li>
+                  <li><strong>Revoke consent:</strong> Parents can withdraw consent at any time</li>
+                  <li><strong>Download:</strong> Parents can request a copy of their child&apos;s data in a portable format</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Safe Learning Environment</h3>
+                <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
+                  <li>Student accounts have restricted features and cannot contact other users directly</li>
+                  <li>All content is moderated and age-appropriate</li>
+                  <li>We employ content filters and human review for any shared projects</li>
+                </ul>
+              </div>
+            </div>
           </section>
 
           {/* Data Sharing */}
@@ -164,13 +217,57 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Data Retention</h2>
             </div>
             <p className="text-slate-700 dark:text-slate-300">
-              We retain personal information for as long as necessary to provide our services and fulfill the purposes
-              described in this policy. When you delete your account:
+              We retain personal information only for as long as necessary. Here are our specific retention periods:
+            </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-slate-700 dark:text-slate-300">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-700">
+                    <th className="text-left py-2 pr-4 font-semibold">Data Type</th>
+                    <th className="text-left py-2 font-semibold">Retention Period</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tr>
+                    <td className="py-2 pr-4">Account information</td>
+                    <td className="py-2">Until account deletion + 30 days</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Child&apos;s learning progress</td>
+                    <td className="py-2">Until account deletion + 30 days</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Code projects</td>
+                    <td className="py-2">Until account deletion + 30 days</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Profile photos</td>
+                    <td className="py-2">Until removed or account deletion</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Payment records</td>
+                    <td className="py-2">7 years (legal requirement)</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Consent records</td>
+                    <td className="py-2">3 years after consent withdrawal</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">Anonymized analytics</td>
+                    <td className="py-2">Indefinitely (non-identifiable)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-slate-700 dark:text-slate-300">
+              When you request account deletion:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-slate-700 dark:text-slate-300">
               <li>Personal data is deleted within 30 days</li>
-              <li>Some data may be retained for legal or legitimate business purposes</li>
-              <li>Anonymized data may be kept for analytics</li>
+              <li>Backup copies are purged within 90 days</li>
+              <li>We will confirm deletion via email to the parent</li>
             </ul>
           </section>
 
@@ -206,7 +303,7 @@ export default function PrivacyPage() {
             </p>
             <div className="space-y-1 text-slate-700 dark:text-slate-300">
               <p>Email: <a href={`mailto:${emails.support}`} className="text-purple-600 dark:text-purple-400 hover:underline">{emails.support}</a></p>
-              <p>Website: <a href="https://ourcodingkiddos.com/contact" className="text-purple-600 dark:text-purple-400 hover:underline">ourcodingkiddos.com/contact</a></p>
+              <p>Website: <Link href="/contact" className="text-purple-600 dark:text-purple-400 hover:underline">ourcodingkiddos.com/contact</Link></p>
             </div>
           </section>
 

@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
 
   const name = String(body?.name || "").trim();
   let password = String(body?.password || "");
-  const providedEmail = String(body?.email || "").trim().toLowerCase();
+  // COPPA Compliance: Use username instead of email for child accounts
+  const providedUsername = String(body?.username || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
   const age = Number(body?.age) || null;
   const ageGroup = String(body?.ageGroup || "").toUpperCase() || null;
   const avatar = String(body?.avatar || "");
@@ -48,23 +49,33 @@ export async function POST(request: NextRequest) {
 
   // New fields from enhanced form
   const profileImage = body?.profileImage || null;
-  const birthday = body?.birthday || null;
   const codingInterests = body?.codingInterests || [];
   const learningStyle = body?.learningStyle || null;
   const learningGoals = body?.learningGoals || null;
   const parentNotes = body?.parentNotes || null;
 
-  if (!name || !parentEmail || !providedEmail) {
-    return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+  // COPPA consent fields
+  const coppaConsent = body?.coppaConsent || false;
+  const photoConsent = body?.photoConsent || false;
+
+  if (!name || !parentEmail || !providedUsername) {
+    return NextResponse.json({ error: "Name and username are required" }, { status: 400 });
+  }
+
+  // Validate username format
+  if (providedUsername.length < 3 || providedUsername.length > 30) {
+    return NextResponse.json({ error: "Username must be 3-30 characters" }, { status: 400 });
   }
 
   try {
-    const email = providedEmail;
+    // COPPA Compliance: Generate a pseudo-email from username (not used for communication)
+    // All communications go to the parent's email
+    const email = `${providedUsername}@student.ourcodingkiddos.local`;
 
-    // Check if email already exists
+    // Check if username already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ error: "This email is already registered" }, { status: 400 });
+      return NextResponse.json({ error: "This username is already taken" }, { status: 400 });
     }
 
     // Find the parent's profile to properly link the student
@@ -98,7 +109,7 @@ export async function POST(request: NextRequest) {
             avatar: profileImage || avatar, // Use uploaded image if available, otherwise use avatar
             age,
             ageGroup: ageGroup || undefined,
-            dob: birthday ? new Date(birthday) : undefined, // Map birthday to dob field
+            // COPPA consent stored in badges for audit purposes
             accessibilitySettings: {
               dyslexia_font: !!accessibility?.dyslexia_font,
               high_contrast: !!accessibility?.high_contrast,
@@ -107,7 +118,15 @@ export async function POST(request: NextRequest) {
               screen_reader: !!accessibility?.screen_reader,
               keyboard_navigation: !!accessibility?.keyboard_navigation,
             },
-            badges: codingInterests.length > 0 ? { interests: codingInterests, learningStyle, learningGoals, parentNotes } : undefined,
+            badges: {
+              interests: codingInterests,
+              learningStyle,
+              learningGoals,
+              parentNotes,
+              // COPPA audit trail
+              coppaConsent: coppaConsent ? { granted: true, timestamp: new Date().toISOString() } : undefined,
+              photoConsent: photoConsent ? { granted: true, timestamp: new Date().toISOString() } : undefined,
+            },
           },
         } as any,
       },
@@ -121,9 +140,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Log student creation
-    logCreate(parentEmail, "Student", user.id, `Added student: ${name} (${email})`, undefined, {
+    logCreate(parentEmail, "Student", user.id, `Added student: ${name} (username: ${providedUsername})`, undefined, {
       studentName: name,
-      email,
+      username: providedUsername,
       ageGroup,
     }).catch(() => {});
 
@@ -131,18 +150,18 @@ export async function POST(request: NextRequest) {
     createNotification(
       parentEmail,
       "Student Added Successfully! 🎉",
-      `${name} has been added to your account. Email: ${email}`,
+      `${name} has been added to your account. Username: ${providedUsername}`,
       "student_added",
       "/dashboard/parent/students",
-      { studentId: user.id, studentName: name, email }
+      { studentId: user.id, studentName: name, username: providedUsername }
     );
 
-    return NextResponse.json({ status: "ok", user, credentials: { password, email } });
+    return NextResponse.json({ status: "ok", user, credentials: { password, username: providedUsername } });
   } catch (err: any) {
     console.error("[students] create failed", err);
     const msg =
       err?.code === "P2002" || err?.message?.includes("Unique constraint")
-        ? "Email already taken"
+        ? "Username already taken"
         : err?.message || "Could not create student";
     return NextResponse.json({ error: msg }, { status: 500 });
   }

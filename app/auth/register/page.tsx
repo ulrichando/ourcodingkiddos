@@ -15,12 +15,29 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isOver18, setIsOver18] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToCoppa, setAgreedToCoppa] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const nameValue = name.trim();
     const emailValue = email.trim().toLowerCase();
     const passwordValue = password;
+
+    // Validate consent checkboxes
+    if (!isOver18) {
+      setError("You must be 18 or older to create a parent account.");
+      return;
+    }
+    if (!agreedToTerms) {
+      setError("You must agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
+    if (!agreedToCoppa) {
+      setError("You must acknowledge COPPA compliance to create an account for your children.");
+      return;
+    }
 
     setError(null);
     setLoading(true);
@@ -150,6 +167,86 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Consent Checkboxes */}
+            <div className="space-y-3 pt-2">
+              {/* Age Verification */}
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={isOver18}
+                    onChange={(e) => setIsOver18(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-500 transition-all flex items-center justify-center">
+                    {isOver18 && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                  I confirm that I am <strong>18 years of age or older</strong> and am creating this account as a parent/guardian.
+                </span>
+              </label>
+
+              {/* Terms Agreement */}
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 peer-checked:border-purple-500 peer-checked:bg-purple-500 transition-all flex items-center justify-center">
+                    {agreedToTerms && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                  I agree to the{" "}
+                  <Link href="/terms" className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+
+              {/* COPPA Consent */}
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={agreedToCoppa}
+                    onChange={(e) => setAgreedToCoppa(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 peer-checked:border-emerald-500 peer-checked:bg-emerald-500 transition-all flex items-center justify-center">
+                    {agreedToCoppa && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                  I understand that Coding Kiddos is{" "}
+                  <Link href="/safety" className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium">
+                    COPPA compliant
+                  </Link>{" "}
+                  and I consent to the collection of my child&apos;s information as described in the Privacy Policy.
+                </span>
+              </label>
+            </div>
+
             {/* Error Message */}
             {error && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 animate-fade-in">
@@ -233,16 +330,6 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
-            By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-purple-600 dark:text-purple-400 hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-purple-600 dark:text-purple-400 hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
         </div>
       </div>
     </main>

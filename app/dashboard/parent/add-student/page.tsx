@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, User, Sparkles, Camera, X, ChevronLeft, ChevronRight, Gamepad2, Globe, Smartphone, Cpu, Brain, Palette, Eye, Ear, Hand, BookOpen, AlertTriangle } from "lucide-react";
+import { User, Sparkles, Camera, X, ChevronLeft, ChevronRight, Gamepad2, Globe, Smartphone, Cpu, Brain, Palette, Eye, Ear, Hand, BookOpen, Shield, Info } from "lucide-react";
 import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
 import ParentLayout from "../../../../components/parent/ParentLayout";
@@ -38,13 +37,16 @@ export default function AddStudentPage() {
 
   // Profile fields
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
-  const [birthday, setBirthday] = useState("");
   const [avatar, setAvatar] = useState(avatars[0]);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [useCustomImage, setUseCustomImage] = useState(false);
+
+  // COPPA consent (required for children under 13)
+  const [coppaConsent, setCoppaConsent] = useState(false);
+  const [photoConsent, setPhotoConsent] = useState(false);
 
   // Preferences fields
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -68,7 +70,16 @@ export default function AddStudentPage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const ageGroup = age ? (Number(age) <= 10 ? "AGES_7_10" : Number(age) <= 14 ? "AGES_11_14" : "AGES_15_18") : null;
+  const isUnder13 = age ? Number(age) < 13 : false;
   const progress = (step / totalSteps) * 100;
+
+  // Generate username from name
+  const suggestedUsername = useMemo(() => {
+    if (!name) return "";
+    const base = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const random = Math.floor(Math.random() * 1000);
+    return `${base}${random}`;
+  }, [name]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,11 +118,23 @@ export default function AddStudentPage() {
     );
   };
 
-  const canProceedStep1 = name && email && password && age;
-  const canProceedStep2 = true; // Optional fields
+  // Validation: COPPA consent required for children under 13
+  const coppaValid = !isUnder13 || coppaConsent;
+  const photoConsentValid = !useCustomImage || photoConsent;
+  const canProceedStep1 = name && username && password && age && coppaValid && photoConsentValid;
   const canSubmit = canProceedStep1;
 
   async function handleSubmit() {
+    // Validate COPPA consent for children under 13
+    if (isUnder13 && !coppaConsent) {
+      setError("COPPA consent is required for children under 13.");
+      return;
+    }
+    if (useCustomImage && !photoConsent) {
+      setError("Photo consent is required to upload a custom image.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -122,10 +145,9 @@ export default function AddStudentPage() {
         credentials: "include",
         body: JSON.stringify({
           name,
+          username: username.trim().toLowerCase(),
           password,
-          email: email.trim().toLowerCase(),
           age: Number(age),
-          birthday: birthday || undefined,
           ageGroup,
           avatar: useCustomImage ? null : avatar,
           profileImage: useCustomImage ? profileImage : null,
@@ -135,6 +157,8 @@ export default function AddStudentPage() {
           learningGoals: learningGoals || undefined,
           parentNotes: parentNotes || undefined,
           accessibility,
+          coppaConsent: isUnder13 ? coppaConsent : undefined,
+          photoConsent: useCustomImage ? photoConsent : undefined,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -142,7 +166,7 @@ export default function AddStudentPage() {
       const creds = json?.credentials;
       setSuccess(
         creds
-          ? `Student created! Email: ${creds.email} • Password: ${creds.password}`
+          ? `Student created! Username: ${creds.username} • Password: ${creds.password}`
           : "Student account created successfully!"
       );
       setTimeout(() => router.push("/dashboard/parent"), 1500);
@@ -193,15 +217,15 @@ export default function AddStudentPage() {
             {/* Step 1: Profile Information */}
             {step === 1 && (
               <div className="space-y-6">
-                {/* Important Notice */}
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                {/* COPPA Notice */}
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 flex gap-3">
+                  <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
-                      Important: Use your child&apos;s email address
+                    <p className="text-sm text-emerald-800 dark:text-emerald-200 font-medium">
+                      COPPA Compliant Account Creation
                     </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                      Your child will use this email and password to log in to their student account. Do not use your parent email here.
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">
+                      Your child will log in with a username (not email). All notifications go to your parent email for privacy protection.
                     </p>
                   </div>
                 </div>
@@ -281,23 +305,27 @@ export default function AddStudentPage() {
                     Student&apos;s First Name *
                     <input
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (!username) setUsername(suggestedUsername);
+                      }}
                       placeholder="Enter first name"
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
                   </label>
 
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
-                    Child&apos;s Email (for login) *
+                    Username (for login) *
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="yourchild@example.com"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))}
+                      placeholder={suggestedUsername || "e.g., coder123"}
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-normal">
-                      Use your child&apos;s email address, not yours. This will be their login email.
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal flex items-center gap-1">
+                      <Info className="w-3 h-3" />
+                      Letters and numbers only. No email needed for children.
                     </p>
                   </label>
 
@@ -307,12 +335,12 @@ export default function AddStudentPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="e.g., coder123"
+                      placeholder="Create a password"
                       className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600 dark:placeholder:text-slate-400"
                     />
                   </label>
 
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1 sm:col-span-2">
                     Age *
                     <select
                       value={age}
@@ -321,25 +349,83 @@ export default function AddStudentPage() {
                     >
                       <option value="">Select age</option>
                       {ageOptions.map((a) => (
-                        <option key={a} value={a}>{a}</option>
+                        <option key={a} value={a}>{a} years old</option>
                       ))}
                     </select>
                   </label>
-
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 space-y-1">
-                    Birthday (Optional)
-                    <input
-                      type="date"
-                      value={birthday}
-                      onChange={(e) => setBirthday(e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-purple-600"
-                    />
-                  </label>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
-                  <strong>Remember:</strong> After creating the account, share the email and password with your child so they can log in to their student portal.
-                </p>
+                {/* COPPA Consent for children under 13 */}
+                {isUnder13 && (
+                  <div className="space-y-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
+                      <Shield className="w-5 h-5" />
+                      <p className="font-semibold text-sm">COPPA Parental Consent Required</p>
+                    </div>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      Since your child is under 13, federal law (COPPA) requires your explicit consent before we can collect their information.
+                    </p>
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <div className="relative flex-shrink-0 mt-0.5">
+                        <input
+                          type="checkbox"
+                          checked={coppaConsent}
+                          onChange={(e) => setCoppaConsent(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-5 h-5 rounded border-2 border-blue-400 dark:border-blue-500 bg-white dark:bg-slate-700 peer-checked:border-blue-600 peer-checked:bg-blue-600 transition-all flex items-center justify-center">
+                          {coppaConsent && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-sm text-blue-800 dark:text-blue-200">
+                        I am the parent/guardian of this child and I consent to the collection of their first name, age, learning progress, and code projects as described in the{" "}
+                        <a href="/privacy" target="_blank" className="underline font-medium">Privacy Policy</a> and{" "}
+                        <a href="/safety" target="_blank" className="underline font-medium">Child Safety Policy</a>.
+                      </span>
+                    </label>
+                  </div>
+                )}
+
+                {/* Photo Consent (if custom image uploaded) */}
+                {useCustomImage && (
+                  <div className="space-y-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                      <Camera className="w-5 h-5" />
+                      <p className="font-semibold text-sm">Photo Consent Required</p>
+                    </div>
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <div className="relative flex-shrink-0 mt-0.5">
+                        <input
+                          type="checkbox"
+                          checked={photoConsent}
+                          onChange={(e) => setPhotoConsent(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-5 h-5 rounded border-2 border-amber-400 dark:border-amber-500 bg-white dark:bg-slate-700 peer-checked:border-amber-600 peer-checked:bg-amber-600 transition-all flex items-center justify-center">
+                          {photoConsent && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-sm text-amber-800 dark:text-amber-200">
+                        I consent to uploading this photo of my child. The photo will only be visible to instructors and is stored securely.
+                      </span>
+                    </label>
+                  </div>
+                )}
+
+                <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg flex items-start gap-2">
+                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <strong>How login works:</strong> Your child will log in with their username and password. All notifications and communications will be sent to your parent email ({session?.user?.email}).
+                  </div>
+                </div>
               </div>
             )}
 
