@@ -13,7 +13,6 @@ type AnalyticsData = {
     totalCourses: number;
     totalLessons: number;
     totalEnrollments: number;
-    activeSubscriptions: number;
     totalRevenue: number;
   };
   activity: {
@@ -84,7 +83,6 @@ export default function AnalyticsPage() {
     { label: "Instructors", value: data.overview.totalInstructors, icon: Award, color: "bg-amber-500" },
     { label: "Total Courses", value: data.overview.totalCourses, icon: BookOpen, color: "bg-emerald-500" },
     { label: "Total Enrollments", value: data.overview.totalEnrollments, icon: TrendingUp, color: "bg-cyan-500" },
-    { label: "Active Subscriptions", value: data.overview.activeSubscriptions, icon: Activity, color: "bg-indigo-500" },
     { label: "Total Revenue", value: `$${(data.overview.totalRevenue / 100).toFixed(2)}`, icon: DollarSign, color: "bg-green-500" },
   ];
 

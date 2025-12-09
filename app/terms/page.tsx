@@ -93,30 +93,29 @@ export default function TermsPage() {
             </div>
           </section>
 
-          {/* Subscriptions and Payments */}
+          {/* Programs and Payments */}
           <section className="space-y-4">
             <div className="flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">3. Subscriptions and Payments</h2>
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">3. Programs and Payments</h2>
             </div>
 
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">3.1 Subscription Plans</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">3.1 Program Enrollment</h3>
                 <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
-                  <li>We offer various subscription plans with different features and pricing</li>
-                  <li>Some content may be available for free; premium content requires a paid subscription</li>
-                  <li>Plan details, pricing, and features are available on our pricing page</li>
+                  <li>We offer various coding programs with different features and pricing</li>
+                  <li>Programs are purchased with a one-time payment (no recurring subscriptions)</li>
+                  <li>Program details, pricing, and features are available on our programs page</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">3.2 Billing and Renewal</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">3.2 One-Time Payments</h3>
                 <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
-                  <li>Subscriptions are billed in advance on a recurring basis (monthly or annually)</li>
-                  <li>Subscriptions automatically renew unless cancelled before the renewal date</li>
-                  <li>You can cancel your subscription at any time through your account settings</li>
-                  <li>Cancellation takes effect at the end of the current billing period</li>
+                  <li>All program enrollments are one-time payments with no automatic renewals</li>
+                  <li>Once enrolled, you have access to all sessions included in the program</li>
+                  <li>Additional programs can be purchased separately at any time</li>
                 </ul>
               </div>
 
@@ -125,8 +124,7 @@ export default function TermsPage() {
                 <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
                   <li>Payments are processed securely through Stripe</li>
                   <li>We do not store your credit card information</li>
-                  <li>You authorize us to charge your payment method for all fees due</li>
-                  <li>Failed payments may result in suspension of your account</li>
+                  <li>You authorize us to charge your payment method for the program fee</li>
                 </ul>
               </div>
 
@@ -137,7 +135,7 @@ export default function TermsPage() {
                   Refund requests should be submitted to{" "}
                   <a href={`mailto:${emails.support}`} className="text-purple-600 dark:text-purple-400 hover:underline">
                     {emails.support}
-                  </a>. Refunds are granted at our discretion and may be prorated based on usage.
+                  </a>. Refunds are granted at our discretion and may be prorated based on sessions completed.
                 </p>
               </div>
             </div>

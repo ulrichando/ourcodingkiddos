@@ -80,7 +80,7 @@ export default function PrivacyPage() {
               <li><strong>Provide Services:</strong> Deliver coding courses, track progress, and issue certificates</li>
               <li><strong>Account Management:</strong> Create and manage user accounts</li>
               <li><strong>Communication:</strong> Send important updates, respond to inquiries, and provide customer support</li>
-              <li><strong>Payment Processing:</strong> Process subscriptions and transactions through Stripe</li>
+              <li><strong>Payment Processing:</strong> Process program payments and transactions through Stripe</li>
               <li><strong>Improvement:</strong> Analyze usage patterns to improve our platform and content</li>
               <li><strong>Security:</strong> Protect against fraud and unauthorized access</li>
               <li><strong>Legal Compliance:</strong> Comply with applicable laws and regulations</li>

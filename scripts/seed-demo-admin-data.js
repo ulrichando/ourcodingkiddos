@@ -1,4 +1,4 @@
-// Seeds demo parent, student, courses, and subscription data for the admin dashboard.
+// Seeds demo parent, student, and courses data for the admin dashboard.
 // Requires DATABASE_URL to be set (already in .env.local). Safe to re-run (uses upserts).
 
 const { PrismaClient } = require("@prisma/client");
@@ -69,34 +69,6 @@ async function main() {
       create: { ...course, description: course.title, isPublished: true },
     });
   }
-
-  // Subscription for the parent
-  await prisma.subscription.upsert({
-    where: { stripeSubscriptionId: "demo-subscription-1" },
-    update: {
-      userId: parentUser.id,
-      status: "ACTIVE",
-      priceId: "demo-price",
-      planType: "FAMILY",
-      priceCents: 0,
-      stripeCustomerId: "demo-customer",
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      parentEmail: parentUser.email,
-    },
-    create: {
-      userId: parentUser.id,
-      status: "ACTIVE",
-      priceId: "demo-price",
-      planType: "FAMILY",
-      priceCents: 0,
-      stripeSubscriptionId: "demo-subscription-1",
-      stripeCustomerId: "demo-customer",
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      parentEmail: parentUser.email,
-    },
-  });
 
   console.log("Seed complete:");
   console.log("- Parent:", parentUser.email);

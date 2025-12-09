@@ -48,7 +48,7 @@ const faqs = [
   {
     category: "getting-started",
     question: "How do I create an account?",
-    answer: "Click 'Get Started' or 'Sign Up' on our website. Parents create a parent account first, then can add student profiles for their children. This allows parents to monitor progress and manage subscriptions while giving kids a safe, supervised learning environment."
+    answer: "Click 'Get Started' or 'Sign Up' on our website. Parents create a parent account first, then can add student profiles for their children. This allows parents to monitor progress and manage enrollments while giving kids a safe, supervised learning environment."
   },
   {
     category: "getting-started",
@@ -128,8 +128,8 @@ const faqs = [
   },
   {
     category: "account",
-    question: "Can I switch between subscription plans?",
-    answer: "Yes, you can upgrade or downgrade your plan at any time. Upgrades take effect immediately with prorated billing. Downgrades take effect at the start of your next billing cycle."
+    question: "How do program enrollments work?",
+    answer: "Our programs use one-time payments - no recurring subscriptions. When you enroll in a program, you pay once and get full access to all sessions included. You can enroll in additional programs at any time."
   },
 
   // Technical Support
