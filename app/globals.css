@@ -15,6 +15,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Scroll offset for sections with IDs - accounts for fixed header */
+section[id] {
+  scroll-margin-top: 80px;
+}
+
 html.dark {
   background-color: #020617; /* dark mode - slate-950 */
 }

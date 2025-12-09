@@ -1380,34 +1380,10 @@ const stats = [
   { value: "50+", label: "Expert Instructors", icon: GraduationCap },
 ];
 
-// Section navigation items
-const sectionNavItems = [
-  { id: "courses", label: "Courses", icon: Target },
-  { id: "placement-test", label: "Skill Test", icon: Brain },
-  { id: "features", label: "Why Us", icon: Zap },
-  { id: "testimonials", label: "Reviews", icon: Heart },
-];
-
 export default function HomePage() {
   const [selectedAge, setSelectedAge] = useState("kids");
   const [showVideo, setShowVideo] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
-  const [showScrollNav, setShowScrollNav] = useState(false);
   const [gameMode, setGameMode] = useState<GameMode>('snake');
-
-  // Smooth scroll to section - must be inside component for proper event handling
-  const scrollToSection = useCallback((sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const offset = 100; // Account for sticky header
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - offset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
-  }, []);
 
   // Auto-scale hero content to fit any screen
   const heroContentRef = useRef<HTMLDivElement>(null);
@@ -1463,55 +1439,9 @@ export default function HomePage() {
     };
   }, [calculateHeroScale]);
 
-  // Scroll spy using Intersection Observer - more reliable than scroll events
-  useEffect(() => {
-    // Show/hide navigation based on scroll position
-    const handleScroll = () => {
-      setShowScrollNav(window.scrollY > 400);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial check
-
-    // Intersection Observer for section detection
-    const observerOptions = {
-      root: null, // viewport
-      rootMargin: "-40% 0px -50% 0px", // Creates a "middle zone" for activation
-      threshold: 0,
-    };
-
-    const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      // Find the entry that is intersecting
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    // Observe all section elements
-    sectionNavItems.forEach((item) => {
-      const element = document.getElementById(item.id);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      observer.disconnect();
-    };
-  }, []);
-
-  // Scroll to top
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   return (
-    <main className="min-h-screen bg-white dark:bg-slate-950 overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-slate-950 overflow-x-hidden">
       {/* Video Modal */}
       {showVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
@@ -1801,8 +1731,8 @@ export default function HomePage() {
 
         {/* Scroll Indicator - Absolutely positioned at bottom of hero */}
         <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 z-30 flex justify-center pointer-events-auto">
-          <button
-            onClick={() => scrollToSection('courses')}
+          <a
+            href="#courses"
             aria-label="Scroll down to explore courses"
             className="group flex flex-col items-center gap-1.5 transition-all duration-300 hover:scale-105"
           >
@@ -1819,7 +1749,7 @@ export default function HomePage() {
                 aria-hidden="true"
               />
             </div>
-          </button>
+          </a>
         </div>
 
         {/* CSS Animations */}
@@ -1912,94 +1842,6 @@ export default function HomePage() {
           }
         `}</style>
       </section>
-
-      {/* Floating Side Navigation - Scroll Spy */}
-      <div
-        className={`fixed right-4 top-1/2 -translate-y-1/2 z-40 transition-all duration-300 hidden md:block ${
-          showScrollNav ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10 pointer-events-none"
-        }`}
-      >
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-full py-3 px-2 shadow-lg border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col items-center gap-3">
-            {sectionNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeSection === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className={`group relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
-                    isActive
-                      ? "bg-violet-600 text-white shadow-md scale-110"
-                      : "text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30"
-                  }`}
-                  aria-label={item.label}
-                >
-                  <Icon className="w-5 h-5" />
-                  {/* Tooltip */}
-                  <span className="absolute right-full mr-3 px-2 py-1 rounded-md bg-slate-900 dark:bg-slate-700 text-white text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    {item.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Bottom Navigation - with integrated scroll to top */}
-      <div
-        className={`fixed bottom-0 left-0 right-0 z-40 md:hidden transition-all duration-300 ${
-          showScrollNav ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700 shadow-lg safe-area-pb">
-          <div className="flex items-center justify-around py-2 px-2">
-            {sectionNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeSection === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all ${
-                    isActive
-                      ? "text-violet-600 dark:text-violet-400"
-                      : "text-slate-500 dark:text-slate-400"
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 ${isActive ? "scale-110" : ""} transition-transform`} />
-                  <span className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}>
-                    {item.label}
-                  </span>
-                  {isActive && (
-                    <span className="absolute -top-0.5 w-1 h-1 rounded-full bg-violet-600" />
-                  )}
-                </button>
-              );
-            })}
-            {/* Scroll to Top - integrated in mobile nav */}
-            <button
-              onClick={scrollToTop}
-              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all"
-            >
-              <ChevronUp className="w-5 h-5" />
-              <span className="text-[10px] font-medium">Top</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Scroll to Top Button - Desktop only, positioned above chatbot */}
-      <button
-        onClick={scrollToTop}
-        className={`fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-violet-600 hover:bg-violet-700 text-white shadow-lg hidden md:flex items-center justify-center transition-all duration-300 ${
-          showScrollNav ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
-        }`}
-        aria-label="Scroll to top"
-      >
-        <ChevronUp className="w-6 h-6" />
-      </button>
 
       {/* Stats Section */}
       <section className="py-12 px-4 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
@@ -2561,6 +2403,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
