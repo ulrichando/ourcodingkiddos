@@ -99,7 +99,7 @@ export default function ParentDashboardPage() {
     const startDate = new Date(cls.start);
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour default
     const formatDate = (d: Date) => d.toISOString().replace(/-|:|\.\d+/g, "").slice(0, 15) + "Z";
-    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cls.title)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent("Coding class at Our Coding Kiddos")}`;
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cls.title)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent("Coding class at Coding Kiddos")}`;
     window.open(googleUrl, "_blank");
   };
 

@@ -51,10 +51,10 @@ const defaultTemplates: EmailTemplate[] = [
   {
     id: "welcome",
     name: "Welcome Email",
-    subject: "Welcome to Our Coding Kiddos! 🎉",
+    subject: "Welcome to Coding Kiddos! 🎉",
     body: `Dear {{name}},
 
-Welcome to Our Coding Kiddos! We're thrilled to have you join our community of young coders.
+Welcome to Coding Kiddos! We're thrilled to have you join our community of young coders.
 
 Your account has been created successfully. Here's what you can do next:
 
@@ -66,7 +66,7 @@ Your account has been created successfully. Here's what you can do next:
 We can't wait to see your child start their coding adventure!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "onboarding",
   },
   {
@@ -75,7 +75,7 @@ The Our Coding Kiddos Team`,
     subject: "Getting Started - A Guide for Parents",
     body: `Dear {{name}},
 
-Thank you for choosing Our Coding Kiddos for your child's coding education!
+Thank you for choosing Coding Kiddos for your child's coding education!
 
 Here's a quick guide to help you get the most out of our platform:
 
@@ -94,14 +94,14 @@ All our instructors are background-checked, and we maintain strict online safety
 Need help? Reply to this email or contact us at support@ourcodingkiddos.com.
 
 Happy coding!
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "onboarding",
   },
   // Engagement Templates
   {
     id: "inactive",
     name: "We Miss You",
-    subject: "We miss you at Our Coding Kiddos! 💜",
+    subject: "We miss you at Coding Kiddos! 💜",
     body: `Hi {{name}},
 
 We noticed it's been a while since your last visit. We miss having you in our coding community!
@@ -118,7 +118,7 @@ Your progress is saved and waiting for you. Ready to continue your coding journe
 Log in now and pick up where you left off!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "engagement",
   },
   {
@@ -141,7 +141,7 @@ Tips to stay motivated:
 Keep up the amazing work!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "engagement",
   },
   {
@@ -164,14 +164,14 @@ What's next?
 We're so proud of your progress!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "engagement",
   },
   // Announcement Templates
   {
     id: "announcement",
     name: "General Announcement",
-    subject: "Important Update from Our Coding Kiddos",
+    subject: "Important Update from Coding Kiddos",
     body: `Dear {{name}},
 
 We have an important announcement to share with you:
@@ -183,7 +183,7 @@ If you have any questions, please don't hesitate to reach out to us.
 Thank you for being part of our community!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "announcement",
   },
   {
@@ -209,7 +209,7 @@ This course is perfect for {{age_group}} and includes:
 Enroll today and start learning!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "announcement",
   },
   {
@@ -233,7 +233,7 @@ This is a great opportunity to learn, connect, and have fun with fellow young co
 RSVP by replying to this email or through your dashboard.
 
 See you there!
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "announcement",
   },
   // Administrative Templates
@@ -261,7 +261,7 @@ A Zoom link will be sent 30 minutes before the class.
 If you need to reschedule, please contact us at least 24 hours in advance.
 
 See you in class!
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "scheduling",
   },
   {
@@ -285,13 +285,13 @@ Please make sure you:
 The Zoom link will be sent 30 minutes before the class.
 
 See you tomorrow!
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "scheduling",
   },
   {
     id: "payment-receipt",
     name: "Payment Receipt",
-    subject: "Payment Confirmation - Our Coding Kiddos",
+    subject: "Payment Confirmation - Coding Kiddos",
     body: `Dear {{name}},
 
 Thank you for your payment! Here are the details:
@@ -305,10 +305,10 @@ Transaction ID: {{transaction_id}}
 
 Your purchase is now active. If you have any questions about your purchase, please contact our billing team at billing@ourcodingkiddos.com.
 
-Thank you for choosing Our Coding Kiddos!
+Thank you for choosing Coding Kiddos!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "billing",
   },
   {
@@ -335,7 +335,7 @@ What's next?
 Keep up the amazing work!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "achievement",
   },
   // Feedback Templates
@@ -345,7 +345,7 @@ The Our Coding Kiddos Team`,
     subject: "We'd Love Your Feedback! 💬",
     body: `Dear {{name}},
 
-We hope you're enjoying your experience at Our Coding Kiddos!
+We hope you're enjoying your experience at Coding Kiddos!
 
 Your feedback is incredibly important to us. It helps us improve and provide the best learning experience for all our students.
 
@@ -360,16 +360,16 @@ Simply reply to this email with your feedback, or visit our feedback form in you
 Thank you for helping us improve!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "feedback",
   },
   {
     id: "newsletter",
     name: "Monthly Newsletter",
-    subject: "Our Coding Kiddos Newsletter - {{month}} {{year}}",
+    subject: "Coding Kiddos Newsletter - {{month}} {{year}}",
     body: `Dear {{name}},
 
-Here's what's happening at Our Coding Kiddos this month:
+Here's what's happening at Coding Kiddos this month:
 
 📰 NEWSLETTER - {{month}} {{year}}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -389,7 +389,7 @@ Here's what's happening at Our Coding Kiddos this month:
 Thank you for being part of our coding community!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     category: "newsletter",
   },
 ];

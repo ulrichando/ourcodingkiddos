@@ -151,7 +151,7 @@ export async function POST(request: Request) {
                 Hi ${parentName || "there"},
               </p>
               <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                Thank you for expressing interest in Our Coding Kiddos for <strong>${childName}</strong>! We're excited to help your child start their coding journey.
+                Thank you for expressing interest in Coding Kiddos for <strong>${childName}</strong>! We're excited to help your child start their coding journey.
               </p>
               <p style="color: #475569; font-size: 16px; line-height: 1.6;">
                 Our team will reach out to you shortly to discuss available programs and schedule a free trial class.
@@ -173,9 +173,9 @@ export async function POST(request: Request) {
 
     await sendEmail({
       to: parentEmail,
-      subject: `Thanks for Your Interest - Our Coding Kiddos`,
+      subject: `Thanks for Your Interest - Coding Kiddos`,
       html: parentEmailHtml,
-      text: `Hi ${parentName || "there"},\n\nThank you for expressing interest in Our Coding Kiddos for ${childName}! We're excited to help your child start their coding journey.\n\nOur team will reach out to you shortly to discuss available programs and schedule a free trial class.\n\nExplore our programs: https://ourcodingkiddos.com/programs\n\nQuestions? Reply to this email or chat with us on our website!`,
+      text: `Hi ${parentName || "there"},\n\nThank you for expressing interest in Coding Kiddos for ${childName}! We're excited to help your child start their coding journey.\n\nOur team will reach out to you shortly to discuss available programs and schedule a free trial class.\n\nExplore our programs: https://ourcodingkiddos.com/programs\n\nQuestions? Reply to this email or chat with us on our website!`,
     });
 
     return NextResponse.json({

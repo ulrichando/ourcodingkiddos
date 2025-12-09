@@ -6,12 +6,12 @@ import { sendEmail } from "@/lib/email";
 
 // Available sender addresses
 const SENDER_ADDRESSES = [
-  { value: "support@ourcodingkiddos.com", label: "Support", displayName: "Our Coding Kiddos Support" },
-  { value: "billing@ourcodingkiddos.com", label: "Billing", displayName: "Our Coding Kiddos Billing" },
-  { value: "info@ourcodingkiddos.com", label: "Info", displayName: "Our Coding Kiddos" },
-  { value: "hello@ourcodingkiddos.com", label: "Hello", displayName: "Our Coding Kiddos" },
-  { value: "safety@ourcodingkiddos.com", label: "Safety", displayName: "Our Coding Kiddos Safety" },
-  { value: "partnerships@ourcodingkiddos.com", label: "Partnerships", displayName: "Our Coding Kiddos Partnerships" },
+  { value: "support@ourcodingkiddos.com", label: "Support", displayName: "Coding Kiddos Support" },
+  { value: "billing@ourcodingkiddos.com", label: "Billing", displayName: "Coding Kiddos Billing" },
+  { value: "info@ourcodingkiddos.com", label: "Info", displayName: "Coding Kiddos" },
+  { value: "hello@ourcodingkiddos.com", label: "Hello", displayName: "Coding Kiddos" },
+  { value: "safety@ourcodingkiddos.com", label: "Safety", displayName: "Coding Kiddos Safety" },
+  { value: "partnerships@ourcodingkiddos.com", label: "Partnerships", displayName: "Coding Kiddos Partnerships" },
 ];
 
 // GET - Return available sender addresses

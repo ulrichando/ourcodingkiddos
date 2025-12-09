@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { CurriculumContent } from "./CurriculumContent";
 
 export const metadata: Metadata = {
-  title: "Coding Curriculum - Structured Learning Paths | Our Coding Kiddos",
+  title: "Coding Curriculum - Structured Learning Paths | Coding Kiddos",
   description:
     "Explore our structured coding curriculum for kids and teens ages 7-18. From beginner to advanced, learn Python, Web Development, Game Design, AI & more with live instruction.",
   keywords: [
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     "web development for teens",
   ],
   openGraph: {
-    title: "Coding Curriculum - Our Coding Kiddos",
+    title: "Coding Curriculum - Coding Kiddos",
     description:
       "Structured learning paths from beginner to advanced. Live instruction, hands-on projects, certificates.",
     url: "https://ourcodingkiddos.com/curriculum",

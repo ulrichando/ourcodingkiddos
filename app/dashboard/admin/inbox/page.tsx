@@ -311,10 +311,10 @@ export default function AdminInboxPage() {
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
           <p style="color: #64748b; font-size: 14px;">
             Best regards,<br>
-            <strong>Our Coding Kiddos Support Team</strong>
+            <strong>Coding Kiddos Support Team</strong>
           </p>
           <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 20px;">
-            &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+            &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
           </p>
         </div>
       `;
@@ -365,10 +365,10 @@ export default function AdminInboxPage() {
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
           <p style="color: #64748b; font-size: 14px;">
             Best regards,<br>
-            <strong>Our Coding Kiddos Team</strong>
+            <strong>Coding Kiddos Team</strong>
           </p>
           <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 20px;">
-            &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+            &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
           </p>
         </div>
       `;

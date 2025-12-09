@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     // Send welcome email
     await sendEmail({
       to: normalizedEmail,
-      subject: "Welcome to Our Coding Kiddos Newsletter!",
+      subject: "Welcome to Coding Kiddos Newsletter!",
       html: `
         <!DOCTYPE html>
         <html>
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
             <h1 style="color: #1e293b; font-size: 24px; margin-bottom: 16px;">You're In!</h1>
 
-            <p>Thanks for subscribing to the Our Coding Kiddos newsletter!</p>
+            <p>Thanks for subscribing to the Coding Kiddos newsletter!</p>
 
             <p>You'll be the first to know about:</p>
             <ul style="color: #475569;">
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
             <p>In the meantime, check out our <a href="${process.env.NEXTAUTH_URL || "https://ourcodingkiddos.com"}/courses" style="color: #8B5CF6;">courses</a> and see how we can help your child start their coding journey!</p>
 
             <p>Happy coding!</p>
-            <p><strong>The Our Coding Kiddos Team</strong></p>
+            <p><strong>The Coding Kiddos Team</strong></p>
 
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
@@ -98,14 +98,14 @@ export async function POST(request: Request) {
           </body>
         </html>
       `,
-      text: `Welcome to Our Coding Kiddos Newsletter!
+      text: `Welcome to Coding Kiddos Newsletter!
 
 Thanks for subscribing! You'll be the first to know about new courses, coding tips, special offers, and more.
 
 Check out our courses: ${process.env.NEXTAUTH_URL || "https://ourcodingkiddos.com"}/courses
 
 Happy coding!
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     });
 
     return NextResponse.json({

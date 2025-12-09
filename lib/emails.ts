@@ -1,5 +1,5 @@
 /**
- * Centralized email configuration for Our Coding Kiddos
+ * Centralized email configuration for Coding Kiddos
  *
  * This file contains all email addresses used across the website.
  * Update these values to change emails site-wide.
@@ -17,7 +17,7 @@
 // =============================================================================
 
 // Sender email - for transactional emails (welcome, password reset, notifications)
-export const SENDER_EMAIL = process.env.EMAIL_FROM || "Our Coding Kiddos <hello@ourcodingkiddos.com>";
+export const SENDER_EMAIL = process.env.EMAIL_FROM || "Coding Kiddos <hello@ourcodingkiddos.com>";
 export const SENDER_EMAIL_ADDRESS = "hello@ourcodingkiddos.com";
 
 // Reply-To email - where replies to transactional emails should go

@@ -178,7 +178,7 @@ export default function CookiePolicyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Children&apos;s Privacy</h2>
             <p className="text-slate-700 dark:text-slate-300">
-              Our Coding Kiddos is designed for children, and we take their privacy seriously. We minimize the
+              Coding Kiddos is designed for children, and we take their privacy seriously. We minimize the
               use of tracking cookies for users identified as students. Marketing cookies are not used for
               student accounts, and analytics data is collected in an anonymized manner.
             </p>

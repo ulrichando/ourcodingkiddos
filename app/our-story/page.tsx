@@ -41,7 +41,7 @@ const timeline = [
   {
     year: "2023",
     title: "Coding Kiddos is Born",
-    description: "Ulrich officially launched Our Coding Kiddos, combining his software engineering expertise with a passion for education. The first students enrolled and the journey began.",
+    description: "Ulrich officially launched Coding Kiddos, combining his software engineering expertise with a passion for education. The first students enrolled and the journey began.",
     icon: Rocket,
   },
   {

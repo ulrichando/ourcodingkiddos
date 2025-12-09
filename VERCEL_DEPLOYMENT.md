@@ -28,7 +28,7 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 STRIPE_SECRET_KEY=your-stripe-secret
 STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
 EMAIL_SERVER=smtp://username:password@smtp.example.com:587
-EMAIL_FROM="Our Coding Kiddos <hello@ourcodingkiddos.com>"
+EMAIL_FROM="Coding Kiddos <hello@ourcodingkiddos.com>"
 ```
 
 ## Common Deployment Errors

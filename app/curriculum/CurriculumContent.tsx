@@ -170,7 +170,7 @@ const testimonials = [
     rating: 5,
   },
   {
-    quote: "Our Coding Kiddos helped my son discover his passion for programming. He's now considering a career in tech!",
+    quote: "Coding Kiddos helped my son discover his passion for programming. He's now considering a career in tech!",
     author: "Jennifer L.",
     role: "Parent of 16-year-old",
     rating: 5,
@@ -1076,7 +1076,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold mb-4">What Parents Are Saying</h2>
             <p className="text-slate-600 dark:text-slate-400">
-              Join thousands of satisfied families who trust Our Coding Kiddos.
+              Join thousands of satisfied families who trust Coding Kiddos.
             </p>
           </div>
 
@@ -1114,7 +1114,7 @@ export function CurriculumContent({ programs, sessions }: CurriculumContentProps
             Ready to Start Your Child&apos;s Coding Journey?
           </h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-            Join thousands of students learning to code with Our Coding Kiddos. Try risk-free with
+            Join thousands of students learning to code with Coding Kiddos. Try risk-free with
             our 4-session money-back guarantee.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

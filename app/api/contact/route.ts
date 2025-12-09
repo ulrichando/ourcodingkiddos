@@ -78,7 +78,7 @@ export async function POST(request: Request) {
             </div>
 
             <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 20px;">
-              This message was sent from the Our Coding Kiddos contact form.
+              This message was sent from the Coding Kiddos contact form.
             </p>
           </body>
         </html>
@@ -107,7 +107,7 @@ Reply directly to this email to respond to ${name}.`,
     // Send confirmation email to user
     const confirmResult = await sendEmail({
       to: email,
-      subject: "We received your message - Our Coding Kiddos",
+      subject: "We received your message - Coding Kiddos",
       html: `
         <!DOCTYPE html>
         <html>
@@ -139,14 +139,14 @@ Reply directly to this email to respond to ${name}.`,
               <li>Chat with Cody, our AI assistant, on the website</li>
             </ul>
 
-            <p>Thank you for your interest in Our Coding Kiddos!</p>
+            <p>Thank you for your interest in Coding Kiddos!</p>
 
-            <p>Best regards,<br><strong>The Our Coding Kiddos Team</strong></p>
+            <p>Best regards,<br><strong>The Coding Kiddos Team</strong></p>
 
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
             <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-              &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+              &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
             </p>
           </body>
         </html>
@@ -166,10 +166,10 @@ In the meantime, you can:
 - Browse our courses catalog: ${process.env.NEXTAUTH_URL || "https://ourcodingkiddos.com"}/courses
 - Chat with Cody, our AI assistant, on the website
 
-Thank you for your interest in Our Coding Kiddos!
+Thank you for your interest in Coding Kiddos!
 
 Best regards,
-The Our Coding Kiddos Team`,
+The Coding Kiddos Team`,
     });
 
     if (!confirmResult.success) {

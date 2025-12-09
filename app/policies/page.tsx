@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Policies | Our Coding Kiddos",
-  description: "Class policies including attendance, missed classes, and catch-up sessions at Our Coding Kiddos.",
+  title: "Policies | Coding Kiddos",
+  description: "Class policies including attendance, missed classes, and catch-up sessions at Coding Kiddos.",
 };
 
 export default function PoliciesPage() {

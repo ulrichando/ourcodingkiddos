@@ -7,12 +7,12 @@ import { emails } from "@/lib/emails";
 
 // Map of valid from addresses
 const FROM_ADDRESSES: Record<string, string> = {
-  hello: `Our Coding Kiddos <${emails.senderAddress}>`,
-  support: `Our Coding Kiddos Support <${emails.support}>`,
-  billing: `Our Coding Kiddos Billing <${emails.billing}>`,
-  safety: `Our Coding Kiddos Safety <${emails.safety}>`,
-  info: `Our Coding Kiddos <${emails.info}>`,
-  partnerships: `Our Coding Kiddos Partnerships <${emails.partnerships}>`,
+  hello: `Coding Kiddos <${emails.senderAddress}>`,
+  support: `Coding Kiddos Support <${emails.support}>`,
+  billing: `Coding Kiddos Billing <${emails.billing}>`,
+  safety: `Coding Kiddos Safety <${emails.safety}>`,
+  info: `Coding Kiddos <${emails.info}>`,
+  partnerships: `Coding Kiddos Partnerships <${emails.partnerships}>`,
 };
 
 export async function POST(request: Request) {
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="color-scheme" content="light">
   <meta name="supported-color-schemes" content="light">
-  <title>Our Coding Kiddos</title>
+  <title>Coding Kiddos</title>
   <!--[if mso]>
   <style type="text/css">
     table {border-collapse: collapse;}
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
                 </tr>
                 <tr>
                   <td align="center">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2;">Our Coding Kiddos</h1>
+                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2;">Coding Kiddos</h1>
                   </td>
                 </tr>
                 <tr>
@@ -199,7 +199,7 @@ export async function POST(request: Request) {
                 <tr>
                   <td align="center">
                     <p style="margin: 0; color: #94a3b8; font-size: 12px;">
-                      &copy; ${currentYear} Our Coding Kiddos. All rights reserved.
+                      &copy; ${currentYear} Coding Kiddos. All rights reserved.
                     </p>
                   </td>
                 </tr>

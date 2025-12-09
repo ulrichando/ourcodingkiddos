@@ -94,7 +94,7 @@ export async function sendPasswordResetEmail(
 
         <p>Hi ${name || "there"},</p>
 
-        <p>We received a request to reset your password for your Our Coding Kiddos account. Click the button below to create a new password:</p>
+        <p>We received a request to reset your password for your Coding Kiddos account. Click the button below to create a new password:</p>
 
         <div style="text-align: center; margin: 30px 0;">
           <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #8B5CF6, #EC4899); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Reset Password</a>
@@ -108,7 +108,7 @@ export async function sendPasswordResetEmail(
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+          &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
         </p>
       </body>
     </html>
@@ -128,7 +128,7 @@ If you didn't request this, you can safely ignore this email.`;
 
   return sendEmail({
     to: email,
-    subject: "Reset Your Password - Our Coding Kiddos",
+    subject: "Reset Your Password - Coding Kiddos",
     html,
     text,
   });
@@ -153,11 +153,11 @@ export async function sendWelcomeEmail(
           <div style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #8B5CF6, #EC4899); border-radius: 16px; line-height: 60px; color: white; font-weight: bold; font-size: 24px;">CK</div>
         </div>
 
-        <h1 style="color: #1e293b; font-size: 24px; margin-bottom: 16px;">Welcome to Our Coding Kiddos!</h1>
+        <h1 style="color: #1e293b; font-size: 24px; margin-bottom: 16px;">Welcome to Coding Kiddos!</h1>
 
         <p>Hi ${name || "there"},</p>
 
-        <p>Thank you for joining Our Coding Kiddos! We're excited to help your child start their coding journey.</p>
+        <p>Thank you for joining Coding Kiddos! We're excited to help your child start their coding journey.</p>
 
         <p>Here's what you can do next:</p>
         <ul style="color: #475569;">
@@ -174,22 +174,22 @@ export async function sendWelcomeEmail(
         <p>If you have any questions, feel free to reach out to our support team.</p>
 
         <p>Happy coding!</p>
-        <p><strong>The Our Coding Kiddos Team</strong></p>
+        <p><strong>The Coding Kiddos Team</strong></p>
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+          &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
         </p>
       </body>
     </html>
   `;
 
-  const text = `Welcome to Our Coding Kiddos!
+  const text = `Welcome to Coding Kiddos!
 
 Hi ${name || "there"},
 
-Thank you for joining Our Coding Kiddos! We're excited to help your child start their coding journey.
+Thank you for joining Coding Kiddos! We're excited to help your child start their coding journey.
 
 Here's what you can do next:
 - Add your child's profile to get started
@@ -202,11 +202,11 @@ Visit your dashboard: ${process.env.NEXTAUTH_URL || "https://ourcodingkiddos.com
 If you have any questions, feel free to reach out to our support team.
 
 Happy coding!
-The Our Coding Kiddos Team`;
+The Coding Kiddos Team`;
 
   return sendEmail({
     to: email,
-    subject: "Welcome to Our Coding Kiddos!",
+    subject: "Welcome to Coding Kiddos!",
     html,
     text,
   });
@@ -261,12 +261,12 @@ export async function sendClassReminderEmail(
         ` : ""}
 
         <p>See you there!</p>
-        <p><strong>The Our Coding Kiddos Team</strong></p>
+        <p><strong>The Coding Kiddos Team</strong></p>
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+          &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
         </p>
       </body>
     </html>
@@ -284,7 +284,7 @@ When: ${formattedTime}
 ${meetingLink ? `Join here: ${meetingLink}` : ""}
 
 See you there!
-The Our Coding Kiddos Team`;
+The Coding Kiddos Team`;
 
   return sendEmail({
     to: email,
@@ -318,7 +318,7 @@ export async function sendVerificationEmail(
 
         <p>Hi ${name || "there"},</p>
 
-        <p>Thank you for registering with Our Coding Kiddos! Please verify your email address by clicking the button below:</p>
+        <p>Thank you for registering with Coding Kiddos! Please verify your email address by clicking the button below:</p>
 
         <div style="text-align: center; margin: 30px 0;">
           <a href="${verifyUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #8B5CF6, #EC4899); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Verify Email Address</a>
@@ -332,7 +332,7 @@ export async function sendVerificationEmail(
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+          &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
         </p>
       </body>
     </html>
@@ -342,7 +342,7 @@ export async function sendVerificationEmail(
 
 Hi ${name || "there"},
 
-Thank you for registering with Our Coding Kiddos! Please verify your email address by clicking this link:
+Thank you for registering with Coding Kiddos! Please verify your email address by clicking this link:
 
 ${verifyUrl}
 
@@ -352,7 +352,7 @@ If you didn't create an account, you can safely ignore this email.`;
 
   return sendEmail({
     to: email,
-    subject: "Verify Your Email - Our Coding Kiddos",
+    subject: "Verify Your Email - Coding Kiddos",
     html,
     text,
   });
@@ -393,12 +393,12 @@ export async function sendNotificationEmail(
         </div>
         ` : ""}
 
-        <p><strong>The Our Coding Kiddos Team</strong></p>
+        <p><strong>The Coding Kiddos Team</strong></p>
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
         <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-          &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+          &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
         </p>
       </body>
     </html>
@@ -412,7 +412,7 @@ ${message}
 
 ${actionUrl ? `\n${actionText || "Click here"}: ${actionUrl}` : ""}
 
-The Our Coding Kiddos Team`;
+The Coding Kiddos Team`;
 
   return sendEmail({
     to: email,

@@ -31,7 +31,7 @@ export default function PrivacyPage() {
           {/* Introduction */}
           <section className="space-y-3">
             <p className="text-slate-700 dark:text-slate-300">
-              Our Coding Kiddos (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting the privacy of our users,
+              Coding Kiddos (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting the privacy of our users,
               especially children. This Privacy Policy explains how we collect, use, disclose, and safeguard your
               information when you visit our website and use our services.
             </p>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Children&apos;s Privacy (COPPA Compliance)</h2>
             </div>
             <p className="text-slate-700 dark:text-slate-300">
-              Our Coding Kiddos is designed for children, and we take their privacy very seriously.
+              Coding Kiddos is designed for children, and we take their privacy very seriously.
               We comply with the Children&apos;s Online Privacy Protection Act (COPPA).
             </p>
             <ul className="list-disc pl-5 space-y-2 text-slate-700 dark:text-slate-300">

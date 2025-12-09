@@ -24,8 +24,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://ourcodingkiddos.com"),
   title: {
-    default: "Our Coding Kiddos - Online Coding Classes for Kids Ages 7-18",
-    template: "%s | Our Coding Kiddos"
+    default: "Coding Kiddos - Online Coding Classes for Kids Ages 7-18",
+    template: "%s | Coding Kiddos"
   },
   description: "Top-rated online coding classes for kids ages 7-18. Learn JavaScript, Python, HTML, CSS, and game development with live instructors. Fun, interactive programming courses designed for young beginners. Enroll today!",
   keywords: [
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
     "kids learn to code",
     "interactive coding courses"
   ],
-  authors: [{ name: "Our Coding Kiddos", url: "https://ourcodingkiddos.com" }],
-  creator: "Our Coding Kiddos",
-  publisher: "Our Coding Kiddos",
+  authors: [{ name: "Coding Kiddos", url: "https://ourcodingkiddos.com" }],
+  creator: "Coding Kiddos",
+  publisher: "Coding Kiddos",
   robots: {
     index: true,
     follow: true,
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Our Coding Kiddos"
+    title: "Coding Kiddos"
   },
   formatDetection: {
     telephone: false
@@ -83,15 +83,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://ourcodingkiddos.com",
-    siteName: "Our Coding Kiddos",
-    title: "Our Coding Kiddos - Online Coding Classes for Kids Ages 7-18",
+    siteName: "Coding Kiddos",
+    title: "Coding Kiddos - Online Coding Classes for Kids Ages 7-18",
     description: "Top-rated online coding classes for kids. Learn JavaScript, Python, HTML & game development with live instructors. Fun, interactive lessons for ages 7-18!",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Our Coding Kiddos - Online Coding Classes for Kids",
+        alt: "Coding Kiddos - Online Coding Classes for Kids",
       }
     ],
   },

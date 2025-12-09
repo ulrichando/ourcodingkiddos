@@ -97,8 +97,8 @@ export default function Footer() {
       </div>
 
       {/* Main Footer Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-12 gap-8 lg:gap-12">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 tablet:px-8 py-12 tablet:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-6 tablet:gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-3">
             <Link href="/" className="inline-flex items-center gap-3 group mb-6">
@@ -166,7 +166,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-500">
-              © {currentYear} Our Coding Kiddos. All rights reserved.
+              © {currentYear} Coding Kiddos. All rights reserved.
             </p>
             <div className="flex items-center gap-6">
               <Link

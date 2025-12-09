@@ -142,7 +142,7 @@ export default function ParentReviewsPage() {
               Share Your Experience
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Help other families by sharing your experience with Our Coding Kiddos
+              Help other families by sharing your experience with Coding Kiddos
             </p>
           </div>
         </div>

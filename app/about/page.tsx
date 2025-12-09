@@ -182,7 +182,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto animate-fade-in-up delay-100">
-            Our Coding Kiddos was founded with a simple mission: make coding accessible,
+            Coding Kiddos was founded with a simple mission: make coding accessible,
             fun, and safe for every child. We believe that every kid deserves the chance
             to discover the magic of creating with code.
           </p>
@@ -286,7 +286,7 @@ export default function AboutPage() {
             </span>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">What We Stand For</h2>
             <p className="text-slate-600 dark:text-slate-400">
-              These core principles guide everything we do at Our Coding Kiddos.
+              These core principles guide everything we do at Coding Kiddos.
             </p>
           </div>
 
@@ -382,7 +382,7 @@ export default function AboutPage() {
             Ready to Start Your Child&apos;s Coding Journey?
           </h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-            Join thousands of families who&apos;ve discovered the joy of coding with Our Coding Kiddos.
+            Join thousands of families who&apos;ve discovered the joy of coding with Coding Kiddos.
             Start with a free course today!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

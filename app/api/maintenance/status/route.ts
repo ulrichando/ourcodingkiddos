@@ -22,7 +22,7 @@ export async function GET() {
       maintenanceMode: settings?.maintenanceMode ?? false,
       maintenanceMessage: settings?.maintenanceMessage ?? null,
       maintenanceEndTime: settings?.maintenanceEndTime?.toISOString() ?? null,
-      siteName: settings?.siteName ?? "Our Coding Kiddos",
+      siteName: settings?.siteName ?? "Coding Kiddos",
     }, {
       headers: {
         // Cache for 10 seconds to reduce DB hits while staying responsive
@@ -36,7 +36,7 @@ export async function GET() {
       maintenanceMode: false,
       maintenanceMessage: null,
       maintenanceEndTime: null,
-      siteName: "Our Coding Kiddos",
+      siteName: "Coding Kiddos",
     });
   }
 }

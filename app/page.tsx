@@ -1707,9 +1707,9 @@ export default function HomePage() {
             style={{ transform: `scale(${heroScale})` }}
           >
             <div className="max-w-7xl mx-auto w-full">
-              <div className="grid lg:grid-cols-2 items-center gap-6 lg:gap-12">
+              <div className="grid tablet:grid-cols-2 items-center gap-6 tablet:gap-8 lg:gap-12">
                 {/* Left Column - Text Content */}
-                <div className="text-center lg:text-left flex flex-col gap-3 sm:gap-4">
+                <div className="text-center tablet:text-left flex flex-col gap-3 sm:gap-4">
                   {/* Small Badge - Theme adaptive */}
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/10 dark:bg-white/10 border border-slate-900/20 dark:border-white/20 backdrop-blur-sm">
                     <span className="relative flex h-2.5 w-2.5">
@@ -1728,13 +1728,13 @@ export default function HomePage() {
                   </h1>
 
                   {/* Subheadline - Slightly larger */}
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-slate-600 dark:text-white/80 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+                  <p className="text-base sm:text-lg tablet:text-lg lg:text-xl xl:text-2xl text-slate-600 dark:text-white/80 max-w-xl mx-auto tablet:mx-0 leading-relaxed font-medium">
                     Expert-led 1:1 coding classes with game-based learning.
                     Kids build real projects while having fun.
                   </p>
 
                   {/* CTA Row - Bigger buttons */}
-                  <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 pt-4 pointer-events-auto">
+                  <div className="flex flex-col sm:flex-row items-center tablet:items-start gap-4 pt-4 pointer-events-auto">
                     <Link
                       href="/free-trial"
                       className="group relative inline-flex items-center gap-2.5 px-6 py-3 sm:px-8 sm:py-4 rounded-full bg-violet-600 dark:bg-white text-white dark:text-slate-900 font-bold text-base sm:text-lg shadow-2xl shadow-violet-600/25 dark:shadow-white/25 hover:shadow-violet-600/50 dark:hover:shadow-white/50 transition-all duration-300 hover:-translate-y-1 hover:scale-105 w-full sm:w-auto justify-center overflow-hidden"
@@ -1756,7 +1756,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Compact Trust Row - Hidden on very small screens */}
-                  <div className="hidden sm:flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2">
+                  <div className="hidden sm:flex flex-wrap items-center justify-center tablet:justify-start gap-4 text-xs text-slate-500 dark:text-white/50 pt-2">
                     <span className="flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                       No credit card
@@ -1772,14 +1772,16 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Right Column - Interactive Code Playground */}
-                <div className="hidden lg:block pointer-events-auto">
-                  <InteractiveCodePlayground onGameChange={setGameMode} />
+                {/* Right Column - Interactive Code Playground (visible on tablet and up) */}
+                <div className="hidden tablet:block pointer-events-auto">
+                  <div className="tablet:scale-[0.85] lg:scale-100 origin-top-right">
+                    <InteractiveCodePlayground onGameChange={setGameMode} />
+                  </div>
                 </div>
               </div>
 
-              {/* Mobile Code Playground - Viewport-responsive */}
-              <div className="lg:hidden pointer-events-auto mt-4 sm:mt-6">
+              {/* Mobile Code Playground - Viewport-responsive (hidden on tablet and up) */}
+              <div className="tablet:hidden pointer-events-auto mt-4 sm:mt-6">
                 <div className="origin-top scale-[0.72] sm:scale-[0.82] -mb-16 sm:-mb-12">
                   <InteractiveCodePlayground onGameChange={setGameMode} />
                 </div>

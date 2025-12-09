@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact Us - Get Help with Coding Classes | Support",
-  description: "Get in touch with Our Coding Kiddos support team. Questions about enrollments, classes, billing, or technical support? We reply within 24 hours. Safe and private.",
+  description: "Get in touch with Coding Kiddos support team. Questions about enrollments, classes, billing, or technical support? We reply within 24 hours. Safe and private.",
   keywords: ["contact coding school", "coding support", "enrollment help", "coding class questions", "customer support"],
   openGraph: {
     title: "Contact Us - Get Help with Coding Classes",

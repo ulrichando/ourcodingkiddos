@@ -32,7 +32,7 @@ const defaultResponses: CannedResponse[] = [
   {
     id: "1",
     title: "Welcome Greeting",
-    content: "Hi! Welcome to Our Coding Kiddos! How can I help you today? I'm here to answer any questions about our coding programs for kids.",
+    content: "Hi! Welcome to Coding Kiddos! How can I help you today? I'm here to answer any questions about our coding programs for kids.",
     category: "Greetings",
     usageCount: 45,
   },

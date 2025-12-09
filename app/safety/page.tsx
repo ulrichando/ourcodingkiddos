@@ -58,7 +58,7 @@ export default function SafetyPage() {
           {/* Introduction */}
           <section className="space-y-3">
             <p className="text-slate-700 dark:text-slate-300">
-              At Our Coding Kiddos, the safety and well-being of children is our highest priority.
+              At Coding Kiddos, the safety and well-being of children is our highest priority.
               We are committed to creating a secure online learning environment where kids can explore
               coding without worry. This page explains our safety measures and how we comply with the
               Children&apos;s Online Privacy Protection Act (COPPA).
@@ -163,7 +163,7 @@ export default function SafetyPage() {
             <ol className="list-decimal pl-5 space-y-3 text-slate-700 dark:text-slate-300">
               <li>
                 <strong>Parent Account Creation:</strong> Only adults (18+) can create a parent
-                account on Our Coding Kiddos.
+                account on Coding Kiddos.
               </li>
               <li>
                 <strong>Student Profile Setup:</strong> Parents create student profiles for their

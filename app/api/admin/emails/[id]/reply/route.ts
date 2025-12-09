@@ -7,13 +7,13 @@ import { sendEmail } from "@/lib/email";
 // Get display name based on email address
 function getEmailDisplayName(email: string): string {
   const address = email.toLowerCase();
-  if (address.includes("support")) return "Our Coding Kiddos Support";
-  if (address.includes("billing")) return "Our Coding Kiddos Billing";
-  if (address.includes("info")) return "Our Coding Kiddos";
-  if (address.includes("hello")) return "Our Coding Kiddos";
-  if (address.includes("safety")) return "Our Coding Kiddos Safety";
-  if (address.includes("partner")) return "Our Coding Kiddos Partnerships";
-  return "Our Coding Kiddos";
+  if (address.includes("support")) return "Coding Kiddos Support";
+  if (address.includes("billing")) return "Coding Kiddos Billing";
+  if (address.includes("info")) return "Coding Kiddos";
+  if (address.includes("hello")) return "Coding Kiddos";
+  if (address.includes("safety")) return "Coding Kiddos Safety";
+  if (address.includes("partner")) return "Coding Kiddos Partnerships";
+  return "Coding Kiddos";
 }
 
 // POST /api/admin/emails/[id]/reply - Send a reply to the email

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   description: "Explore our structured learning programs designed for kids ages 7-18. One-time payment, expert instructors, live sessions. Python, Web Development, Roblox, and more.",
   keywords: ["coding programs for kids", "structured coding courses", "kids programming", "learn to code", "coding bootcamp for kids"],
   openGraph: {
-    title: "Learning Programs - Our Coding Kiddos",
+    title: "Learning Programs - Coding Kiddos",
     description: "Structured learning programs with live instruction. One-time payment, no subscriptions.",
     url: "https://ourcodingkiddos.com/programs",
     type: "website",
@@ -177,7 +177,7 @@ export default async function ProgramsPage({
                 of <span className="font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{totalCount}</span> programs
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 tablet:grid-cols-2 lg:grid-cols-3 gap-4 tablet:gap-6">
                 {programs.map((program, index) => (
                   <ProgramCard key={program.id} program={program} featured={program.isFeatured} index={index} />
                 ))}
@@ -203,7 +203,7 @@ export default async function ProgramsPage({
           <p className="text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto">
             Select the program length that fits your child&apos;s goals and schedule. Each session builds on the previous one.
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 tablet:grid-cols-4 gap-4 tablet:gap-6">
             {[
               { sessions: 6, description: "Quick Start", ideal: "Intro to coding basics", color: "from-emerald-500 to-teal-500" },
               { sessions: 12, description: "Foundation", ideal: "Build real projects", color: "from-blue-500 to-cyan-500" },

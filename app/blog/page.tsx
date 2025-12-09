@@ -15,10 +15,10 @@ import {
 
 export const metadata: Metadata = {
   title: "Blog - Coding Tips, News & Student Spotlights",
-  description: "Read the latest coding tips, tutorials, student success stories, and news from Our Coding Kiddos. Learn from expert instructors and get inspired by young coders.",
+  description: "Read the latest coding tips, tutorials, student success stories, and news from Coding Kiddos. Learn from expert instructors and get inspired by young coders.",
   keywords: ["coding blog", "kids coding tips", "programming tutorials", "student spotlight", "coding news"],
   openGraph: {
-    title: "Blog - Our Coding Kiddos",
+    title: "Blog - Coding Kiddos",
     description: "Coding tips, tutorials, and inspiring stories from young coders.",
     url: "https://ourcodingkiddos.com/blog",
     type: "website",
@@ -124,7 +124,7 @@ export default async function BlogPage() {
           </h1>
 
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto animate-fade-in-up delay-100">
-            Coding tips, tutorials, student success stories, and the latest news from Our Coding Kiddos.
+            Coding tips, tutorials, student success stories, and the latest news from Coding Kiddos.
           </p>
         </div>
       </section>

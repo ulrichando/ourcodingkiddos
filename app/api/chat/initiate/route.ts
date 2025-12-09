@@ -98,7 +98,7 @@ export async function POST(request: Request) {
         <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">Message from Our Coding Kiddos</h1>
+              <h1 style="color: white; margin: 0; font-size: 24px;">Message from Coding Kiddos</h1>
             </div>
             <div style="background: white; padding: 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
               <div style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
@@ -124,9 +124,9 @@ export async function POST(request: Request) {
 
     await sendEmail({
       to: visitorEmail,
-      subject: `Message from Our Coding Kiddos Support`,
+      subject: `Message from Coding Kiddos Support`,
       html: emailHtml,
-      text: `Message from Our Coding Kiddos Support:\n\n${message.trim()}\n\nVisit our website to reply: https://ourcodingkiddos.com`,
+      text: `Message from Coding Kiddos Support:\n\n${message.trim()}\n\nVisit our website to reply: https://ourcodingkiddos.com`,
     });
 
     // Audit log for initiated conversation

@@ -1,6 +1,6 @@
 # Automated Test Report
 **Date**: 2025-12-01
-**Platform**: Our Coding Kiddos
+**Platform**: Coding Kiddos
 **Environment**: Development
 **Status**: ✅ **ALL TESTS PASSED**
 

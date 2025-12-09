@@ -123,7 +123,7 @@ export async function POST(request: Request) {
               <div style="background: white; padding: 30px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                 <div style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                   <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px;">From:</p>
-                  <p style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600;">Our Coding Kiddos Support Team</p>
+                  <p style="margin: 0 0 16px 0; color: #1e293b; font-size: 16px; font-weight: 600;">Coding Kiddos Support Team</p>
                   <p style="margin: 0 0 8px 0; color: #64748b; font-size: 14px;">Message:</p>
                   <p style="margin: 0; color: #1e293b; font-size: 16px; white-space: pre-wrap;">${message.trim()}</p>
                 </div>
@@ -144,9 +144,9 @@ export async function POST(request: Request) {
 
       await sendEmail({
         to: recipientEmail,
-        subject: "Reply from Our Coding Kiddos Support",
+        subject: "Reply from Coding Kiddos Support",
         html: emailHtml,
-        text: `New reply from Our Coding Kiddos Support:\n\n${message.trim()}\n\nVisit our website: https://ourcodingkiddos.com`,
+        text: `New reply from Coding Kiddos Support:\n\n${message.trim()}\n\nVisit our website: https://ourcodingkiddos.com`,
       });
     }
 

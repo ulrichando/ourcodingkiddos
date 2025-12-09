@@ -1,5 +1,5 @@
 # 🚀 Feature Proposals & Roadmap
-## Our Coding Kiddos Platform Enhancement Plan
+## Coding Kiddos Platform Enhancement Plan
 
 Last Updated: November 30, 2025
 

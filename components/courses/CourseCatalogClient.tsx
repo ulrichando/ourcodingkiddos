@@ -387,7 +387,7 @@ export default function CourseCatalogClient({ courses }: { courses: CatalogCours
               </button>
             </div>
           ) : (
-            <div ref={gridRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div ref={gridRef} className="grid sm:grid-cols-2 tablet:grid-cols-3 gap-4 tablet:gap-6">
               {paginatedCourses.map((course, index) => (
                 <Link key={course.id} href={`/courses/${course.slug}`}>
                   <div

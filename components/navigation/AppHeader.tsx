@@ -232,9 +232,9 @@ export default function AppHeader() {
             </span>
           </Link>
 
-          {/* Center Navigation */}
+          {/* Center Navigation - Show on tablet (768px) and above */}
           <nav ref={navRef} className="hidden md:flex items-center">
-            <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 rounded-full p-1">
+            <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 rounded-full p-1 tablet:p-0.5">
               {navGroups.map((group, groupIndex) => (
                 <div
                   key={group.label}
@@ -243,7 +243,7 @@ export default function AppHeader() {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <button
-                    className={`relative flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                    className={`relative flex items-center gap-1 px-3 tablet:px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
                       activeDropdown === group.label
                         ? "text-slate-900 dark:text-white"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -336,10 +336,10 @@ export default function AppHeader() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Search Trigger */}
+            {/* Search Trigger - Responsive width for tablets */}
             <button
               onClick={() => setCommandOpen(true)}
-              className="hidden md:flex items-center gap-2 h-9 w-52 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+              className="hidden md:flex items-center gap-2 h-9 w-40 tablet:w-44 lg:w-52 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
             >
               <Search className="h-4 w-4" />
               <span className="flex-1 text-left text-sm">Search...</span>

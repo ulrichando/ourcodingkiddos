@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   // Send welcome notification to new parent
   createNotification(
     email,
-    `Welcome to Our Coding Kiddos, ${name}!`,
+    `Welcome to Coding Kiddos, ${name}!`,
     "Get started by adding your first student and exploring our interactive coding courses!",
     "welcome",
     "/dashboard/parent/add-student",

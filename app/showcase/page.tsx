@@ -5,10 +5,10 @@ import { Eye, Heart, MessageCircle, Github, ExternalLink, Star, Code2, Rocket } 
 
 export const metadata: Metadata = {
   title: "Student Showcase - Amazing Projects by Young Coders",
-  description: "Explore incredible coding projects created by our talented students. See what kids can build when they learn to code with Our Coding Kiddos.",
+  description: "Explore incredible coding projects created by our talented students. See what kids can build when they learn to code with Coding Kiddos.",
   keywords: ["student projects", "kids coding projects", "coding showcase", "learn to code", "young programmers"],
   openGraph: {
-    title: "Student Showcase - Our Coding Kiddos",
+    title: "Student Showcase - Coding Kiddos",
     description: "Amazing projects built by our talented young coders.",
     url: "https://ourcodingkiddos.com/showcase",
     type: "website",
@@ -132,7 +132,7 @@ export default async function ShowcasePage() {
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to Build Your Own Project?</h2>
           <p className="text-lg text-white/80 mb-8">
-            Join Our Coding Kiddos and start creating amazing things with code!
+            Join Coding Kiddos and start creating amazing things with code!
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

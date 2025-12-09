@@ -2,7 +2,7 @@ export default function StructuredData() {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
-    "name": "Our Coding Kiddos",
+    "name": "Coding Kiddos",
     "alternateName": "Coding Kiddos",
     "description": "Top-rated online coding classes for kids ages 7-18. Learn JavaScript, Python, HTML, CSS, and game development with live instructors.",
     "url": "https://ourcodingkiddos.com",
@@ -31,7 +31,7 @@ export default function StructuredData() {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Our Coding Kiddos",
+    "name": "Coding Kiddos",
     "alternateName": "Coding Kiddos",
     "url": "https://ourcodingkiddos.com",
     "description": "Online coding classes for kids ages 7-18",
@@ -53,7 +53,7 @@ export default function StructuredData() {
     "description": "Learn to build interactive games using JavaScript. Perfect for kids who love gaming and want to create their own games!",
     "provider": {
       "@type": "EducationalOrganization",
-      "name": "Our Coding Kiddos",
+      "name": "Coding Kiddos",
       "url": "https://ourcodingkiddos.com"
     },
     "educationalLevel": "Beginner to Intermediate",
@@ -83,7 +83,7 @@ export default function StructuredData() {
     "description": "Start your coding journey with the fundamentals. Great for beginners who are new to programming!",
     "provider": {
       "@type": "EducationalOrganization",
-      "name": "Our Coding Kiddos",
+      "name": "Coding Kiddos",
       "url": "https://ourcodingkiddos.com"
     },
     "educationalLevel": "Beginner",
@@ -149,7 +149,7 @@ export default function StructuredData() {
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Our Coding Kiddos",
+    "name": "Coding Kiddos",
     "@id": "https://ourcodingkiddos.com",
     "url": "https://ourcodingkiddos.com",
     "image": "https://ourcodingkiddos.com/opengraph-image",

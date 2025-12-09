@@ -233,7 +233,7 @@ export default function MaintenancePage() {
         {/* Branding */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {status?.siteName || "Our Coding Kiddos"}
+            {status?.siteName || "Coding Kiddos"}
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
             Teaching kids to code, one line at a time

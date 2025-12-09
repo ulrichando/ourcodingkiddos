@@ -1,6 +1,6 @@
 # 🚀 Stripe Product Setup Guide
 
-This guide will walk you through creating the three subscription products needed for Our Coding Kiddos.
+This guide will walk you through creating the three subscription products needed for Coding Kiddos.
 
 ---
 
@@ -31,7 +31,7 @@ This guide will walk you through creating the three subscription products needed
 ### 2.2 Fill in Product Details
 
 **Product Information:**
-- **Name:** `Free Trial - Our Coding Kiddos`
+- **Name:** `Free Trial - Coding Kiddos`
 - **Description:** `7-day free trial with full access to all courses and features`
 - **Image:** (Optional) Upload your logo or product image
 
@@ -73,7 +73,7 @@ STRIPE_FREE_TRIAL_PRICE_ID="price_YOUR_PRICE_ID_HERE"
 ### 3.2 Fill in Product Details
 
 **Product Information:**
-- **Name:** `Monthly Plan - Our Coding Kiddos`
+- **Name:** `Monthly Plan - Coding Kiddos`
 - **Description:** `Monthly subscription with full access to all courses, live classes, and features`
 - **Image:** (Optional) Upload your logo
 
@@ -111,7 +111,7 @@ STRIPE_MONTHLY_PRICE_ID="price_YOUR_PRICE_ID_HERE"
 ### 4.2 Fill in Product Details
 
 **Product Information:**
-- **Name:** `Family Plan - Our Coding Kiddos`
+- **Name:** `Family Plan - Coding Kiddos`
 - **Description:** `Monthly family subscription for up to 3 students with full access to all features`
 - **Image:** (Optional) Upload your logo
 

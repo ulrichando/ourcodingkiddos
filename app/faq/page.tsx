@@ -32,8 +32,8 @@ const faqs = [
   // Getting Started
   {
     category: "getting-started",
-    question: "What is Our Coding Kiddos?",
-    answer: "Our Coding Kiddos is an online learning platform designed specifically for children ages 6-16 to learn coding. We offer interactive courses in HTML, CSS, JavaScript, Python, and Roblox Studio, with both self-paced lessons and live classes taught by certified instructors."
+    question: "What is Coding Kiddos?",
+    answer: "Coding Kiddos is an online learning platform designed specifically for children ages 6-16 to learn coding. We offer interactive courses in HTML, CSS, JavaScript, Python, and Roblox Studio, with both self-paced lessons and live classes taught by certified instructors."
   },
   {
     category: "getting-started",

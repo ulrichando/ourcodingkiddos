@@ -50,7 +50,7 @@ export default function RefundPolicyPage() {
           {/* Introduction */}
           <section className="space-y-3">
             <p className="text-slate-700 dark:text-slate-300">
-              At Our Coding Kiddos, we want you and your child to be completely satisfied with our
+              At Coding Kiddos, we want you and your child to be completely satisfied with our
               coding courses and programs. We understand that circumstances may change, and we strive
               to provide a fair and transparent refund policy for all our customers.
             </p>

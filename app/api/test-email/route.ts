@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     // Send test email
     const result = await sendEmail({
       to: testEmail,
-      subject: "Test Email - Our Coding Kiddos",
+      subject: "Test Email - Coding Kiddos",
       html: `
         <!DOCTYPE html>
         <html>
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
 
             <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-              &copy; ${new Date().getFullYear()} Our Coding Kiddos. All rights reserved.
+              &copy; ${new Date().getFullYear()} Coding Kiddos. All rights reserved.
             </p>
           </body>
         </html>

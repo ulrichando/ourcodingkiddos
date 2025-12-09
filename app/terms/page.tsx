@@ -31,8 +31,8 @@ export default function TermsPage() {
           {/* Introduction */}
           <section className="space-y-3">
             <p className="text-slate-700 dark:text-slate-300">
-              Welcome to Our Coding Kiddos! These Terms of Service (&quot;Terms&quot;) govern your access to and use of
-              the Our Coding Kiddos website, platform, and services (collectively, the &quot;Service&quot;). By accessing
+              Welcome to Coding Kiddos! These Terms of Service (&quot;Terms&quot;) govern your access to and use of
+              the Coding Kiddos website, platform, and services (collectively, the &quot;Service&quot;). By accessing
               or using our Service, you agree to be bound by these Terms.
             </p>
             <p className="text-slate-700 dark:text-slate-300">
@@ -45,7 +45,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">1. Definitions</h2>
             <ul className="list-disc pl-5 space-y-2 text-slate-700 dark:text-slate-300">
-              <li><strong>&quot;We,&quot; &quot;us,&quot; or &quot;our&quot;</strong> refers to Our Coding Kiddos.</li>
+              <li><strong>&quot;We,&quot; &quot;us,&quot; or &quot;our&quot;</strong> refers to Coding Kiddos.</li>
               <li><strong>&quot;You&quot; or &quot;user&quot;</strong> refers to the individual accessing or using the Service.</li>
               <li><strong>&quot;Parent&quot;</strong> refers to the parent or legal guardian of a Student.</li>
               <li><strong>&quot;Student&quot;</strong> refers to a child using our educational services.</li>
@@ -67,7 +67,7 @@ export default function TermsPage() {
                 <ul className="list-disc pl-5 space-y-1 text-slate-700 dark:text-slate-300">
                   <li>Parent/Guardian accounts must be created by individuals 18 years or older</li>
                   <li>Student accounts are for children and must be created by a Parent or Guardian</li>
-                  <li>Instructor accounts require verification and approval by Our Coding Kiddos</li>
+                  <li>Instructor accounts require verification and approval by Coding Kiddos</li>
                 </ul>
               </div>
 
@@ -188,7 +188,7 @@ export default function TermsPage() {
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">5.1 Our Content</h3>
                 <p className="text-slate-700 dark:text-slate-300">
                   All content on the Service, including courses, videos, text, graphics, logos, images, and software,
-                  is owned by Our Coding Kiddos or our licensors and is protected by copyright, trademark, and other
+                  is owned by Coding Kiddos or our licensors and is protected by copyright, trademark, and other
                   intellectual property laws.
                 </p>
               </div>
@@ -217,7 +217,7 @@ export default function TermsPage() {
                 <p className="text-slate-700 dark:text-slate-300">
                   All third-party company names, logos, and trademarks referenced on this site (including but not limited
                   to Google, Microsoft, Meta, Apple, Roblox, and others) are for illustrative and educational purposes only
-                  and remain the property of their respective owners. Our Coding Kiddos is not affiliated with, endorsed by,
+                  and remain the property of their respective owners. Coding Kiddos is not affiliated with, endorsed by,
                   or sponsored by these companies unless explicitly stated otherwise.
                 </p>
               </div>
@@ -360,7 +360,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">12. Entire Agreement</h2>
             <p className="text-slate-700 dark:text-slate-300">
               These Terms, together with our Privacy Policy and Cookie Policy, constitute the entire agreement
-              between you and Our Coding Kiddos regarding your use of the Service and supersede all prior
+              between you and Coding Kiddos regarding your use of the Service and supersede all prior
               agreements and understandings.
             </p>
           </section>

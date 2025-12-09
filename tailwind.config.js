@@ -7,6 +7,14 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    screens: {
+      'sm': '640px',
+      'md': '768px',      // iPad Mini portrait, tablets portrait
+      'tablet': '900px',  // iPad portrait, larger tablets
+      'lg': '1024px',     // iPad landscape
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       fontFamily: {
         display: ["'Baloo 2'", "Quicksand", "system-ui", "sans-serif"],

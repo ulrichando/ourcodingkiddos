@@ -51,7 +51,7 @@ export default function AcceptableUsePolicyPage() {
           {/* Introduction */}
           <section className="space-y-3">
             <p className="text-slate-700 dark:text-slate-300">
-              Our Coding Kiddos is committed to providing a safe, respectful, and productive learning
+              Coding Kiddos is committed to providing a safe, respectful, and productive learning
               environment for all students. This Acceptable Use Policy outlines the expected behavior
               and prohibited activities on our platform to ensure everyone can learn and grow together.
             </p>

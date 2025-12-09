@@ -67,7 +67,7 @@ export default function ParentBlogPage() {
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Blog</h1>
-          <p className="text-slate-600 dark:text-slate-400">News, tips, and updates from Our Coding Kiddos</p>
+          <p className="text-slate-600 dark:text-slate-400">News, tips, and updates from Coding Kiddos</p>
         </div>
 
         {/* Filters */}

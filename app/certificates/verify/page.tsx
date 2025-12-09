@@ -286,7 +286,7 @@ export default function CertificateVerifyPage() {
             Verify Certificate
           </h1>
           <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-            Enter the verification code from a Our Coding Kiddos certificate to confirm its authenticity.
+            Enter the verification code from a Coding Kiddos certificate to confirm its authenticity.
           </p>
         </div>
 
