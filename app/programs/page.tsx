@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Sparkles,
   Zap,
+  CalendarDays,
 } from "lucide-react";
 
 const PROGRAMS_PER_PAGE = 9;
@@ -271,6 +272,8 @@ interface ProgramCardProps {
     priceCents: number;
     originalPriceCents: number | null;
     features: any;
+    startDate: Date | null;
+    endDate: Date | null;
     _count: { enrollments: number };
   };
   featured?: boolean;
@@ -344,11 +347,19 @@ function ProgramCard({ program, featured, index = 0 }: ProgramCardProps) {
           {program.shortDescription || program.description}
         </p>
 
-        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400 mb-3">
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
             <span className="tabular-nums">{program.sessionCount} sessions</span>
           </div>
+          {program.startDate && program.endDate && (
+            <div className="flex items-center gap-1.5">
+              <CalendarDays className="w-4 h-4" />
+              <span>
+                {new Date(program.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })} - {new Date(program.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Enrollment Status */}

@@ -90,6 +90,8 @@ export async function POST(request: NextRequest) {
       originalPriceCents,
       features,
       curriculum,
+      startDate,
+      endDate,
       isFeatured,
       isPublished,
       courseIds,
@@ -131,6 +133,8 @@ export async function POST(request: NextRequest) {
         originalPriceCents,
         features: features || [],
         curriculum: curriculum || [],
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
         isFeatured: isFeatured || false,
         isPublished: isPublished || false,
         courses: courseIds?.length

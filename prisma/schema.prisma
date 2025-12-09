@@ -825,6 +825,8 @@ model Program {
   originalPriceCents Int?               // for showing discounts
   features          Json?               // array of feature strings
   curriculum        Json?               // outline of what's covered
+  startDate         DateTime?           // Program start date
+  endDate           DateTime?           // Program end date
   isFeatured        Boolean             @default(false)
   isPublished       Boolean             @default(false)
   orderIndex        Int?

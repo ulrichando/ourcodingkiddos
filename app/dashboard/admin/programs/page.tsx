@@ -65,6 +65,8 @@ export default function AdminProgramsPage() {
     priceCents: 34900,
     originalPriceCents: 0,
     features: [] as string[],
+    startDate: "",
+    endDate: "",
     isPublished: false,
     isFeatured: false,
   });
@@ -178,6 +180,8 @@ export default function AdminProgramsPage() {
       priceCents: 34900,
       originalPriceCents: 0,
       features: [],
+      startDate: "",
+      endDate: "",
       isPublished: false,
       isFeatured: false,
     });
@@ -204,6 +208,8 @@ export default function AdminProgramsPage() {
           priceCents: p.priceCents,
           originalPriceCents: p.originalPriceCents || 0,
           features: p.features || [],
+          startDate: p.startDate ? new Date(p.startDate).toISOString().split("T")[0] : "",
+          endDate: p.endDate ? new Date(p.endDate).toISOString().split("T")[0] : "",
           isPublished: p.isPublished,
           isFeatured: p.isFeatured,
         });
@@ -539,6 +545,32 @@ export default function AdminProgramsPage() {
                           ...prev,
                           originalPriceCents: parseFloat(e.target.value) * 100,
                         }))
+                      }
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                </div>
+
+                {/* Program Dates */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, startDate: e.target.value }))
+                      }
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, endDate: e.target.value }))
                       }
                       className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                     />
