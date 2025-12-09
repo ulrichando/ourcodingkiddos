@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import {
   Plus,
@@ -13,7 +14,11 @@ import {
   Clock,
   DollarSign,
   Users,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+
+const ITEMS_PER_PAGE = 10;
 
 interface Program {
   id: string;
@@ -50,6 +55,7 @@ export default function AdminProgramsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -76,6 +82,29 @@ export default function AdminProgramsPage() {
   useEffect(() => {
     fetchPrograms();
   }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (showModal) {
+      // Save current scroll position and lock scroll
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        // Restore scroll position when modal closes
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [showModal]);
 
   async function fetchPrograms() {
     try {
@@ -240,6 +269,16 @@ export default function AdminProgramsPage() {
       p.language.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPrograms.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedPrograms = filteredPrograms.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   return (
     <AdminLayout>
       <div className="max-w-7xl mx-auto">
@@ -272,7 +311,7 @@ export default function AdminProgramsPage() {
               placeholder="Search programs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
             />
           </div>
         </div>
@@ -308,14 +347,14 @@ export default function AdminProgramsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {filteredPrograms.length === 0 ? (
+                {paginatedPrograms.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
                       No programs found. Create your first program!
                     </td>
                   </tr>
                 ) : (
-                  filteredPrograms.map((program) => (
+                  paginatedPrograms.map((program) => (
                     <tr key={program.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -405,17 +444,75 @@ export default function AdminProgramsPage() {
                 )}
               </tbody>
             </table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, filteredPrograms.length)} of {filteredPrograms.length} programs
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === page
+                            ? "bg-purple-600 text-white"
+                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Create/Edit Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                  {editingProgram ? "Edit Program" : "Create New Program"}
-                </h2>
+        {showModal && createPortal(
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowModal(false);
+            }}
+          >
+            <div className="min-h-full flex items-center justify-center p-4">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                    {editingProgram ? "Edit Program" : "Create New Program"}
+                  </h2>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               <div className="p-6 space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
@@ -434,7 +531,7 @@ export default function AdminProgramsPage() {
                             .replace(/(^-|-$)/g, ""),
                         }));
                       }}
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -443,7 +540,7 @@ export default function AdminProgramsPage() {
                       type="text"
                       value={formData.slug}
                       onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -454,7 +551,7 @@ export default function AdminProgramsPage() {
                     value={formData.description}
                     onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                     rows={3}
-                    className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                    className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all resize-none"
                   />
                 </div>
 
@@ -464,7 +561,7 @@ export default function AdminProgramsPage() {
                     <select
                       value={formData.language}
                       onChange={(e) => setFormData((prev) => ({ ...prev, language: e.target.value }))}
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     >
                       <option value="PYTHON">Python</option>
                       <option value="JAVASCRIPT">JavaScript</option>
@@ -480,7 +577,7 @@ export default function AdminProgramsPage() {
                     <select
                       value={formData.ageGroup}
                       onChange={(e) => setFormData((prev) => ({ ...prev, ageGroup: e.target.value }))}
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     >
                       <option value="AGES_7_10">Ages 7-10</option>
                       <option value="AGES_11_14">Ages 11-14</option>
@@ -492,7 +589,7 @@ export default function AdminProgramsPage() {
                     <select
                       value={formData.level}
                       onChange={(e) => setFormData((prev) => ({ ...prev, level: e.target.value }))}
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     >
                       <option value="BEGINNER">Beginner</option>
                       <option value="INTERMEDIATE">Intermediate</option>
@@ -510,7 +607,7 @@ export default function AdminProgramsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, sessionCount: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -521,7 +618,7 @@ export default function AdminProgramsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, sessionDuration: parseInt(e.target.value) }))
                       }
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -532,7 +629,7 @@ export default function AdminProgramsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, priceCents: parseFloat(e.target.value) * 100 }))
                       }
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -546,7 +643,7 @@ export default function AdminProgramsPage() {
                           originalPriceCents: parseFloat(e.target.value) * 100,
                         }))
                       }
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -561,7 +658,7 @@ export default function AdminProgramsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, startDate: e.target.value }))
                       }
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [color-scheme:light] dark:[color-scheme:dark]"
                     />
                   </div>
                   <div>
@@ -572,7 +669,7 @@ export default function AdminProgramsPage() {
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, endDate: e.target.value }))
                       }
-                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [color-scheme:light] dark:[color-scheme:dark]"
                     />
                   </div>
                 </div>
@@ -586,8 +683,8 @@ export default function AdminProgramsPage() {
                       value={newFeature}
                       onChange={(e) => setNewFeature(e.target.value)}
                       placeholder="Add a feature..."
-                      className="flex-1 p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
-                      onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addFeature())}
+                      className="flex-1 p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFeature())}
                     />
                     <button
                       type="button"
@@ -601,7 +698,7 @@ export default function AdminProgramsPage() {
                     {formData.features.map((feature, i) => (
                       <span
                         key={i}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-sm"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-sm text-slate-700 dark:text-slate-200"
                       >
                         {feature}
                         <button onClick={() => removeFeature(i)} className="text-red-500">
@@ -613,47 +710,49 @@ export default function AdminProgramsPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isPublished}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, isPublished: e.target.checked }))
                       }
-                      className="rounded"
+                      className="rounded border-slate-300 dark:border-slate-600 text-purple-600 focus:ring-purple-500"
                     />
-                    <span className="text-sm">Published</span>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">Published</span>
                   </label>
-                  <label className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isFeatured}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, isFeatured: e.target.checked }))
                       }
-                      className="rounded"
+                      className="rounded border-slate-300 dark:border-slate-600 text-purple-600 focus:ring-purple-500"
                     />
-                    <span className="text-sm">Featured</span>
+                    <span className="text-sm text-slate-700 dark:text-slate-300">Featured</span>
                   </label>
                 </div>
               </div>
-              <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+              <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3 sticky bottom-0 bg-white dark:bg-slate-800">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold"
+                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold disabled:opacity-50 hover:brightness-110 transition-all"
                 >
                   {saving ? "Saving..." : editingProgram ? "Update" : "Create"}
                 </button>
               </div>
+              </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </AdminLayout>

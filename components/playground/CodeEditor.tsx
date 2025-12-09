@@ -31,28 +31,34 @@ const languageColors: Record<NonNullable<Props["language"]>, string> = {
 let pyodideInstance: any = null;
 let pyodideLoading = false;
 let pyodideLoadPromise: Promise<any> | null = null;
+let pyodideLoadError: string | null = null;
+
+const PYODIDE_VERSION = "0.27.0";
+const PYODIDE_CDN_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
 async function loadPyodideInternal(): Promise<any> {
   // Load Pyodide script if not already loaded
   if (!(window as any).loadPyodide) {
     const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+    script.src = `${PYODIDE_CDN_URL}pyodide.js`;
     script.async = true;
+    script.crossOrigin = "anonymous";
     await new Promise<void>((res, rej) => {
       script.onload = () => res();
-      script.onerror = () => rej(new Error("Failed to load Pyodide"));
+      script.onerror = () => rej(new Error("Failed to load Pyodide script. Please check your internet connection or try disabling ad blockers."));
       document.head.appendChild(script);
     });
   }
 
   // Initialize Pyodide
   return (window as any).loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+    indexURL: PYODIDE_CDN_URL,
   });
 }
 
 async function loadPyodide() {
   if (pyodideInstance) return pyodideInstance;
+  if (pyodideLoadError) throw new Error(pyodideLoadError);
   if (pyodideLoadPromise) return pyodideLoadPromise;
 
   pyodideLoading = true;
@@ -60,14 +66,21 @@ async function loadPyodide() {
     .then((instance) => {
       pyodideInstance = instance;
       pyodideLoading = false;
+      pyodideLoadError = null;
       return instance;
     })
     .catch((error) => {
       pyodideLoading = false;
+      pyodideLoadPromise = null; // Allow retry
+      pyodideLoadError = error.message;
       throw error;
     });
 
   return pyodideLoadPromise;
+}
+
+function resetPyodideError() {
+  pyodideLoadError = null;
 }
 
 export default function CodeEditor({
@@ -97,11 +110,27 @@ export default function CodeEditor({
   useEffect(() => {
     if (language === "python" && !pyodideInstance && !pyodideLoading) {
       setIsPyodideLoading(true);
+      setPythonError(null);
       loadPyodide()
         .then(() => setIsPyodideLoading(false))
-        .catch(() => setIsPyodideLoading(false));
+        .catch((err) => {
+          setIsPyodideLoading(false);
+          setPythonError(err.message);
+        });
     }
   }, [language]);
+
+  const retryLoadPyodide = () => {
+    resetPyodideError();
+    setPythonError(null);
+    setIsPyodideLoading(true);
+    loadPyodide()
+      .then(() => setIsPyodideLoading(false))
+      .catch((err) => {
+        setIsPyodideLoading(false);
+        setPythonError(err.message);
+      });
+  };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
@@ -330,8 +359,18 @@ export default function CodeEditor({
                 </div>
               ))}
               {pythonError && (
-                <div className="text-red-500 whitespace-pre-wrap">
-                  {pythonError}
+                <div className="space-y-3">
+                  <div className="text-red-500 whitespace-pre-wrap">
+                    {pythonError}
+                  </div>
+                  {pythonError.includes("Failed to load Pyodide") && (
+                    <button
+                      onClick={retryLoadPyodide}
+                      className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium transition-colors"
+                    >
+                      Retry Loading Python
+                    </button>
+                  )}
                 </div>
               )}
             </div>
