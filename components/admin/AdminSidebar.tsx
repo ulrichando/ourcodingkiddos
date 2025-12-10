@@ -30,6 +30,7 @@ import {
   Home,
   MessageSquare,
   Headphones,
+  Clock,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -48,6 +49,7 @@ const navigationGroups = [
       { href: "/dashboard/admin/instructors", label: "Instructors", icon: Award },
       { href: "/dashboard/admin/parents", label: "Parent Stats", icon: UserCircle },
       { href: "/dashboard/admin/support-staff", label: "Support Staff", icon: Headphones },
+      { href: "/dashboard/admin/pending-accounts", label: "Pending Accounts", icon: Clock },
     ]
   },
   {

@@ -50,21 +50,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update account status to REJECTED
-    await prisma.user.update({
-      where: { id: userId },
-      data: { accountStatus: "REJECTED" },
-    });
-
-    // Log the rejection
+    // Log the rejection before deleting
     logUpdate(
       session.user.email || "admin",
       "User",
       userId,
-      `Rejected ${user.role.toLowerCase()} account: ${user.name || user.email}`,
+      `Rejected and deleted ${user.role.toLowerCase()} account: ${user.name || user.email}`,
       session.user.id,
-      { oldStatus: "PENDING", newStatus: "REJECTED", reason }
+      { oldStatus: "PENDING", newStatus: "DELETED", reason }
     ).catch(() => {});
+
+    // Delete the user completely from the database
+    await prisma.user.delete({
+      where: { id: userId },
+    });
 
     // Send notification to the user
     createNotification(
