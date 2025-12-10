@@ -23,6 +23,7 @@ import {
   ChevronUp,
   ChevronDown,
   RotateCcw,
+  BookOpen,
 } from "lucide-react";
 
 // =====================================================
@@ -1364,7 +1365,7 @@ const stats = [
 
 export default function HomePage() {
   const [selectedAge, setSelectedAge] = useState("kids");
-  const [showVideo, setShowVideo] = useState(false);
+  // Video modal removed - no demo video available yet
   const [gameMode, setGameMode] = useState<GameMode>('snake');
 
   // Auto-scale hero content to fit any screen
@@ -1424,28 +1425,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 overflow-x-hidden">
-      {/* Video Modal */}
-      {showVideo && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm pt-24 px-4">
-          <div className="relative w-full max-w-4xl">
-            <button
-              onClick={() => setShowVideo(false)}
-              className="absolute -top-12 right-0 text-white hover:text-violet-400 transition-colors"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <Play className="w-16 h-16 mx-auto mb-4 text-violet-400" />
-                  <p className="text-lg">Video demo would play here</p>
-                  <p className="text-sm text-slate-400 mt-2">Add your YouTube/Vimeo embed</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Hero Section - Modern 2025 Design with Light/Dark Theme Support */}
       {/* Using h-[100dvh] for exact viewport height - dvh handles mobile browser chrome */}
@@ -1665,14 +1644,13 @@ export default function HomePage() {
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </Link>
-                    <button
-                      onClick={() => setShowVideo(true)}
-                      aria-label="Watch video"
+                    <Link
+                      href="/curriculum"
                       className="inline-flex items-center gap-2.5 px-5 py-3.5 text-slate-600 dark:text-white/80 hover:text-slate-900 dark:hover:text-white text-base font-semibold transition-colors hover:bg-slate-900/10 dark:hover:bg-white/10 rounded-full"
                     >
-                      <Play className="w-5 h-5 fill-current" aria-hidden="true" />
-                      Watch demo
-                    </button>
+                      <BookOpen className="w-5 h-5" aria-hidden="true" />
+                      View Curriculum
+                    </Link>
                   </div>
 
                   {/* Trust & Legal Row - Always visible */}
