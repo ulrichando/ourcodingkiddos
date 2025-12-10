@@ -7,7 +7,7 @@ type UserData = {
   id: string;
   name: string | null;
   email: string;
-  role: "STUDENT" | "PARENT" | "INSTRUCTOR" | "ADMIN";
+  role: "STUDENT" | "PARENT" | "INSTRUCTOR" | "SUPPORT" | "ADMIN";
   phone?: string | null;
   address?: string | null;
   image?: string | null;
@@ -156,6 +156,7 @@ export default function EditUserModal({ user, onClose, onSave }: Props) {
               <option value="STUDENT">Student</option>
               <option value="PARENT">Parent</option>
               <option value="INSTRUCTOR">Instructor</option>
+              <option value="SUPPORT">Support</option>
               <option value="ADMIN">Admin</option>
             </select>
           </div>
