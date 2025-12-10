@@ -244,10 +244,11 @@ export const authOptions: NextAuthOptions = {
           include: { accounts: { where: { provider: "google" } } },
         });
 
-        // Check account status for existing users
-        if (existingUser) {
+        // Check account status for existing users (but not for brand new signups)
+        // If the user exists AND has a Google account linked, they're trying to log in (not sign up)
+        if (existingUser && existingUser.accounts.length > 0) {
           if (existingUser.accountStatus === "PENDING") {
-            throw new Error("Your account is pending approval. An admin will review your application soon.");
+            throw new Error("Your instructor application is pending approval. An admin will review your application soon. You'll receive an email once your account is approved.");
           }
           if (existingUser.accountStatus === "REJECTED") {
             throw new Error("Your account application was not approved. Please contact support for more information.");

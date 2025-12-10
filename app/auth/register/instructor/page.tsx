@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2, Award, CheckCircle, GraduationCap } from "lucide-react";
@@ -18,6 +18,14 @@ export default function InstructorRegisterPage() {
   const [password, setPassword] = useState("");
   const [resumeUrl, setResumeUrl] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // Check for success query parameter (from Google OAuth callback)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      setSuccess(true);
+    }
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -400,7 +408,8 @@ export default function InstructorRegisterPage() {
                   if (data.token) {
                     // Store the token in a cookie (10 minutes expiry)
                     document.cookie = `instructor_intent_token=${data.token}; path=/; max-age=600; SameSite=Lax`;
-                    signIn("google", { callbackUrl: "/auth/login" });
+                    // Redirect to this page so we can show the success message
+                    signIn("google", { callbackUrl: "/auth/register/instructor?success=true" });
                   } else {
                     setError("Failed to initiate Google sign-up. Please try again.");
                   }
