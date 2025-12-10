@@ -9,6 +9,45 @@ import type { UserRole } from "../types/next-auth";
 import { checkLoginRateLimit, resetLoginRateLimit } from "./upstash-rate-limit";
 import { logLogin, logFailedLogin } from "./audit";
 
+// In-memory store for instructor signup intents (token -> {timestamp, resumeUrl})
+// Entries auto-expire after 10 minutes
+const instructorSignupIntents = new Map<string, { timestamp: number; resumeUrl?: string }>();
+const INTENT_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+
+export function markInstructorSignupIntent(token: string, resumeUrl?: string) {
+  instructorSignupIntents.set(token, { timestamp: Date.now(), resumeUrl });
+}
+
+function hasInstructorSignupIntent(token: string): boolean {
+  const data = instructorSignupIntents.get(token);
+  if (!data) return false;
+
+  // Check if expired
+  if (Date.now() - data.timestamp > INTENT_EXPIRY_MS) {
+    instructorSignupIntents.delete(token);
+    return false;
+  }
+
+  return true;
+}
+
+function getInstructorResumeUrl(token: string): string | undefined {
+  const data = instructorSignupIntents.get(token);
+  if (!data) return undefined;
+
+  // Check if expired
+  if (Date.now() - data.timestamp > INTENT_EXPIRY_MS) {
+    instructorSignupIntents.delete(token);
+    return undefined;
+  }
+
+  return data.resumeUrl;
+}
+
+function clearInstructorSignupIntent(token: string) {
+  instructorSignupIntents.delete(token);
+}
+
 // Check if site is in maintenance mode
 async function isMaintenanceMode(): Promise<boolean> {
   try {
@@ -197,7 +236,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account, profile, credentials }) {
       // For Google OAuth, link to existing account if email matches
       if (account?.provider === "google" && user.email) {
         const existingUser = await prismaBase.user.findUnique({
@@ -262,16 +301,32 @@ export const authOptions: NextAuthOptions = {
           user.id = existingUser.id;
           user.role = existingUser.role as UserRole;
         } else {
-          // New Google user - determine role from email patterns
+          // New Google user - determine role from signup intent or email patterns
+          // Try to import the token getter function
+          let intentToken: string | null = null;
+          try {
+            const { getCurrentIntentToken } = await import("../app/api/auth/[...nextauth]/route");
+            intentToken = getCurrentIntentToken();
+          } catch (e) {
+            // If import fails, continue without token
+          }
+
+          const hasIntent = intentToken ? hasInstructorSignupIntent(intentToken) : false;
+          const resumeUrl = intentToken ? getInstructorResumeUrl(intentToken) : undefined;
           const isLikelyInstructor =
             user.email?.includes('teacher') ||
             user.email?.includes('instructor') ||
             user.email?.includes('edu');
 
-          const role: "PARENT" | "INSTRUCTOR" = isLikelyInstructor ? "INSTRUCTOR" : "PARENT";
+          const role: "PARENT" | "INSTRUCTOR" = (hasIntent || isLikelyInstructor) ? "INSTRUCTOR" : "PARENT";
           const accountStatus = role === "INSTRUCTOR" ? "PENDING" : "APPROVED";
 
-          console.log('[Auth] Creating new Google OAuth user as', role, 'with status', accountStatus, ':', user.email);
+          console.log('[Auth] Creating new Google OAuth user as', role, 'with status', accountStatus, '(intent:', hasIntent, ', email pattern:', isLikelyInstructor, ', resumeUrl:', !!resumeUrl, '):', user.email);
+
+          // Clear the intent after using it
+          if (intentToken && hasIntent) {
+            clearInstructorSignupIntent(intentToken);
+          }
 
           const newUser = await prismaBase.user.create({
             data: {
@@ -280,6 +335,7 @@ export const authOptions: NextAuthOptions = {
               image: user.image || (profile as any)?.picture,
               role,
               accountStatus,
+              ...(resumeUrl && role === "INSTRUCTOR" ? { resumeUrl, resumeUploadedAt: new Date() } : {}),
               ...(role === "PARENT"
                 ? {
                     parentProfile: {

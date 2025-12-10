@@ -345,30 +345,87 @@ export default function InstructorRegisterPage() {
             <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
           </div>
 
-          {/* Google Sign Up */}
-          <button
-            type="button"
-            onClick={() => {
-              // Store intent in sessionStorage before Google OAuth
-              sessionStorage.setItem('pendingRole', 'INSTRUCTOR');
-              signIn("google", { callbackUrl: "/auth/login" });
-            }}
-            className="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium rounded-xl py-3 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-200 active:scale-[0.98]"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Apply with Google
-          </button>
+          {/* Google OAuth Section with Resume Input */}
+          <div className="space-y-3">
+            {/* Resume URL for Google OAuth */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Resume/CV Link (Required for Google Sign-Up) <span className="text-red-500">*</span>
+              </label>
+              <div className={`relative flex items-center border rounded-xl transition-all duration-200 ${
+                focusedField === "google-resume"
+                  ? "ring-2 ring-purple-500/30 border-purple-500 dark:border-purple-400"
+                  : "border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"
+              }`}>
+                <svg className={`w-4 h-4 ml-3 transition-colors ${focusedField === "google-resume" ? "text-purple-500" : "text-slate-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <input
+                  name="googleResumeUrl"
+                  type="url"
+                  value={resumeUrl}
+                  onChange={(e) => setResumeUrl(e.target.value)}
+                  onFocus={() => setFocusedField("google-resume")}
+                  onBlur={() => setFocusedField(null)}
+                  placeholder="https://drive.google.com/... or https://dropbox.com/..."
+                  className="flex-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 py-3 text-sm focus:outline-none"
+                />
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Provide your resume link before signing up with Google
+              </p>
+            </div>
 
-          {/* Google OAuth Note */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-blue-700 dark:text-blue-300">
-              <strong>Note:</strong> Your application will be set to pending status and require admin approval before you can access the platform.
-            </p>
+            {/* Google Sign Up Button */}
+            <button
+              type="button"
+              onClick={async () => {
+                // Validate resume URL
+                const resumeUrlValue = resumeUrl.trim();
+                if (!resumeUrlValue) {
+                  setError("Please provide a resume/CV link before signing up with Google.");
+                  return;
+                }
+
+                setError(null);
+                try {
+                  // Get an instructor intent token from the server
+                  const res = await fetch("/api/auth/mark-instructor-intent", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ resumeUrl: resumeUrlValue }),
+                  });
+                  const data = await res.json();
+
+                  if (data.token) {
+                    // Store the token in a cookie (10 minutes expiry)
+                    document.cookie = `instructor_intent_token=${data.token}; path=/; max-age=600; SameSite=Lax`;
+                    signIn("google", { callbackUrl: "/auth/login" });
+                  } else {
+                    setError("Failed to initiate Google sign-up. Please try again.");
+                  }
+                } catch (err) {
+                  console.error("Failed to mark instructor intent:", err);
+                  setError("Failed to initiate Google sign-up. Please try again.");
+                }
+              }}
+              className="w-full flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium rounded-xl py-3 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-200 active:scale-[0.98]"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Apply with Google
+            </button>
+
+            {/* Google OAuth Note */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                <strong>Note:</strong> Your application will be set to pending status and require admin approval before you can access the platform.
+              </p>
+            </div>
           </div>
 
           {/* Login Link */}
