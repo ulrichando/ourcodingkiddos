@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       email,
       `Application Submitted, ${name}!`,
       "Your instructor application is pending admin approval. You'll receive an email once your account is reviewed.",
-      "info",
+      "system",
       "/auth/login",
       { userName: name, userRole: role, accountStatus }
     );
