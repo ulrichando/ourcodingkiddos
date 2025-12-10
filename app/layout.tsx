@@ -123,73 +123,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
-        {/* Server-rendered legal footer for Google OAuth verification */}
-        {/* This is rendered on the server and visible to crawlers regardless of JS execution */}
-        <footer
-          id="server-legal-footer"
+        {/* Server-rendered legal links for Google OAuth verification - visually hidden but in DOM */}
+        <nav
+          aria-label="Legal links"
           style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: '#020617',
-            borderTop: '1px solid #1e293b',
-            padding: '6px 16px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '16px',
-            fontSize: '11px',
-            zIndex: 50
+            position: 'absolute',
+            width: '1px',
+            height: '1px',
+            padding: 0,
+            margin: '-1px',
+            overflow: 'hidden',
+            clip: 'rect(0, 0, 0, 0)',
+            whiteSpace: 'nowrap',
+            border: 0
           }}
         >
-          <span style={{ color: '#64748b' }}>© 2025 Coding Kiddos</span>
-          <a
-            href="/privacy"
-            style={{
-              color: '#a78bfa',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
-          >
-            Privacy Policy
-          </a>
-          <a
-            href="/terms"
-            style={{
-              color: '#a78bfa',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
-          >
-            Terms
-          </a>
-          <a
-            href="/safety"
-            style={{
-              color: '#a78bfa',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
-          >
-            Safety
-          </a>
-        </footer>
-        {/* Keep server footer visible - Google's human reviewers need to see the Privacy Policy link */}
-        {/* Hide on dashboard pages only via client-side script */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined') {
-                var path = window.location.pathname;
-                if (path.startsWith('/dashboard')) {
-                  var el = document.getElementById('server-legal-footer');
-                  if (el) el.style.display = 'none';
-                }
-              }
-            `,
-          }}
-        />
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Service</a>
+          <a href="/safety">Child Safety</a>
+        </nav>
         <StructuredData />
         <AuthProvider>
           <ThemeHydrator />
