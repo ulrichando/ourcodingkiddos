@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       user.email,
       "Account Application Status",
       `Your account application was not approved. Reason: ${reason}. Please contact support for more information.`,
-      "error",
+      "system",
       "/auth/login",
       { userName: user.name, userRole: user.role }
     );
