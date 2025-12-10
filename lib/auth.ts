@@ -84,7 +84,18 @@ const providers: NextAuthOptions["providers"] = [
       // Using prismaBase (without Accelerate extension) for auth
       try {
         console.log('[Auth] Looking up user:', email);
-        const user = await prismaBase.user.findUnique({ where: { email } });
+        const user = await prismaBase.user.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            role: true,
+            accountStatus: true,
+            hashedPassword: true,
+          }
+        });
         console.log('[Auth] User found:', !!user, user?.email);
 
         if (user?.hashedPassword) {
@@ -93,6 +104,20 @@ const providers: NextAuthOptions["providers"] = [
           if (!valid) {
             logFailedLogin(email, "Invalid password").catch(() => {});
             return null;
+          }
+
+          // Check account status
+          if (user.accountStatus === "PENDING") {
+            logFailedLogin(email, "Account pending approval").catch(() => {});
+            throw new Error("Your account is pending approval. An admin will review your application soon.");
+          }
+          if (user.accountStatus === "REJECTED") {
+            logFailedLogin(email, "Account rejected").catch(() => {});
+            throw new Error("Your account application was not approved. Please contact support for more information.");
+          }
+          if (user.accountStatus === "SUSPENDED") {
+            logFailedLogin(email, "Account suspended").catch(() => {});
+            throw new Error("Your account has been suspended. Please contact support for assistance.");
           }
 
           // Check maintenance mode - only allow ADMIN and SUPPORT login
@@ -180,6 +205,19 @@ export const authOptions: NextAuthOptions = {
           include: { accounts: { where: { provider: "google" } } },
         });
 
+        // Check account status for existing users
+        if (existingUser) {
+          if (existingUser.accountStatus === "PENDING") {
+            throw new Error("Your account is pending approval. An admin will review your application soon.");
+          }
+          if (existingUser.accountStatus === "REJECTED") {
+            throw new Error("Your account application was not approved. Please contact support for more information.");
+          }
+          if (existingUser.accountStatus === "SUSPENDED") {
+            throw new Error("Your account has been suspended. Please contact support for assistance.");
+          }
+        }
+
         // Check maintenance mode for non-admin/support OAuth users
         if (!existingUser || (existingUser.role !== "ADMIN" && existingUser.role !== "SUPPORT")) {
           const maintenance = await isMaintenanceMode();
@@ -224,19 +262,33 @@ export const authOptions: NextAuthOptions = {
           user.id = existingUser.id;
           user.role = existingUser.role as UserRole;
         } else {
-          // New Google user - create as PARENT with parent profile
-          console.log('[Auth] Creating new Google OAuth user as PARENT:', user.email);
+          // New Google user - determine role from email patterns
+          const isLikelyInstructor =
+            user.email?.includes('teacher') ||
+            user.email?.includes('instructor') ||
+            user.email?.includes('edu');
+
+          const role: "PARENT" | "INSTRUCTOR" = isLikelyInstructor ? "INSTRUCTOR" : "PARENT";
+          const accountStatus = role === "INSTRUCTOR" ? "PENDING" : "APPROVED";
+
+          console.log('[Auth] Creating new Google OAuth user as', role, 'with status', accountStatus, ':', user.email);
+
           const newUser = await prismaBase.user.create({
             data: {
               email: user.email,
               name: user.name || profile?.name || "Google User",
               image: user.image || (profile as any)?.picture,
-              role: "PARENT",
-              parentProfile: {
-                create: {
-                  phone: null,
-                },
-              },
+              role,
+              accountStatus,
+              ...(role === "PARENT"
+                ? {
+                    parentProfile: {
+                      create: {
+                        phone: null,
+                      },
+                    },
+                  }
+                : {}),
               accounts: {
                 create: {
                   type: account.type,
@@ -252,8 +304,14 @@ export const authOptions: NextAuthOptions = {
               },
             },
           });
+
+          // If instructor with PENDING status, block signin immediately
+          if (accountStatus === "PENDING") {
+            throw new Error("Your instructor application is pending approval. An admin will review your application soon. You'll receive an email once your account is approved.");
+          }
+
           user.id = newUser.id;
-          user.role = "PARENT" as UserRole;
+          user.role = role as UserRole;
           // Prevent the adapter from creating a duplicate user
           return true;
         }

@@ -10,7 +10,8 @@ type UserRow = {
   id: string;
   name: string | null;
   email: string;
-  role: "STUDENT" | "PARENT" | "INSTRUCTOR" | "ADMIN";
+  role: "STUDENT" | "PARENT" | "INSTRUCTOR" | "SUPPORT" | "ADMIN";
+  accountStatus?: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
   phone?: string | null;
   address?: string | null;
   image?: string | null;
@@ -42,7 +43,7 @@ function formatLastSeen(lastSeen: string | null | undefined): string {
   return date.toLocaleDateString();
 }
 
-const roleOrder = ["ALL", "PARENT", "STUDENT", "INSTRUCTOR", "ADMIN"] as const;
+const roleOrder = ["ALL", "PARENT", "STUDENT", "INSTRUCTOR", "SUPPORT", "ADMIN"] as const;
 
 export default function AdminUsersClient({
   initialUsers,

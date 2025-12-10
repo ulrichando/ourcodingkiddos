@@ -16,6 +16,9 @@ model User {
   hashedPassword         String?
   image                  String?
   role                   Role                     @default(STUDENT)
+  accountStatus          AccountStatus            @default(APPROVED) // PENDING for instructors, APPROVED for others
+  resumeUrl              String?                  // Resume/CV URL for instructors (stored in cloud storage)
+  resumeUploadedAt       DateTime?                // When resume was uploaded
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   classReminders         Boolean                  @default(true)
@@ -574,6 +577,13 @@ enum Role {
   INSTRUCTOR
   SUPPORT
   ADMIN
+}
+
+enum AccountStatus {
+  PENDING      // Awaiting admin approval (for instructors)
+  APPROVED     // Account approved and active
+  REJECTED     // Application rejected
+  SUSPENDED    // Account temporarily suspended
 }
 
 enum CourseLevel {

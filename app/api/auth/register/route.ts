@@ -13,15 +13,18 @@ export async function POST(request: Request) {
   const email = body?.email?.toLowerCase().trim();
   const password = body?.password;
   const roleInput = String(body?.role || "").toUpperCase();
+  const resumeUrl = body?.resumeUrl?.trim();
 
-  // Only parents can self-register. Instructors must be created by an admin.
-  if (roleInput === "INSTRUCTOR" || roleInput === "ADMIN") {
+  // Parents and Instructors can self-register. Admins cannot.
+  let role: Role = "PARENT";
+  if (roleInput === "INSTRUCTOR") {
+    role = "INSTRUCTOR";
+  } else if (roleInput === "ADMIN" || roleInput === "SUPPORT") {
     return NextResponse.json(
-      { status: "error", message: "Only parents can register. Instructors are added by administrators." },
+      { status: "error", message: "Admin and Support accounts must be created by an administrator." },
       { status: 403 }
     );
   }
-  const role: Role = "PARENT";
 
   if (!name || !email || !password || password.length < 8) {
     return NextResponse.json({ status: "error", message: "Password must be at least 8 characters" }, { status: 400 });
@@ -34,12 +37,17 @@ export async function POST(request: Request) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // Set account status: PENDING for instructors, APPROVED for parents
+  const accountStatus = role === "INSTRUCTOR" ? "PENDING" : "APPROVED";
+
   const user = await prisma.user.create({
     data: {
       name,
       email,
       hashedPassword,
       role,
+      accountStatus,
+      ...(resumeUrl && role === "INSTRUCTOR" ? { resumeUrl, resumeUploadedAt: new Date() } : {}),
       ...(role === "PARENT"
         ? {
             parentProfile: {
@@ -53,17 +61,28 @@ export async function POST(request: Request) {
   });
 
   // Log user registration
-  logCreate(email, "User", user.id, `New ${role.toLowerCase()} registered: ${name}`, user.id, { role }).catch(() => {});
+  logCreate(email, "User", user.id, `New ${role.toLowerCase()} registered: ${name}`, user.id, { role, accountStatus }).catch(() => {});
 
-  // Send welcome notification to new parent
-  createNotification(
-    email,
-    `Welcome to Coding Kiddos, ${name}!`,
-    "Get started by adding your first student and exploring our interactive coding courses!",
-    "welcome",
-    "/dashboard/parent/add-student",
-    { userName: name, userRole: role }
-  );
+  // Send welcome notification based on role
+  if (role === "INSTRUCTOR") {
+    createNotification(
+      email,
+      `Application Submitted, ${name}!`,
+      "Your instructor application is pending admin approval. You'll receive an email once your account is reviewed.",
+      "info",
+      "/auth/login",
+      { userName: name, userRole: role, accountStatus }
+    );
+  } else {
+    createNotification(
+      email,
+      `Welcome to Coding Kiddos, ${name}!`,
+      "Get started by adding your first student and exploring our interactive coding courses!",
+      "welcome",
+      "/dashboard/parent/add-student",
+      { userName: name, userRole: role }
+    );
+  }
 
   // Generate email verification token
   const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -85,9 +104,14 @@ export async function POST(request: Request) {
     console.error("[register] Failed to send verification email:", err);
   });
 
+  // Different message for instructors
+  const message = role === "INSTRUCTOR"
+    ? "Application submitted! Your instructor account is pending admin approval. Please check your email to verify your address."
+    : "Account created! Please check your email to verify your address.";
+
   return NextResponse.json({
     status: "ok",
-    user: { id: user.id, email: user.email },
-    message: "Account created! Please check your email to verify your address."
+    user: { id: user.id, email: user.email, role, accountStatus },
+    message
   }, { status: 201 });
 }
