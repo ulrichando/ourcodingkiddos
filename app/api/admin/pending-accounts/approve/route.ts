@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       user.role === "INSTRUCTOR"
         ? "Your instructor account has been approved! You can now log in and start creating sessions."
         : "Your account has been approved! You can now log in and access the platform.",
-      "success",
+      "welcome",
       "/auth/login",
       { userName: user.name, userRole: user.role }
     );
