@@ -26,11 +26,42 @@ type PendingUser = {
   resumeUploadedAt?: string | null;
 };
 
+// Generate consistent color from string (for avatar backgrounds)
+function stringToColor(str: string): string {
+  const colors = [
+    "from-blue-500 to-purple-500",
+    "from-emerald-500 to-teal-500",
+    "from-pink-500 to-rose-500",
+    "from-amber-500 to-orange-500",
+    "from-violet-500 to-purple-500",
+    "from-cyan-500 to-blue-500",
+    "from-fuchsia-500 to-pink-500",
+    "from-indigo-500 to-blue-500",
+  ];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// Get initials from name
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map(n => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 export default function AdminPendingAccountsPage() {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchPendingUsers();
@@ -219,15 +250,18 @@ export default function AdminPendingAccountsPage() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     {/* User Info */}
                     <div className="flex items-center gap-4">
-                      {user.image ? (
+                      {user.image && !imageErrors.has(user.id) ? (
                         <img
                           src={user.image}
                           alt={user.name || "User"}
-                          className="w-14 h-14 rounded-full object-cover"
+                          className="w-14 h-14 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700"
+                          onError={() => {
+                            setImageErrors(prev => new Set(prev).add(user.id));
+                          }}
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-xl">
-                          {(user.name || user.email).charAt(0).toUpperCase()}
+                        <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${stringToColor(user.email)} flex items-center justify-center text-white font-semibold text-xl shadow-md`}>
+                          {user.name ? getInitials(user.name) : user.email.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1">
