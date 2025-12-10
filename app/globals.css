@@ -37,9 +37,7 @@ body {
   /* Prevent text size flash during font load */
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-  /* Performance: Enable GPU acceleration for smoother scrolling */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  /* Note: Removed transform: translateZ(0) as it breaks fixed positioning for modals */
 }
 
 /* Performance optimizations for smooth scrolling and navigation */

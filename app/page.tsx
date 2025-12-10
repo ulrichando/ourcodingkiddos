@@ -1426,7 +1426,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white dark:bg-slate-950 overflow-x-hidden">
       {/* Video Modal */}
       {showVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm pt-24 px-4">
           <div className="relative w-full max-w-4xl">
             <button
               onClick={() => setShowVideo(false)}

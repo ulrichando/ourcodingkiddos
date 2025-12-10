@@ -170,25 +170,31 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="relative border-t border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
             <span className="text-slate-500">© {currentYear} Coding Kiddos. All rights reserved.</span>
-            <span className="text-slate-600 hidden sm:inline">•</span>
-            <Link href="/privacy" className="text-slate-300 hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            <span className="text-slate-600">•</span>
-            <Link href="/terms" className="text-slate-300 hover:text-white transition-colors">
-              Terms of Service
-            </Link>
-            <span className="text-slate-600">•</span>
-            <Link href="/policies" className="text-slate-300 hover:text-white transition-colors">
-              Class Policies
-            </Link>
-            <span className="text-slate-600 hidden sm:inline">•</span>
             <span className="text-slate-600 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               All systems operational
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Legal Links Bar */}
+      <div className="relative bg-slate-950 border-t border-slate-800/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
+          <div className="flex items-center justify-center gap-4 text-[10px]">
+            <Link href="/privacy" className="text-slate-500 hover:text-slate-400 transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-slate-700">•</span>
+            <Link href="/terms" className="text-slate-500 hover:text-slate-400 transition-colors">
+              Terms of Service
+            </Link>
+            <span className="text-slate-700">•</span>
+            <Link href="/policies" className="text-slate-500 hover:text-slate-400 transition-colors">
+              Class Policies
+            </Link>
           </div>
         </div>
       </div>
