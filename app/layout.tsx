@@ -175,17 +175,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Safety
           </a>
         </footer>
-        {/* Hide server footer after client hydration - users see the nicer React footer */}
+        {/* Keep server footer visible - Google's human reviewers need to see the Privacy Policy link */}
+        {/* Hide on dashboard pages only via client-side script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if (typeof window !== 'undefined') {
-                window.addEventListener('load', function() {
-                  setTimeout(function() {
-                    var el = document.getElementById('server-legal-footer');
-                    if (el) el.style.display = 'none';
-                  }, 100);
-                });
+                var path = window.location.pathname;
+                if (path.startsWith('/dashboard')) {
+                  var el = document.getElementById('server-legal-footer');
+                  if (el) el.style.display = 'none';
+                }
               }
             `,
           }}
