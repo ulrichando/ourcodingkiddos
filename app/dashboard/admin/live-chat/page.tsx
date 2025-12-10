@@ -19,6 +19,10 @@ import {
   Circle,
   Trash2,
   AlertTriangle,
+  Bell,
+  BellOff,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 type Conversation = {
@@ -76,12 +80,73 @@ export default function AdminLiveChatPage() {
   const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Notification state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const prevConversationCount = useRef<number>(0);
+  const prevVisitorCount = useRef<number>(0);
+  const prevMessageCount = useRef<number>(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio and request notification permission
+  useEffect(() => {
+    // Create audio element for notification sound
+    audioRef.current = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleWhDPZC/3NV3OhUtcbnd3JRQJBRXl+Xkpo9RIhdMidrqsJVYKRhDd9XuupxkLx08Zs3yuaFoMyA4XMX1vKRsMCUzUb72wKhwNCoxS7X4xKt0Ny0tRa35x650OiwpQKL6zLJ5PSwmO5f7z7V+QC0jNov91LmBRC4gMX/+1rqES/AtG2bh3rqMaT4mFVHf5MKZY0wfJUbf6sqnZ1EdLDzg8c+rbVgeNTXe9tWwc14gPi/c+tq1d2AjQCva/N+5e2EnQyjX/+K8fmQpRCbT/+W/gWcrRiPQ/+jCg2ouSB/L/+vFhm0wShzH/+7IiXAySxjD//HLjHI0TBW+//TOj3U2TRK6//fRknk4TQ+1//rUlXs6Tgux//3XmH09UAiu//3amn8/UQar//vdnYFAUgOo//rgoYRCVP+l/fjjpIdEVfui/Pbnp4lGV/mf+vTqq4xJWfac+PLtr49MXPeZ9u/wsJJOX/WW9O30s5VRYvST8uv3tphUZfGQ8On6uZxXaO6N7ub9vJ9acOqK7OP+wKJddOeH7OD/w6VgeOOE69z/xahke9+B6dn/yKtof9t+6NX/y65rgt185tH/zrFuhth56s3/0bRxic54683/1Ld0jMp16Mj/17p3j8Z06MT/2r16ksN06MD/3sB9lb9v573/4cKAnbtu3Lr/5MWDoLdp2bb/58iGo7Nk1rL/6suJprBf0q7/7c6MqaxZ0Kv/8NGPq6lUzaj/89SSraVPy6T/9deUr6JKyKD/+NqXsZ5FxZz/+92aspxAvZj//OCctp0+yZr//eOet5s8y5z/");
+
+    // Check if notifications are already permitted
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      setNotificationsEnabled(true);
+    }
+  }, []);
+
+  // Play notification sound
+  const playNotificationSound = () => {
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
+  // Send browser notification
+  const sendNotification = (title: string, body: string) => {
+    if (notificationsEnabled && typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification(title, {
+        body,
+        icon: "/icon.svg",
+        tag: "live-chat-notification",
+      });
+    }
+    playNotificationSound();
+  };
+
+  // Request notification permission
+  const requestNotificationPermission = async () => {
+    if (typeof Notification === "undefined") return;
+
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      setNotificationsEnabled(true);
+    }
+  };
+
   // Load conversations
   const loadConversations = async () => {
     try {
       const res = await fetch("/api/chat/conversations");
       const data = await res.json();
-      setConversations(data.conversations || []);
+      const newConversations = data.conversations || [];
+
+      // Check for new conversations
+      if (prevConversationCount.current > 0 && newConversations.length > prevConversationCount.current) {
+        const newChat = newConversations[0];
+        sendNotification(
+          "New Chat Message",
+          `${newChat.userName || "Guest"}: ${newChat.lastMessage?.substring(0, 50)}...`
+        );
+      }
+
+      prevConversationCount.current = newConversations.length;
+      setConversations(newConversations);
     } catch (error) {
       console.error("Failed to load conversations:", error);
     }
@@ -92,7 +157,18 @@ export default function AdminLiveChatPage() {
     try {
       const res = await fetch("/api/visitors");
       const data = await res.json();
-      setVisitors(data.visitors || []);
+      const newVisitors = data.visitors || [];
+
+      // Check for new visitors
+      if (prevVisitorCount.current > 0 && newVisitors.length > prevVisitorCount.current) {
+        sendNotification(
+          "New Visitor",
+          `Someone is browsing your site`
+        );
+      }
+
+      prevVisitorCount.current = newVisitors.length;
+      setVisitors(newVisitors);
     } catch (error) {
       console.error("Failed to load visitors:", error);
     }
@@ -303,7 +379,33 @@ export default function AdminLiveChatPage() {
               Real-time support chat and visitor monitoring
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {/* Notification Controls */}
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
+              <button
+                onClick={notificationsEnabled ? () => setNotificationsEnabled(false) : requestNotificationPermission}
+                className={`p-2 rounded-lg transition-colors ${
+                  notificationsEnabled
+                    ? "text-purple-600 bg-purple-100 dark:bg-purple-900/30"
+                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                }`}
+                title={notificationsEnabled ? "Notifications enabled" : "Enable notifications"}
+              >
+                {notificationsEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className={`p-2 rounded-lg transition-colors ${
+                  soundEnabled
+                    ? "text-purple-600 bg-purple-100 dark:bg-purple-900/30"
+                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                }`}
+                title={soundEnabled ? "Sound enabled" : "Sound muted"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
+            </div>
+
             {conversations.length > 0 && (
               <Button
                 onClick={() => setShowClearAllConfirm(true)}

@@ -123,13 +123,73 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
-        {/* Server-rendered links for Google's crawler (doesn't execute JS) */}
-        <noscript>
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '12px', backgroundColor: '#0f172a', textAlign: 'center', zIndex: 9999 }}>
-            <a href="/privacy" style={{ color: '#94a3b8', marginRight: '16px', textDecoration: 'underline' }}>Privacy Policy</a>
-            <a href="/terms" style={{ color: '#94a3b8', textDecoration: 'underline' }}>Terms of Service</a>
-          </div>
-        </noscript>
+        {/* Server-rendered legal footer for Google OAuth verification */}
+        {/* This is rendered on the server and visible to crawlers regardless of JS execution */}
+        <footer
+          id="server-legal-footer"
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: '#020617',
+            borderTop: '1px solid #1e293b',
+            padding: '6px 16px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '16px',
+            fontSize: '11px',
+            zIndex: 50
+          }}
+        >
+          <span style={{ color: '#64748b' }}>© 2025 Coding Kiddos</span>
+          <a
+            href="/privacy"
+            style={{
+              color: '#a78bfa',
+              textDecoration: 'none',
+              fontWeight: 500
+            }}
+          >
+            Privacy Policy
+          </a>
+          <a
+            href="/terms"
+            style={{
+              color: '#a78bfa',
+              textDecoration: 'none',
+              fontWeight: 500
+            }}
+          >
+            Terms
+          </a>
+          <a
+            href="/safety"
+            style={{
+              color: '#a78bfa',
+              textDecoration: 'none',
+              fontWeight: 500
+            }}
+          >
+            Safety
+          </a>
+        </footer>
+        {/* Hide server footer after client hydration - users see the nicer React footer */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined') {
+                window.addEventListener('load', function() {
+                  setTimeout(function() {
+                    var el = document.getElementById('server-legal-footer');
+                    if (el) el.style.display = 'none';
+                  }, 100);
+                });
+              }
+            `,
+          }}
+        />
         <StructuredData />
         <AuthProvider>
           <ThemeHydrator />

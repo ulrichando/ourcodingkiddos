@@ -69,6 +69,8 @@ export default function ChatBot() {
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [isSendingSupport, setIsSendingSupport] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [showProactiveMessage, setShowProactiveMessage] = useState(false);
+  const [proactiveMessageDismissed, setProactiveMessageDismissed] = useState(false);
 
   // Registration interest mode
   const [registrationMode, setRegistrationMode] = useState(false);
@@ -92,6 +94,24 @@ export default function ChatBot() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  // Proactive greeting for guests - show after 8 seconds
+  useEffect(() => {
+    if (isAuthenticated || isOpen || proactiveMessageDismissed) return;
+
+    const timer = setTimeout(() => {
+      setShowProactiveMessage(true);
+    }, 8000); // 8 seconds delay
+
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, isOpen, proactiveMessageDismissed]);
+
+  // Hide proactive message when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowProactiveMessage(false);
+    }
+  }, [isOpen]);
 
   // Poll for new messages when in support mode
   useEffect(() => {
@@ -408,6 +428,64 @@ export default function ChatBot() {
 
   return (
     <>
+      {/* Proactive Message Bubble */}
+      {showProactiveMessage && !isOpen && (
+        <div className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="relative max-w-[280px] bg-white dark:bg-slate-800 rounded-2xl rounded-br-md shadow-xl border border-slate-200 dark:border-slate-700 p-4">
+            {/* Close button */}
+            <button
+              onClick={() => {
+                setShowProactiveMessage(false);
+                setProactiveMessageDismissed(true);
+              }}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors shadow-sm"
+            >
+              <X className="w-3 h-3" />
+            </button>
+
+            {/* Avatar and message */}
+            <div className="flex gap-3">
+              <div className="flex-shrink-0">
+                <div className="relative flex -space-x-2">
+                  {supportTeam.map((member, idx) => (
+                    <div
+                      key={member.name}
+                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${member.color} flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-slate-800`}
+                      style={{ zIndex: supportTeam.length - idx }}
+                    >
+                      {member.initials}
+                    </div>
+                  ))}
+                  <span className="absolute -bottom-0.5 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+                  Hi there! 👋
+                </p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Have questions about our coding classes? We&apos;re here to help!
+                </p>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <button
+              onClick={() => {
+                setIsOpen(true);
+                setShowProactiveMessage(false);
+              }}
+              className="mt-3 w-full py-2 px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-violet-500/25"
+            >
+              Chat with us
+            </button>
+          </div>
+
+          {/* Arrow pointing to chat button */}
+          <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white dark:bg-slate-800 border-r border-b border-slate-200 dark:border-slate-700 rotate-45" />
+        </div>
+      )}
+
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
