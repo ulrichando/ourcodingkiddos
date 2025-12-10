@@ -1,5 +1,5 @@
 import prisma from "./prisma";
-import type { AuditAction, AuditSeverity } from "../generated/prisma-client";
+import type { AuditAction, AuditSeverity } from "@prisma/client";
 
 type AuditLogInput = {
   userId?: string;

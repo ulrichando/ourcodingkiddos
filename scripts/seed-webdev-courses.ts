@@ -1,4 +1,4 @@
-import { PrismaClient, Language, CourseLevel, AgeGroup } from "../generated/prisma-client";
+import { PrismaClient, Language, CourseLevel, AgeGroup } from "@prisma/client";
 
 const prisma = new PrismaClient();
 

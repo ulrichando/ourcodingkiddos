@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
-import { CourseLevel } from "../../../../generated/prisma-client";
+import { CourseLevel } from "@prisma/client";
 import { logUpdate, logDelete } from "../../../../lib/audit";
 
 function normalizeSlug(text: string | null | undefined) {

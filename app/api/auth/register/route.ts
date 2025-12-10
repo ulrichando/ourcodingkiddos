@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { Role } from "../../../../generated/prisma-client";
+import { Role } from "@prisma/client";
 import prisma from "../../../../lib/prisma";
 import { createNotification } from "../../notifications/route";
 import { logCreate } from "../../../../lib/audit";

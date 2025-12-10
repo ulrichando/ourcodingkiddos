@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
-import { CourseLevel, Language, AgeGroup } from "../../../generated/prisma-client";
+import { CourseLevel, Language, AgeGroup } from "@prisma/client";
 import { logCreate } from "../../../lib/audit";
 
 // Force dynamic rendering - disable all caching for this route

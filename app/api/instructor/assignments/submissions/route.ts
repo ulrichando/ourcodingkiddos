@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
-import { SubmissionStatus } from "../../../../../generated/prisma-client";
+import { SubmissionStatus } from "@prisma/client";
 
 // GET - List submissions for an assignment (instructor) or student's own submissions
 export async function GET(req: Request) {
