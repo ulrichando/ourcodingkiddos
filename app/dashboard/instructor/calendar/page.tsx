@@ -34,12 +34,16 @@ type Program = {
 type ClassSession = {
   id: string;
   title: string;
+  description?: string;
+  sessionType: string;
+  language: string;
+  ageGroup: string;
   startTime: string;
   durationMinutes: number;
   enrolledCount: number;
   maxStudents: number | null;
-  meetingUrl: string | null;
-  programId: string | null;
+  meetingUrl?: string | null;
+  programId?: string | null;
 };
 
 type Assignment = {

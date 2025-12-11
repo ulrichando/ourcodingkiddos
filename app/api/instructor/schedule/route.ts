@@ -67,6 +67,10 @@ export async function GET() {
       select: {
         id: true,
         title: true,
+        description: true,
+        sessionType: true,
+        language: true,
+        ageGroup: true,
         startTime: true,
         durationMinutes: true,
         enrolledCount: true,
