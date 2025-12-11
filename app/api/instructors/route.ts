@@ -3,7 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
 
-// GET - Fetch all instructors with their availability
+// GET - Fetch instructors with their availability
+// For parents: returns only instructors teaching their children
+// For others: returns all instructors
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -12,18 +14,123 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find all users with INSTRUCTOR role
-    const instructors = await prisma.user.findMany({
-      where: {
-        role: "INSTRUCTOR",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-      },
-    });
+    const userRole = (session as any)?.user?.role?.toUpperCase();
+    const userEmail = session.user.email;
+
+    let instructors;
+
+    // If parent, only return instructors teaching their children
+    if (userRole === "PARENT" && userEmail) {
+      // Find parent's children
+      const parent = await prisma.user.findUnique({
+        where: { email: userEmail },
+        include: {
+          parentProfile: {
+            include: {
+              children: {
+                include: {
+                  programEnrollments: {
+                    where: {
+                      status: { in: ["ACTIVE", "PENDING_PAYMENT"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!parent?.parentProfile) {
+        return NextResponse.json({ instructors: [] });
+      }
+
+      // Get all class sessions for the parent's children's programs
+      const programIds = parent.parentProfile.children.flatMap(
+        child => child.programEnrollments.map(e => e.programId)
+      );
+
+      // Find instructors teaching these programs
+      const classSessions = await prisma.classSession.findMany({
+        where: {
+          programId: { in: programIds },
+          status: { in: ["SCHEDULED", "IN_PROGRESS"] }
+        },
+        select: {
+          instructorEmail: true
+        },
+        distinct: ["instructorEmail"]
+      });
+
+      let instructorEmails = classSessions
+        .map(s => s.instructorEmail)
+        .filter(Boolean) as string[];
+
+      // Fallback: If no instructors found from programs, check existing conversations
+      if (instructorEmails.length === 0) {
+        const existingConversations = await prisma.conversation.findMany({
+          where: {
+            participants: {
+              some: {
+                userEmail: userEmail
+              }
+            }
+          },
+          include: {
+            participants: {
+              where: {
+                userRole: "INSTRUCTOR"
+              }
+            }
+          }
+        });
+
+        instructorEmails = existingConversations
+          .flatMap(c => c.participants.map(p => p.userEmail))
+          .filter((email, index, self) => self.indexOf(email) === index) as string[];
+      }
+
+      // If still no instructors found, return all instructors (fallback for demo/testing)
+      if (instructorEmails.length === 0) {
+        instructors = await prisma.user.findMany({
+          where: {
+            role: "INSTRUCTOR",
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        });
+      } else {
+        instructors = await prisma.user.findMany({
+          where: {
+            email: { in: instructorEmails },
+            role: "INSTRUCTOR",
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        });
+      }
+    } else {
+      // For non-parents, return all instructors
+      instructors = await prisma.user.findMany({
+        where: {
+          role: "INSTRUCTOR",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      });
+    }
 
     // Fetch availability for all instructors
     const instructorEmails = instructors.map((i) => i.email).filter(Boolean) as string[];

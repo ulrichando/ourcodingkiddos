@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     const userRole = (session?.user as any)?.role;
     const isAdmin = userRole === "ADMIN";
+    const isInstructor = userRole === "INSTRUCTOR";
 
     const { searchParams } = new URL(request.url);
     const ageGroup = searchParams.get("ageGroup");
@@ -17,10 +18,12 @@ export async function GET(request: NextRequest) {
 
     const where: any = {};
 
-    // Only show published programs to non-admins
-    if (!isAdmin) {
+    // Only show published programs to regular users (non-admins and non-instructors)
+    if (!isAdmin && !isInstructor) {
       where.isPublished = true;
     }
+
+    // Instructors and admins see all programs
 
     if (ageGroup) {
       where.ageGroup = ageGroup;

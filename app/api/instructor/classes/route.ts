@@ -159,10 +159,53 @@ export async function GET() {
     return NextResponse.json({ sessions: enrichedSessions });
   }
 
-  // Instructors should see all scheduled classes (including those created by others) so they can manage or join.
+  // Instructors see ALL classes from currently running programs
+  // This allows any instructor to see available classes they can teach
   const includeFrom = new Date(Date.now() - 60 * 60 * 1000);
+  const now = new Date();
+
+  console.log('[Instructor Classes API] Fetching classes for instructor:', email);
+
+  // Get currently running programs (programs that are published and within their date range)
+  const runningPrograms = await prisma.program.findMany({
+    where: {
+      isPublished: true,
+      OR: [
+        {
+          // Programs with date ranges that are currently active
+          AND: [
+            { startDate: { lte: now } },
+            { endDate: { gte: now } },
+          ],
+        },
+        {
+          // Programs without end dates that have started
+          startDate: { lte: now },
+          endDate: null,
+        },
+        {
+          // Programs without dates (always available)
+          startDate: null,
+          endDate: null,
+        },
+      ],
+    },
+    select: { id: true },
+  });
+
+  const runningProgramIds = runningPrograms.map(p => p.id);
+
+  console.log('[Instructor Classes API] Found', runningProgramIds.length, 'running programs');
+  console.log('[Instructor Classes API] Running program IDs:', runningProgramIds);
+
+  // ONLY show classes from currently running published programs
+  // Do NOT show standalone classes (programId: null)
   const sessions = await prisma.classSession.findMany({
-    where: { status: "SCHEDULED", startTime: { gte: includeFrom } },
+    where: {
+      status: "SCHEDULED",
+      startTime: { gte: includeFrom },
+      programId: { in: runningProgramIds },  // ONLY from running programs
+    },
     orderBy: { startTime: "asc" },
     select: {
       id: true,
@@ -203,6 +246,8 @@ export async function GET() {
       thumbnailUrl: program?.thumbnailUrl || null,
     };
   });
+
+  console.log('[Instructor Classes API] Found', enrichedSessions.length, 'classes for instructor:', email);
 
   return NextResponse.json({ sessions: enrichedSessions });
 }

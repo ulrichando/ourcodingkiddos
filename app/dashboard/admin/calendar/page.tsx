@@ -141,7 +141,7 @@ export default function CalendarPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Schedule</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Calendar</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
               Calendar View
             </h1>

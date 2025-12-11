@@ -48,7 +48,7 @@ export default function CreateClassPage() {
   useEffect(() => {
     async function fetchPrograms() {
       try {
-        const res = await fetch("/api/admin/programs");
+        const res = await fetch("/api/programs");
         if (res.ok) {
           const data = await res.json();
           setPrograms(data.programs || []);

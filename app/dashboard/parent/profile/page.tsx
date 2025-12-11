@@ -89,7 +89,7 @@ export default function ParentProfilePage() {
 
   return (
     <ParentLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div>
           <Link
@@ -98,6 +98,7 @@ export default function ParentProfilePage() {
           >
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </Link>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Profile</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
             My Profile
           </h1>

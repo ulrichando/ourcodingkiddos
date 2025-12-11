@@ -80,6 +80,7 @@ export default function ParentCoursesPage() {
     <ParentLayout>
       <div className="max-w-6xl mx-auto space-y-6">
         <div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Courses</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Courses</h1>
           <p className="text-slate-600 dark:text-slate-400">Browse coding courses for your child</p>
         </div>

@@ -108,9 +108,10 @@ export default function ParentDashboardPage() {
 
   return (
     <ParentLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Welcome Header */}
         <div className="mb-6 sm:mb-8">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Dashboard</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             {getGreeting()}{session?.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}! 👋
           </h1>
@@ -643,7 +644,8 @@ export default function ParentDashboardPage() {
                 <Button
                   onClick={addGoal}
                   disabled={!newGoal.studentId || !newGoal.description}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  variant="success"
+                  className="flex-1"
                 >
                   <Flag className="w-4 h-4 mr-2" />
                   Set Goal

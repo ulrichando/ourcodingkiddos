@@ -58,7 +58,10 @@ export default function AnalyticsPage() {
     return (
       <AdminLayout>
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Analytics Dashboard</h1>
+          <div className="mb-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Analytics</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Analytics Dashboard</h1>
+          </div>
           <p className="text-slate-500 dark:text-slate-400">Loading analytics...</p>
         </main>
       </AdminLayout>
@@ -69,7 +72,10 @@ export default function AnalyticsPage() {
     return (
       <AdminLayout>
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Analytics Dashboard</h1>
+          <div className="mb-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Analytics</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Analytics Dashboard</h1>
+          </div>
           <p className="text-red-600 dark:text-red-400">Failed to load analytics</p>
         </main>
       </AdminLayout>
@@ -97,8 +103,8 @@ export default function AnalyticsPage() {
     <AdminLayout>
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Analytics Dashboard</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Analytics</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Analytics Dashboard</h1>
         </div>
 
       {/* Overview Stats */}

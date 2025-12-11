@@ -77,13 +77,18 @@ export default function InstructorDashboard() {
     let mounted = true;
     fetchSessions().then((data) => {
       if (!mounted) return;
+      console.log('[Instructor Dashboard] Received sessions data:', data);
       // Normalize dates
       const normalized = data.map((s: any) => ({
         ...s,
         start: new Date(s.startTime || s.start),
         bookings: s.enrolledCount ?? 0,
       }));
+      console.log('[Instructor Dashboard] Normalized sessions:', normalized.length, 'classes');
       setSessions(normalized);
+    }).catch((err) => {
+      console.error('[Instructor Dashboard] Error fetching sessions:', err);
+      if (mounted) setSessions([]);
     });
 
     // Fetch dashboard data (students and bookings)
@@ -120,7 +125,7 @@ export default function InstructorDashboard() {
 
   return (
     <InstructorLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Demo Account Banner */}
         {isDemoAccount && (
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
@@ -136,7 +141,8 @@ export default function InstructorDashboard() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Instructor Dashboard</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Dashboard</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Instructor Dashboard</h1>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Welcome back, {userName}!</p>
           </div>
           <Link
@@ -173,7 +179,7 @@ export default function InstructorDashboard() {
           <div className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-700 p-4 sm:p-6 lg:col-span-2 space-y-4 min-h-[260px]">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-slate-900 dark:text-slate-100">Upcoming Classes</h3>
-              <Link href="/dashboard/instructor" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200">
+              <Link href="/dashboard/instructor/classes" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200">
                 View All <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
@@ -242,7 +248,7 @@ export default function InstructorDashboard() {
                         <button
                           onClick={() => checkAttendance(session.id, true)}
                           disabled={checkingAttendance === session.id}
-                          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white px-3 py-2 rounded-md text-xs sm:text-sm"
+                          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 disabled:hover:bg-amber-300 text-white px-3 py-2 rounded-md text-xs sm:text-sm"
                           title="Check student attendance and notify parents of offline students"
                         >
                           {checkingAttendance === session.id ? (

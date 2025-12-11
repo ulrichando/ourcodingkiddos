@@ -82,9 +82,10 @@ export default function ParentSchedulePage() {
 
   return (
     <ParentLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Schedule</p>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Schedule</h1>
             <p className="text-slate-600 dark:text-slate-400">View upcoming classes and sessions</p>
           </div>

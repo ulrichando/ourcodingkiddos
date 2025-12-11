@@ -170,11 +170,12 @@ export default function ProgressReportsPage() {
 
   return (
     <ParentLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Reports</p>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-3">
                 <TrendingUp className="w-7 h-7 sm:w-8 sm:h-8 text-purple-500 dark:text-purple-400" />
                 Progress Reports

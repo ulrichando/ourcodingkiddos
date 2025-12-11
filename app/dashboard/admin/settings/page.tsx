@@ -102,8 +102,11 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="max-w-5xl mx-auto space-y-6">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">System Settings</h1>
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Settings</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">System Settings</h1>
+          </div>
           <p className="text-slate-500 dark:text-slate-400">Loading settings...</p>
         </div>
       </AdminLayout>
@@ -113,8 +116,11 @@ export default function SettingsPage() {
   if (error) {
     return (
       <AdminLayout>
-        <div className="max-w-5xl mx-auto space-y-6">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">System Settings</h1>
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Settings</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">System Settings</h1>
+          </div>
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
             <p className="text-red-700 dark:text-red-400">{error}</p>
             <button
@@ -132,8 +138,11 @@ export default function SettingsPage() {
   if (!settings) {
     return (
       <AdminLayout>
-        <div className="max-w-5xl mx-auto space-y-6">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">System Settings</h1>
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Settings</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">System Settings</h1>
+          </div>
           <p className="text-slate-500 dark:text-slate-400">No settings found.</p>
         </div>
       </AdminLayout>
@@ -150,10 +159,10 @@ export default function SettingsPage() {
 
   return (
     <AdminLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Admin</p>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">System Settings</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Settings</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">System Settings</h1>
         </div>
 
       {/* Tabs */}

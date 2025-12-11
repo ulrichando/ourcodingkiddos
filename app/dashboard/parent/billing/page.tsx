@@ -189,6 +189,7 @@ export default function ParentBillingPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Billing</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <Wallet className="w-8 h-8 text-purple-500" />
             Billing & Payments

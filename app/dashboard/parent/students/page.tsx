@@ -123,7 +123,7 @@ export default function ManageStudentsPage() {
 
   return (
     <ParentLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <Link href="/dashboard/parent" className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 mb-4">
@@ -131,6 +131,7 @@ export default function ManageStudentsPage() {
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Students</p>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                 Manage Students
               </h1>
@@ -280,19 +281,17 @@ export default function ManageStudentsPage() {
                               Export Data
                             </Button>
                             <Button
-                              variant="outline"
+                              variant="warning"
                               size="sm"
                               onClick={() => handleArchiveStudent(student)}
-                              className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
                             >
                               <Archive className="w-4 h-4 sm:mr-2" />
                               <span className="hidden sm:inline">Archive</span>
                             </Button>
                             <Button
-                              variant="outline"
+                              variant="destructive"
                               size="sm"
                               onClick={() => handleDeleteStudent(student)}
-                              className="border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                               <Trash2 className="w-4 h-4 sm:mr-2" />
                               <span className="hidden sm:inline">Delete</span>
@@ -301,19 +300,17 @@ export default function ManageStudentsPage() {
                         ) : (
                           <>
                             <Button
-                              variant="outline"
+                              variant="success"
                               size="sm"
                               onClick={() => handleRestoreStudent(student)}
-                              className="border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
                             >
                               <RotateCcw className="w-4 h-4 sm:mr-2" />
                               <span className="hidden sm:inline">Restore</span>
                             </Button>
                             <Button
-                              variant="outline"
+                              variant="destructive"
                               size="sm"
                               onClick={() => handleDeleteStudent(student)}
-                              className="border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                               <Trash2 className="w-4 h-4 sm:mr-2" />
                               <span className="hidden sm:inline">Delete Now</span>
@@ -406,13 +403,14 @@ export default function ManageStudentsPage() {
                   </Button>
                   <Button
                     onClick={executeAction}
-                    className={`flex-1 ${
+                    variant={
                       confirmDialog.action === "delete"
-                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        ? "destructive"
                         : confirmDialog.action === "restore"
-                        ? "bg-green-600 hover:bg-green-700 text-white"
-                        : "bg-amber-600 hover:bg-amber-700 text-white"
-                    }`}
+                        ? "success"
+                        : "warning"
+                    }
+                    className="flex-1"
                   >
                     {confirmDialog.action === "archive" && "Archive Student"}
                     {confirmDialog.action === "delete" && "Delete Permanently"}

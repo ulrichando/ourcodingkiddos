@@ -18,6 +18,36 @@ export async function GET(req: Request) {
     const userEmail = session.user.email.toLowerCase();
     const userRole = (session as any)?.user?.role?.toUpperCase() || "PARENT";
 
+    // Check if requesting specific conversation messages
+    const { searchParams } = new URL(req.url);
+    const conversationId = searchParams.get('conversationId');
+
+    if (conversationId) {
+      // Fetch messages for specific conversation
+      const messages = await prisma.message.findMany({
+        where: {
+          conversationId
+        },
+        orderBy: {
+          createdAt: 'asc'
+        }
+      });
+
+      const transformedMessages = messages.map(msg => ({
+        id: msg.id,
+        conversationId: msg.conversationId,
+        fromRole: msg.fromRole.toLowerCase(),
+        toRole: "parent", // Simplified
+        fromName: msg.fromName,
+        text: msg.content,
+        attachmentName: msg.attachmentName,
+        timestamp: new Date(msg.createdAt).getTime(),
+        status: "sent"
+      }));
+
+      return NextResponse.json({ messages: transformedMessages });
+    }
+
     // Fetch conversations where user is a participant
     const conversations = await prisma.conversation.findMany({
       where: {

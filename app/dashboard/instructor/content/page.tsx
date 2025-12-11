@@ -69,7 +69,7 @@ export default function InstructorContentPage() {
 
   return (
     <InstructorLayout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Demo Account Banner */}
         {isDemoAccount && (
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3">
@@ -86,7 +86,8 @@ export default function InstructorContentPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Content Management</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Content</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Content Management</h1>
             <p className="text-slate-600 dark:text-slate-400">Manage your course content, lessons, and resources</p>
           </div>
           <button

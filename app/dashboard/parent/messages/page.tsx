@@ -38,6 +38,10 @@ export default function ParentMessagesPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<string | null>(null);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [creatingChat, setCreatingChat] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +75,69 @@ export default function ParentMessagesPage() {
       setLoading(false);
     }
   };
+
+  const loadContacts = async () => {
+    setLoadingContacts(true);
+    try {
+      const res = await fetch("/api/parent/contacts");
+      if (res.ok) {
+        const data = await res.json();
+        setContacts(data.contacts || []);
+      }
+    } catch (error) {
+      console.error("Failed to load contacts:", error);
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const createConversation = async () => {
+    if (!selectedContact) {
+      console.log("No contact selected");
+      return;
+    }
+
+    console.log("Creating conversation with:", selectedContact);
+    setCreatingChat(true);
+    try {
+      const contact = contacts.find(c => c.email === selectedContact);
+      console.log("Contact details:", contact);
+
+      const res = await fetch("/api/messages/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientEmail: selectedContact,
+          recipientName: contact?.name || "Contact",
+        }),
+      });
+
+      console.log("Response status:", res.status);
+      const data = await res.json();
+      console.log("Response data:", data);
+
+      if (res.ok) {
+        await loadConversations();
+        setActiveId(data.conversationId);
+        setShowNewChat(false);
+        setSelectedContact(null);
+      } else {
+        console.error("Failed to create conversation:", data.error);
+        alert(`Failed to create conversation: ${data.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Failed to create conversation:", error);
+      alert(`Error creating conversation: ${error}`);
+    } finally {
+      setCreatingChat(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showNewChat) {
+      loadContacts();
+    }
+  }, [showNewChat]);
 
   const loadMessages = async (conversationId: string) => {
     try {
@@ -139,9 +206,10 @@ export default function ParentMessagesPage() {
 
   return (
     <ParentLayout>
-      <div className="h-[calc(100vh-8rem)] flex flex-col">
+      <div className="max-w-6xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Messages</p>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Messages</h1>
             <p className="text-slate-600 dark:text-slate-400">Chat with instructors</p>
           </div>
@@ -305,24 +373,107 @@ export default function ParentMessagesPage() {
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">New Conversation</h2>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Start a conversation with your child's instructor.
+                  Select a contact to start a conversation.
                 </p>
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {loadingContacts ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-violet-500" />
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-slate-100">Contact Instructor</p>
-                      <p className="text-sm text-slate-500">Message your child's teacher</p>
-                    </div>
-                  </div>
+                  ) : contacts.length === 0 ? (
+                    <p className="text-center text-sm text-slate-500 py-8">No contacts available</p>
+                  ) : (
+                    <>
+                      {/* Children Section */}
+                      {contacts.filter(c => c.type === "student").length > 0 && (
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 px-1">
+                            My Children
+                          </h3>
+                          <div className="space-y-2">
+                            {contacts.filter(c => c.type === "student").map((child) => (
+                              <button
+                                key={child.email}
+                                onClick={() => setSelectedContact(child.email)}
+                                className={`w-full p-3 rounded-lg border ${
+                                  selectedContact === child.email
+                                    ? "border-violet-500 bg-violet-50 dark:bg-violet-900/20"
+                                    : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                } transition-colors flex items-center gap-3 text-left`}
+                              >
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-medium flex-shrink-0">
+                                  {child.name?.charAt(0) || "S"}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{child.name}</p>
+                                  <p className="text-xs text-slate-500 truncate">{child.relationship}</p>
+                                </div>
+                                {selectedContact === child.email && (
+                                  <div className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0">
+                                    <Check className="w-3 h-3 text-white" />
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Instructors Section */}
+                      {contacts.filter(c => c.type === "instructor").length > 0 && (
+                        <div>
+                          <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 px-1">
+                            Instructors
+                          </h3>
+                          <div className="space-y-2">
+                            {contacts.filter(c => c.type === "instructor").map((instructor) => (
+                              <button
+                                key={instructor.email}
+                                onClick={() => setSelectedContact(instructor.email)}
+                                className={`w-full p-3 rounded-lg border ${
+                                  selectedContact === instructor.email
+                                    ? "border-violet-500 bg-violet-50 dark:bg-violet-900/20"
+                                    : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                } transition-colors flex items-center gap-3 text-left`}
+                              >
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-medium flex-shrink-0">
+                                  {instructor.name?.charAt(0) || "I"}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{instructor.name}</p>
+                                  <p className="text-xs text-slate-500 truncate">{instructor.relationship}</p>
+                                </div>
+                                {selectedContact === instructor.email && (
+                                  <div className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0">
+                                    <Check className="w-3 h-3 text-white" />
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setShowNewChat(false)} className="flex-1">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowNewChat(false);
+                      setSelectedContact(null);
+                    }}
+                    className="flex-1"
+                  >
                     Cancel
                   </Button>
-                  <Button className="flex-1">Start Chat</Button>
+                  <Button
+                    onClick={createConversation}
+                    disabled={!selectedContact || creatingChat}
+                    className="flex-1"
+                  >
+                    {creatingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : "Start Chat"}
+                  </Button>
                 </div>
               </CardContent>
             </Card>

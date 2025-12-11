@@ -16,6 +16,8 @@ import {
   GraduationCap,
   BarChart3,
   ClipboardList,
+  Search,
+  Command,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -39,7 +41,7 @@ const navigationGroups = [
     title: "Schedule",
     items: [
       { href: "/dashboard/instructor/availability", label: "Availability", icon: Clock },
-      { href: "/schedule", label: "Calendar", icon: Calendar },
+      { href: "/dashboard/instructor/calendar", label: "Calendar", icon: Calendar },
     ]
   },
   {
@@ -52,11 +54,12 @@ const navigationGroups = [
 ];
 
 type InstructorSidebarProps = {
+  onCommandOpen?: () => void;
   isOpen?: boolean;
   onClose?: () => void;
 };
 
-export default function InstructorSidebar({ isOpen = false, onClose }: InstructorSidebarProps) {
+export default function InstructorSidebar({ onCommandOpen, isOpen = false, onClose }: InstructorSidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -123,6 +126,34 @@ export default function InstructorSidebar({ isOpen = false, onClose }: Instructo
             )}
           </Link>
         </div>
+
+        {/* Search/Command Trigger */}
+        {!isCollapsed && (
+          <div className="px-4 py-3">
+            <button
+              onClick={onCommandOpen}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+            >
+              <Search className="w-4 h-4" />
+              <span className="flex-1 text-left">Search...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-500 bg-slate-200 dark:bg-slate-700 rounded group-hover:bg-slate-300 dark:group-hover:bg-slate-600">
+                <Command className="w-2.5 h-2.5" />K
+              </kbd>
+            </button>
+          </div>
+        )}
+
+        {isCollapsed && (
+          <div className="px-3 py-3">
+            <button
+              onClick={onCommandOpen}
+              className="w-full flex items-center justify-center p-2 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              title="Search (⌘K)"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Navigation Section - Scrollable */}
         <nav className={`flex-1 overflow-y-auto ios-scroll py-4 space-y-6 ${isCollapsed ? "px-3" : "px-4"}`}>

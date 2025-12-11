@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { User, Mail, Smile, Wifi, WifiOff, ArrowLeft } from "lucide-react";
+import { User, Mail, Smile, ArrowLeft } from "lucide-react";
 import Button from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import InstructorLayout from "@/components/instructor/InstructorLayout";
+import LastSeenIndicator from "@/components/instructor/LastSeenIndicator";
 
 type StudentRow = {
   id: string;
@@ -13,7 +14,7 @@ type StudentRow = {
   email?: string;
   age?: number;
   avatar?: string;
-  lastActive?: string;
+  lastSeen?: string | Date | null;
 };
 
 export default function InstructorStudentsPage() {
@@ -29,10 +30,10 @@ export default function InstructorStudentsPage() {
         const rows: StudentRow[] = (data.students || []).map((s: any) => ({
           id: s.id,
           name: s.name || "Student",
-          email: s.email,
+          email: s.user?.email || s.email,
           age: s.age,
           avatar: s.avatar,
-          lastActive: s.lastActiveDate,
+          lastSeen: s.user?.lastSeen || s.lastActiveDate || null,
         }));
         setStudents(rows);
       })
@@ -43,19 +44,13 @@ export default function InstructorStudentsPage() {
     };
   }, []);
 
-  const renderStatus = (lastActive?: string) => {
-    if (!lastActive) return { label: "offline", online: false };
-    const last = new Date(lastActive).getTime();
-    const online = Date.now() - last < 10 * 60 * 1000; // 10 min window
-    return { label: online ? "online" : "offline", online };
-  };
-
   return (
     <InstructorLayout>
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">My Students</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Students</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">My Students</h1>
             <p className="text-slate-600 dark:text-slate-400">View all students and see who is online.</p>
           </div>
         </div>
@@ -69,7 +64,6 @@ export default function InstructorStudentsPage() {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
                 {students.map((s) => {
-                  const status = renderStatus(s.lastActive);
                   return (
                     <div key={s.id} className="flex items-center justify-between py-3">
                       <div className="flex items-center gap-3">
@@ -89,13 +83,13 @@ export default function InstructorStudentsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span
-                          className={`inline-flex items-center gap-1 text-sm font-semibold px-3 py-1 rounded-full ${
-                            status.online ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
-                          }`}
-                        >
-                          {status.online ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />} {status.label}
-                        </span>
+                        <LastSeenIndicator
+                          lastSeen={s.lastSeen}
+                          size="md"
+                          showDot={true}
+                          showText={true}
+                          variant="badge"
+                        />
                         <Link href={`/dashboard/instructor/students/${s.id}`}>
                           <Button variant="outline" size="sm">View Profile</Button>
                         </Link>

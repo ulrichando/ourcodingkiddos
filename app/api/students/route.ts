@@ -229,6 +229,12 @@ export async function GET(request: NextRequest) {
       lastActiveDate: true,
       archivedAt: true,
       userId: true,
+      user: {
+        select: {
+          email: true,
+          lastSeen: true,
+        },
+      },
       guardian: {
         select: {
           id: true,

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { logout } from "@/lib/logout";
 import NotificationBell from "../notifications/NotificationBell";
+import LastSeenIndicator from "./LastSeenIndicator";
 
 type InstructorDashboardHeaderProps = {
   onMenuToggle?: () => void;
@@ -42,11 +43,24 @@ export default function InstructorDashboardHeader({ onMenuToggle, isSidebarOpen 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [lastSeen, setLastSeen] = useState<Date | null>(null);
 
   useEffect(() => {
     setMounted(true);
     setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
+
+    // Fetch user's last seen data
+    if (session?.user?.email) {
+      fetch(`/api/user/profile?email=${encodeURIComponent(session.user.email)}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.lastSeen) {
+            setLastSeen(new Date(data.lastSeen));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [session?.user?.email]);
 
   const toggleTheme = () => {
     const newIsDark = !isDark;
@@ -163,13 +177,19 @@ export default function InstructorDashboardHeader({ onMenuToggle, isSidebarOpen 
                 />
                 <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl z-50 overflow-hidden">
                   {/* User Info */}
-                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 space-y-1.5">
                     <p className="font-medium text-slate-900 dark:text-slate-100 text-sm truncate">
                       {session?.user?.name || "Instructor"}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                       {session?.user?.email || "instructor@example.com"}
                     </p>
+                    <LastSeenIndicator
+                      lastSeen={lastSeen}
+                      size="sm"
+                      showDot={true}
+                      showText={true}
+                    />
                   </div>
 
                   {/* Menu Items */}

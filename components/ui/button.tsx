@@ -1,7 +1,7 @@
 import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "../../lib/utils";
 
-type Variant = "default" | "secondary" | "outline" | "ghost" | "destructive" | "success";
+type Variant = "default" | "secondary" | "outline" | "ghost" | "destructive" | "success" | "warning" | "danger";
 type Size = "sm" | "md" | "lg" | "icon";
 
 const variantClasses: Record<Variant, string> = {
@@ -33,10 +33,22 @@ const variantClasses: Record<Variant, string> = {
     "hover:bg-red-500 hover:shadow-red-500/40",
     "active:scale-[0.98]",
   ].join(" "),
+  danger: [
+    "bg-red-600 text-white",
+    "shadow-lg shadow-red-500/25",
+    "hover:bg-red-700 hover:shadow-red-500/40",
+    "active:scale-[0.98]",
+  ].join(" "),
   success: [
     "bg-gradient-to-r from-emerald-600 to-teal-600 text-white",
     "shadow-lg shadow-emerald-500/25",
     "hover:from-emerald-500 hover:to-teal-500 hover:shadow-emerald-500/40",
+    "active:scale-[0.98]",
+  ].join(" "),
+  warning: [
+    "bg-amber-500 text-white",
+    "shadow-lg shadow-amber-500/25",
+    "hover:bg-amber-600 hover:shadow-amber-500/40",
     "active:scale-[0.98]",
   ].join(" "),
 };

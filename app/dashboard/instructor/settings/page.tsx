@@ -124,6 +124,7 @@ export default function InstructorSettingsPage() {
     <InstructorLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         <div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Home / Settings</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
           <p className="text-slate-600 dark:text-slate-400">Manage your account and teaching preferences</p>
         </div>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { updateLastSeen } from "@/lib/update-last-seen";
 
 // GET - List assignments for the student
 export async function GET(req: Request) {
@@ -13,6 +14,9 @@ export async function GET(req: Request) {
 
   const userId = (session.user as any).id;
   const userEmail = session.user.email.toLowerCase();
+
+  // Update last seen timestamp for student
+  await updateLastSeen(userEmail);
 
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status"); // all, pending, completed

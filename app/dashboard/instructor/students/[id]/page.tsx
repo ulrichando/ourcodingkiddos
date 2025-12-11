@@ -140,7 +140,7 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
                     )}
                   </div>
                   <div className="mt-3">
-                    <Link href={`/messages?to=${encodeURIComponent(parentEmail || "")}&name=${encodeURIComponent(parentName)}&subject=${encodeURIComponent(
+                    <Link href={`/dashboard/instructor/messages?to=${encodeURIComponent(parentEmail || "")}&name=${encodeURIComponent(parentName)}&subject=${encodeURIComponent(
                       `Regarding ${student.name} - Class Attendance`
                     )}`}>
                       <Button variant="secondary">
@@ -221,13 +221,13 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <Link href={`/messages?to=${encodeURIComponent(student.email || "")}&name=${encodeURIComponent(student.name)}&subject=Hello ${encodeURIComponent(student.name)}`}>
+              <Link href={`/dashboard/instructor/messages?to=${encodeURIComponent(student.email || "")}&name=${encodeURIComponent(student.name)}&subject=Hello ${encodeURIComponent(student.name)}`}>
                 <Button variant="outline">
                   <MessageSquare className="h-4 w-4" />
                   Message Student
                 </Button>
               </Link>
-              <Link href={`/messages?to=${encodeURIComponent(parentEmail || "")}&name=${encodeURIComponent(parentName)}&subject=${encodeURIComponent(
+              <Link href={`/dashboard/instructor/messages?to=${encodeURIComponent(parentEmail || "")}&name=${encodeURIComponent(parentName)}&subject=${encodeURIComponent(
                 "Regarding " + student.name
               )}`}>
                 <Button variant="outline">

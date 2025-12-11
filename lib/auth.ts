@@ -239,10 +239,33 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account, profile, credentials }) {
       // For Google OAuth, link to existing account if email matches
       if (account?.provider === "google" && user.email) {
+        // IMPORTANT: Restrict instructor Google OAuth to company domain only
+        const isCompanyEmail = user.email.endsWith('@ourcodingkiddos.com');
+
+        // Check if user is trying to sign up/login as an instructor
         const existingUser = await prismaBase.user.findUnique({
           where: { email: user.email },
           include: { accounts: { where: { provider: "google" } } },
         });
+
+        // If existing user is an instructor, require company email
+        if (existingUser?.role === 'INSTRUCTOR' && !isCompanyEmail) {
+          throw new Error("Instructors must use a company email address (@ourcodingkiddos.com) to sign in. Please contact your administrator.");
+        }
+
+        // For new signups via instructor intent, allow personal emails for applications
+        // They will be assigned company emails after approval
+        let intentToken: string | null = null;
+        try {
+          const { getCurrentIntentToken } = await import("../app/api/auth/[...nextauth]/route");
+          intentToken = getCurrentIntentToken();
+        } catch (e) {
+          // If import fails, continue without token
+        }
+
+        const hasInstructorIntent = intentToken ? hasInstructorSignupIntent(intentToken) : false;
+        // Note: We allow personal emails for instructor applications (PENDING status)
+        // Once approved, admin will assign them a company email
 
         // Check account status for existing users (but not for brand new signups)
         // If the user exists AND has a Google account linked, they're trying to log in (not sign up)
@@ -314,12 +337,23 @@ export const authOptions: NextAuthOptions = {
 
           const hasIntent = intentToken ? hasInstructorSignupIntent(intentToken) : false;
           const resumeUrl = intentToken ? getInstructorResumeUrl(intentToken) : undefined;
+
+          // IMPORTANT: Only allow company emails to be instructors
+          // Personal emails detected as "instructor-like" will be rejected
           const isLikelyInstructor =
             user.email?.includes('teacher') ||
             user.email?.includes('instructor') ||
             user.email?.includes('edu');
 
-          const role: "PARENT" | "INSTRUCTOR" = (hasIntent || isLikelyInstructor) ? "INSTRUCTOR" : "PARENT";
+          // Allow instructor applications with personal emails
+          // They will be PENDING and admin will assign company email after approval
+          let role: "PARENT" | "INSTRUCTOR" = "PARENT";
+          if (hasIntent || isLikelyInstructor) {
+            role = "INSTRUCTOR";
+            // Personal email instructors get PENDING status
+            // Company email instructors also get PENDING status (admin approval required)
+          }
+
           const accountStatus = role === "INSTRUCTOR" ? "PENDING" : "APPROVED";
 
           console.log('[Auth] Creating new Google OAuth user as', role, 'with status', accountStatus, '(intent:', hasIntent, ', email pattern:', isLikelyInstructor, ', resumeUrl:', !!resumeUrl, '):', user.email);
