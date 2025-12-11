@@ -42,7 +42,7 @@ type ClassSession = {
   durationMinutes: number;
   enrolledCount: number;
   maxStudents: number | null;
-  meetingUrl?: string | null;
+  meetingUrl?: string;
   programId?: string | null;
 };
 

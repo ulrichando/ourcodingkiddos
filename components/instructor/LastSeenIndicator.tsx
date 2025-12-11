@@ -13,7 +13,7 @@
 import { formatLastSeen, getOnlineStatusColor, isUserOnline } from '@/lib/update-last-seen';
 
 interface LastSeenIndicatorProps {
-  lastSeen: Date | string | null;
+  lastSeen?: Date | string | null;
   showDot?: boolean;
   showText?: boolean;
   size?: 'sm' | 'md' | 'lg';

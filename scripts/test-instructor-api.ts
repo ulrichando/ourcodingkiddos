@@ -49,9 +49,7 @@ async function testInstructorAPI() {
       startTime: { gte: includeFrom },
       OR: [
         { programId: { in: runningProgramIds } },
-        { programId: null },
         { instructorEmail: email },
-        { instructorEmail: null },
       ],
     },
     orderBy: { startTime: "asc" },
@@ -88,14 +86,6 @@ async function testInstructorAPI() {
       },
     });
 
-    const standalone = await prisma.classSession.count({
-      where: {
-        status: "SCHEDULED",
-        startTime: { gte: includeFrom },
-        programId: null,
-      },
-    });
-
     const byInstructor = await prisma.classSession.count({
       where: {
         status: "SCHEDULED",
@@ -104,18 +94,8 @@ async function testInstructorAPI() {
       },
     });
 
-    const unassigned = await prisma.classSession.count({
-      where: {
-        status: "SCHEDULED",
-        startTime: { gte: includeFrom },
-        instructorEmail: null,
-      },
-    });
-
     console.log('  - By running program:', byProgram);
-    console.log('  - Standalone (programId null):', standalone);
     console.log('  - By instructor email:', byInstructor);
-    console.log('  - Unassigned (instructorEmail null):', unassigned);
   }
 
   await prisma.$disconnect();

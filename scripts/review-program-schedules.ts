@@ -90,7 +90,7 @@ async function reviewProgramSchedules() {
         const times = dayClasses.map(c =>
           c.startTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
         );
-        console.log(`      ${day}: ${dayClasses.length} class(es) - ${[...new Set(times)].join(', ')}`);
+        console.log(`      ${day}: ${dayClasses.length} class(es) - ${Array.from(new Set(times)).join(', ')}`);
       });
     }
 

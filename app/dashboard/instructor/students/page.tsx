@@ -88,7 +88,6 @@ export default function InstructorStudentsPage() {
                           size="md"
                           showDot={true}
                           showText={true}
-                          variant="badge"
                         />
                         <Link href={`/dashboard/instructor/students/${s.id}`}>
                           <Button variant="outline" size="sm">View Profile</Button>

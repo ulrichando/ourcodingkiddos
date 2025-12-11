@@ -73,10 +73,10 @@ async function assignDemoInstructor() {
           programId: program.id,
           instructorEmail: demoInstructor.email,
           sessionType: 'ONE_ON_ONE',
-          language: 'JAVASCRIPT',
-          ageGroup: 'AGES_7_10',
+          language: program.language,
+          ageGroup: program.ageGroup,
           startTime: new Date(),
-          durationMinutes: (program.durationInMonths || 1) * 4 * 60,
+          durationMinutes: program.sessionDuration,
           status: 'SCHEDULED',
           meetingUrl: null
         }

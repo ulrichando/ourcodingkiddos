@@ -9,7 +9,11 @@ async function checkChildren() {
       include: {
         parentProfile: {
           include: {
-            children: true
+            children: {
+              include: {
+                user: true
+              }
+            }
           }
         }
       }
@@ -22,7 +26,7 @@ async function checkChildren() {
         console.log(`Children: ${parent.parentProfile.children.length}`);
         for (const child of parent.parentProfile.children) {
           console.log(`  - ${child.name}`);
-          console.log(`    Email: ${child.email || 'NO EMAIL'}`);
+          console.log(`    Email: ${child.user?.email || 'NO EMAIL'}`);
           console.log(`    ID: ${child.id}`);
         }
       } else {
