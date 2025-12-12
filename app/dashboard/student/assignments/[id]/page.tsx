@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
+import {  ArrowLeft,
   Clock,
   Calendar,
   Star,
@@ -20,6 +19,12 @@ import {
   Trophy,
   Sparkles,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface Assignment {
   id: string;
@@ -347,7 +352,7 @@ export default function AssignmentDetailPage() {
             {/* Links */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold mb-2 flex items-center gap-2">
+                <label className="text-sm font-semibold mb-2 flex items-center gap-2">
                   <Code className="h-4 w-4" /> GitHub Link (Optional)
                 </label>
                 <input
@@ -359,7 +364,7 @@ export default function AssignmentDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 flex items-center gap-2">
+                <label className="text-sm font-semibold mb-2 flex items-center gap-2">
                   <ExternalLink className="h-4 w-4" /> Demo Link (Optional)
                 </label>
                 <input

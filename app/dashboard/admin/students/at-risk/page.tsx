@@ -17,6 +17,11 @@ import {
   User,
 } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type AtRiskStudent = {
   id: string;
   name: string;

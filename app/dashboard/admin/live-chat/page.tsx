@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  Headphones,
+import {  Headphones,
   MessageSquare,
   Users,
   Send,
@@ -24,6 +23,12 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Conversation = {
   id: string;

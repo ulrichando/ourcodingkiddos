@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import SupportLayout from "../../../../components/support/SupportLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  MessageSquare,
+import {  MessageSquare,
   Loader2,
   RefreshCcw,
   Send,
@@ -17,6 +16,12 @@ import {
   User,
   Search,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Message = {
   id: string;

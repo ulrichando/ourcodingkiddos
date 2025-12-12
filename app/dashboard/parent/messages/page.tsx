@@ -7,6 +7,11 @@ import Button from "../../../../components/ui/button";
 import ParentLayout from "../../../../components/parent/ParentLayout";
 import { MessageSquare, Send, Search, Check, CheckCheck, Loader2, User, Plus } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Conversation = {
   id: string;
   name: string;

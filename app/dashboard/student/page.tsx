@@ -4,15 +4,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import {
-  Video, Star, Flame, Trophy, Zap, BookOpen, Clock, Calendar,
-  ArrowRight, Target as Aim, Loader2, Sparkles, Gift, Rocket,
+import {  ArrowRight, Target as Aim, Loader2, Sparkles, Gift, Rocket,
   CheckCircle, Lock, Play, ChevronRight, Medal, Crown, Code2,
-  Plus, X, Upload, Eye, Heart, ClipboardList
+  Plus, X, Upload, Eye, Heart, ClipboardList, Flame, Star, Zap, BookOpen, Calendar, Trophy, Video
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";
 import LanguageIcon from "@/components/ui/LanguageIcon";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type ClassItem = {
   id: string;

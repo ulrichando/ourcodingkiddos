@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import SupportLayout from "../../../../components/support/SupportLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  Clock,
+import {  Clock,
   Loader2,
   RefreshCcw,
   Search,
@@ -17,6 +16,12 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type ChatHistory = {
   id: string;

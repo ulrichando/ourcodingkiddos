@@ -9,7 +9,13 @@ import ParentLayout from "../../../../../components/parent/ParentLayout";
 import { User, Calendar, Award, Zap, Trophy, Save, Check, Loader2, ArrowLeft, Flame } from "lucide-react";
 import Link from "next/link";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 const avatarOptions = ["👦", "👧", "🧒", "👨‍🎓", "👩‍🎓", "🦸", "🦸‍♀️", "🧑‍💻", "👩‍💻", "🤖", "🎮", "🚀"];
+
+
 
 type StudentProfile = {
   id: string;

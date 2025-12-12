@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  Headphones,
+import {  Headphones,
   Plus,
   Edit,
   Trash2,
@@ -20,6 +19,12 @@ import {
   X,
   Check,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type SupportStaff = {
   id: string;

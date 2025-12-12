@@ -7,6 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import InstructorLayout from "@/components/instructor/InstructorLayout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Guardian = {
   id: string;
   user: {

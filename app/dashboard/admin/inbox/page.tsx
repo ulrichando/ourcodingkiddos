@@ -3,8 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
-import {
-  Mail,
+import {  Mail,
   MailOpen,
   Reply,
   Archive,
@@ -23,6 +22,12 @@ import {
   Bell,
   BellOff,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type ReceivedEmail = {
   id: string;

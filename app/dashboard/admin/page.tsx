@@ -11,7 +11,12 @@ import {
   demoParentsRaw,
 } from "../../../lib/demo-data";
 
-export const dynamic = "force-dynamic";
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
+
 
 const ageGroupLabel: Record<string, string> = {
   AGES_7_10: "7-10",

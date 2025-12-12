@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { Users, GraduationCap, BookOpen, DollarSign, TrendingUp, Activity, Award, Calendar } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type AnalyticsData = {
   overview: {
     totalUsers: number;

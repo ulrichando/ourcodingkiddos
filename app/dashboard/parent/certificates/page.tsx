@@ -8,6 +8,11 @@ import { Award, Download, ExternalLink, Loader2, Trophy, Star, Medal } from "luc
 import Button from "../../../../components/ui/button";
 import Link from "next/link";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Certificate = {
   id: string;
   courseTitle: string;

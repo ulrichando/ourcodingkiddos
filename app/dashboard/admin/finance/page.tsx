@@ -5,6 +5,11 @@ import AdminLayout from "../../../../components/admin/AdminLayout";
 import AdminStatCard from "../../../../components/admin/AdminStatCard";
 import { Loader2, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type FinanceData = {
   stats: {
     totalRevenue: number;

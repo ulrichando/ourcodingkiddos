@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
-import {
-  Save,
+import {  Save,
   Settings as SettingsIcon,
   Mail,
   Clock,
@@ -15,6 +14,12 @@ import {
   AlertTriangle,
   Eye,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Settings = {
   siteName: string;

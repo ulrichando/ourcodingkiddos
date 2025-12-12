@@ -8,6 +8,11 @@ import Button from "../../../../components/ui/button";
 import { Calendar, Clock, User, BookOpen, Plus, CheckCircle, XCircle, AlertCircle, Loader2, Users, CreditCard } from "lucide-react";
 import ParentLayout from "../../../../components/parent/ParentLayout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type ClassRequest = {
   id: string;
   requestedTopic: string;

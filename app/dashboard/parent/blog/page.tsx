@@ -5,6 +5,11 @@ import Link from "next/link";
 import ParentLayout from "@/components/parent/ParentLayout";
 import { Newspaper, Calendar, Clock, ChevronRight, Loader2, Search, Tag } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type BlogPost = {
   id: string;
   slug: string;

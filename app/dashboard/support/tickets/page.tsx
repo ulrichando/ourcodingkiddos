@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import SupportLayout from "../../../../components/support/SupportLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  HelpCircle,
+import {  HelpCircle,
   Loader2,
   RefreshCcw,
   Clock,
@@ -20,6 +19,12 @@ import {
   Search,
   Filter,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Ticket = {
   id: string;

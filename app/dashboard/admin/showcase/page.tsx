@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import {
-  CheckCircle,
+import {  CheckCircle,
   XCircle,
   Star,
   Search,
@@ -13,6 +12,12 @@ import {
   Github,
   ExternalLink,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface StudentProject {
   id: string;

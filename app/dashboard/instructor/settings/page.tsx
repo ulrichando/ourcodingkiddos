@@ -8,7 +8,14 @@ import InstructorLayout from "../../../../components/instructor/InstructorLayout
 import { User, Bell, Shield, Palette, Save, Check, Loader2, Calendar, Clock } from "lucide-react";
 import { logout } from "../../../../lib/logout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function InstructorSettingsPage() {
+
+
+
   const { data: session, status } = useSession();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

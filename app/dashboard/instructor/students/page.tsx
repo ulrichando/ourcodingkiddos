@@ -8,6 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import InstructorLayout from "@/components/instructor/InstructorLayout";
 import LastSeenIndicator from "@/components/instructor/LastSeenIndicator";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type StudentRow = {
   id: string;
   name: string;

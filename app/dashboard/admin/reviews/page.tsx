@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import {
-  Star,
+import {  Star,
   Check,
   X,
   Trash2,
@@ -17,6 +16,12 @@ import {
   Edit,
   Save,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface Review {
   id: string;

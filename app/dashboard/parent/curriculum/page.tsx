@@ -5,6 +5,11 @@ import Link from "next/link";
 import ParentLayout from "@/components/parent/ParentLayout";
 import { BookMarked, Clock, Users, Star, ChevronRight, Loader2 } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Program = {
   id: string;
   name: string;

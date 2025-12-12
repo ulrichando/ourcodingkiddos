@@ -7,7 +7,14 @@ import { Clock, Video, Users, CalendarDays, Link2, Loader2, CheckCircle2, Repeat
 import Button from "../../../../components/ui/button";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function CreateClassPage() {
+
+
+
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

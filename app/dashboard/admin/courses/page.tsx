@@ -3,8 +3,12 @@ import AdminLayout from '../../../../components/admin/AdminLayout';
 import CoursesList from './CoursesList';
 import { BookOpen } from 'lucide-react';
 
-// Force dynamic rendering - no caching
+// Force dynamic rendering
 export const dynamic = 'force-dynamic';
+
+
+
+
 export const revalidate = 0;
 
 /**

@@ -5,6 +5,11 @@ import ParentLayout from "@/components/parent/ParentLayout";
 import { Calendar, Clock, Video, MapPin, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "@/components/ui/button";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type ClassSession = {
   id: string;
   title: string;

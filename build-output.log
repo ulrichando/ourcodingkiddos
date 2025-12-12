@@ -1,0 +1,27 @@
+
+> ourcodingkiddos@0.0.0 build
+> next build
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 16.0.7 (Turbopack)
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 18.7s
+   Running TypeScript ...
+Failed to compile.
+
+./app/dashboard/instructor/assignments/page.tsx:289:14
+Type error: Cannot find name 'Plus'.
+
+[0m [90m 287 |[39m             className[33m=[39m[32m"inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold shadow transition"[39m
+ [90m 288 |[39m           [33m>[39m
+[31m[1m>[22m[39m[90m 289 |[39m             [33m<[39m[33mPlus[39m className[33m=[39m[32m"h-4 w-4"[39m [33m/[39m[33m>[39m [33mCreate[39m [33mAssignment[39m
+ [90m     |[39m              [31m[1m^[22m[39m
+ [90m 290 |[39m           [33m<[39m[33m/[39m[33mbutton[39m[33m>[39m
+ [90m 291 |[39m         [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 292 |[39m[0m
+Next.js build worker exited with code: 1 and signal: null

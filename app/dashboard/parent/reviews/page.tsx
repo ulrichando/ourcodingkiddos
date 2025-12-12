@@ -5,7 +5,14 @@ import { useSession } from "next-auth/react";
 import ParentLayout from "@/components/parent/ParentLayout";
 import { Star, Send, CheckCircle, AlertCircle, MessageSquare, User, Loader2 } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function ParentReviewsPage() {
+
+
+
   const { data: session } = useSession();
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);

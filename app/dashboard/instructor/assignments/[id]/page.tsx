@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  User,
+import {  User,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -15,8 +13,15 @@ import {
   Send,
   Star,
   Trophy,
+  ArrowLeft,
 } from "lucide-react";
 import InstructorLayout from "../../../../../components/instructor/InstructorLayout";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface Submission {
   id: string;

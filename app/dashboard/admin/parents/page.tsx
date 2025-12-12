@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import {
-  Users,
+import {  Users,
   UserCircle,
   CreditCard,
   TrendingUp,
@@ -19,6 +18,12 @@ import {
   Target,
   Clock,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type ParentStats = {
   id: string;

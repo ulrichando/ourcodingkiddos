@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import SupportLayout from "../../../../components/support/SupportLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  FileText,
+import {  FileText,
   Loader2,
   Plus,
   Edit,
@@ -19,6 +18,12 @@ import {
   Tag,
   X,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type CannedResponse = {
   id: string;

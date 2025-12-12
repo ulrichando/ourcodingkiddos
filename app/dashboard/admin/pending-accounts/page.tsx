@@ -2,8 +2,7 @@
 
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { useEffect, useState } from "react";
-import {
-  UserCheck,
+import {  UserCheck,
   UserX,
   Clock,
   Mail,
@@ -13,6 +12,12 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type PendingUser = {
   id: string;

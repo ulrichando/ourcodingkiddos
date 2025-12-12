@@ -8,7 +8,12 @@ import fs from "fs/promises";
 import path from "path";
 import { courses as fallbackCourses } from "../../../../data/courses";
 
-export const dynamic = "force-dynamic";
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
+
 
 export default async function AdminContentPage() {
   const session = await getServerSession(authOptions);

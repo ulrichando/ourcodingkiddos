@@ -3,6 +3,12 @@ import AdminLayout from "../../../../../components/admin/AdminLayout";
 import InstructorAssignment from "./InstructorAssignment";
 import { Loader2 } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
+
 function LoadingFallback() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">

@@ -8,7 +8,14 @@ import ParentLayout from "../../../../components/parent/ParentLayout";
 import { User, Mail, Phone, MapPin, Calendar, Save, Check, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function ParentProfilePage() {
+
+
+
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

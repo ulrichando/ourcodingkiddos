@@ -3,8 +3,7 @@
 import { useState, useEffect, use } from "react";
 import AdminLayout from "../../../../../components/admin/AdminLayout";
 import Link from "next/link";
-import {
-  Award,
+import {  Award,
   Mail,
   Calendar,
   Clock,
@@ -23,6 +22,12 @@ import {
   Phone,
   Globe,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type InstructorDetails = {
   id: string;

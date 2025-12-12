@@ -5,9 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import SupportLayout from "../../../components/support/SupportLayout";
 import { Card, CardContent } from "../../../components/ui/card";
-import {
-  Headphones,
-  MessageSquare,
+import {  MessageSquare,
   Clock,
   CheckCircle2,
   TrendingUp,
@@ -16,6 +14,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Stats = {
   activeChats: number;

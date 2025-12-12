@@ -5,7 +5,14 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function DashboardRedirect() {
+
+
+
   const { data: session, status } = useSession();
   const router = useRouter();
 

@@ -7,6 +7,11 @@ import Button from "../../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type AvailabilitySlot = {
   id: string;
   dayOfWeek: number | null;

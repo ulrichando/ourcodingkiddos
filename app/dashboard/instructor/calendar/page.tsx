@@ -3,9 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-  Calendar,
-  BookOpen,
+import {  BookOpen,
   Clock,
   Users,
   FileText,
@@ -14,9 +12,16 @@ import {
   CalendarDays,
   GraduationCap,
   AlertCircle,
+  Calendar,
 } from "lucide-react";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 import ModernInstructorCalendar from "../../../../components/instructor/ModernInstructorCalendar";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Program = {
   id: string;

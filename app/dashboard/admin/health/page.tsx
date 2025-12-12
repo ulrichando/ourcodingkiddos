@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { Activity, CheckCircle, AlertCircle, Database, Globe, Server, Zap, Clock } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 type ServiceStatus = "operational" | "degraded" | "down";
+
+
 
 type Service = {
   name: string;

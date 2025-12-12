@@ -3,8 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
 import Link from "next/link";
-import {
-  Calendar,
+import {  Calendar,
   Clock,
   Users,
   Video,
@@ -21,6 +20,12 @@ import {
   Search,
   X,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type ClassSession = {
   id: string;

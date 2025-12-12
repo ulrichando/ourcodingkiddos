@@ -3,9 +3,7 @@
 import Link from "next/link";
 import React, { useMemo, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import {
-  Calendar,
-  Users,
+import {  Users,
   BookOpen,
   Clock,
   Plus,
@@ -15,8 +13,15 @@ import {
   UserCheck,
   AlertTriangle,
   Bell,
+  Calendar,
 } from "lucide-react";
 import InstructorLayout from "../../../components/instructor/InstructorLayout";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 async function fetchSessions() {
   const res = await fetch("/api/instructor/classes", { cache: "no-store" });

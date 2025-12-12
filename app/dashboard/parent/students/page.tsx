@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import ParentLayout from "../../../../components/parent/ParentLayout";
 
 export default function ManageStudentsPage() {
+
   const { data: session } = useSession();
   const router = useRouter();
   const [students, setStudents] = useState<any[]>([]);
@@ -344,6 +345,12 @@ export default function ManageStudentsPage() {
                     <>
                       <p className="font-semibold text-slate-900 dark:text-slate-100">
                         This will hide {confirmDialog.student?.name || confirmDialog.student?.username} from your dashboard.
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
                       </p>
                       <ul className="list-disc list-inside space-y-1 ml-2">
                         <li>All progress data will be preserved</li>

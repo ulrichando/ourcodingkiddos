@@ -5,6 +5,11 @@ import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
 import { Megaphone, Plus, Trash2, Pin } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Announcement = {
   id: string;
   title: string;

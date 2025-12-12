@@ -21,6 +21,12 @@ import {
   X,
 } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
+
 type ClassSession = {
   id: string;
   title: string;

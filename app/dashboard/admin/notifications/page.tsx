@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Link from "next/link";
-import {
-  Bell,
+import {  Bell,
   ChevronLeft,
   HelpCircle,
   UserPlus,
@@ -20,6 +19,12 @@ import {
   Search,
   Settings,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Notification = {
   id: string;

@@ -2,9 +2,7 @@
 
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import { useEffect, useState } from "react";
-import {
-  Award,
-  Users,
+import {  Users,
   Clock,
   Star,
   DollarSign,
@@ -18,8 +16,15 @@ import {
   RefreshCw,
   Mail,
   BarChart3,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Instructor = {
   id: string;

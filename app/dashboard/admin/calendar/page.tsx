@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Link from "next/link";
-import {
-  Calendar as CalendarIcon,
+import {  Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -16,6 +15,12 @@ import {
   Filter,
   X,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type CalendarEvent = {
   id: string;

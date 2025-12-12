@@ -6,7 +6,14 @@ import ParentLayout from "@/components/parent/ParentLayout";
 import { Brain, CheckCircle, Clock, ArrowRight, Users } from "lucide-react";
 import Button from "@/components/ui/button";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function ParentPlacementExamPage() {
+
+
+
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
 
   const examFeatures = [

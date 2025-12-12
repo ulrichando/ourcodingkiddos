@@ -5,6 +5,11 @@ import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
 import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Loader2, ChevronDown, ChevronUp, MoreHorizontal, CreditCard, DollarSign } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type ClassRequest = {
   id: string;
   requestedTopic: string;

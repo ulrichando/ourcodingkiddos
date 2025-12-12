@@ -3,8 +3,7 @@
 import { useState, useEffect, use } from "react";
 import AdminLayout from "../../../../../components/admin/AdminLayout";
 import Link from "next/link";
-import {
-  User,
+import {  User,
   Mail,
   Calendar,
   Award,
@@ -22,6 +21,12 @@ import {
   BarChart3,
   Activity,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type StudentDetails = {
   id: string;

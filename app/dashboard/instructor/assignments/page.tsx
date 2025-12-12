@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-  Plus,
-  FileText,
+import {  FileText,
   Code,
   Bug,
   BookOpen,
@@ -23,8 +21,15 @@ import {
   Calendar,
   Search,
   Filter,
+  Plus,
 } from "lucide-react";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface Assignment {
   id: string;

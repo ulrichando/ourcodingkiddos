@@ -7,9 +7,14 @@ import StudentCard from "../../../components/dashboard/StudentCard";
 import Button from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { useSession } from "next-auth/react";
-import ParentLayout from "../../../components/parent/ParentLayout";
+import ParentLayout from "../../../components/parent/ParentLayout";// Time-based greeting helper
 
-// Time-based greeting helper
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
+
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";

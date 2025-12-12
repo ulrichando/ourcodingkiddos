@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ClipboardList,
+import {  ClipboardList,
   Code,
   Bug,
   BookOpen,
@@ -26,6 +25,12 @@ import {
   Flame,
   Award,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface Assignment {
   id: string;

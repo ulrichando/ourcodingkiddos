@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
-import {
-  Mail,
+import {  Mail,
   Users,
   UserCheck,
   UserX,
@@ -16,6 +15,12 @@ import {
   Download,
   Calendar
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type Subscriber = {
   id: string;

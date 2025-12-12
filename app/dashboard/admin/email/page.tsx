@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import {
-  Mail,
+import {  Mail,
   Send,
   Users,
   GraduationCap,
@@ -20,6 +19,12 @@ import {
   ChevronDown,
   AtSign,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 // Email sender options
 const fromAddressOptions = [

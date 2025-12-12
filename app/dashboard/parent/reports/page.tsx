@@ -8,6 +8,11 @@ import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
 import ParentLayout from "../../../../components/parent/ParentLayout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type StudentProgress = {
   student: {
     id: string;

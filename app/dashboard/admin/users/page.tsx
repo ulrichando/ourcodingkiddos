@@ -4,7 +4,14 @@ import AdminLayout from "../../../../components/admin/AdminLayout";
 import AdminUsersClient from "../../../../components/admin/AdminUsersClient";
 import { useEffect, useState } from "react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function AdminUsersPage() {
+
+
+
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

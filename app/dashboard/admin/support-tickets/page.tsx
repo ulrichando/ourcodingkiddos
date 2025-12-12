@@ -6,6 +6,11 @@ import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import { HelpCircle, MessageSquare, Clock, CheckCircle, Loader2, AlertCircle, User, Plus, X } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Ticket = {
   id: string;
   ticketNumber: string;

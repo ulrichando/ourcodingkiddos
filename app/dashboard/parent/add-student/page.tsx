@@ -7,7 +7,14 @@ import Button from "../../../../components/ui/button";
 import { useSession } from "next-auth/react";
 import ParentLayout from "../../../../components/parent/ParentLayout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 const avatars = ["🦊", "🐼", "🦁", "🐯", "🐸", "🦉", "🐙", "🦄", "🐲", "🤖", "👾", "🎮"];
+
+
+
 const ageOptions = ["7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
 
 const codingInterests = [

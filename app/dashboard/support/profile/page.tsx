@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import SupportLayout from "../../../../components/support/SupportLayout";
 import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
-import {
-  UserCircle,
+import {  UserCircle,
   Loader2,
   Mail,
   Shield,
@@ -20,6 +19,12 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 export default function SupportProfilePage() {
   const { data: session, status, update } = useSession();

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import {
-  Plus,
+import {  Plus,
   Edit,
   Trash2,
   Eye,
@@ -14,6 +13,12 @@ import {
   MessageCircle,
   Heart,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface BlogPost {
   id: string;

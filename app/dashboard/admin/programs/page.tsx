@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
-import {
-  Plus,
+import {  Plus,
   Edit,
   Trash2,
   Eye,
@@ -17,6 +16,12 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 const ITEMS_PER_PAGE = 10;
 

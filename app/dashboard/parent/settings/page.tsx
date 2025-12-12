@@ -8,7 +8,14 @@ import ParentLayout from "../../../../components/parent/ParentLayout";
 import { User, Bell, Shield, Palette, Save, Check, Loader2 } from "lucide-react";
 import { logout } from "../../../../lib/logout";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
 export default function ParentSettingsPage() {
+
+
+
   const { data: session, status } = useSession();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

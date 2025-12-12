@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-  CreditCard,
-  Download,
+import {  Download,
   ExternalLink,
   Receipt,
   DollarSign,
@@ -21,10 +19,17 @@ import {
   Wallet,
   History,
   Calendar,
+  CreditCard,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import ParentLayout from "@/components/parent/ParentLayout";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 interface BillingSummary {
   totalSpent: number;

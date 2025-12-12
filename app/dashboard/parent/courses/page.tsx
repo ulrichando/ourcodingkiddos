@@ -5,6 +5,11 @@ import Link from "next/link";
 import ParentLayout from "@/components/parent/ParentLayout";
 import { BookOpen, Clock, Star, ChevronRight, Loader2, Search } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 type Course = {
   id: string;
   slug: string;

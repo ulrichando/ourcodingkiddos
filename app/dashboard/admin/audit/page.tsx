@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import {
-  Shield,
+import {  Shield,
   Search,
   Download,
   User,
@@ -30,6 +29,12 @@ import {
   MoreVertical,
   Eraser,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type AuditLog = {
   id: string;

@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import {
-  Download,
+import {  Download,
   FileText,
   TrendingUp,
   Users,
@@ -14,6 +13,12 @@ import {
   Filter,
   Loader2,
 } from "lucide-react";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type DateRange = "7d" | "30d" | "90d" | "1y" | "all";
 

@@ -3,16 +3,21 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  BookOpen,
-  FileText,
+import {  FileText,
   Video,
   Plus,
   Search,
   ChevronRight,
   AlertTriangle,
+  BookOpen,
 } from "lucide-react";
 import InstructorLayout from "../../../../components/instructor/InstructorLayout";
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+
+
 
 type ContentItem = {
   id: string;
