@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
+import { logger } from "../../../lib/logger";
 
 // GET - Fetch instructors with their availability
 // For parents: returns only instructors teaching their children
@@ -208,7 +209,7 @@ export async function GET() {
 
     return NextResponse.json({ instructors: instructorsWithAvailability });
   } catch (error) {
-    console.error("GET /api/instructors error:", error);
+    logger.api.error("Failed to fetch instructors", error);
     return NextResponse.json({ error: "Failed to fetch instructors" }, { status: 500 });
   }
 }

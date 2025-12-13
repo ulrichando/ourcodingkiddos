@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
 import { logCreate } from "../../../../../lib/audit";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error("[BulkEnroll] Error:", error);
+    logger.error("BulkEnroll", "Failed to process enrollments", error);
     return NextResponse.json(
       { error: "Failed to process enrollments", enrolled: 0, failed: 0, errors: [] },
       { status: 500 }

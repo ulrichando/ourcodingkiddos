@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: Request) {
   try {
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("GET /api/certificates/verify error:", error);
+    logger.db.error("GET /api/certificates/verify error", error);
     return NextResponse.json(
       { error: "Failed to verify certificate" },
       { status: 500 }

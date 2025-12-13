@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
-import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import {  Headphones,
   MessageSquare,
@@ -369,18 +368,15 @@ export default function AdminLiveChatPage() {
 
   return (
     <AdminLayout>
-      <div className="h-[calc(100vh-8rem)] flex flex-col">
+      <div className="max-w-7xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
         {/* Header */}
         <div className="flex-shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3">
-              <div className="relative">
-                <Headphones className="w-8 h-8 text-purple-600" />
-                <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full animate-pulse border-2 border-white dark:border-slate-900" />
-              </div>
-              Live Chat
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Live Chat</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Live Chat Support
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Real-time support chat and visitor monitoring
             </p>
           </div>
@@ -430,66 +426,59 @@ export default function AdminLiveChatPage() {
 
         {/* Stats */}
         <div className="flex-shrink-0 grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Active Visitors</p>
-                  <p className="text-2xl font-bold text-purple-600">{visitors.length}</p>
-                </div>
-                <Globe className="w-8 h-8 text-purple-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Active Visitors</p>
+                <p className="text-2xl font-bold text-purple-600">{visitors.length}</p>
               </div>
-            </CardContent>
-          </Card>
+              <Globe className="w-8 h-8 text-purple-600 opacity-50" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Total Chats</p>
-                  <p className="text-2xl font-bold text-blue-600">{conversations.length}</p>
-                </div>
-                <MessageSquare className="w-8 h-8 text-blue-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Total Chats</p>
+                <p className="text-2xl font-bold text-blue-600">{conversations.length}</p>
               </div>
-            </CardContent>
-          </Card>
+              <MessageSquare className="w-8 h-8 text-blue-600 opacity-50" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Logged In</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {visitors.filter(v => v.isAuthenticated).length}
-                  </p>
-                </div>
-                <Users className="w-8 h-8 text-purple-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Logged In</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {visitors.filter(v => v.isAuthenticated).length}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <Users className="w-8 h-8 text-purple-600 opacity-50" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Guests</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {visitors.filter(v => !v.isAuthenticated).length}
-                  </p>
-                </div>
-                <User className="w-8 h-8 text-orange-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Guests</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {visitors.filter(v => !v.isAuthenticated).length}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <User className="w-8 h-8 text-orange-600 opacity-50" />
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
           {/* Left Panel - Conversations/Visitors List */}
-          <Card className="border-0 shadow-sm lg:col-span-1 flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 lg:col-span-1 flex flex-col overflow-hidden">
             {/* Tabs */}
             <div className="flex-shrink-0 flex border-b border-slate-200 dark:border-slate-700">
               <button
+                type="button"
                 onClick={() => setActiveTab("chats")}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === "chats"
@@ -501,6 +490,7 @@ export default function AdminLiveChatPage() {
                 Chats ({conversations.length})
               </button>
               <button
+                type="button"
                 onClick={() => setActiveTab("visitors")}
                 className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === "visitors"
@@ -636,10 +626,10 @@ export default function AdminLiveChatPage() {
                 </div>
               )}
             </div>
-          </Card>
+          </div>
 
           {/* Right Panel - Chat Messages */}
-          <Card className="border-0 shadow-sm lg:col-span-2 flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 lg:col-span-2 flex flex-col overflow-hidden">
             {!selectedConversation ? (
               <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-slate-400">
                 <div className="text-center">
@@ -741,14 +731,14 @@ export default function AdminLiveChatPage() {
                 </div>
               </>
             )}
-          </Card>
+          </div>
         </div>
       </div>
 
       {/* Initiate Chat Modal */}
       {initiatingVisitor && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-4 border-b border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold ${
@@ -818,7 +808,7 @@ export default function AdminLiveChatPage() {
       {/* Delete Single Conversation Confirm Modal */}
       {showDeleteConfirm && deletingConversationId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-4 border-b border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -875,7 +865,7 @@ export default function AdminLiveChatPage() {
       {/* Clear All Conversations Confirm Modal */}
       {showClearAllConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-4 border-b border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">

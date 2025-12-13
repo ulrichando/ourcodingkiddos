@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 // Available sender addresses
 const SENDER_ADDRESSES = [
@@ -72,15 +73,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log the sent email (optional: you could store sent emails too)
-    console.log(`[Compose Email] Sent email from ${fromAddress} to ${to}: ${subject}`);
-
     return NextResponse.json({
       success: true,
       messageId: result.messageId,
     });
   } catch (error) {
-    console.error("[Compose Email] Error:", error);
+    logger.email.error("Failed to send email", error);
     return NextResponse.json(
       { error: "Failed to send email" },
       { status: 500 }

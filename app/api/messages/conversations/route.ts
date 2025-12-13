@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // Force dynamic - no caching
 export const dynamic = 'force-dynamic';
@@ -66,7 +67,7 @@ export async function GET() {
       conversations: transformedConvos
     });
   } catch (error: any) {
-    console.error("GET /api/messages/conversations error:", error);
+    logger.api.error("GET /api/messages/conversations error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -173,7 +174,7 @@ export async function POST(req: Request) {
       message: "Conversation created successfully"
     });
   } catch (error: any) {
-    console.error("POST /api/messages/conversations error:", error);
+    logger.api.error("POST /api/messages/conversations error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -190,8 +191,7 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const conversationId = searchParams.get('id');
 
-    console.log('[DELETE] User email:', userEmail);
-    console.log('[DELETE] Conversation ID:', conversationId);
+    logger.info("Messages", "DELETE conversation request", { userEmail, conversationId });
 
     if (!conversationId) {
       return NextResponse.json({ error: "Conversation ID required" }, { status: 400 });
@@ -211,10 +211,7 @@ export async function DELETE(req: Request) {
       }
     });
 
-    console.log('[DELETE] Conversation exists:', !!convExists);
-    if (convExists) {
-      console.log('[DELETE] Participants:', JSON.stringify(convExists.participants, null, 2));
-    }
+    logger.info("Messages", "Conversation exists check", { exists: !!convExists, participants: convExists?.participants });
 
     // Verify user is a participant in this conversation
     const conversation = await prisma.conversation.findFirst({
@@ -231,14 +228,14 @@ export async function DELETE(req: Request) {
       }
     });
 
-    console.log('[DELETE] User is participant:', !!conversation);
+    logger.info("Messages", "User is participant check", { isParticipant: !!conversation });
 
     if (!conversation) {
-      console.log('[DELETE] Authorization failed - returning 404');
+      logger.warn("Messages", "Authorization failed - conversation not found or unauthorized", { userEmail, conversationId });
       return NextResponse.json({ error: "Conversation not found or unauthorized" }, { status: 404 });
     }
 
-    console.log('[DELETE] Proceeding with soft deletion...');
+    logger.info("Messages", "Proceeding with soft deletion");
 
     // Soft delete: Mark the conversation as deleted instead of actually deleting it
     // This allows admins to view deleted conversations for monitoring
@@ -250,11 +247,11 @@ export async function DELETE(req: Request) {
       }
     });
 
-    console.log('[DELETE] Conversation soft-deleted successfully');
+    logger.info("Messages", "Conversation soft-deleted successfully", { conversationId });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("DELETE /api/messages/conversations error:", error);
+    logger.api.error("DELETE /api/messages/conversations error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

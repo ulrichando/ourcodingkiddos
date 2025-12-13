@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import Stripe from 'stripe';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
+    logger.error('Stripe Webhook', 'Signature verification failed', err);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
 
@@ -41,12 +42,12 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info('Stripe Webhook', `Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Webhook handler error:', error);
+    logger.error('Stripe Webhook', 'Webhook handler failed', error);
     return NextResponse.json(
       { error: `Webhook handler failed: ${error.message}` },
       { status: 500 }
@@ -67,7 +68,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           stripePaymentId: session.id,
         },
       });
-      console.log(`1-on-1 class payment completed for request ${classRequestId}`);
+      logger.info('Stripe Webhook', '1-on-1 class payment completed', { classRequestId });
     }
     return;
   }
@@ -93,12 +94,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           startDate: new Date(),
         },
       });
-      console.log(`Program enrollment payment completed for program ${programId}, student ${studentProfileId}`);
+      logger.info('Stripe Webhook', 'Program enrollment payment completed', { programId, studentProfileId });
     }
     return;
   }
 
-  console.log('Checkout session completed:', session.id);
+  logger.info('Stripe Webhook', 'Checkout session completed', { sessionId: session.id });
 }
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
@@ -121,10 +122,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           startDate: new Date(),
         },
       });
-      console.log(`Program payment intent succeeded for program ${programId}, student ${studentProfileId}`);
+      logger.info('Stripe Webhook', 'Program payment intent succeeded', { programId, studentProfileId });
     }
     return;
   }
 
-  console.log('Payment intent succeeded:', paymentIntent.id);
+  logger.info('Stripe Webhook', 'Payment intent succeeded', { paymentIntentId: paymentIntent.id });
 }

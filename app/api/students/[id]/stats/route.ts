@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import prisma from "../../../../../lib/prisma";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -130,7 +131,7 @@ export async function GET(
       badges: formattedBadges,
     });
   } catch (error) {
-    console.error("[students/[id]/stats] Error:", error);
+    logger.db.error("GET /api/students/[id]/stats error", error);
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
   }
 }

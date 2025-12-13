@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../../../components/admin/AdminLayout";
 import Button from "../../../../components/ui/button";
-import { Card, CardContent } from "../../../../components/ui/card";
 import {
   Calendar,
   Clock,
@@ -216,7 +215,7 @@ export default function AdminSessionsPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -236,62 +235,53 @@ export default function AdminSessionsPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-600 dark:text-slate-400">Scheduled</span>
-                <Clock className="w-5 h-5 text-blue-500" />
-              </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                {stats.scheduled}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Upcoming sessions</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-slate-600 dark:text-slate-400">Scheduled</span>
+              <Clock className="w-5 h-5 text-blue-500" />
+            </div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              {stats.scheduled}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Upcoming sessions</p>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-600 dark:text-slate-400">In Progress</span>
-                <Video className="w-5 h-5 text-emerald-500" />
-              </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                {stats.inProgress}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Active now</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-slate-600 dark:text-slate-400">In Progress</span>
+              <Video className="w-5 h-5 text-emerald-500" />
+            </div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              {stats.inProgress}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Active now</p>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-600 dark:text-slate-400">Completed</span>
-                <CheckCircle className="w-5 h-5 text-slate-500" />
-              </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                {stats.completed}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Past sessions</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-slate-600 dark:text-slate-400">Completed</span>
+              <CheckCircle className="w-5 h-5 text-slate-500" />
+            </div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              {stats.completed}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Past sessions</p>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-slate-600 dark:text-slate-400">Cancelled</span>
-                <XCircle className="w-5 h-5 text-red-500" />
-              </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                {stats.cancelled}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cancelled sessions</p>
-            </CardContent>
-          </Card>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-slate-600 dark:text-slate-400">Cancelled</span>
+              <XCircle className="w-5 h-5 text-red-500" />
+            </div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              {stats.cancelled}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cancelled sessions</p>
+          </div>
         </div>
 
         {/* Filters */}
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -326,11 +316,10 @@ export default function AdminSessionsPage() {
                 <option value="CAMP">Camp</option>
               </select>
             </div>
-          </CardContent>
-        </Card>
+        </div>
 
         {/* Sessions Table */}
-        <Card className="border-0 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
@@ -444,18 +433,18 @@ export default function AdminSessionsPage() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
 
         {/* Summary */}
         <div className="text-sm text-slate-600 dark:text-slate-400 text-center">
           Showing {filteredSessions.length} of {sessions.length} total sessions
         </div>
-      </main>
+      </div>
 
       {/* Create Session Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl my-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl my-8">
             <form onSubmit={handleCreateSession}>
               <div className="p-6 space-y-6">
                 <div className="flex items-center justify-between">

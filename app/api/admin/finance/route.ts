@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { stripe } from "../../../../lib/stripe";
+import { logger } from "../../../../lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -86,7 +87,7 @@ export async function GET() {
         stripeInvoiceId: inv.id,
       }));
     } catch (stripeError) {
-      console.error("[admin/finance] Stripe invoices error:", stripeError);
+      logger.error("admin/finance", "Stripe invoices error", stripeError);
       // Fall back to database payments if Stripe fails
       const dbPayments = await prisma.payment.findMany({
         take: 10,
@@ -151,7 +152,7 @@ export async function GET() {
       })),
     });
   } catch (error) {
-    console.error("[admin/finance] Error:", error);
+    logger.db.error("Failed to fetch finance data", error);
     return NextResponse.json({ error: "Failed to fetch finance data" }, { status: 500 });
   }
 }

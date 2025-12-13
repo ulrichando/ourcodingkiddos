@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
+import { logger } from "../../../lib/logger";
 
 const updateSchema = z.object({
   enrollmentId: z.string(),
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json({ status: "ok", data: progress });
   } catch (error) {
-    console.error("GET /api/progress error", error);
+    logger.api.error("Failed to fetch progress", error);
     return NextResponse.json({ status: "error", message: "Failed to fetch progress" }, { status: 500 });
   }
 }
@@ -131,7 +132,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ status: "ok", data: progress });
   } catch (error) {
-    console.error("PATCH /api/progress error", error);
+    logger.api.error("Failed to update progress", error);
     return NextResponse.json({ status: "error", message: "Failed to update progress" }, { status: 500 });
   }
 }

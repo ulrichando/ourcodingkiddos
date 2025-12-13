@@ -166,7 +166,7 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
       >
         {/* Logo Section */}
         <div className={`p-4 flex-shrink-0 border-b border-slate-100 dark:border-slate-800 ${isCollapsed ? "px-3" : "px-4"}`}>
-          <Link href="/dashboard/admin" className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
+          <Link href="/dashboard/admin" scroll={false} className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3"}`}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
               <LayoutDashboard className="w-5 h-5 text-white" />
             </div>
@@ -224,6 +224,8 @@ export default function AdminSidebar({ onCommandOpen, isOpen = false, onClose }:
                     <li key={item.href}>
                       <Link
                         href={item.href}
+                        prefetch={true}
+                        scroll={false}
                         onClick={onClose}
                         title={isCollapsed ? item.label : undefined}
                         className={`flex items-center gap-3 rounded-lg transition-all duration-200 ${

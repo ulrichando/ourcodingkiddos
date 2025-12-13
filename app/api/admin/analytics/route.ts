@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -191,7 +192,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error("[admin/analytics] Error:", error);
+    logger.db.error("Analytics fetch error", error);
     return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 });
   }
 }

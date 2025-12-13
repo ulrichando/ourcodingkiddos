@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { emails } from "@/lib/emails";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -195,7 +196,7 @@ export async function POST(request: Request) {
       conversationId: conversation.id,
     });
   } catch (error) {
-    console.error("Support chat error:", error);
+    logger.error("Chat", "Support chat error", error);
     return NextResponse.json(
       { error: "Failed to send message" },
       { status: 500 }

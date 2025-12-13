@@ -4,6 +4,7 @@ import { authOptions } from "lib/auth";
 import prisma from "lib/prisma";
 import bcrypt from "bcryptjs";
 import { logCreate } from "lib/audit";
+import { logger } from "lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -125,7 +126,7 @@ export async function POST(req: Request) {
     if (e.code === "P2002") {
       return NextResponse.json({ error: "Email already exists" }, { status: 409 });
     }
-    console.error("[admin/users/create] Error:", e);
+    logger.db.error("Failed to create user", e);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "../../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,7 @@ export async function GET(
       messages: formattedMessages,
     });
   } catch (error) {
-    console.error("Error fetching conversation:", error);
+    logger.db.error("Error fetching conversation", error);
     return NextResponse.json(
       { error: "Failed to fetch conversation" },
       { status: 500 }
@@ -110,7 +111,7 @@ export async function DELETE(
       message: "Conversation deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting conversation:", error);
+    logger.db.error("Error deleting conversation", error);
     return NextResponse.json(
       { error: "Failed to delete conversation" },
       { status: 500 }

@@ -20,11 +20,11 @@ function LoadingFallback() {
 export default function AssignInstructorPage() {
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <Suspense fallback={<LoadingFallback />}>
           <InstructorAssignment />
         </Suspense>
-      </main>
+      </div>
     </AdminLayout>
   );
 }

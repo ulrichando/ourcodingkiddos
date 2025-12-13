@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prismaBase } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
       message: "Password has been reset successfully. You can now log in with your new password.",
     });
   } catch (error) {
-    console.error("[reset-password] Error:", error);
+    logger.auth.error("reset-password error", error);
     return NextResponse.json(
       { error: "Failed to reset password" },
       { status: 500 }

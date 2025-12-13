@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { emails } from "@/lib/emails";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -184,7 +185,7 @@ export async function POST(request: Request) {
       id: newInterest.id,
     });
   } catch (error) {
-    console.error("Error saving registration interest:", error);
+    logger.db.error("Error saving registration interest", error);
     return NextResponse.json(
       { error: "Failed to save interest" },
       { status: 500 }

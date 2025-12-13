@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
+import { logger } from "../../../../lib/logger";
 
 const updateSchema = z
   .object({
@@ -29,7 +30,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     if (!lesson) return NextResponse.json({ status: "not-found" }, { status: 404 });
     return NextResponse.json({ status: "ok", data: lesson });
   } catch (error) {
-    console.error("GET /api/lessons/:id error", error);
+    logger.api.error("Failed to fetch lesson", error);
     return NextResponse.json({ status: "error", message: "Failed to fetch lesson" }, { status: 500 });
   }
 }
@@ -52,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const lesson = await prisma.lesson.update({ where: { id }, data: parsed.data });
     return NextResponse.json({ status: "ok", data: lesson });
   } catch (error) {
-    console.error("PATCH /api/lessons/:id error", error);
+    logger.api.error("Failed to update lesson", error);
     return NextResponse.json({ status: "error", message: "Failed to update lesson" }, { status: 500 });
   }
 }
@@ -68,7 +69,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     await prisma.lesson.delete({ where: { id } });
     return NextResponse.json({ status: "ok" });
   } catch (error) {
-    console.error("DELETE /api/lessons/:id error", error);
+    logger.api.error("Failed to delete lesson", error);
     return NextResponse.json({ status: "error", message: "Failed to delete lesson" }, { status: 500 });
   }
 }

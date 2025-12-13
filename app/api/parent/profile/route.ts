@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +36,7 @@ export async function GET() {
       },
     });
   } catch (error: any) {
-    console.error("GET /api/parent/profile error:", error);
+    logger.db.error("GET /api/parent/profile error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -84,7 +85,7 @@ export async function PUT(req: Request) {
       },
     });
   } catch (error: any) {
-    console.error("PUT /api/parent/profile error:", error);
+    logger.db.error("PUT /api/parent/profile error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

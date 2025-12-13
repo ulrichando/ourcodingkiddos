@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
 import { logUpdate, logDelete } from "../../../../../lib/audit";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error("[BulkStatus] Error:", error);
+    logger.error("BulkStatus", "Failed to process status updates", error);
     return NextResponse.json(
       { error: "Failed to process status updates", updated: 0, failed: 0, errors: [] },
       { status: 500 }

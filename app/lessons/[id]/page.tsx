@@ -12,6 +12,7 @@ import QuizCard from "@/components/quiz/QuizCard";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Button from "@/components/ui/button";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 
 type CourseType = ((typeof mockCourses)[number]) & { slug?: string };
 type LessonType = CourseType["lessons"][number];
@@ -621,7 +622,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string }>
                       </div>
                       <div
                         className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-slate-900 dark:prose-headings:text-slate-100 prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-strong:text-purple-700 dark:prose-strong:text-purple-400 prose-code:bg-purple-100 dark:prose-code:bg-purple-900/50 prose-code:text-purple-700 dark:prose-code:text-purple-300 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-pre:bg-slate-900 prose-pre:border-2 prose-pre:border-slate-700 prose-ul:space-y-2 prose-li:text-slate-700 dark:prose-li:text-slate-300"
-                        dangerouslySetInnerHTML={{ __html: (active as any).content.replace(/\n/g, '<br />') }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeRichHtml((active as any).content.replace(/\n/g, '<br />')) }}
                       />
                     </CardContent>
                   </Card>

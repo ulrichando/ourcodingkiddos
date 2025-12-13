@@ -6,6 +6,7 @@
  */
 
 import { prismaBase } from './prisma';
+import { logger } from './logger';
 
 /**
  * Update user's last seen timestamp
@@ -19,7 +20,7 @@ export async function updateLastSeen(userEmail: string): Promise<void> {
     });
   } catch (error) {
     // Silently fail - last seen updates should not break the app
-    console.error('[Last Seen] Error updating lastSeen:', error);
+    logger.db.error('Error updating lastSeen', error, { userEmail });
   }
 }
 

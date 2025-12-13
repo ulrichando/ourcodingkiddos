@@ -133,12 +133,13 @@ export default function SubscribersPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Newsletter Subscribers</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Subscribers</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Newsletter Subscribers</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Manage your newsletter mailing list
             </p>
           </div>

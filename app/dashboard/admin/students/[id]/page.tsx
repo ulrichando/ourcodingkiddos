@@ -146,7 +146,7 @@ export default function StudentProgressPage({ params }: { params: Promise<{ id: 
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link
@@ -243,6 +243,7 @@ export default function StudentProgressPage({ params }: { params: Promise<{ id: 
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
                   activeTab === tab.id
@@ -461,7 +462,7 @@ export default function StudentProgressPage({ params }: { params: Promise<{ id: 
             )}
           </div>
         )}
-      </main>
+      </div>
     </AdminLayout>
   );
 }

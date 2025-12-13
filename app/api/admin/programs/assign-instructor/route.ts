@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
+import { logger } from "../../../../../lib/logger";
 
 // POST - Assign an instructor to a program
 export async function POST(req: Request) {
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
       instructorEmail: instructorEmail
     });
   } catch (error) {
-    console.error("POST /api/admin/programs/assign-instructor error:", error);
+    logger.db.error("Failed to assign instructor", error);
     return NextResponse.json({ error: "Failed to assign instructor" }, { status: 500 });
   }
 }

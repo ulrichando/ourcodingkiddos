@@ -104,7 +104,7 @@ export default function HealthMonitorPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div>
           <p className="text-sm text-slate-500 dark:text-slate-400">Admin / System</p>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Health Monitor</h1>
@@ -273,7 +273,7 @@ export default function HealthMonitorPage() {
             <p className="text-sm">No incidents in the past 30 days</p>
           </div>
         </div>
-      </main>
+      </div>
     </AdminLayout>
   );
 }

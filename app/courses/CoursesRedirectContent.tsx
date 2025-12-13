@@ -32,8 +32,12 @@ export default function CoursesRedirectContent() {
         router.push(`/dashboard/admin/courses${queryParam}`);
         break;
       case "INSTRUCTOR":
-      case "PARENT":
+        router.push(`/dashboard/instructor/courses${queryParam}`);
+        break;
       case "STUDENT":
+        router.push(`/dashboard/student/courses${queryParam}`);
+        break;
+      case "PARENT":
         router.push(`/dashboard/parent/courses${queryParam}`);
         break;
       default:

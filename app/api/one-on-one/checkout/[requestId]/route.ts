@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import { formatPrice } from '@/lib/one-on-one-pricing';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   req: NextRequest,
@@ -143,7 +144,7 @@ export async function POST(
       },
     });
   } catch (error: any) {
-    console.error('1-on-1 checkout error:', error);
+    logger.api.error('1-on-1 checkout error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/instructor/dashboard - Get dashboard data for instructor
@@ -108,7 +109,7 @@ export async function GET() {
       totalBookings: recentBookings.length,
     });
   } catch (error) {
-    console.error("[instructor/dashboard] Error:", error);
+    logger.db.error("[instructor/dashboard] Error", error);
     return NextResponse.json({ error: "Failed to fetch dashboard data" }, { status: 500 });
   }
 }

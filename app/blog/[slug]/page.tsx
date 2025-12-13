@@ -14,6 +14,7 @@ import {
   BookOpen,
   User,
 } from "lucide-react";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 
 interface BlogPost {
   id: string;
@@ -273,7 +274,7 @@ export default function BlogPostPage() {
         {/* Content */}
         <div
           className="prose prose-slate dark:prose-invert max-w-none mb-8"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(post.content) }}
         />
 
         {/* Actions */}

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { createProgramCheckoutSession } from "@/lib/stripe";
+import { logger } from "@/lib/logger";
 
 // POST /api/programs/[id]/enroll - Create checkout session for program enrollment
 export async function POST(
@@ -133,7 +134,7 @@ export async function POST(
       enrollmentId: enrollment.id,
     });
   } catch (error) {
-    console.error("Error creating enrollment:", error);
+    logger.db.error("Error creating enrollment", error);
     return NextResponse.json(
       { error: "Failed to create enrollment" },
       { status: 500 }
@@ -182,7 +183,7 @@ export async function GET(
 
     return NextResponse.json({ enrollments });
   } catch (error) {
-    console.error("Error fetching enrollments:", error);
+    logger.db.error("Error fetching enrollments", error);
     return NextResponse.json(
       { error: "Failed to fetch enrollments" },
       { status: 500 }

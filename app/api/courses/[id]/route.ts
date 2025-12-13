@@ -5,6 +5,7 @@ import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
 import { CourseLevel } from "@prisma/client";
 import { logUpdate, logDelete } from "../../../../lib/audit";
+import { logger } from "../../../../lib/logger";
 
 function normalizeSlug(text: string | null | undefined) {
   if (!text) return "";
@@ -51,7 +52,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     if (!course) return NextResponse.json({ status: "not-found" }, { status: 404 });
     return NextResponse.json({ status: "ok", data: course });
   } catch (error) {
-    console.error("GET /api/courses/:id error", error);
+    logger.db.error("GET /api/courses/:id error", error);
     return NextResponse.json({ status: "error", message: "Failed to fetch course" }, { status: 500 });
   }
 }
@@ -85,7 +86,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ status: "ok", data: course });
   } catch (error) {
-    console.error("PATCH /api/courses/:id error", error);
+    logger.db.error("PATCH /api/courses/:id error", error);
     return NextResponse.json({ status: "error", message: "Failed to update course" }, { status: 500 });
   }
 }
@@ -110,7 +111,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     return NextResponse.json({ status: "ok" });
   } catch (error) {
-    console.error("DELETE /api/courses/:id error", error);
+    logger.db.error("DELETE /api/courses/:id error", error);
     return NextResponse.json({ status: "error", message: "Failed to delete course" }, { status: 500 });
   }
 }

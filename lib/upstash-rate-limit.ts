@@ -1,10 +1,14 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { logger } from "./logger";
 
 /**
  * Upstash Redis-based rate limiting for production
- * Falls back to allowing requests if Redis is not configured
+ * Falls back to in-memory rate limiting if Redis is not configured
  */
+
+// In-memory rate limit store for fallback (simple Map-based implementation)
+const memoryStore = new Map<string, { count: number; resetAt: number }>();
 
 // Check if Upstash is configured
 const isUpstashConfigured = !!(
@@ -19,6 +23,42 @@ const redis = isUpstashConfigured
       token: process.env.UPSTASH_REDIS_REST_TOKEN!,
     })
   : null;
+
+/**
+ * In-memory rate limiting fallback when Redis is unavailable
+ * NOT suitable for production with multiple instances - use Redis instead
+ */
+function checkMemoryRateLimit(
+  identifier: string,
+  limit: number,
+  windowMs: number
+): { success: boolean; remaining: number; reset: number; limit: number } {
+  const now = Date.now();
+  const key = identifier;
+  const record = memoryStore.get(key);
+
+  // Clean expired entries periodically
+  if (memoryStore.size > 10000) {
+    memoryStore.forEach((v, k) => {
+      if (v.resetAt < now) memoryStore.delete(k);
+    });
+  }
+
+  if (!record || record.resetAt < now) {
+    // New window
+    memoryStore.set(key, { count: 1, resetAt: now + windowMs });
+    return { success: true, remaining: limit - 1, reset: now + windowMs, limit };
+  }
+
+  if (record.count >= limit) {
+    // Rate limited
+    return { success: false, remaining: 0, reset: record.resetAt, limit };
+  }
+
+  // Increment count
+  record.count++;
+  return { success: true, remaining: limit - record.count, reset: record.resetAt, limit };
+}
 
 // Create rate limiters for different use cases
 const loginRateLimiter = redis
@@ -61,8 +101,8 @@ export interface RateLimitResult {
  */
 export async function checkLoginRateLimit(identifier: string): Promise<RateLimitResult> {
   if (!loginRateLimiter) {
-    // Fallback: allow if Redis not configured
-    return { success: true, remaining: 5, reset: Date.now() + 900000, limit: 5 };
+    // Fallback to in-memory rate limiting: 5 attempts per 15 minutes
+    return checkMemoryRateLimit(`login:${identifier}`, 5, 15 * 60 * 1000);
   }
 
   try {
@@ -74,9 +114,9 @@ export async function checkLoginRateLimit(identifier: string): Promise<RateLimit
       limit: result.limit,
     };
   } catch (error) {
-    console.error("[RateLimit] Redis error:", error);
-    // Allow on error to prevent lockout
-    return { success: true, remaining: 5, reset: Date.now() + 900000, limit: 5 };
+    logger.db.error("Redis rate limit error", error);
+    // Fallback to memory on Redis error
+    return checkMemoryRateLimit(`login:${identifier}`, 5, 15 * 60 * 1000);
   }
 }
 
@@ -86,7 +126,8 @@ export async function checkLoginRateLimit(identifier: string): Promise<RateLimit
  */
 export async function checkApiRateLimit(identifier: string): Promise<RateLimitResult> {
   if (!apiRateLimiter) {
-    return { success: true, remaining: 100, reset: Date.now() + 60000, limit: 100 };
+    // Fallback to in-memory: 100 requests per minute
+    return checkMemoryRateLimit(`api:${identifier}`, 100, 60 * 1000);
   }
 
   try {
@@ -98,8 +139,8 @@ export async function checkApiRateLimit(identifier: string): Promise<RateLimitRe
       limit: result.limit,
     };
   } catch (error) {
-    console.error("[RateLimit] Redis error:", error);
-    return { success: true, remaining: 100, reset: Date.now() + 60000, limit: 100 };
+    logger.db.error("Redis rate limit error", error);
+    return checkMemoryRateLimit(`api:${identifier}`, 100, 60 * 1000);
   }
 }
 
@@ -109,7 +150,8 @@ export async function checkApiRateLimit(identifier: string): Promise<RateLimitRe
  */
 export async function checkContactRateLimit(identifier: string): Promise<RateLimitResult> {
   if (!contactFormRateLimiter) {
-    return { success: true, remaining: 3, reset: Date.now() + 60000, limit: 3 };
+    // Fallback to in-memory: 3 submissions per minute
+    return checkMemoryRateLimit(`contact:${identifier}`, 3, 60 * 1000);
   }
 
   try {
@@ -121,8 +163,8 @@ export async function checkContactRateLimit(identifier: string): Promise<RateLim
       limit: result.limit,
     };
   } catch (error) {
-    console.error("[RateLimit] Redis error:", error);
-    return { success: true, remaining: 3, reset: Date.now() + 60000, limit: 3 };
+    logger.db.error("Redis rate limit error", error);
+    return checkMemoryRateLimit(`contact:${identifier}`, 3, 60 * 1000);
   }
 }
 
@@ -139,7 +181,7 @@ export async function resetLoginRateLimit(identifier: string): Promise<void> {
       await redis.del(...keys);
     }
   } catch (error) {
-    console.error("[RateLimit] Failed to reset:", error);
+    logger.db.error("Failed to reset rate limit", error);
   }
 }
 

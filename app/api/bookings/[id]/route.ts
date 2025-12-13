@@ -4,6 +4,7 @@ import { z } from "zod";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/auth";
 import { logUpdate, logDelete } from "../../../../lib/audit";
+import { logger } from "../../../../lib/logger";
 
 const updateSchema = z
   .object({
@@ -66,7 +67,7 @@ export async function PATCH(
 
     return NextResponse.json({ status: "ok", data: booking });
   } catch (error) {
-    console.error("PATCH /api/bookings/:id error", error);
+    logger.db.error("PATCH /api/bookings/:id error", error);
     return NextResponse.json({ status: "error", message: "Failed to update booking" }, { status: 500 });
   }
 }
@@ -95,7 +96,7 @@ export async function DELETE(
 
     return NextResponse.json({ status: "ok" });
   } catch (error) {
-    console.error("DELETE /api/bookings/:id error", error);
+    logger.db.error("DELETE /api/bookings/:id error", error);
     return NextResponse.json({ status: "error", message: "Failed to delete booking" }, { status: 500 });
   }
 }

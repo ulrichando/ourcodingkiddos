@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // GET /api/showcase/[id] - Get a single project
 export async function GET(
@@ -80,7 +81,7 @@ export async function GET(
 
     return NextResponse.json({ project, userHasLiked });
   } catch (error) {
-    console.error("Error fetching project:", error);
+    logger.api.error("Failed to fetch project", error);
     return NextResponse.json({ error: "Failed to fetch project" }, { status: 500 });
   }
 }
@@ -171,7 +172,7 @@ export async function PUT(
 
     return NextResponse.json({ project });
   } catch (error) {
-    console.error("Error updating project:", error);
+    logger.api.error("Failed to update project", error);
     return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
   }
 }
@@ -218,7 +219,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting project:", error);
+    logger.api.error("Failed to delete project", error);
     return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
   }
 }

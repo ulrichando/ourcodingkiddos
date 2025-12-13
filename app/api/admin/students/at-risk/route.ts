@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -149,7 +150,7 @@ export async function GET() {
       total: atRiskStudents.length,
     });
   } catch (error) {
-    console.error("[AtRiskStudents] Error:", error);
+    logger.db.error("Failed to fetch at-risk students", error);
     return NextResponse.json(
       { error: "Failed to fetch at-risk students", students: [] },
       { status: 500 }

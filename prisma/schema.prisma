@@ -39,6 +39,10 @@ model User {
   sessions               Session[]
   studentProfile         StudentProfile?
   badges                 UserBadge[]
+
+  @@index([role])
+  @@index([createdAt])
+  @@index([accountStatus])
 }
 
 model StudentProfile {
@@ -64,6 +68,10 @@ model StudentProfile {
   user                  User                @relation(fields: [userId], references: [id])
   programEnrollments    ProgramEnrollment[] // programs the student is enrolled in
   studentProjects       StudentProject[]    // showcase projects
+
+  @@index([guardianId])
+  @@index([lastActiveDate])
+  @@index([parentEmail])
 }
 
 model ParentProfile {
@@ -162,6 +170,9 @@ model Enrollment {
   progress     Progress[]
 
   @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
 }
 
 model Certificate {
@@ -193,6 +204,8 @@ model Progress {
   lesson           Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([enrollmentId, lessonId])
+  @@index([enrollmentId])
+  @@index([status])
 }
 
 model Booking {

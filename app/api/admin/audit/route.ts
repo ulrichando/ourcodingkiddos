@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { createAuditLog } from "../../../../lib/audit";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
       offset,
     });
   } catch (error) {
-    console.error("[AuditAPI] Error fetching audit logs:", error);
+    logger.db.error("Error fetching audit logs", error);
     return NextResponse.json(
       { error: "Failed to fetch audit logs", logs: [], total: 0 },
       { status: 500 }
@@ -133,7 +134,7 @@ export async function DELETE(request: Request) {
       message: `Successfully deleted ${deletedCount} audit log entries`,
     });
   } catch (error) {
-    console.error("[AuditAPI] Error clearing audit logs:", error);
+    logger.db.error("Error clearing audit logs", error);
     return NextResponse.json(
       { error: "Failed to clear audit logs" },
       { status: 500 }

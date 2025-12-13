@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -165,7 +166,7 @@ export async function GET() {
       unreadCount: notifications.filter((n) => !n.read).length,
     });
   } catch (error) {
-    console.error("[Notifications] Error:", error);
+    logger.db.error("Failed to fetch notifications", error);
     return NextResponse.json(
       { error: "Failed to fetch notifications", notifications: [] },
       { status: 500 }

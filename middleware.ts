@@ -35,7 +35,8 @@ export default withAuth(
   async function middleware(req) {
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
-    const role = token?.role as string | undefined;
+    // Normalize role to uppercase for consistent comparison
+    const role = (token?.role as string | undefined)?.toUpperCase();
 
     // Paths that should be accessible during maintenance
     const maintenanceExemptPaths = [

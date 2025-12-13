@@ -504,7 +504,7 @@ export default function AdminProgramsPage() {
             }}
           >
             <div className="min-h-full flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+              <div className="bg-white dark:bg-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
               <div className="p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">

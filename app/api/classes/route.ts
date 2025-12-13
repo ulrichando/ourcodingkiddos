@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
+import { logger } from "../../../lib/logger";
 
 export async function GET() {
   // Public endpoint to list upcoming scheduled class sessions
@@ -59,7 +60,7 @@ export async function GET() {
 
     return NextResponse.json({ sessions: enrichedSessions });
   } catch (e) {
-    console.error("[classes] GET error:", e);
+    logger.api.error("Failed to load classes", e);
     return NextResponse.json({ error: "Failed to load classes" }, { status: 500 });
   }
 }

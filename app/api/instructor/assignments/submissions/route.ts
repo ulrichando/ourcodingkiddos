@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
 import { SubmissionStatus } from "@prisma/client";
+import { logger } from "../../../../../lib/logger";
 
 // GET - List submissions for an assignment (instructor) or student's own submissions
 export async function GET(req: Request) {
@@ -78,7 +79,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ submissions });
   } catch (e) {
-    console.error("Failed to fetch submissions:", e);
+    logger.db.error("Failed to fetch submissions", e);
     return NextResponse.json({ error: "Failed to fetch submissions" }, { status: 500 });
   }
 }
@@ -188,7 +189,7 @@ export async function POST(req: Request) {
       message: isDraft ? "Draft saved" : "Assignment submitted successfully",
     });
   } catch (e) {
-    console.error("Failed to submit assignment:", e);
+    logger.db.error("Failed to submit assignment", e);
     return NextResponse.json({ error: "Failed to submit assignment" }, { status: 500 });
   }
 }
@@ -277,7 +278,7 @@ export async function PATCH(req: Request) {
       message: "Submission graded successfully",
     });
   } catch (e) {
-    console.error("Failed to grade submission:", e);
+    logger.db.error("Failed to grade submission", e);
     return NextResponse.json({ error: "Failed to grade submission" }, { status: 500 });
   }
 }

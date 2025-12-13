@@ -32,8 +32,10 @@ export default function ScheduleRedirectContent() {
         router.push(`/dashboard/instructor${queryParam}`); // Instructor doesn't have separate schedule page
         break;
       case "PARENT":
-      case "STUDENT":
         router.push(`/dashboard/parent/schedule${queryParam}`);
+        break;
+      case "STUDENT":
+        router.push(`/dashboard/student/classes${queryParam}`);
         break;
       case "ADMIN":
       case "SUPPORT":

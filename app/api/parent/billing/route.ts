@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import Stripe from "stripe";
+import { logger } from "../../../../lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -155,7 +156,7 @@ export async function GET() {
         }));
       }
     } catch (stripeError) {
-      console.error("[parent/billing] Stripe error:", stripeError);
+      logger.api.error("Parent billing Stripe error", stripeError);
       // Continue without Stripe data
     }
 
@@ -256,7 +257,7 @@ export async function GET() {
       hasStripeCustomer: !!stripeCustomer,
     });
   } catch (error) {
-    console.error("[parent/billing] Error:", error);
+    logger.db.error("[parent/billing] Error", error);
     return NextResponse.json(
       { error: "Failed to load billing data" },
       { status: 500 }

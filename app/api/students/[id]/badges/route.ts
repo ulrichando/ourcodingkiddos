@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET(
   _request: NextRequest,
@@ -96,7 +97,7 @@ export async function GET(
 
     return NextResponse.json({ badges });
   } catch (error) {
-    console.error("GET /api/students/[id]/badges error:", error);
+    logger.db.error("GET /api/students/[id]/badges error", error);
     return NextResponse.json(
       { error: "Failed to fetch badges" },
       { status: 500 }

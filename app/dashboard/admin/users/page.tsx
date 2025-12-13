@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div>
           <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Users</p>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">User Management</h1>
@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
         {loading && <p className="text-sm text-slate-500 dark:text-slate-400">Loading users…</p>}
         {error && <p className="text-sm text-rose-600 dark:text-rose-400">Failed to load users</p>}
         {!loading && !error && <AdminUsersClient initialUsers={users} />}
-      </main>
+      </div>
     </AdminLayout>
   );
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 function generateMeetLink() {
   const rand = Math.random().toString(36).slice(2, 12);
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
       message: `Successfully created ${createdSessions.length} class session(s)`
     });
   } catch (e) {
-    console.error("Failed to create class:", e);
+    logger.db.error("Failed to create class", e);
     return NextResponse.json({ error: "Failed to create class" }, { status: 500 });
   }
 }
@@ -164,8 +165,6 @@ export async function GET() {
   const includeFrom = new Date(Date.now() - 60 * 60 * 1000);
   const now = new Date();
 
-  console.log('[Instructor Classes API] Fetching classes for instructor:', email);
-
   // Get currently running programs (programs that are published and within their date range)
   const runningPrograms = await prisma.program.findMany({
     where: {
@@ -194,9 +193,6 @@ export async function GET() {
   });
 
   const runningProgramIds = runningPrograms.map(p => p.id);
-
-  console.log('[Instructor Classes API] Found', runningProgramIds.length, 'running programs');
-  console.log('[Instructor Classes API] Running program IDs:', runningProgramIds);
 
   // ONLY show classes from currently running published programs
   // Do NOT show standalone classes (programId: null)
@@ -246,8 +242,6 @@ export async function GET() {
       thumbnailUrl: program?.thumbnailUrl || null,
     };
   });
-
-  console.log('[Instructor Classes API] Found', enrichedSessions.length, 'classes for instructor:', email);
 
   return NextResponse.json({ sessions: enrichedSessions });
 }

@@ -1,5 +1,6 @@
 import prisma from "./prisma";
 import type { AuditAction, AuditSeverity } from "@prisma/client";
+import { logger } from "./logger";
 
 type AuditLogInput = {
   userId?: string;
@@ -37,8 +38,8 @@ export async function createAuditLog(input: AuditLogInput): Promise<void> {
       },
     });
   } catch (error) {
-    // Log to console but don't throw - audit logging shouldn't break the app
-    console.error("[AuditLog] Failed to create audit log:", error);
+    // Log but don't throw - audit logging shouldn't break the app
+    logger.db.error("Failed to create audit log", error, { action: input.action, resource: input.resource });
   }
 }
 

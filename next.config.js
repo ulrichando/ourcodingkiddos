@@ -40,6 +40,12 @@ const nextConfig = {
       'lodash',
       'framer-motion',
     ],
+    // Enable client-side router cache for faster navigation (Next.js 15)
+    // This caches visited pages client-side, making return visits instant
+    staleTimes: {
+      dynamic: 30,  // Cache dynamic pages for 30 seconds
+      static: 180,  // Cache static pages for 3 minutes
+    },
   },
 
   // Security and caching headers

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // Public endpoint to check maintenance mode status
 // Used by middleware to redirect non-admin users and by maintenance page for display
@@ -30,7 +31,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error("Maintenance status check error:", error);
+    logger.db.error("Maintenance status check error", error);
     // Default to not in maintenance mode on error
     return NextResponse.json({
       maintenanceMode: false,

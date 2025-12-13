@@ -75,19 +75,19 @@ export default function AdminFinancePage() {
   if (loading) {
     return (
       <AdminLayout>
-        <main className="max-w-7xl mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-7xl mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-purple-500 mb-4" />
             <p className="text-slate-600 dark:text-slate-400">Loading financial data...</p>
           </div>
-        </main>
+        </div>
       </AdminLayout>
     );
   }
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Finance</p>
@@ -115,7 +115,7 @@ export default function AdminFinancePage() {
         {/* Revenue Growth & Payments by Type */}
         {finance && (
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
                 Revenue This Month
               </h2>
@@ -146,7 +146,7 @@ export default function AdminFinancePage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
                 Payment Summary
               </h2>
@@ -182,7 +182,7 @@ export default function AdminFinancePage() {
 
         {/* Revenue Trend */}
         {finance && finance.revenueTrend.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
               Revenue Trend (Last 6 Months)
             </h2>
@@ -210,7 +210,7 @@ export default function AdminFinancePage() {
         )}
 
         {/* Recent Invoices */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 p-5">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">Recent Invoices</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -257,7 +257,7 @@ export default function AdminFinancePage() {
             </table>
           </div>
         </div>
-      </main>
+      </div>
     </AdminLayout>
   );
 }

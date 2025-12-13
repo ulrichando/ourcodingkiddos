@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 // GET - Fetch approved reviews (public) or all reviews (admin)
 export async function GET(request: Request) {
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ reviews });
   } catch (error) {
-    console.error("[reviews] GET error:", error);
+    logger.api.error("Failed to fetch reviews", error);
     return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
   }
 }
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
       review,
     });
   } catch (error) {
-    console.error("[reviews] POST error:", error);
+    logger.api.error("Failed to submit review", error);
     return NextResponse.json({ error: "Failed to submit review" }, { status: 500 });
   }
 }

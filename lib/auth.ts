@@ -8,6 +8,7 @@ import { prismaBase } from "./prisma";
 import type { UserRole } from "../types/next-auth";
 import { checkLoginRateLimit, resetLoginRateLimit } from "./upstash-rate-limit";
 import { logLogin, logFailedLogin } from "./audit";
+import { logger } from "./logger";
 
 // In-memory store for instructor signup intents (token -> {timestamp, resumeUrl})
 // Entries auto-expire after 10 minutes
@@ -122,7 +123,7 @@ const providers: NextAuthOptions["providers"] = [
       // Look up user in DB only (no demo fallbacks)
       // Using prismaBase (without Accelerate extension) for auth
       try {
-        console.log('[Auth] Looking up user:', email);
+        logger.auth.debug('Looking up user', { email });
         const user = await prismaBase.user.findUnique({
           where: { email },
           select: {
@@ -135,11 +136,11 @@ const providers: NextAuthOptions["providers"] = [
             hashedPassword: true,
           }
         });
-        console.log('[Auth] User found:', !!user, user?.email);
+        logger.auth.debug('User lookup result', { found: !!user, email: user?.email });
 
         if (user?.hashedPassword) {
           const valid = await bcrypt.compare(password, user.hashedPassword);
-          console.log('[Auth] Password valid:', valid);
+          logger.auth.debug('Password validation result', { valid, email });
           if (!valid) {
             logFailedLogin(email, "Invalid password").catch(() => {});
             return null;
@@ -163,7 +164,7 @@ const providers: NextAuthOptions["providers"] = [
           if (user.role !== "ADMIN" && user.role !== "SUPPORT") {
             const maintenance = await isMaintenanceMode();
             if (maintenance) {
-              console.log('[Auth] Login blocked during maintenance for non-admin:', email);
+              logger.auth.info('Login blocked during maintenance for non-admin', { email });
               logFailedLogin(email, "Login blocked during maintenance mode").catch(() => {});
               throw new Error("Site is under maintenance. Please try again later.");
             }
@@ -183,11 +184,12 @@ const providers: NextAuthOptions["providers"] = [
             role: user.role as UserRole,
           };
         }
-        console.log('[Auth] No hashed password found for user');
+        logger.auth.debug('No hashed password found for user', { email });
         logFailedLogin(email, "No password set for account").catch(() => {});
-      } catch (e: any) {
-        console.error('[Auth] Database error:', e.message);
-        logFailedLogin(email, `Database error: ${e.message}`).catch(() => {});
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        logger.auth.error('Database error during login', e, { email });
+        logFailedLogin(email, `Database error: ${errorMessage}`).catch(() => {});
       }
 
       return null;
@@ -285,7 +287,7 @@ export const authOptions: NextAuthOptions = {
         if (!existingUser || (existingUser.role !== "ADMIN" && existingUser.role !== "SUPPORT")) {
           const maintenance = await isMaintenanceMode();
           if (maintenance) {
-            console.log('[Auth] OAuth login blocked during maintenance for:', user.email);
+            logger.auth.info('OAuth login blocked during maintenance', { email: user.email });
             throw new Error("Site is under maintenance. Please try again later.");
           }
         }
@@ -294,7 +296,7 @@ export const authOptions: NextAuthOptions = {
           // User exists - check if Google account is already linked
           if (existingUser.accounts.length === 0) {
             // Link Google account to existing user
-            console.log('[Auth] Linking Google account to existing user:', user.email);
+            logger.auth.info('Linking Google account to existing user', { email: user.email });
             await prismaBase.account.create({
               data: {
                 userId: existingUser.id,
@@ -311,7 +313,7 @@ export const authOptions: NextAuthOptions = {
             });
           } else {
             // Update existing Google account tokens
-            console.log('[Auth] Updating Google tokens for:', user.email);
+            logger.auth.debug('Updating Google tokens', { email: user.email });
             await prismaBase.account.update({
               where: { id: existingUser.accounts[0].id },
               data: {
@@ -356,7 +358,14 @@ export const authOptions: NextAuthOptions = {
 
           const accountStatus = role === "INSTRUCTOR" ? "PENDING" : "APPROVED";
 
-          console.log('[Auth] Creating new Google OAuth user as', role, 'with status', accountStatus, '(intent:', hasIntent, ', email pattern:', isLikelyInstructor, ', resumeUrl:', !!resumeUrl, '):', user.email);
+          logger.auth.info('Creating new Google OAuth user', {
+            email: user.email,
+            role,
+            accountStatus,
+            hasIntent,
+            isLikelyInstructor,
+            hasResumeUrl: !!resumeUrl
+          });
 
           // Clear the intent after using it
           if (intentToken && hasIntent) {

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { google } from "googleapis";
+import { logger } from "../../../../lib/logger";
 
 // Helper to refresh Google access token
 async function refreshAccessToken(refreshToken: string) {
@@ -17,7 +18,7 @@ async function refreshAccessToken(refreshToken: string) {
     const { credentials } = await oauth2Client.refreshAccessToken();
     return credentials.access_token;
   } catch (error) {
-    console.error("[google-meet] Failed to refresh token:", error);
+    logger.auth.error("[google-meet] Failed to refresh token", error);
     return null;
   }
 }
@@ -172,7 +173,7 @@ export async function POST(req: Request) {
       calendarEventLink: event.data.htmlLink,
     });
   } catch (error: any) {
-    console.error("[google-meet] Error creating meeting:", error);
+    logger.googleMeet.error("Error creating meeting", error);
 
     // Handle specific Google API errors
     if (error.code === 401 || error.message?.includes("invalid_grant")) {
@@ -224,7 +225,7 @@ export async function GET() {
       needsReauth: hasGoogleAccount && !isTokenValid,
     });
   } catch (error) {
-    console.error("[google-meet] Error checking Google account:", error);
+    logger.googleMeet.error("Error checking Google account", error);
     return NextResponse.json(
       { error: "Failed to check Google account status" },
       { status: 500 }

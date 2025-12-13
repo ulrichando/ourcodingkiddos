@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import prisma from "../../../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -184,7 +185,7 @@ export async function GET(
       period,
     });
   } catch (error) {
-    console.error("[students/[id]/progress] Error:", error);
+    logger.db.error("GET /api/students/[id]/progress error", error);
     return NextResponse.json({ error: "Failed to fetch progress" }, { status: 500 });
   }
 }

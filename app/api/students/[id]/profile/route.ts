@@ -3,6 +3,7 @@ import prisma from "../../../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import { AgeGroup } from "@prisma/client";
+import { logger } from "../../../../../lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +77,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error("[students/[id]/profile] GET error:", error);
+    logger.db.error("GET /api/students/[id]/profile error", error);
     return NextResponse.json(
       { error: error?.message || "Failed to get student profile" },
       { status: 500 }
@@ -187,7 +188,7 @@ export async function PUT(
       },
     });
   } catch (error: any) {
-    console.error("[students/[id]/profile] PUT error:", error);
+    logger.db.error("PUT /api/students/[id]/profile error", error);
     return NextResponse.json(
       { error: error?.message || "Failed to update student profile" },
       { status: 500 }

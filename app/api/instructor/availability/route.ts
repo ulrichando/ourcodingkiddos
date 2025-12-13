@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // GET - Fetch instructor's availability
 export async function GET(req: Request) {
@@ -75,7 +76,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ availability });
   } catch (error) {
-    console.error("GET /api/instructor/availability error:", error);
+    logger.db.error("GET /api/instructor/availability error", error);
     return NextResponse.json({ error: "Failed to fetch availability" }, { status: 500 });
   }
 }
@@ -198,7 +199,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, availability });
   } catch (error) {
-    console.error("POST /api/instructor/availability error:", error);
+    logger.db.error("POST /api/instructor/availability error", error);
     return NextResponse.json({ error: "Failed to create availability" }, { status: 500 });
   }
 }
@@ -245,7 +246,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, availability: updated });
   } catch (error) {
-    console.error("PATCH /api/instructor/availability error:", error);
+    logger.db.error("PATCH /api/instructor/availability error", error);
     return NextResponse.json({ error: "Failed to update availability" }, { status: 500 });
   }
 }
@@ -286,7 +287,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true, message: "Availability deleted" });
   } catch (error) {
-    console.error("DELETE /api/instructor/availability error:", error);
+    logger.db.error("DELETE /api/instructor/availability error", error);
     return NextResponse.json({ error: "Failed to delete availability" }, { status: 500 });
   }
 }

@@ -202,21 +202,17 @@ export default function AdminReviewsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                Parent Reviews
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                Manage and moderate parent reviews
-              </p>
-            </div>
+          <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Reviews</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Parent Reviews
+            </h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+              Manage and moderate parent reviews
+            </p>
           </div>
           <button
             onClick={openCreateModal}
@@ -289,7 +285,7 @@ export default function AdminReviewsPage() {
             <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
           </div>
         ) : filteredReviews.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
             <AlertCircle className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
               No reviews found
@@ -314,7 +310,7 @@ export default function AdminReviewsPage() {
             {filteredReviews.map((review) => (
               <div
                 key={review.id}
-                className={`bg-white dark:bg-slate-800 rounded-2xl border ${
+                className={`bg-white dark:bg-slate-800 rounded-xl border ${
                   !review.isApproved
                     ? "border-amber-300 dark:border-amber-700"
                     : review.isFeatured
@@ -441,7 +437,7 @@ export default function AdminReviewsPage() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 {editingReview ? "Edit Review" : "Add New Review"}

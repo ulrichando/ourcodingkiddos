@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // GET /api/programs - List all published programs (public) or all programs (admin)
 export async function GET(request: NextRequest) {
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ programs });
   } catch (error) {
-    console.error("Error fetching programs:", error);
+    logger.db.error("Error fetching programs", error);
     return NextResponse.json({ error: "Failed to fetch programs" }, { status: 500 });
   }
 }
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ program }, { status: 201 });
   } catch (error) {
-    console.error("Error creating program:", error);
+    logger.db.error("Error creating program", error);
     return NextResponse.json({ error: "Failed to create program" }, { status: 500 });
   }
 }

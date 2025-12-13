@@ -5,6 +5,7 @@ import prisma from "../../../../../lib/prisma";
 import { logUpdate } from "../../../../../lib/audit";
 import { createNotification } from "../../../notifications/route";
 import { sendEmail } from "../../../../../lib/email";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -123,7 +124,7 @@ export async function POST(request: Request) {
         </html>
       `
     }).catch((err) => {
-      console.error("[reject] Failed to send rejection email:", err);
+      logger.email.error("Failed to send rejection email", err);
     });
 
     return NextResponse.json(
@@ -131,7 +132,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (e: any) {
-    console.error("[reject] Error rejecting account:", e);
+    logger.db.error("Error rejecting account", e);
     return NextResponse.json(
       { status: "error", message: "Failed to reject account" },
       { status: 500 }

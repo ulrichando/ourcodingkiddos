@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prismaBase } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -55,22 +56,15 @@ export async function POST(request: Request) {
     const result = await sendPasswordResetEmail(email, user.name, resetUrl);
 
     if (!result.success) {
-      console.error("[forgot-password] Email send failed:", result.error);
-      // Still return success to prevent email enumeration
-      // But log for debugging
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Password Reset] Reset URL:", resetUrl);
-      }
+      logger.auth.error("forgot-password email send failed", result.error);
     }
 
     return NextResponse.json({
       success: true,
       message: "If an account exists with this email, you will receive a password reset link.",
-      // Only include reset URL in development if email failed
-      ...(process.env.NODE_ENV === "development" && !result.success && { resetUrl }),
     });
   } catch (error) {
-    console.error("[forgot-password] Error:", error);
+    logger.auth.error("forgot-password error", error);
     return NextResponse.json(
       { error: "Failed to process password reset request" },
       { status: 500 }

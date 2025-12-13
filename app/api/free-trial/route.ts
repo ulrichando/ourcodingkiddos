@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 const freeTrialSchema = z.object({
   parentEmail: z.string().email(),
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("POST /api/free-trial error:", error);
+    logger.api.error("POST /api/free-trial error", error);
     return NextResponse.json(
       { status: "error", message: "Failed to book free trial" },
       { status: 500 }
@@ -183,7 +184,7 @@ export async function GET(request: NextRequest) {
       ),
     });
   } catch (error) {
-    console.error("GET /api/free-trial error:", error);
+    logger.api.error("GET /api/free-trial error", error);
     return NextResponse.json(
       { status: "error", message: "Failed to fetch trial status" },
       { status: 500 }

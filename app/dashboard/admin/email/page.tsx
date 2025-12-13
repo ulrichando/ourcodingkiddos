@@ -658,7 +658,7 @@ export default function EmailManagementPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div>
           <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Communication</p>
@@ -1118,7 +1118,7 @@ export default function EmailManagementPage() {
             </div>
           </div>
         )}
-      </main>
+      </div>
     </AdminLayout>
   );
 }

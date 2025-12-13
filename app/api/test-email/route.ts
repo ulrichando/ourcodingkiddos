@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 // Only allow admins to test email
 export async function POST(request: Request) {
@@ -106,7 +107,7 @@ If you received this email, your email service is properly configured!`,
       }, { status: 500 });
     }
   } catch (error) {
-    console.error("[test-email] Error:", error);
+    logger.email.error("Test email failed", error);
     return NextResponse.json(
       {
         success: false,

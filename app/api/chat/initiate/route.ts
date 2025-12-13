@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { createAuditLog, getClientIP, getUserAgent } from "@/lib/audit";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -154,7 +155,7 @@ export async function POST(request: Request) {
       messageId: newMessage.id,
     });
   } catch (error) {
-    console.error("Error initiating conversation:", error);
+    logger.db.error("Error initiating conversation", error);
     return NextResponse.json(
       { error: "Failed to initiate conversation" },
       { status: 500 }

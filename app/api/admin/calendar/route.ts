@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -135,7 +136,7 @@ export async function GET(request: Request) {
       total: events.length,
     });
   } catch (error) {
-    console.error("[Calendar] Error:", error);
+    logger.db.error("Calendar fetch error", error);
     return NextResponse.json(
       { error: "Failed to fetch calendar events", events: [] },
       { status: 500 }

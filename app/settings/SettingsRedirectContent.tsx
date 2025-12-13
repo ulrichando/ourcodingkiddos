@@ -29,7 +29,7 @@ export default function SettingsRedirectContent() {
         router.push("/dashboard/parent/settings");
         break;
       case "STUDENT":
-        router.push("/dashboard/parent/settings"); // Students use parent dashboard
+        router.push("/dashboard/student/settings");
         break;
       case "ADMIN":
       case "SUPPORT":

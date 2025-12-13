@@ -5,6 +5,7 @@ import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
 import { CourseLevel, Language, AgeGroup } from "@prisma/client";
 import { logCreate } from "../../../lib/audit";
+import { logger } from "../../../lib/logger";
 
 // Force dynamic rendering - disable all caching for this route
 export const dynamic = 'force-dynamic';
@@ -32,10 +33,6 @@ export async function GET(request: Request) {
   const published = searchParams.get("published");
 
   try {
-    console.log("=== GET /api/courses ===");
-    console.log("Timestamp:", new Date().toISOString());
-    console.log("Filters:", { level, language, ageGroup, published });
-
     const courses = await prisma.course.findMany({
       where: {
         level: level ? (level as any) : undefined,
@@ -47,19 +44,12 @@ export async function GET(request: Request) {
       include: { lessons: { select: { id: true, title: true, slug: true, orderIndex: true } } },
     });
 
-    console.log(`✓ Fetched ${courses.length} courses from database`);
-    courses.forEach(c => console.log(`  - ${c.title}: isPublished=${c.isPublished}`));
-
     return NextResponse.json({
       status: "ok",
       data: courses,
-      _debug: {
-        timestamp: new Date().toISOString(),
-        count: courses.length
-      }
     });
   } catch (error) {
-    console.error("GET /api/courses error", error);
+    logger.db.error("GET /api/courses error", error);
     return NextResponse.json({ status: "error", message: "Failed to fetch courses" }, { status: 500 });
   }
 }
@@ -96,7 +86,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: "ok", data: course }, { status: 201 });
   } catch (error) {
-    console.error("POST /api/courses error", error);
+    logger.db.error("POST /api/courses error", error);
     return NextResponse.json({ status: "error", message: "Failed to create course" }, { status: 500 });
   }
 }

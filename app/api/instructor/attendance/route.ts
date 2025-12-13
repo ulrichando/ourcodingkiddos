@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { createNotification } from "../../notifications/route";
+import { logger } from "../../../../lib/logger";
 
 // Check if user is online (active in last 5 minutes)
 function isOnline(lastSeen?: Date | null): boolean {
@@ -106,7 +107,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error("[attendance] Error checking attendance:", error);
+    logger.db.error("[attendance] Error checking attendance", error);
     return NextResponse.json({ error: "Failed to check attendance" }, { status: 500 });
   }
 }
@@ -230,7 +231,7 @@ export async function POST(req: Request) {
       parentsNotified: notifyParents ? offlineStudents.filter((s) => s.parentEmail).length : 0,
     });
   } catch (error) {
-    console.error("[attendance] Error notifying:", error);
+    logger.db.error("Error notifying attendance", error);
     return NextResponse.json({ error: "Failed to send notifications" }, { status: 500 });
   }
 }

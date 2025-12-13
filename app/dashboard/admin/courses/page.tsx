@@ -42,7 +42,7 @@ export default function AdminCoursesPage() {
  */
 function CoursesLoadingSkeleton() {
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       {/* Header Skeleton */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="space-y-2">
@@ -132,6 +132,6 @@ function CoursesLoadingSkeleton() {
           <span className="text-sm">Loading courses from database...</span>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

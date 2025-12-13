@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // GET /api/admin/emails/[id] - Get single email with full content
 export async function GET(
@@ -48,7 +49,7 @@ export async function GET(
 
     return NextResponse.json(email);
   } catch (error) {
-    console.error("[Admin Email] Error:", error);
+    logger.db.error("Failed to fetch email", error);
     return NextResponse.json(
       { error: "Failed to fetch email" },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function PATCH(
 
     return NextResponse.json(email);
   } catch (error) {
-    console.error("[Admin Email] Error:", error);
+    logger.db.error("Failed to update email", error);
     return NextResponse.json(
       { error: "Failed to update email" },
       { status: 500 }
@@ -137,7 +138,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[Admin Email] Error:", error);
+    logger.db.error("Failed to delete email", error);
     return NextResponse.json(
       { error: "Failed to delete email" },
       { status: 500 }

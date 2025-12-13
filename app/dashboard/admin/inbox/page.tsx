@@ -22,6 +22,7 @@ import {  Mail,
   Bell,
   BellOff,
 } from "lucide-react";
+import { sanitizeEmailHtml } from "@/lib/sanitize";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -415,13 +416,23 @@ export default function AdminInboxPage() {
 
   return (
     <AdminLayout>
-      <div className="flex h-[calc(100vh-120px)]">
+      <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-8rem)] flex flex-col">
+        {/* Breadcrumb Header */}
+        <div className="flex-shrink-0 pb-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Inbox</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Email Inbox</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            Manage and respond to incoming emails
+          </p>
+        </div>
+
+      <div className="flex flex-1 min-h-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         {/* Email List Panel */}
         <div className={`${selectedEmail ? "hidden md:flex" : "flex"} flex-col w-full md:w-1/2 lg:w-2/5 border-r border-slate-200 dark:border-slate-700`}>
           {/* Header */}
           <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Inbox</h1>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Messages</h2>
               <div className="flex items-center gap-2">
                 <Button size="sm" onClick={() => setShowComposeForm(true)}>
                   <Edit3 className="w-4 h-4" />
@@ -664,7 +675,7 @@ export default function AdminInboxPage() {
                 {selectedEmail.htmlBody ? (
                   <div
                     className="prose dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: selectedEmail.htmlBody }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(selectedEmail.htmlBody) }}
                   />
                 ) : selectedEmail.textBody ? (
                   <pre className="whitespace-pre-wrap font-sans text-slate-700 dark:text-slate-300">
@@ -694,7 +705,7 @@ export default function AdminInboxPage() {
                           </div>
                           <div
                             className="text-sm text-slate-700 dark:text-slate-300"
-                            dangerouslySetInnerHTML={{ __html: reply.htmlBody }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(reply.htmlBody) }}
                           />
                         </div>
                       ))}
@@ -706,7 +717,7 @@ export default function AdminInboxPage() {
               {/* Reply Form Modal */}
               {showReplyForm && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-                  <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
                     <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                         Reply to {selectedEmail.fromName || selectedEmail.from}
@@ -779,11 +790,12 @@ export default function AdminInboxPage() {
           )}
         </div>
       </div>
+      </div>
 
       {/* Compose Email Modal */}
       {showComposeForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                 Compose New Email

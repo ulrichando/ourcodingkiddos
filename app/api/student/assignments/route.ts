@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { updateLastSeen } from "@/lib/update-last-seen";
+import { logger } from "@/lib/logger";
 
 // GET - List assignments for the student
 export async function GET(req: Request) {
@@ -105,7 +106,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ assignments: filteredAssignments });
   } catch (error) {
-    console.error("[student/assignments] Error:", error);
+    logger.db.error("GET /api/student/assignments error", error);
     return NextResponse.json(
       { error: "Failed to load assignments" },
       { status: 500 }

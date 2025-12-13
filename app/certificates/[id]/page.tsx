@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { use, useState, useEffect } from "react";
-import { ArrowLeft, Calendar, Download } from "lucide-react";
+import { ArrowLeft, Calendar, Download, Loader2 } from "lucide-react";
 import Button from "../../../components/ui/button";
+import { escapeHtml } from "@/lib/utils";
 
 type Certificate = {
   id: string;
@@ -18,15 +19,58 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const [cert, setCert] = useState<Certificate | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Fetch certificate data from API
-    // For now, just set loading to false with no cert
-    setLoading(false);
+    async function fetchCertificate() {
+      try {
+        // Use the verify API which accepts verification code (id in URL is verification code)
+        const response = await fetch(`/api/certificates/verify?code=${encodeURIComponent(id)}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("Certificate not found");
+          } else {
+            throw new Error("Failed to fetch certificate");
+          }
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.valid && data.certificate) {
+          setCert({
+            id: data.certificate.id,
+            student: data.certificate.studentName,
+            course: data.certificate.courseTitle,
+            issued: new Date(data.certificate.issuedAt).toLocaleDateString(),
+            code: data.certificate.verificationCode,
+            type: data.certificate.achievementType === "course_completion"
+              ? "Certificate of Completion"
+              : data.certificate.achievementType === "track_completion"
+              ? "Track Completion"
+              : "Special Achievement",
+          });
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCertificate();
   }, [id]);
 
   const handleDownload = () => {
     if (!cert) return;
+    // Escape user content to prevent XSS in generated HTML
+    const safeStudent = escapeHtml(cert.student);
+    const safeCourse = escapeHtml(cert.course);
+    const safeIssued = escapeHtml(cert.issued);
+    const safeCode = escapeHtml(cert.code);
+    const safeType = escapeHtml(cert.type);
+
     const html = `
       <html>
         <head>
@@ -50,13 +94,13 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
           <div class="wrapper">
             <div class="card">
               <div class="logo">🎖️</div>
-              <div class="title">Certificate of Completion</div>
+              <div class="title">${safeType}</div>
               <div class="subtitle">This is to certify that</div>
-              <div class="student">${cert.student}</div>
+              <div class="student">${safeStudent}</div>
               <div class="subtitle">has successfully completed</div>
-              <div class="course">${cert.course}</div>
-              <div class="date">Issued: ${cert.issued}</div>
-              <div class="code">Verification Code: ${cert.code}</div>
+              <div class="course">${safeCourse}</div>
+              <div class="date">Issued: ${safeIssued}</div>
+              <div class="code">Verification Code: ${safeCode}</div>
               <div class="footer">Coding Kiddos</div>
             </div>
           </div>
@@ -79,16 +123,16 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-        <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-slate-600 dark:text-slate-400">
-            Loading certificate...
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
           </div>
         </div>
       </main>
     );
   }
 
-  if (!cert) {
+  if (error || !cert) {
     return (
       <main className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
         <div className="max-w-5xl mx-auto px-4 py-8 space-y-4">
@@ -97,7 +141,7 @@ export default function CertificateDetail({ params }: { params: Promise<{ id: st
             Back to Certificates
           </Link>
           <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center text-slate-600 dark:text-slate-400">
-            No certificate found.
+            {error || "Certificate not found."}
           </div>
         </div>
       </main>

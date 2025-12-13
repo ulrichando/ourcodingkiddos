@@ -12,6 +12,7 @@ import {  MessageSquare,
   Users,
   Loader2,
   AlertCircle,
+  Headphones,
 } from "lucide-react";
 import Link from "next/link";
 

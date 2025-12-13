@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { MessageCircle, X, Send, Sparkles, RefreshCcw, ArrowRight, Mail, ArrowLeft, Loader2, Headphones, User, Bot, GraduationCap, Phone, Check } from "lucide-react";
 import Button from "../ui/button";
 import { emails } from "@/lib/emails";
+import { sanitizeMessage } from "@/lib/sanitize";
 
 type Message = { role: "assistant" | "user" | "support"; content: string; timestamp?: Date };
 
@@ -30,23 +31,8 @@ const faqResponses: Record<string, string> = {
 };
 
 function formatMessage(content: string) {
-  // Simple markdown-like formatting
-  return content
-    .split('\n')
-    .map((line, i) => {
-      // Bold text
-      let formatted = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Bullet points
-      if (formatted.startsWith('• ')) {
-        return `<li key=${i} class="ml-4">${formatted.slice(2)}</li>`;
-      }
-      // Numbered lists
-      if (/^\d+\.\s/.test(formatted)) {
-        return `<li key=${i} class="ml-4 list-decimal">${formatted.replace(/^\d+\.\s/, '')}</li>`;
-      }
-      return formatted;
-    })
-    .join('<br/>');
+  // Use sanitizeMessage for XSS-safe formatting
+  return sanitizeMessage(content);
 }
 
 export default function ChatBot() {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
+import { logger } from "@/lib/logger";
 
 // Resend webhook event types
 interface ResendEmailReceivedEvent {
@@ -73,12 +74,12 @@ export async function POST(request: NextRequest) {
 
     // Verify signature if secret is configured
     if (webhookSecret && !verifyWebhookSignature(payload, signature, webhookSecret)) {
-      console.error("[Resend Webhook] Invalid signature");
+      logger.error("Resend Webhook", "Invalid signature", new Error("Signature verification failed"));
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const event: ResendWebhookEvent = JSON.parse(payload);
-    console.log(`[Resend Webhook] Received event: ${event.type}`);
+    logger.info("Resend Webhook", `Received event: ${event.type}`);
 
     // Handle email.received event
     if (event.type === "email.received") {
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (existing) {
-        console.log(`[Resend Webhook] Email ${email_id} already processed`);
+        logger.info("Resend Webhook", `Email ${email_id} already processed`);
         return NextResponse.json({ success: true, message: "Already processed" });
       }
 
@@ -116,11 +117,11 @@ export async function POST(request: NextRequest) {
 
         if (emailDetails.ok) {
           const details = await emailDetails.json();
-          console.log("[Resend Webhook] Email details:", JSON.stringify(details, null, 2));
+          logger.info("Resend Webhook", "Email details fetched", { emailId: email_id });
           textBody = details.text || null;
           htmlBody = details.html || null;
         } else {
-          console.error("[Resend Webhook] Failed to fetch email details:", emailDetails.status, await emailDetails.text());
+          logger.error("Resend Webhook", "Failed to fetch email details", new Error(`Status: ${emailDetails.status}`));
         }
 
         // Fetch attachments metadata
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
           attachments = attachmentsData.data || [];
         }
       } catch (fetchError) {
-        console.error("[Resend Webhook] Error fetching email details:", fetchError);
+        logger.error("Resend Webhook", "Error fetching email details", fetchError);
       }
 
       // Look up if sender is a known user
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log(`[Resend Webhook] Saved email ${receivedEmail.id} from ${sender.email}`);
+      logger.info("Resend Webhook", "Saved email", { emailId: receivedEmail.id, from: sender.email });
 
       return NextResponse.json({
         success: true,
@@ -182,16 +183,16 @@ export async function POST(request: NextRequest) {
 
     // Handle other event types (delivery status, bounces, etc.)
     if (event.type === "email.delivered") {
-      console.log("[Resend Webhook] Email delivered:", event.data);
+      logger.info("Resend Webhook", "Email delivered", { data: event.data });
     } else if (event.type === "email.bounced") {
-      console.log("[Resend Webhook] Email bounced:", event.data);
+      logger.warn("Resend Webhook", "Email bounced", { data: event.data });
     } else if (event.type === "email.complained") {
-      console.log("[Resend Webhook] Spam complaint:", event.data);
+      logger.warn("Resend Webhook", "Spam complaint", { data: event.data });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[Resend Webhook] Error:", error);
+    logger.error("Resend Webhook", "Webhook processing failed", error);
     return NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }

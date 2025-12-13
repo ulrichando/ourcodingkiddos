@@ -4,6 +4,7 @@ import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
 import bcrypt from "bcryptjs";
 import { logCreate } from "../../../../../lib/audit";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error("[BulkImport] Error:", error);
+    logger.error("BulkImport", "Failed to process import", error);
     return NextResponse.json(
       { error: "Failed to process import", imported: 0, failed: 0, errors: [] },
       { status: 500 }

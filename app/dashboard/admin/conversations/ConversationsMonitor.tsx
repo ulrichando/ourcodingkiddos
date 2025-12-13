@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "../../../../components/ui/card";
 import Button from "../../../../components/ui/button";
 import { MessageSquare, Search, User, Calendar, Eye, Loader2, Filter, ArrowLeft } from "lucide-react";
 
@@ -84,13 +83,16 @@ export default function ConversationsMonitor() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
+    <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-8rem)] flex flex-col">
       <div className="mb-4">
-        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">Conversations Monitor</h1>
-        <p className="text-sm md:text-base text-slate-600 dark:text-slate-400">Track all conversations between instructors, parents, and students</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Conversations</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Conversations Monitor</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          Track all conversations between instructors, parents, and students
+        </p>
       </div>
 
-      <Card className="flex-1 border-0 shadow-sm overflow-hidden">
+      <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="flex flex-col md:flex-row h-full">
           {/* Conversations List */}
           <div className={`${selectedConv ? 'hidden md:flex' : 'flex'} w-full md:w-96 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-700 flex-col`}>
@@ -273,7 +275,7 @@ export default function ConversationsMonitor() {
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

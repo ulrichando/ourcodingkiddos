@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { goalsStore } from "../../parent/goals/route";
+import { logger } from "../../../../lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -80,7 +81,7 @@ export async function GET() {
       summary,
     });
   } catch (error) {
-    console.error("[AdminGoals] Error:", error);
+    logger.db.error("Failed to fetch goals", error);
     return NextResponse.json(
       { error: "Failed to fetch goals", goals: [], summary: null },
       { status: 500 }

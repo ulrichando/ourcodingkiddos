@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { markInstructorSignupIntent } from "../../../../lib/auth";
 import crypto from "crypto";
+import { logger } from "../../../../lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (e: any) {
-    console.error("[mark-instructor-intent] Error:", e);
+    logger.auth.error("Failed to mark instructor intent", e);
     return NextResponse.json(
       { status: "error", message: "Failed to mark intent" },
       { status: 500 }

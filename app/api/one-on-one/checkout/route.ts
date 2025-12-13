@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import { calculatePrice, formatPrice, getBaseRate } from '@/lib/one-on-one-pricing';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
@@ -166,7 +167,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('1-on-1 checkout error:', error);
+    logger.api.error('1-on-1 checkout error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
@@ -205,7 +206,7 @@ export async function GET(req: NextRequest) {
       pricePerSessionFormatted: formatPrice(pricing.pricePerSession),
     });
   } catch (error: any) {
-    console.error('Pricing calculation error:', error);
+    logger.api.error('Pricing calculation error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to calculate pricing' },
       { status: 500 }

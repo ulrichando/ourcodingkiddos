@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { createAuditLog, getClientIP, getUserAgent } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export async function GET() {
 
     return NextResponse.json({ supportStaff });
   } catch (error) {
-    console.error("Error fetching support staff:", error);
+    logger.db.error("Failed to fetch support staff", error);
     return NextResponse.json(
       { error: "Failed to fetch support staff" },
       { status: 500 }
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
       user: newUser,
     });
   } catch (error) {
-    console.error("Error creating support staff:", error);
+    logger.db.error("Failed to create support staff", error);
     return NextResponse.json(
       { error: "Failed to create support staff" },
       { status: 500 }
@@ -222,7 +223,7 @@ export async function PUT(request: Request) {
       user: updatedUser,
     });
   } catch (error) {
-    console.error("Error updating support staff:", error);
+    logger.db.error("Failed to update support staff", error);
     return NextResponse.json(
       { error: "Failed to update support staff" },
       { status: 500 }
@@ -288,7 +289,7 @@ export async function DELETE(request: Request) {
       message: "Support staff deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting support staff:", error);
+    logger.db.error("Failed to delete support staff", error);
     return NextResponse.json(
       { error: "Failed to delete support staff" },
       { status: 500 }

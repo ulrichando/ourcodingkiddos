@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 // Get display name based on email address
 function getEmailDisplayName(email: string): string {
@@ -105,7 +106,7 @@ export async function POST(
       reply,
     });
   } catch (error) {
-    console.error("[Admin Email Reply] Error:", error);
+    logger.email.error("Failed to send reply", error);
     return NextResponse.json(
       { error: "Failed to send reply" },
       { status: 500 }

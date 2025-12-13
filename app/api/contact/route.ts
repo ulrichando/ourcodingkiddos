@@ -1,28 +1,34 @@
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email";
 import { SUPPORT_EMAIL } from "@/lib/emails";
+import { escapeHtml, isValidEmail, normalizeEmail } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, subject, message } = body;
+    const { name: rawName, email: rawEmail, subject, message: rawMessage } = body;
 
     // Validate required fields
-    if (!name || !email || !message) {
+    if (!rawName || !rawEmail || !rawMessage) {
       return NextResponse.json(
         { error: "Name, email, and message are required" },
         { status: 400 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Normalize and validate email
+    const email = normalizeEmail(rawEmail);
+    if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: "Invalid email address" },
         { status: 400 }
       );
     }
+
+    // Sanitize user input to prevent XSS
+    const name = escapeHtml(rawName.trim());
+    const message = escapeHtml(rawMessage.trim());
 
     // Get subject label
     const subjectLabels: Record<string, string> = {
@@ -97,7 +103,7 @@ Reply directly to this email to respond to ${name}.`,
     });
 
     if (!supportResult.success) {
-      console.error("[contact] Failed to send to support:", supportResult.error);
+      logger.email.error("Failed to send contact message to support", supportResult.error);
       return NextResponse.json(
         { error: "Failed to send message. Please try again later." },
         { status: 500 }
@@ -174,7 +180,7 @@ The Coding Kiddos Team`,
 
     if (!confirmResult.success) {
       // Log but don't fail - support email was sent successfully
-      console.warn("[contact] Failed to send confirmation email:", confirmResult.error);
+      logger.email.warn("Failed to send confirmation email", { error: confirmResult.error });
     }
 
     return NextResponse.json({
@@ -182,7 +188,7 @@ The Coding Kiddos Team`,
       message: "Message sent successfully!",
     });
   } catch (error) {
-    console.error("[contact] Error:", error);
+    logger.api.error("Contact form submission failed", error);
     return NextResponse.json(
       { error: "Failed to send message. Please try again later." },
       { status: 500 }

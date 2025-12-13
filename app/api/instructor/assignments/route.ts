@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // GET - List assignments for instructor
 export async function GET(req: Request) {
@@ -81,7 +82,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ assignments: assignmentsWithStats });
   } catch (e) {
-    console.error("Failed to fetch assignments:", e);
+    logger.db.error("Failed to fetch assignments", e);
     return NextResponse.json({ error: "Failed to fetch assignments" }, { status: 500 });
   }
 }
@@ -156,7 +157,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ assignment, message: "Assignment created successfully" });
   } catch (e) {
-    console.error("Failed to create assignment:", e);
+    logger.db.error("Failed to create assignment", e);
     return NextResponse.json({ error: "Failed to create assignment" }, { status: 500 });
   }
 }
@@ -204,7 +205,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ assignment, message: "Assignment updated successfully" });
   } catch (e) {
-    console.error("Failed to update assignment:", e);
+    logger.db.error("Failed to update assignment", e);
     return NextResponse.json({ error: "Failed to update assignment" }, { status: 500 });
   }
 }
@@ -246,7 +247,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ message: "Assignment deleted successfully" });
   } catch (e) {
-    console.error("Failed to delete assignment:", e);
+    logger.db.error("Failed to delete assignment", e);
     return NextResponse.json({ error: "Failed to delete assignment" }, { status: 500 });
   }
 }

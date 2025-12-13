@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // POST /api/comments - Create a new comment
 export async function POST(request: NextRequest) {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {
-    console.error("Error creating comment:", error);
+    logger.api.error("Failed to create comment", error);
     return NextResponse.json({ error: "Failed to create comment" }, { status: 500 });
   }
 }
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ comments });
   } catch (error) {
-    console.error("Error fetching comments:", error);
+    logger.api.error("Failed to fetch comments", error);
     return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
   }
 }

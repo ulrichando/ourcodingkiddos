@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
 import { logCreate, logUpdate } from "../../../lib/audit";
+import { logger } from "../../../lib/logger";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -79,7 +80,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ tickets });
   } catch (error: any) {
-    console.error("GET /api/support-tickets error:", error);
+    logger.api.error("GET /api/support-tickets error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -182,7 +183,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
-    console.error("POST /api/support-tickets error:", error);
+    logger.api.error("POST /api/support-tickets error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -253,7 +254,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, ticket });
   } catch (error: any) {
-    console.error("PATCH /api/support-tickets error:", error);
+    logger.api.error("PATCH /api/support-tickets error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

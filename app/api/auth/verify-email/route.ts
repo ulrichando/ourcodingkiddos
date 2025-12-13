@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import { sendVerificationEmail } from "../../../../lib/email";
 import crypto from "crypto";
+import { logger } from "../../../../lib/logger";
 
 // POST - Send verification email
 export async function POST(request: Request) {
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       message: "Verification email sent. Please check your inbox.",
     });
   } catch (error) {
-    console.error("[verify-email] POST error:", error);
+    logger.auth.error("verify-email POST error", error);
     return NextResponse.json(
       { status: "error", message: "Failed to send verification email" },
       { status: 500 }
@@ -139,7 +140,7 @@ export async function GET(request: Request) {
       message: "Email verified successfully! You can now use all features.",
     });
   } catch (error) {
-    console.error("[verify-email] GET error:", error);
+    logger.auth.error("verify-email GET error", error);
     return NextResponse.json(
       { status: "error", message: "Failed to verify email" },
       { status: 500 }

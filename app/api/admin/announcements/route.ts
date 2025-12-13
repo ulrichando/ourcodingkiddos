@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import { createNotification } from "../../notifications/route";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 type Announcement = {
   id: string;
@@ -72,7 +73,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ announcement });
   } catch (error) {
-    console.error("[admin/announcements] Error:", error);
+    logger.error("admin/announcements", "Failed to create announcement", error);
     return NextResponse.json({ error: "Failed to create announcement" }, { status: 500 });
   }
 }

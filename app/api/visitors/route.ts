@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export async function GET() {
       visitors,
     });
   } catch (error) {
-    console.error("Error fetching visitors:", error);
+    logger.api.error("Failed to fetch visitors", error);
     return NextResponse.json(
       { error: "Failed to fetch visitors" },
       { status: 500 }
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error updating visitor:", error);
+    logger.api.error("Failed to update visitor", error);
     return NextResponse.json(
       { error: "Failed to update visitor" },
       { status: 500 }
@@ -114,7 +115,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error removing visitor:", error);
+    logger.api.error("Failed to remove visitor", error);
     return NextResponse.json(
       { error: "Failed to remove visitor" },
       { status: 500 }

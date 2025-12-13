@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { updateLastSeen } from "@/lib/update-last-seen";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -108,7 +109,7 @@ export async function GET() {
 
     return NextResponse.json({ sessions });
   } catch (error) {
-    console.error("[student/classes] Error:", error);
+    logger.db.error("GET /api/student/classes error", error);
     return NextResponse.json(
       { error: "Failed to load classes" },
       { status: 500 }

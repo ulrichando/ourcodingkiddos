@@ -217,17 +217,15 @@ export default function SupportStaffPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 sm:gap-3">
-              <div className="relative">
-                <Headphones className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-              </div>
-              Support Staff
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Support Staff</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Support Staff Management
             </h1>
-            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Manage support agent accounts
             </p>
           </div>
@@ -267,57 +265,51 @@ export default function SupportStaffPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Total Staff</p>
-                  <p className="text-2xl font-bold text-purple-600">{staff.length}</p>
-                </div>
-                <Headphones className="w-8 h-8 text-purple-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Total Staff</p>
+                <p className="text-2xl font-bold text-purple-600">{staff.length}</p>
               </div>
-            </CardContent>
-          </Card>
+              <Headphones className="w-8 h-8 text-purple-600 opacity-50" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Active Today</p>
-                  <p className="text-2xl font-bold text-green-600">{staff.length}</p>
-                </div>
-                <User className="w-8 h-8 text-green-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Active Today</p>
+                <p className="text-2xl font-bold text-green-600">{staff.length}</p>
               </div>
-            </CardContent>
-          </Card>
+              <User className="w-8 h-8 text-green-600 opacity-50" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">This Month</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {staff.filter(s => {
-                      const created = new Date(s.createdAt);
-                      const now = new Date();
-                      return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
-                    }).length}
-                  </p>
-                </div>
-                <Calendar className="w-8 h-8 text-blue-600 opacity-50" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">This Month</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {staff.filter(s => {
+                    const created = new Date(s.createdAt);
+                    const now = new Date();
+                    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+                  }).length}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <Calendar className="w-8 h-8 text-blue-600 opacity-50" />
+            </div>
+          </div>
         </div>
 
         {/* Staff List */}
-        <Card className="border-0 shadow-sm">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <h3 className="font-semibold text-slate-900 dark:text-slate-100">
               Support Staff Members
             </h3>
           </div>
-          <CardContent className="p-0">
+          <div>
             {staff.length === 0 ? (
               <div className="text-center py-12 text-slate-500 dark:text-slate-400">
                 <Headphones className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -373,8 +365,8 @@ export default function SupportStaffPage() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Create Modal */}

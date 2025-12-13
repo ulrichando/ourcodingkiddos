@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { createNotification } from "../../notifications/route";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   // Authentication check
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
       data: { totalXp: updated.totalXp, currentLevel: newLevel, courseId: courseId || lesson?.courseId },
     });
   } catch (error) {
-    console.error("[lessons/complete] failed", error);
+    logger.api.error("Failed to complete lesson", error);
     return NextResponse.json({ status: "error", message: "Could not update progress" }, { status: 500 });
   }
 }

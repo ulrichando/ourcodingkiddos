@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { verifyProgramPayment } from "@/lib/stripe";
+import { logger } from "@/lib/logger";
 
 // POST /api/enrollments/[id]/verify - Verify and activate an enrollment after payment
 export async function POST(
@@ -122,7 +123,7 @@ export async function POST(
 
     return NextResponse.json({ enrollment });
   } catch (error) {
-    console.error("Error verifying enrollment:", error);
+    logger.api.error("Failed to verify enrollment", error);
     return NextResponse.json(
       { error: "Failed to verify enrollment" },
       { status: 500 }

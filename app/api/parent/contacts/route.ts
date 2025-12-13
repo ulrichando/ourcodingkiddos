@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // GET - Fetch contacts for parents (instructors + children)
 export async function GET() {
@@ -172,7 +173,7 @@ export async function GET() {
 
     return NextResponse.json({ contacts });
   } catch (error) {
-    console.error("GET /api/parent/contacts error:", error);
+    logger.db.error("GET /api/parent/contacts error", error);
     return NextResponse.json({ error: "Failed to fetch contacts" }, { status: 500 });
   }
 }

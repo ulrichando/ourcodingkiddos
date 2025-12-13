@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // In-memory storage for goals (in production, add a Goal model to Prisma schema)
 // This is a temporary solution - goals will reset on server restart
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ goals: parentGoals });
   } catch (error) {
-    console.error("Error fetching goals:", error);
+    logger.db.error("Error fetching goals", error);
     return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
   }
 }
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ goal });
   } catch (error) {
-    console.error("Error creating goal:", error);
+    logger.db.error("Error creating goal", error);
     return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
   }
 }
@@ -125,7 +126,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting goal:", error);
+    logger.db.error("Error deleting goal", error);
     return NextResponse.json({ error: "Failed to delete goal" }, { status: 500 });
   }
 }

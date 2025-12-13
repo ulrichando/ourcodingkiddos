@@ -6,6 +6,7 @@ import prisma from "../../../../lib/prisma";
 import { createNotification } from "../../notifications/route";
 import { logCreate } from "../../../../lib/audit";
 import { sendVerificationEmail } from "../../../../lib/email";
+import { logger } from "../../../../lib/logger";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
   const baseUrl = process.env.NEXTAUTH_URL || "https://ourcodingkiddos.com";
   const verifyUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
   sendVerificationEmail(email, name, verifyUrl).catch((err) => {
-    console.error("[register] Failed to send verification email:", err);
+    logger.email.error("Failed to send verification email", err, { email, name });
   });
 
   // Different message for instructors

@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {  ArrowRight, Target as Aim, Loader2, Sparkles, Gift, Rocket,
   CheckCircle, Lock, Play, ChevronRight, Medal, Crown, Code2,
-  Plus, X, Upload, Eye, Heart, ClipboardList, Flame, Star, Zap, BookOpen, Calendar, Trophy, Video
+  Plus, X, Upload, Eye, Heart, ClipboardList, Flame, Star, Zap, BookOpen, Calendar, Trophy, Video, Clock
 } from "lucide-react";
 import Button from "@/components/ui/button";
 import Badge from "@/components/ui/badge";

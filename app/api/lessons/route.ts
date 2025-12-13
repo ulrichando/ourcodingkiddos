@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
+import { logger } from "../../../lib/logger";
 
 const createLessonSchema = z.object({
   courseId: z.string(),
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json({ status: "ok", data: lessons });
   } catch (error) {
-    console.error("GET /api/lessons error", error);
+    logger.api.error("Failed to fetch lessons", error);
     return NextResponse.json({ status: "error", message: "Failed to fetch lessons" }, { status: 500 });
   }
 }
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ status: "ok", data: lesson }, { status: 201 });
   } catch (error) {
-    console.error("POST /api/lessons error", error);
+    logger.api.error("Failed to create lesson", error);
     return NextResponse.json({ status: "error", message: "Failed to create lesson" }, { status: 500 });
   }
 }

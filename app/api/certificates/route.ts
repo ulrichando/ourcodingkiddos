@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "../../../lib/logger";
 
 // GET - Fetch certificates
 export async function GET(req: Request) {
@@ -57,7 +58,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ certificates });
   } catch (error) {
-    console.error("GET /api/certificates error:", error);
+    logger.db.error("GET /api/certificates error", error);
     return NextResponse.json({ error: "Failed to fetch certificates" }, { status: 500 });
   }
 }
@@ -143,7 +144,7 @@ export async function POST(req: Request) {
       message: `Certificate issued to ${student.name} for ${course.title}`,
     });
   } catch (error) {
-    console.error("POST /api/certificates error:", error);
+    logger.db.error("POST /api/certificates error", error);
     return NextResponse.json({ error: "Failed to issue certificate" }, { status: 500 });
   }
 }

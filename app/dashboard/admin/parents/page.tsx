@@ -181,7 +181,7 @@ export default function ParentStatsPage() {
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div>
           <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Users</p>
@@ -196,6 +196,7 @@ export default function ParentStatsPage() {
         {/* Tabs */}
         <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
           <button
+            type="button"
             onClick={() => setActiveTab("parents")}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition ${
               activeTab === "parents"
@@ -209,6 +210,7 @@ export default function ParentStatsPage() {
             </span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("goals")}
             className={`px-4 py-2 font-medium text-sm border-b-2 transition ${
               activeTab === "goals"
@@ -680,7 +682,7 @@ export default function ParentStatsPage() {
             )}
           </>
         )}
-      </main>
+      </div>
     </AdminLayout>
   );
 }

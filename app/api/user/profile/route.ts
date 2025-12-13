@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import prisma from '../../../../lib/prisma';
+import { logger } from '../../../../lib/logger';
 
 /**
  * GET /api/user/profile
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
       createdAt: user.createdAt.toISOString(),
     });
   } catch (error) {
-    console.error('[User Profile API] Error:', error);
+    logger.api.error('Failed to fetch user profile', error);
     return NextResponse.json(
       { error: 'Failed to fetch user profile' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import prisma from "@/lib/prisma";
 import { emails } from "@/lib/emails";
+import { logger } from "@/lib/logger";
 
 // Map of valid from addresses
 const FROM_ADDRESSES: Record<string, string> = {
@@ -241,9 +242,6 @@ export async function POST(request: Request) {
     const succeeded = results.filter((r) => r.status === "fulfilled" && (r.value as any).success).length;
     const failed = results.length - succeeded;
 
-    // Log the email send
-    console.log(`[Admin Email] Sent ${succeeded}/${allRecipients.length} emails from ${fromAddress}@`);
-
     return NextResponse.json({
       success: true,
       sent: succeeded,
@@ -251,7 +249,7 @@ export async function POST(request: Request) {
       total: allRecipients.length,
     });
   } catch (error: any) {
-    console.error("[Admin Email] Error:", error);
+    logger.email.error("Failed to send emails", error);
     return NextResponse.json(
       { error: error.message || "Failed to send emails" },
       { status: 500 }

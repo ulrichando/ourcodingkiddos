@@ -12,3 +12,9 @@ pnpm-debug.log*
 
 # Generated Prisma Client
 generated/
+
+# Windows reserved names (prevent accidental creation)
+nul
+con
+prn
+aux

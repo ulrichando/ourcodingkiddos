@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -113,7 +114,7 @@ The Coding Kiddos Team`,
       message: "Successfully subscribed!",
     });
   } catch (error) {
-    console.error("[newsletter] Error:", error);
+    logger.api.error("Newsletter subscription failed", error);
     return NextResponse.json(
       { error: "Failed to subscribe. Please try again." },
       { status: 500 }

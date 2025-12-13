@@ -242,19 +242,19 @@ export default function AdminReportsPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <main className="max-w-7xl mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-7xl mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-purple-500 mb-4" />
             <p className="text-slate-600 dark:text-slate-400">Loading analytics...</p>
           </div>
-        </main>
+        </div>
       </AdminLayout>
     );
   }
 
   return (
     <AdminLayout>
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -445,7 +445,7 @@ export default function AdminReportsPage() {
             </p>
           </div>
         </div>
-      </main>
+      </div>
     </AdminLayout>
   );
 }

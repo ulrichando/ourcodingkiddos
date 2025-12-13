@@ -3,6 +3,7 @@ import prisma from "../../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import { logUpdate, logDelete } from "../../../../lib/audit";
+import { logger } from "../../../../lib/logger";
 
 export async function PATCH(
   request: NextRequest,
@@ -61,7 +62,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error: any) {
-    console.error("[students/[id]] PATCH error:", error);
+    logger.db.error("PATCH /api/students/[id] error", error);
     return NextResponse.json(
       { error: error?.message || "Failed to update student" },
       { status: 500 }
@@ -116,7 +117,7 @@ export async function DELETE(
 
     return NextResponse.json({ status: "ok", message: "Student deleted permanently" });
   } catch (error: any) {
-    console.error("[students/[id]] DELETE error:", error);
+    logger.db.error("DELETE /api/students/[id] error", error);
     return NextResponse.json(
       { error: error?.message || "Failed to delete student" },
       { status: 500 }

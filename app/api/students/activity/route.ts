@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/students/activity - Get recent activity for all students of the logged-in parent
@@ -163,7 +164,7 @@ export async function GET() {
       activities: activities.slice(0, 20),
     });
   } catch (error) {
-    console.error("[students/activity] Error:", error);
+    logger.db.error("Students activity fetch error", error);
     return NextResponse.json({ error: "Failed to fetch activities" }, { status: 500 });
   }
 }

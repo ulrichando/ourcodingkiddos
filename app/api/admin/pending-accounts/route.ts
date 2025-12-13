@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ status: "ok", users }, { status: 200 });
   } catch (e: any) {
-    console.error("[pending-accounts] Error fetching pending accounts:", e);
+    logger.db.error("Error fetching pending accounts", e);
     return NextResponse.json(
       { status: "error", message: "Failed to fetch pending accounts" },
       { status: 500 }

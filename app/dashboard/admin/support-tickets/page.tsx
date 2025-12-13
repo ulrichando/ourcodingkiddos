@@ -185,11 +185,12 @@ export default function AdminSupportTicketsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Support Tickets</p>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Support Tickets</h1>
-            <p className="text-slate-600 dark:text-slate-400">Manage customer support requests</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Manage customer support requests</p>
           </div>
           <Button onClick={() => setShowNewTicket(true)} className="self-start">
             <Plus className="w-4 h-4" />
@@ -199,53 +200,45 @@ export default function AdminSupportTicketsPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Open</p>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{openCount}</p>
-                </div>
-                <AlertCircle className="w-8 h-8 text-blue-600" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Open</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{openCount}</p>
               </div>
-            </CardContent>
-          </Card>
+              <AlertCircle className="w-8 h-8 text-blue-600" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">In Progress</p>
-                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{inProgressCount}</p>
-                </div>
-                <Clock className="w-8 h-8 text-yellow-600" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">In Progress</p>
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{inProgressCount}</p>
               </div>
-            </CardContent>
-          </Card>
+              <Clock className="w-8 h-8 text-yellow-600" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Resolved</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{resolvedCount}</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-green-600" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Resolved</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{resolvedCount}</p>
               </div>
-            </CardContent>
-          </Card>
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Total</p>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{tickets.length}</p>
-                </div>
-                <HelpCircle className="w-8 h-8 text-slate-600 dark:text-slate-400" />
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Total</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{tickets.length}</p>
               </div>
-            </CardContent>
-          </Card>
+              <HelpCircle className="w-8 h-8 text-slate-600 dark:text-slate-400" />
+            </div>
+          </div>
         </div>
 
         {/* Filters */}
@@ -290,19 +283,17 @@ export default function AdminSupportTicketsPage() {
         {/* Tickets List */}
         <div className="space-y-4">
           {filteredTickets.length === 0 ? (
-            <Card className="border-0 shadow-sm">
-              <CardContent className="p-12 text-center">
-                <p className="text-slate-500 dark:text-slate-400">No tickets found</p>
-              </CardContent>
-            </Card>
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
+              <p className="text-slate-500 dark:text-slate-400">No tickets found</p>
+            </div>
           ) : (
             filteredTickets.map(ticket => (
-              <Card
+              <div
                 key={ticket.id}
-                className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => window.location.href = `/support?ticket=${ticket.id}`}
               >
-                <CardContent className="p-6">
+                <div className="p-6">
                   <div className="space-y-3">
                     {/* Header */}
                     <div className="flex items-start justify-between">
@@ -383,8 +374,8 @@ export default function AdminSupportTicketsPage() {
                       Created {new Date(ticket.createdAt).toLocaleString()} • Updated {new Date(ticket.updatedAt).toLocaleString()}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))
           )}
         </div>

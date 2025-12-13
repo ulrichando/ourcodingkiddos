@@ -5,6 +5,7 @@ import prisma from "../../../../../lib/prisma";
 import { logUpdate } from "../../../../../lib/audit";
 import { createNotification } from "../../../notifications/route";
 import { sendEmail } from "../../../../../lib/email";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -130,7 +131,7 @@ export async function POST(request: Request) {
         </html>
       `
     }).catch((err) => {
-      console.error("[approve] Failed to send approval email:", err);
+      logger.email.error("Failed to send approval email", err);
     });
 
     return NextResponse.json(
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (e: any) {
-    console.error("[approve] Error approving account:", e);
+    logger.db.error("Error approving account", e);
     return NextResponse.json(
       { status: "error", message: "Failed to approve account" },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import prisma from "../../../lib/prisma";
+import { logger } from "../../../lib/logger";
 
 // POST - Update user's lastSeen timestamp
 export async function POST() {
@@ -18,7 +19,7 @@ export async function POST() {
 
     return NextResponse.json({ status: "ok" });
   } catch (error) {
-    console.error("[activity] Error updating lastSeen:", error);
+    logger.db.error("Error updating lastSeen", error);
     return NextResponse.json({ error: "Failed to update activity" }, { status: 500 });
   }
 }

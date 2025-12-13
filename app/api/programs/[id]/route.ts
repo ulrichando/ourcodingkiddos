@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // GET /api/programs/[id] - Get a single program by ID or slug
 export async function GET(
@@ -84,7 +85,7 @@ export async function GET(
 
     return NextResponse.json({ program });
   } catch (error) {
-    console.error("Error fetching program:", error);
+    logger.db.error("Error fetching program", error);
     return NextResponse.json({ error: "Failed to fetch program" }, { status: 500 });
   }
 }
@@ -205,7 +206,7 @@ export async function PUT(
 
     return NextResponse.json({ program });
   } catch (error) {
-    console.error("Error updating program:", error);
+    logger.db.error("Error updating program", error);
     return NextResponse.json({ error: "Failed to update program" }, { status: 500 });
   }
 }
@@ -245,7 +246,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting program:", error);
+    logger.db.error("Error deleting program", error);
     return NextResponse.json({ error: "Failed to delete program" }, { status: 500 });
   }
 }

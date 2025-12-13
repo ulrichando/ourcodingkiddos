@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { authOptions } from "lib/auth";
 import prisma from "lib/prisma";
 import { logUpdate, logDelete } from "lib/audit";
+import { logger } from "lib/logger";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -106,7 +107,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (e.code === "P2002") {
       return NextResponse.json({ error: "Email already exists" }, { status: 409 });
     }
-    console.error("[admin/users/update] Error:", e);
+    logger.db.error("Failed to update user", e);
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
@@ -304,7 +305,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ status: "ok" });
   } catch (e: any) {
-    console.error("[admin/users/delete] Error:", e);
+    logger.db.error("Failed to delete user", e);
     return NextResponse.json({
       error: e.message || "Delete failed",
       details: e.toString()

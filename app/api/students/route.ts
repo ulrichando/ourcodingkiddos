@@ -6,6 +6,7 @@ import { authOptions } from "../../../lib/auth";
 import { getToken } from "next-auth/jwt";
 import { createNotification } from "../notifications/route";
 import { logCreate } from "../../../lib/audit";
+import { logger } from "../../../lib/logger";
 
 
 export async function POST(request: NextRequest) {
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ status: "ok", user, credentials: { password, username: providedUsername } });
   } catch (err: any) {
-    console.error("[students] create failed", err);
+    logger.db.error("Student create failed", err);
     const msg =
       err?.code === "P2002" || err?.message?.includes("Unique constraint")
         ? "Username already taken"

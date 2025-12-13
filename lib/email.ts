@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { SENDER_EMAIL, REPLY_TO_EMAIL } from "./emails";
+import { logger } from "./logger";
 
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -31,7 +32,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
 
   // Check if API key is configured
   if (!process.env.RESEND_API_KEY) {
-    console.warn("[Email] RESEND_API_KEY not configured. Email not sent.");
+    logger.email.warn('RESEND_API_KEY not configured. Email not sent.', { subject });
     return {
       success: false,
       error: "Email service not configured",
@@ -49,20 +50,20 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
     });
 
     if (error) {
-      console.error("[Email] Resend error:", error);
+      logger.email.error('Resend error', error, { subject, to: Array.isArray(to) ? to.join(', ') : to });
       return {
         success: false,
         error: error.message,
       };
     }
 
-    console.log("[Email] Sent successfully:", data?.id);
+    logger.email.info('Sent successfully', { messageId: data?.id, subject });
     return {
       success: true,
       messageId: data?.id,
     };
   } catch (err) {
-    console.error("[Email] Failed to send:", err);
+    logger.email.error('Failed to send', err, { subject });
     return {
       success: false,
       error: err instanceof Error ? err.message : "Unknown error",

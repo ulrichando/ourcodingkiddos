@@ -220,11 +220,12 @@ export default function AdminBlogPage() {
 
   return (
     <AdminLayout>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Blog</h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Admin / Blog</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Blog Management</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Manage blog posts and articles
             </p>
           </div>
@@ -242,7 +243,7 @@ export default function AdminBlogPage() {
         </div>
 
         {/* Search */}
-        <div className="mb-6">
+        <div>
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -384,10 +385,12 @@ export default function AdminBlogPage() {
           </div>
         )}
 
-        {/* Create/Edit Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      </div>
+
+      {/* Create/Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-slate-200 dark:border-slate-700">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                   {editingPost ? "Edit Blog Post" : "Create New Post"}
@@ -534,12 +537,11 @@ export default function AdminBlogPage() {
                   className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold disabled:opacity-50"
                 >
                   {saving ? "Saving..." : editingPost ? "Update" : "Create"}
-                </button>
-              </div>
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

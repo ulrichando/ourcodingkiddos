@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
+import { logger } from "../../../../lib/logger";
 
 // Force dynamic - no caching
 export const dynamic = 'force-dynamic';
@@ -77,7 +78,7 @@ export async function GET() {
       conversations: transformedConversations
     });
   } catch (error: any) {
-    console.error("GET /api/admin/conversations error:", error);
+    logger.db.error("Failed to fetch conversations", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

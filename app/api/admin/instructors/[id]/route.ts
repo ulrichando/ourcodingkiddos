@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import prisma from "../../../../../lib/prisma";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -223,7 +224,7 @@ export async function GET(
 
     return NextResponse.json({ instructor });
   } catch (error) {
-    console.error("[Instructor Details] Error:", error);
+    logger.db.error("Failed to fetch instructor details", error);
     return NextResponse.json(
       { error: "Failed to fetch instructor details" },
       { status: 500 }

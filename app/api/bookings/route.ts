@@ -4,6 +4,7 @@ import { z } from "zod";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/auth";
 import { logCreate } from "../../../lib/audit";
+import { logger } from "../../../lib/logger";
 
 const bookingSchema = z.object({
   instructorId: z.string(),
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json({ status: "ok", data: bookings });
   } catch (error) {
-    console.error("GET /api/bookings error", error);
+    logger.db.error("GET /api/bookings error", error);
     return NextResponse.json({ status: "error", message: "Failed to fetch bookings" }, { status: 500 });
   }
 }
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: "ok", data: booking }, { status: 201 });
   } catch (error) {
-    console.error("POST /api/bookings error", error);
+    logger.db.error("POST /api/bookings error", error);
     return NextResponse.json({ status: "error", message: "Failed to create booking" }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json({ subscribers, stats });
   } catch (error: any) {
-    console.error("GET /api/admin/subscribers error:", error);
+    logger.db.error("Failed to fetch subscribers", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -64,7 +65,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("DELETE /api/admin/subscribers error:", error);
+    logger.db.error("Failed to delete subscriber", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -101,7 +102,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ success: true, subscriber });
   } catch (error: any) {
-    console.error("PATCH /api/admin/subscribers error:", error);
+    logger.db.error("Failed to update subscriber", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

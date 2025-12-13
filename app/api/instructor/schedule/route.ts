@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { updateLastSeen } from "../../../../lib/update-last-seen";
+import { logger } from "../../../../lib/logger";
 
 export async function GET() {
   try {
@@ -153,7 +154,7 @@ export async function GET() {
       assignments: assignmentsWithCounts,
     });
   } catch (error) {
-    console.error("[Instructor Schedule API] Error:", error);
+    logger.db.error("[Instructor Schedule API] Error", error);
     return NextResponse.json(
       { error: "Failed to fetch schedule" },
       { status: 500 }

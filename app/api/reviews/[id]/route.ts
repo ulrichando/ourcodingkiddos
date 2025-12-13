@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 // PATCH - Update review (admin only - full edit)
 export async function PATCH(
@@ -47,7 +48,7 @@ export async function PATCH(
 
     return NextResponse.json({ status: "ok", review });
   } catch (error) {
-    console.error("[reviews] PATCH error:", error);
+    logger.api.error("Failed to update review", error);
     return NextResponse.json({ error: "Failed to update review" }, { status: 500 });
   }
 }
@@ -68,7 +69,7 @@ export async function DELETE(
 
     return NextResponse.json({ status: "ok" });
   } catch (error) {
-    console.error("[reviews] DELETE error:", error);
+    logger.api.error("Failed to delete review", error);
     return NextResponse.json({ error: "Failed to delete review" }, { status: 500 });
   }
 }

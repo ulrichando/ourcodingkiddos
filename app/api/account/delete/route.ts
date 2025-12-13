@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../lib/auth";
 import prisma from "../../../../lib/prisma";
 import { stripe } from "../../../../lib/stripe";
+import { logger } from "../../../../lib/logger";
 
 /**
  * DELETE /api/account/delete - Permanently delete user account and all associated data
@@ -22,7 +23,7 @@ export async function DELETE() {
     const userId = (session.user as any).id;
     const userRole = (session.user as any).role;
 
-    console.log("[Delete Account] Starting deletion for user:", userEmail);
+    logger.info("Delete Account", "Starting deletion for user", { userEmail });
 
     // Admin accounts cannot be self-deleted for security
     if (userRole === "ADMIN") {
@@ -52,11 +53,11 @@ export async function DELETE() {
     // Step 1: Delete Stripe customer if exists
     if (user.stripeCustomerId) {
       try {
-        console.log("[Delete Account] Deleting Stripe customer:", user.stripeCustomerId);
+        logger.info("Delete Account", "Deleting Stripe customer", { stripeCustomerId: user.stripeCustomerId });
         await stripe.customers.del(user.stripeCustomerId);
       } catch (stripeError: any) {
         if (stripeError.code !== "resource_missing") {
-          console.error("[Delete Account] Stripe customer deletion error:", stripeError.message);
+          logger.error("Delete Account", "Stripe customer deletion error", stripeError);
         }
       }
     }
@@ -65,24 +66,24 @@ export async function DELETE() {
     await prisma.$transaction(async (tx) => {
       // Delete achievements
       await tx.achievement.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted achievements");
+      logger.info("Delete Account", "Deleted achievements");
 
       // Delete user badges
       await tx.userBadge.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted user badges");
+      logger.info("Delete Account", "Deleted user badges");
 
       // Delete portfolio items
       await tx.portfolioItem.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted portfolio items");
+      logger.info("Delete Account", "Deleted portfolio items");
 
       // Delete payments
       await tx.payment.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted payments");
+      logger.info("Delete Account", "Deleted payments");
 
       // Delete program enrollments (if user has a student profile)
       if (user.studentProfile) {
         await tx.programEnrollment.deleteMany({ where: { studentProfileId: user.studentProfile.id } });
-        console.log("[Delete Account] Deleted program enrollments");
+        logger.info("Delete Account", "Deleted program enrollments");
       }
 
       // Delete progress records through enrollments
@@ -96,17 +97,17 @@ export async function DELETE() {
       await tx.certificate.deleteMany({
         where: { enrollmentId: { in: enrollmentIds } },
       });
-      console.log("[Delete Account] Deleted certificates");
+      logger.info("Delete Account", "Deleted certificates");
 
       // Delete progress
       await tx.progress.deleteMany({
         where: { enrollmentId: { in: enrollmentIds } },
       });
-      console.log("[Delete Account] Deleted progress records");
+      logger.info("Delete Account", "Deleted progress records");
 
       // Delete enrollments
       await tx.enrollment.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted enrollments");
+      logger.info("Delete Account", "Deleted enrollments");
 
       // Handle bookings - soft delete by anonymizing instead of hard delete
       // to preserve instructor records
@@ -117,7 +118,7 @@ export async function DELETE() {
           notes: "[Account Deleted]",
         },
       });
-      console.log("[Delete Account] Anonymized bookings");
+      logger.info("Delete Account", "Anonymized bookings");
 
       // For instructors, update their sessions and bookings
       if (userRole === "INSTRUCTOR") {
@@ -140,13 +141,13 @@ export async function DELETE() {
         await tx.instructorAvailability.deleteMany({
           where: { instructorId: userId },
         });
-        console.log("[Delete Account] Handled instructor data");
+        logger.info("Delete Account", "Handled instructor data");
       }
 
       // Delete student profile
       if (user.studentProfile) {
         await tx.studentProfile.delete({ where: { userId } });
-        console.log("[Delete Account] Deleted student profile");
+        logger.info("Delete Account", "Deleted student profile");
       }
 
       // Delete parent profile and handle children
@@ -156,10 +157,10 @@ export async function DELETE() {
           where: { guardianId: user.parentProfile.id },
           data: { guardianId: null, parentEmail: null },
         });
-        console.log("[Delete Account] Unlinked children from parent");
+        logger.info("Delete Account", "Unlinked children from parent");
 
         await tx.parentProfile.delete({ where: { userId } });
-        console.log("[Delete Account] Deleted parent profile");
+        logger.info("Delete Account", "Deleted parent profile");
       }
 
       // Anonymize conversation participants and messages (preserve conversation history)
@@ -171,7 +172,7 @@ export async function DELETE() {
         where: { fromEmail: userEmail || "" },
         data: { fromName: "[Deleted User]" },
       });
-      console.log("[Delete Account] Anonymized messages");
+      logger.info("Delete Account", "Anonymized messages");
 
       // Anonymize support tickets
       await tx.supportTicket.updateMany({
@@ -182,22 +183,22 @@ export async function DELETE() {
         where: { fromEmail: userEmail || "" },
         data: { fromName: "[Deleted User]" },
       });
-      console.log("[Delete Account] Anonymized support tickets");
+      logger.info("Delete Account", "Anonymized support tickets");
 
       // Anonymize class requests
       await tx.classRequest.updateMany({
         where: { parentEmail: userEmail || "" },
         data: { parentName: "[Deleted User]", studentName: "[Deleted]" },
       });
-      console.log("[Delete Account] Anonymized class requests");
+      logger.info("Delete Account", "Anonymized class requests");
 
       // Delete sessions (NextAuth) - these cascade delete automatically
       await tx.session.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted auth sessions");
+      logger.info("Delete Account", "Deleted auth sessions");
 
       // Delete accounts (OAuth) - these cascade delete automatically
       await tx.account.deleteMany({ where: { userId } });
-      console.log("[Delete Account] Deleted OAuth accounts");
+      logger.info("Delete Account", "Deleted OAuth accounts");
 
       // Create audit log entry before deleting user
       await tx.auditLog.create({
@@ -214,17 +215,17 @@ export async function DELETE() {
 
       // Finally, delete the user
       await tx.user.delete({ where: { id: userId } });
-      console.log("[Delete Account] Deleted user record");
+      logger.info("Delete Account", "Deleted user record");
     });
 
-    console.log("[Delete Account] Account deletion completed for:", userEmail);
+    logger.info("Delete Account", "Account deletion completed", { userEmail });
 
     return NextResponse.json({
       success: true,
       message: "Your account has been permanently deleted",
     });
   } catch (error: any) {
-    console.error("DELETE /api/account/delete error:", error.message, error.stack);
+    logger.error("Delete Account", "Failed to delete account", error);
     return NextResponse.json(
       { error: error.message || "Failed to delete account" },
       { status: 500 }

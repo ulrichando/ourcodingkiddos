@@ -6,6 +6,7 @@
  */
 
 import { prismaBase } from './prisma';
+import { logger } from './logger';
 
 /**
  * Get valid Google OAuth token for a user
@@ -26,7 +27,7 @@ async function getValidGoogleToken(userEmail: string): Promise<string | null> {
   });
 
   if (!account || !account.access_token) {
-    console.log('[Google Meet] No Google account linked for:', userEmail);
+    logger.googleMeet.debug('No Google account linked', { userEmail });
     return null;
   }
 
@@ -42,7 +43,7 @@ async function getValidGoogleToken(userEmail: string): Promise<string | null> {
 
   // Token is expired, refresh it
   if (!account.refresh_token) {
-    console.log('[Google Meet] No refresh token available for:', userEmail);
+    logger.googleMeet.debug('No refresh token available', { userEmail });
     return null;
   }
 
@@ -61,7 +62,8 @@ async function getValidGoogleToken(userEmail: string): Promise<string | null> {
     });
 
     if (!response.ok) {
-      console.error('[Google Meet] Token refresh failed:', await response.text());
+      const errorText = await response.text();
+      logger.googleMeet.error('Token refresh failed', new Error(errorText), { userEmail });
       return null;
     }
 
@@ -81,10 +83,10 @@ async function getValidGoogleToken(userEmail: string): Promise<string | null> {
       },
     });
 
-    console.log('[Google Meet] Token refreshed successfully for:', userEmail);
+    logger.googleMeet.debug('Token refreshed successfully', { userEmail });
     return tokens.access_token;
   } catch (error) {
-    console.error('[Google Meet] Error refreshing token:', error);
+    logger.googleMeet.error('Error refreshing token', error, { userEmail });
     return null;
   }
 }
@@ -102,7 +104,7 @@ export async function createGoogleMeetLink(
   const accessToken = await getValidGoogleToken(userEmail);
 
   if (!accessToken) {
-    console.log('[Google Meet] Cannot create meeting link - no valid token');
+    logger.googleMeet.warn('Cannot create meeting link - no valid token', { userEmail });
     return null;
   }
 
@@ -141,7 +143,8 @@ export async function createGoogleMeetLink(
     );
 
     if (!response.ok) {
-      console.error('[Google Meet] Calendar event creation failed:', await response.text());
+      const errorText = await response.text();
+      logger.googleMeet.error('Calendar event creation failed', new Error(errorText), { userEmail, title });
       return null;
     }
 
@@ -151,14 +154,14 @@ export async function createGoogleMeetLink(
     )?.uri;
 
     if (meetLink) {
-      console.log('[Google Meet] Created meeting link:', meetLink);
+      logger.googleMeet.info('Created meeting link', { userEmail, meetLink });
       return meetLink;
     }
 
-    console.log('[Google Meet] No meeting link in response');
+    logger.googleMeet.warn('No meeting link in response', { userEmail, title });
     return null;
   } catch (error) {
-    console.error('[Google Meet] Error creating meeting link:', error);
+    logger.googleMeet.error('Error creating meeting link', error, { userEmail, title });
     return null;
   }
 }
