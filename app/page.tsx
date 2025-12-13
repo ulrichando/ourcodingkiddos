@@ -25,6 +25,11 @@ import {
   RotateCcw,
   BookOpen,
 } from "lucide-react";
+import {
+  EnrollmentIcon,
+  FreeTrialIcon,
+  BrowseCoursesIcon,
+} from "../components/icons/CustomIcons";
 
 // =====================================================
 // CLASSIC ARCADE GAMES BACKGROUND
@@ -2293,7 +2298,7 @@ export default function HomePage() {
               <div className="relative grid lg:grid-cols-2 gap-10 items-center">
                 <div className="text-center lg:text-left">
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-sm font-semibold mb-6">
-                    <Sparkles className="w-4 h-4" />
+                    <EnrollmentIcon className="w-4 h-4" />
                     Now Enrolling for 2025
                   </div>
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">
@@ -2307,7 +2312,7 @@ export default function HomePage() {
                       href="/free-trial"
                       className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-bold text-lg shadow-xl shadow-violet-500/30 transition-all hover:shadow-2xl hover:-translate-y-1"
                     >
-                      <Sparkles className="w-5 h-5" />
+                      <FreeTrialIcon className="w-5 h-5" />
                       Try a Free Class
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
@@ -2315,7 +2320,7 @@ export default function HomePage() {
                       href="/programs"
                       className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                     >
-                      <Rocket className="w-5 h-5" />
+                      <BrowseCoursesIcon className="w-5 h-5" />
                       Browse Programs
                     </Link>
                   </div>

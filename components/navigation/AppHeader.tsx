@@ -232,9 +232,9 @@ export default function AppHeader() {
             </span>
           </Link>
 
-          {/* Center Navigation - Show on tablet (768px) and above */}
-          <nav ref={navRef} className="hidden md:flex items-center">
-            <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 rounded-full p-1 tablet:p-0.5">
+          {/* Center Navigation - Show on lg (1024px) and above for better spacing */}
+          <nav ref={navRef} className="hidden lg:flex items-center">
+            <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 rounded-full p-0.5">
               {navGroups.map((group, groupIndex) => (
                 <div
                   key={group.label}
@@ -243,7 +243,7 @@ export default function AppHeader() {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <button
-                    className={`relative flex items-center gap-1 px-3 tablet:px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                    className={`relative flex items-center gap-1 px-3 xl:px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
                       activeDropdown === group.label
                         ? "text-slate-900 dark:text-white"
                         : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -336,10 +336,10 @@ export default function AppHeader() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Search Trigger - Responsive width for tablets */}
+            {/* Search Trigger - Show on lg and above with nav */}
             <button
               onClick={() => setCommandOpen(true)}
-              className="hidden md:flex items-center gap-2 h-9 w-40 tablet:w-44 lg:w-52 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+              className="hidden lg:flex items-center gap-2 h-9 w-44 xl:w-52 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
             >
               <Search className="h-4 w-4" />
               <span className="flex-1 text-left text-sm">Search...</span>
@@ -348,10 +348,10 @@ export default function AppHeader() {
               </kbd>
             </button>
 
-            {/* Mobile search */}
+            {/* Mobile/Tablet search - show below lg */}
             <button
               onClick={() => setCommandOpen(true)}
-              className="md:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="lg:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
@@ -456,10 +456,10 @@ export default function AppHeader() {
               </div>
             )}
 
-            {/* Mobile menu button */}
+            {/* Mobile/Tablet menu button - show below lg */}
             <button
               onClick={() => setMobileOpen(o => !o)}
-              className="md:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="lg:hidden h-9 w-9 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Menu"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -579,9 +579,9 @@ export default function AppHeader() {
         </div>
       )}
 
-      {/* Mobile Navigation - Slide from right */}
+      {/* Mobile/Tablet Navigation - Slide from right (below lg) */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50">
+        <div className="lg:hidden fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
